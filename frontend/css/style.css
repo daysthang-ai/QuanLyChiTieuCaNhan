@@ -1,0 +1,685 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --bg-main: #080c15;
+  --bg-card: #111827;
+  --bg-card-hover: #172033;
+  --bg-input: #151d30;
+  --border-card: rgba(51, 65, 85, 0.45);
+  --border-subtle: rgba(51, 65, 85, 0.3);
+  --primary-emerald: #10b981;
+  --primary-emerald-glow: #34d399;
+  --primary-indigo: #6366f1;
+  --accent-purple: #8b5cf6;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+/* ==========================================================================
+   GLOBAL DARK THEME BASE STYLES
+   ========================================================================== */
+html, body {
+  font-family: var(--font-main);
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+  overflow-x: hidden;
+  color-scheme: dark;
+}
+
+/* Glassmorphism Dark Cards with Hover Motion */
+.glass-card {
+  background: rgba(17, 24, 39, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-card) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.glass-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(51, 65, 85, 0.75) !important;
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.08) !important;
+}
+
+.glass-nav {
+  background: rgba(13, 19, 34, 0.94) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-card) !important;
+  transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   INTERACTIVE ANIMATIONS & MOTION KEYFRAMES
+   ========================================================================== */
+
+/* 1. Page / Tab Transition */
+@keyframes tabEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tab-anim-enter {
+  animation: tabEnter 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. Staggered Card Entrances */
+@keyframes cardStagger {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-1 { animation: cardStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.stagger-2 { animation: cardStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both; }
+.stagger-3 { animation: cardStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.stagger-4 { animation: cardStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.20s both; }
+
+/* 3. Modal Pop & Backdrop Animation */
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.90) translateY(16px);
+  }
+  60% {
+    transform: scale(1.015) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
+}
+
+#generic-modal > div,
+#auth-modal > div {
+  animation: backdropFadeIn 0.25s ease-out forwards;
+}
+
+#generic-modal > div > div,
+#auth-modal > div > div {
+  animation: modalPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 4. Chat Bubble Entrance & Typing Wave */
+@keyframes bubbleSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-bubble-anim {
+  animation: bubbleSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 5. Floating AI Avatar & Sparkle Spin */
+@keyframes floatBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.float-ai {
+  animation: floatBob 3s ease-in-out infinite;
+}
+
+@keyframes sparkleRotate {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.sparkle-icon {
+  display: inline-block;
+  animation: sparkleRotate 6s linear infinite;
+}
+
+/* 6. Neon Pulsing Buttons */
+@keyframes pulseNeonRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.65);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.ai-pulse-btn {
+  animation: pulseNeonRing 2s infinite !important;
+}
+
+/* 7. Animated Progress Bars with Neon Glow Stripes */
+@keyframes progressStripeAnimation {
+  0% { background-position: 2rem 0; }
+  100% { background-position: 0 0; }
+}
+
+.progress-animated {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  ) !important;
+  background-size: 1rem 1rem !important;
+  animation: progressStripeAnimation 1.5s linear infinite !important;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 8. Skeleton Loading Shimmer Wave */
+@keyframes darkShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-pulse {
+  background: linear-gradient(90deg, #111827 25%, #1e293b 50%, #111827 75%) !important;
+  background-size: 200% 100% !important;
+  animation: darkShimmer 1.8s infinite linear !important;
+}
+
+/* 9. Interactive Buttons with Scale Bounce */
+button, .btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:active, .btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* ==========================================================================
+   GRADIENT ACCENTS
+   ========================================================================== */
+.gradient-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+}
+
+.gradient-indigo {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%) !important;
+}
+
+.gradient-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%) !important;
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%) !important;
+}
+
+.gradient-diamond {
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
+}
+
+.gradient-bronze {
+  background: linear-gradient(135deg, #b45309 0%, #78350f 100%) !important;
+}
+
+.gradient-silver {
+  background: linear-gradient(135deg, #94a3b8 0%, #475569 100%) !important;
+}
+
+/* ==========================================================================
+   DARK THEME OVERRIDES FOR TAILWIND UTILITY CLASSES
+   ========================================================================== */
+/* Backgrounds */
+.bg-white {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+}
+.bg-slate-50, .bg-slate-50\/50, .bg-slate-100 {
+  background-color: #0d1424 !important;
+}
+.bg-slate-100\/80 {
+  background-color: rgba(23, 32, 51, 0.8) !important;
+}
+.bg-slate-200 {
+  background-color: #1e293b !important;
+}
+.bg-slate-800 {
+  background-color: #0f172a !important;
+}
+.bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+.bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+}
+.bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+.bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* Text Colors */
+.text-slate-800, .text-slate-900, .text-gray-900, .text-gray-800 {
+  color: #f8fafc !important;
+}
+.text-slate-700, .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+.text-slate-600, .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+.text-slate-500, .text-gray-500 {
+  color: #94a3b8 !important;
+}
+.text-slate-400, .text-gray-400 {
+  color: #64748b !important;
+}
+.text-emerald-700 {
+  color: #34d399 !important;
+}
+.text-emerald-800, .text-emerald-900 {
+  color: #6ee7b7 !important;
+}
+.text-indigo-700 {
+  color: #a5b4fc !important;
+}
+
+/* Borders & Dividers */
+.border-slate-100, .border-slate-200, .border-slate-300, .border-gray-200, .border-gray-100 {
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+.border-indigo-100 {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+.divide-slate-100 > * + * {
+  border-color: rgba(51, 65, 85, 0.4) !important;
+}
+
+/* Form Controls & Inputs in Dark Theme */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="month"],
+textarea,
+select {
+  background-color: var(--bg-input) !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+  transition: all 0.2s ease !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-emerald) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+  outline: none !important;
+  transform: translateY(-1px);
+}
+
+select option {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+}
+
+/* Tables in Dark Theme */
+table {
+  color: #e2e8f0 !important;
+}
+thead, thead tr {
+  background-color: #151d30 !important;
+}
+thead th {
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+tbody tr {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  transform: scale(1.002);
+}
+
+/* Sleek Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Navigation Active Items */
+.nav-item {
+  color: #94a3b8 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-item:hover {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  color: #f8fafc !important;
+  transform: translateX(4px);
+}
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+  color: #34d399 !important;
+  font-weight: 700 !important;
+  border-left: 3px solid #10b981 !important;
+}
+
+/* Toast container */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(120%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(120%) scale(0.9);
+  }
+}
+
+.toast-msg {
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  background: #111827 !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}
+
+.toast-msg.toast-exit {
+  animation: toastFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+/* Wallet Card Visual */
+.wallet-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wallet-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 22px 30px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+.wallet-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* Quick prompt chips */
+.quick-chip, .chat-prompt-pill {
+  background-color: #172033 !important;
+  border: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+.quick-chip:hover, .chat-prompt-pill:hover {
+  background-color: rgba(99, 102, 241, 0.25) !important;
+  border-color: #6366f1 !important;
+  color: #e0e7ff !important;
+  transform: translateY(-1px) scale(1.03);
+}
+
+/* Modals & Dialogs */
+#generic-modal .bg-white,
+#auth-modal .bg-white {
+  background-color: #111827 !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}
+
+#generic-modal .bg-slate-50,
+#auth-modal .bg-slate-50 {
+  background-color: #0c1220 !important;
+}
+
+#ai-chat-thread {
+  background-color: #0a0f1d !important;
+}
+
+/* ==========================================================================
+   MOBILE SIDEBAR DRAWER & RESPONSIVE BEHAVIOR
+   ========================================================================== */
+#sidebar-backdrop {
+  opacity: 0;
+  pointer-events: none !important;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 40;
+}
+
+#sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto !important;
+}
+
+/* Ensure empty modals never intercept clicks */
+#generic-modal:empty,
+#auth-modal:empty {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+#toast-container {
+  pointer-events: none !important;
+}
+
+#toast-container .toast-msg {
+  pointer-events: auto !important;
+}
+
+@media (min-width: 1024px) {
+  #sidebar-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #sidebar {
+    position: fixed !important;
+    top: 64px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 45 !important;
+    width: 288px !important;
+    max-width: 85vw !important;
+    height: calc(100vh - 64px) !important;
+    height: calc(100dvh - 64px) !important;
+    background-color: #0d1424 !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: 1px solid rgba(51, 65, 85, 0.6) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+  }
+
+  #sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+}
+
+/* ==========================================================================
+   ADMIN CYBER CONTROL CENTER - DYNAMIC HORIZONTAL SUB-TABS & TRANSITIONS
+   ========================================================================== */
+.admin-subtab-bar {
+  background: rgba(13, 19, 34, 0.88) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 63, 94, 0.22) !important;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.admin-subtab-pill {
+  position: relative;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.admin-subtab-pill:hover:not(.active) {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #f8fafc !important;
+  border-color: rgba(71, 85, 105, 0.5) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.admin-subtab-pill.active {
+  background: linear-gradient(135deg, #e11d48, #f43f5e) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-color: rgba(251, 113, 133, 0.5) !important;
+  box-shadow: 0 4px 18px -2px rgba(244, 63, 94, 0.5), 0 0 14px rgba(244, 63, 94, 0.25) !important;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.admin-subtab-pill:active {
+  transform: scale(0.97);
+}
+
+@keyframes adminSubtabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-subtab-content-anim {
+  animation: adminSubtabFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cyberPulseBorder {
+  0%, 100% {
+    border-color: rgba(51, 65, 85, 0.4);
+    box-shadow: none;
+  }
+  50% {
+    border-color: #f43f5e;
+    box-shadow: 0 0 25px rgba(244, 63, 94, 0.3);
+  }
+}
+
+.cyber-card-highlight {
+  animation: cyberPulseBorder 1.2s ease-in-out;
+}
+
+/* Notification Cards & Neon Indicators */
+.notif-card {
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.notif-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.neon-dot-emerald {
+  box-shadow: 0 0 8px #34d399, 0 0 16px rgba(52, 211, 153, 0.6);
+}
+
+.neon-dot-rose {
+  box-shadow: 0 0 8px #f43f5e, 0 0 16px rgba(244, 63, 94, 0.6);
+}
+
+.neon-dot-amber {
+  box-shadow: 0 0 8px #f59e0b, 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+.neon-badge-unread {
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.25), inset 0 0 8px rgba(52, 211, 153, 0.15);
+}
+
+
+

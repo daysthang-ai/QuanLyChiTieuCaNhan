@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinTrack AI - Hệ Thống Quản Lý Chi Tiêu Cá Nhân Thông Minh</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2228%22>💎</text></svg>">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            darkbg: '#080c15',
+            darkcard: '#111827',
+            darkborder: '#1e293b'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- FontAwesome 6 Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Canvas Confetti CDN for goal celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css?v=3.9">
+</head>
+<body class="dark bg-[#080c15] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 glass-nav px-4 lg:px-8 py-3 flex items-center justify-between">
+    
+    <!-- Logo & Brand -->
+    <div class="flex items-center gap-3">
+      <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition" aria-label="Mở menu">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <a href="#" class="flex items-center gap-2.5 group">
+        <div class="w-10 h-10 rounded-2xl gradient-emerald text-white flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition duration-200">
+          <i class="fa-solid fa-gem text-amber-300 text-sm"></i>
+        </div>
+        <div>
+          <span class="text-lg font-black text-slate-100 tracking-tight leading-none block">FinTrack <span class="text-emerald-400">AI</span></span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Smart Finance & Advisor</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Quick Actions & User Bar -->
+    <div class="flex items-center gap-3">
+      
+      <!-- Admin Portal Switch Button (Visible when in User Mode for Admin) -->
+      <button id="header-admin-portal-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl gradient-rose text-white text-xs font-black shadow-md shadow-rose-500/25 hover:shadow-rose-500/40 active:scale-95 transition">
+        <i class="fa-solid fa-shield-halved text-amber-300"></i>
+        <span>🛡️ Admin Portal</span>
+      </button>
+
+      <!-- Exit Admin Portal Button (Visible when in Admin Mode) -->
+      <button id="header-exit-admin-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition shadow-md">
+        <i class="fa-solid fa-user text-emerald-400"></i>
+        <span>👤 Chế Độ Cá Nhân</span>
+      </button>
+
+      <!-- AI Quick Parse Button (Only in User Mode) -->
+      <button id="header-quick-ai-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 active:scale-95 transition ai-pulse-btn">
+        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+        <span>⚡ Nhập Nhanh AI</span>
+      </button>
+
+      <!-- Notification Bell with Interactive Dropdown (User Mode) -->
+      <div class="relative" id="header-notif-wrapper">
+        <button id="header-notification-btn" class="relative w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition border border-slate-700/50 active:scale-95 shadow-sm" title="Hộp thư & Thông báo">
+          <i class="fa-solid fa-bell text-xs"></i>
+          <span id="header-notification-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-[10px] font-black text-white items-center justify-center shadow-lg shadow-rose-500/50 animate-pulse">0</span>
+        </button>
+
+        <!-- Dropdown Popover -->
+        <div id="header-notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl glass-card border border-pink-500/30 shadow-2xl bg-slate-950/95 backdrop-blur-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-150">
+          <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-bullhorn text-pink-400 text-xs"></i>
+              <span class="text-xs font-black text-slate-100">Thông Báo Từ Admin</span>
+              <span id="dropdown-unread-badge" class="px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30">0 mới</span>
+            </div>
+            <button id="btn-dropdown-mark-read" class="text-[11px] text-slate-400 hover:text-emerald-400 font-bold transition flex items-center gap-1">
+              <i class="fa-solid fa-check-double text-[10px]"></i> Đã đọc hết
+            </button>
+          </div>
+
+          <div id="dropdown-notif-list" class="max-h-72 overflow-y-auto divide-y divide-slate-800/50 text-xs">
+            <div class="py-6 text-center text-slate-500 text-xs">Đang tải thông báo...</div>
+          </div>
+
+          <div class="p-2.5 border-t border-slate-800 bg-slate-900/80 text-center">
+            <button id="btn-dropdown-view-all" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <span>Mở Toàn Bộ Hộp Thư Thông Báo</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-pink-400"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown / Pill -->
+      <div class="flex items-center gap-3 pl-3 border-l border-slate-800">
+        <div class="text-right hidden md:block">
+          <div class="flex items-center justify-end gap-1.5">
+            <span id="user-display-name" class="text-xs font-extrabold text-slate-100 block">Nguyễn Văn An</span>
+            <span id="user-display-plan" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 cursor-pointer hover:border-amber-500/50 hover:text-amber-300 transition" title="Gói tài khoản - Nhấn để xem & nâng cấp">FREE</span>
+          </div>
+          <span id="user-display-email" class="text-[10px] text-slate-400 block font-medium">user@fintrack.ai</span>
+        </div>
+        
+        <img id="user-display-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar" 
+          class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 shadow-sm cursor-pointer" />
+
+        <button id="btn-logout" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-red-950/60 hover:text-red-400 text-slate-400 flex items-center justify-center transition border border-slate-700/50" title="Đăng xuất">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+  <!-- Main App Layout (Sidebar + Content View) -->
+  <div class="flex-1 flex max-w-[1600px] w-full mx-auto p-4 lg:p-6 gap-6 relative">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col justify-between glass-card rounded-3xl p-4 h-[calc(100vh-120px)] sticky top-20">
+      
+      <!-- Mobile Sidebar Header with Close Button -->
+      <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800 lg:hidden">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl gradient-emerald text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/25">
+            <i class="fa-solid fa-gem text-amber-300 text-xs"></i>
+          </div>
+          <div>
+            <span class="text-sm font-black text-slate-100 tracking-tight leading-none block">FinTrack <span class="text-emerald-400">AI</span></span>
+            <span id="sidebar-mobile-subtitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Menu Quản Lý</span>
+          </div>
+        </div>
+        <button id="close-sidebar-btn" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700/50 active:scale-95" title="Đóng menu">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      
+      <!-- 1. USER NAVIGATION MENU (Visible in User Mode) -->
+      <nav id="sidebar-user-nav" class="space-y-1">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2 block">Menu Quản Lý</span>
+        
+        <a href="#" class="nav-btn nav-item active flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="dashboard">
+          <i class="fa-solid fa-chart-pie w-4 text-emerald-400"></i>
+          <span>Tổng Quan Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="transactions">
+          <i class="fa-solid fa-receipt w-4 text-blue-400"></i>
+          <span>Ghi Thu - Chi</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="wallets">
+          <i class="fa-solid fa-wallet w-4 text-indigo-400"></i>
+          <span>Ví & Tài Khoản</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="budgets">
+          <i class="fa-solid fa-bullseye w-4 text-amber-400"></i>
+          <span>Hạn Mức Ngân Sách</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="savings">
+          <i class="fa-solid fa-piggy-bank w-4 text-teal-400"></i>
+          <span>Mục Tiêu Tiết Kiệm</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="categories">
+          <i class="fa-solid fa-tags w-4 text-rose-400"></i>
+          <span>Danh Mục Thu/Chi</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="analytics">
+          <i class="fa-solid fa-chart-line w-4 text-cyan-400"></i>
+          <span>Phân Tích & Báo Cáo</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition" data-tab="badges">
+          <i class="fa-solid fa-award w-4 text-amber-400"></i>
+          <span>Huy Hiệu & Thành Tích</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">✨ Mới</span>
+        </a>
+
+        <!-- Subscription / VIP Upgrade Option in Sidebar -->
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition border border-amber-500/20" data-tab="subscription">
+          <i class="fa-solid fa-crown w-4 text-amber-400"></i>
+          <span>Gói Dịch Vụ & VIP</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 font-extrabold">👑 Nâng Cấp</span>
+        </a>
+
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 pt-4 mb-2 block">AI Cố Vấn / Trợ Giúp</span>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-indigo-950/50 hover:text-indigo-300 transition" data-tab="ai_assistant">
+          <i class="fa-solid fa-wand-magic-sparkles w-4 text-indigo-400"></i>
+          <span>Trợ Lý AI FinTrack</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full gradient-indigo text-white font-bold">24/7</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="notifications">
+          <i class="fa-solid fa-bell w-4 text-pink-400"></i>
+          <span>Hộp Thư & Thông Báo</span>
+          <span id="sidebar-notification-badge" class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold hidden">0</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-teal-950/40 hover:text-teal-300 transition" data-tab="support">
+          <i class="fa-solid fa-headset w-4 text-emerald-400"></i>
+          <span>Hỗ Trợ & Khiếu Nại</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold">24/7</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="settings">
+          <i class="fa-solid fa-gear w-4 text-slate-400"></i>
+          <span>Cài Đặt & Bảo Mật</span>
+        </a>
+
+        <!-- Admin Shortcut in User Sidebar (Visible for Admins) -->
+        <div id="admin-nav-section" class="hidden pt-3">
+          <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest px-3 mb-2 block">Hệ Thống</span>
+          <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-rose-300 hover:bg-rose-950/50 hover:text-rose-200 transition border border-rose-500/25" data-tab="admin_dashboard">
+            <i class="fa-solid fa-shield-halved w-4 text-rose-400"></i>
+            <span>Vào Admin Portal</span>
+            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-black border border-rose-500/30">Root</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- 2. DEDICATED ADMIN NAVIGATION MENU (Visible ONLY in Admin Portal Mode) -->
+      <nav id="sidebar-admin-nav" class="space-y-1 hidden">
+        <div class="px-3 pb-2 mb-2 border-b border-slate-800">
+          <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest block flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> CONTROL CENTER
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Quản Trị Hệ Thống</span>
+        </div>
+        
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_dashboard">
+          <i class="fa-solid fa-chart-pie w-4 text-rose-400"></i>
+          <span>Tổng Quan Hệ Thống</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_users">
+          <i class="fa-solid fa-users-gear w-4 text-blue-400"></i>
+          <span>Quản Lý Người Dùng</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_subscriptions">
+          <i class="fa-solid fa-credit-card w-4 text-emerald-400"></i>
+          <span>Quản Lý Nạp & Gói Cước</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">VIP</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_ai">
+          <i class="fa-solid fa-brain w-4 text-indigo-400"></i>
+          <span>Quản Trị AI & Token</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_master_data">
+          <i class="fa-solid fa-layer-group w-4 text-amber-400"></i>
+          <span>Danh Mục Mặc Định & Mẫu Chuẩn</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_logs">
+          <i class="fa-solid fa-clock-rotate-left w-4 text-cyan-400"></i>
+          <span>Nhật Ký Hệ Thống (Audit Logs)</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="admin_notifications">
+          <i class="fa-solid fa-bullhorn w-4 text-pink-400"></i>
+          <span>Phát & Quản Lý Thông Báo</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-bold border border-pink-500/30">Mới</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_support">
+          <i class="fa-solid fa-headset w-4 text-teal-400"></i>
+          <span>Hỗ Trợ & Khiếu Nại</span>
+        </a>
+
+        <a href="#" class="nav-btn nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_settings">
+          <i class="fa-solid fa-sliders w-4 text-purple-400"></i>
+          <span>Cài Đặt Hệ Thống</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Bottom Card / Footers -->
+      <!-- User Footer Card -->
+      <div id="sidebar-user-footer" class="p-3.5 rounded-2xl gradient-indigo text-white shadow-lg shadow-indigo-500/20 text-xs">
+        <div class="flex items-center gap-2 mb-1.5 font-bold">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span>FinTrack AI 1.0</span>
+        </div>
+        <p class="text-[11px] text-white/80 leading-tight">
+          Hỗ trợ bóc tách tự nhiên & Cố vấn 50/30/20 thông minh.
+        </p>
+      </div>
+
+      <!-- Admin Footer Card -->
+      <div id="sidebar-admin-footer" class="hidden p-3.5 rounded-2xl bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-500/30 text-xs space-y-2">
+        <div class="flex items-center gap-2 font-bold text-rose-300">
+          <i class="fa-solid fa-shield-halved text-amber-300"></i>
+          <span>Admin Cyber Console</span>
+        </div>
+        <button id="btn-sidebar-exit-admin" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-arrow-left text-emerald-400 text-[10px]"></i>
+          <span>Về Chế Độ Cá Nhân</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0" id="main-content-view">
+      <!-- Injected by Router -->
+    </main>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Generic Modal (Dynamic) -->
+  <div id="generic-modal"></div>
+
+  <!-- Deposit Wallet Modal Container -->
+  <div id="modal-deposit-wallet"></div>
+
+  <!-- Auth Modal (Login / Register) -->
+  <div id="auth-modal"></div>
+
+  <!-- Application Module Script -->
+  <script type="module" src="/static/js/app.js?v=3.9"></script>
+
+</body>
+</html>

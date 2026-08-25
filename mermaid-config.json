@@ -1,0 +1,25 @@
+{
+  "theme": "dark",
+  "themeVariables": {
+    "darkMode": true,
+    "background": "#0b0f19",
+    "primaryColor": "#141b2d",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#6366f1",
+    "lineColor": "#00f0ff",
+    "secondaryColor": "#1e293b",
+    "tertiaryColor": "#0f172a",
+    "fontSize": "16px",
+    "fontFamily": "Segoe UI, Arial, sans-serif"
+  },
+  "er": {
+    "diagramPadding": 35,
+    "layoutDirection": "TB",
+    "minEntityWidth": 200,
+    "minEntityHeight": 110,
+    "entityPadding": 25,
+    "stroke": "#00f0ff",
+    "fill": "#141b2d",
+    "fontSize": 16
+  }
+}

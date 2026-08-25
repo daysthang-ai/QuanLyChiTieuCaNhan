@@ -1,0 +1,93 @@
+erDiagram
+    users ||--o{ wallets : "owns"
+    users ||--o{ categories : "creates"
+    users ||--o{ transactions : "performs"
+    users ||--o{ budgets : "sets"
+    users ||--o{ saving_goals : "targets"
+    users ||--o{ ai_logs : "records"
+
+    wallets ||--o{ transactions : "balances"
+    categories ||--o{ transactions : "classifies"
+    categories ||--o{ budgets : "limits"
+
+    users {
+        int id PK "Primary Key"
+        string email UK "Unique Email / Account"
+        string password_hash "Bcrypt Hashed"
+        string full_name "User Display Name"
+        string role "USER or ADMIN"
+        string currency "VND or USD"
+        int target_income "Monthly Target Income"
+        string subscription_tier "FREE / PRO / VIP"
+        boolean is_active "Active Status"
+        datetime created_at "Registration Timestamp"
+    }
+
+    wallets {
+        int id PK "Primary Key"
+        int user_id FK "References users.id"
+        string name "Wallet Name (Techcombank, MoMo...)"
+        string type "CASH / BANK / EWALLET / SAVINGS"
+        int balance "Current Available Balance"
+        string account_number "Masked Account Number"
+        string color "Hex Color Code"
+        string icon "FontAwesome Icon"
+        boolean is_active "Active Status"
+    }
+
+    categories {
+        int id PK "Primary Key"
+        int user_id FK "References users.id (Nullable)"
+        string name "Category Name"
+        string type "EXPENSE or INCOME"
+        string group_50_30_20 "NEEDS / WANTS / SAVINGS"
+        string icon "Category Icon"
+        string color "Hex Color Code"
+        boolean is_default "System Default Flag"
+    }
+
+    transactions {
+        int id PK "Primary Key"
+        int user_id FK "References users.id"
+        int wallet_id FK "References wallets.id"
+        int category_id FK "References categories.id"
+        int amount "Transaction Amount (VND)"
+        string type "EXPENSE / INCOME / TRANSFER"
+        date transaction_date "Transaction Date"
+        string description "Note / Description"
+        string tags "Tags (e.g. #family)"
+        string receipt_image "Receipt File Path"
+        boolean is_ai_generated "AI Parser Flag"
+    }
+
+    budgets {
+        int id PK "Primary Key"
+        int user_id FK "References users.id"
+        int category_id FK "References categories.id"
+        int month "Applied Month (1-12)"
+        int year "Applied Year (e.g. 2026)"
+        int limit_amount "Max Spending Ceiling"
+        float alert_thresh "Alert Threshold (e.g. 0.80)"
+    }
+
+    saving_goals {
+        int id PK "Primary Key"
+        int user_id FK "References users.id"
+        string goal_name "Goal Name (Travel, Car...)"
+        int target_amount "Target Amount (VND)"
+        int current_amount "Current Saved Amount"
+        date deadline "Target Deadline Date"
+        string color "Hex Color Code"
+        string icon "Goal Icon"
+        boolean is_completed "Completion Status"
+    }
+
+    ai_logs {
+        int id PK "Primary Key"
+        int user_id FK "References users.id"
+        string log_type "AI_PARSE / AI_ADVISOR / HEALTH_CHECK"
+        int prompt_tokens "Input Token Count"
+        int completion_tokens "Output Token Count"
+        int latency_ms "Processing Time in ms"
+        datetime created_at "Request Timestamp"
+    }

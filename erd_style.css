@@ -1,0 +1,84 @@
+/* Ultra Crisp Typography & Anti-aliasing */
+* {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: geometricPrecision !important;
+}
+
+/* Entity Card Header */
+.er.entityBox {
+    fill: #141b2d !important;
+    stroke: #6366f1 !important;
+    stroke-width: 2.5px !important;
+    rx: 8px !important;
+    ry: 8px !important;
+}
+
+.er.entityLabel {
+    fill: #38bdf8 !important; /* Bright Sky Blue */
+    font-weight: 900 !important;
+    font-size: 19px !important;
+    letter-spacing: 0.6px !important;
+    font-family: 'Segoe UI', 'Arial Black', sans-serif !important;
+}
+
+/* Attribute Table Rows */
+.er.attributeBoxOdd {
+    fill: #0b0f19 !important;
+    stroke: #2a334a !important;
+    stroke-width: 1.2px !important;
+}
+
+.er.attributeBoxEven {
+    fill: #141b2d !important;
+    stroke: #2a334a !important;
+    stroke-width: 1.2px !important;
+}
+
+/* Field Names & Descriptions - Bold & Pure White */
+text.attributeText,
+.er text[class*="attribute"] {
+    fill: #ffffff !important;
+    font-size: 14.5px !important;
+    font-weight: 700 !important;
+    font-family: 'Consolas', 'Lucida Console', 'Courier New', monospace !important;
+}
+
+/* Relationship Lines */
+.er.relationshipLine,
+path.relationshipLine,
+path[class*="relationshipLine"],
+g.er g path {
+    stroke: #00f0ff !important; /* Neon Cyan */
+    stroke-width: 3.5px !important;
+    stroke-opacity: 1 !important;
+}
+
+/* Cardinality Endpoints & Markers */
+marker path,
+marker circle,
+marker line,
+[id^="er-"] path,
+marker[id*="ZERO_OR_MORE"] path,
+marker[id*="ONE_OR_MORE"] path,
+marker[id*="ZERO_OR_ONE"] path,
+marker[id*="ONLY_ONE"] path {
+    fill: #00f0ff !important;
+    stroke: #00f0ff !important;
+    stroke-width: 2.5px !important;
+}
+
+/* Relationship Action Labels (Vibrant Amber Gold) */
+.er.relationshipLabel,
+text.relationshipLabel,
+text[class*="relationshipLabel"],
+g.er text[class*="relationshipLabel"] {
+    fill: #fbbf24 !important; /* Vibrant Gold */
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    font-family: 'Segoe UI', Arial, sans-serif !important;
+    paint-order: stroke fill !important;
+    stroke: #0b0f19 !important;
+    stroke-width: 5px !important;
+    letter-spacing: 0.5px !important;
+}
