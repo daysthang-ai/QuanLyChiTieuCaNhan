@@ -524,18 +524,32 @@ class BadgeService:
         unlocked_count = sum(1 for b in badges_def if b["is_unlocked"])
         total_count = len(badges_def)
 
-        # Gamification Level / Rank calculation
+        # Gamification Level / Rank calculation based on standardized XP thresholds
         xp = unlocked_count * 150 + current_streak * 25
-        level = (xp // 300) + 1
-        level_titles = [
-            "Tập Sự Tài Chính",
-            "Người Quản Lý Triển Vọng",
-            "Chiến Binh Tiết Kiệm",
-            "Nhà Đầu Tư Bản Lĩnh",
-            "Bậc Thầy Tài Chính Tự Do",
-            "Huyền Thoại FinTrack"
-        ]
-        level_title = level_titles[min(level - 1, len(level_titles) - 1)]
+        if xp >= 5000:
+            level = 10
+            level_title = "Huyền Thoại FinTrack"
+            xp_next_level = 5000
+        elif xp >= 3000:
+            level = 7 + min(1, (xp - 3000) // 1000)
+            level_title = "Đại Gia Tài Chính FinTrack"
+            xp_next_level = 5000
+        elif xp >= 1500:
+            level = 5 + min(1, (xp - 1500) // 750)
+            level_title = "Bậc Thầy Tài Chính FinTrack"
+            xp_next_level = 3000
+        elif xp >= 800:
+            level = 3 + min(1, (xp - 800) // 350)
+            level_title = "Chuyên Viên Quản Lý FinTrack"
+            xp_next_level = 1500
+        elif xp >= 300:
+            level = 1 + min(1, (xp - 300) // 250)
+            level_title = "Chiến Binh Tài Chính FinTrack"
+            xp_next_level = 800
+        else:
+            level = 0
+            level_title = "Người Tập Sự FinTrack"
+            xp_next_level = 300
 
         return {
             "unlocked_count": unlocked_count,
@@ -545,7 +559,7 @@ class BadgeService:
             "level": level,
             "level_title": level_title,
             "xp": xp,
-            "xp_next_level": level * 300,
+            "xp_next_level": xp_next_level,
             "badges": badges_def
         }
 

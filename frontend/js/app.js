@@ -1,19 +1,19 @@
-import { api } from './api.js?v=3.9';
-import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=3.9';
-import { AuthComponent } from './components/auth.js?v=3.9';
-import { DashboardComponent } from './components/dashboard.js?v=3.9';
-import { TransactionsComponent } from './components/transactions.js?v=3.9';
-import { WalletsComponent } from './components/wallets.js?v=3.9';
-import { CategoriesComponent } from './components/categories.js?v=3.9';
-import { BudgetsComponent } from './components/budgets.js?v=3.9';
-import { SavingsComponent } from './components/savings.js?v=3.9';
-import { AnalyticsComponent } from './components/analytics.js?v=3.9';
-import { AIAssistantComponent } from './components/ai_assistant.js?v=3.9';
-import { BadgesComponent } from './components/badges.js?v=3.9';
-import { AdminComponent } from './components/admin.js?v=3.9';
-import { SubscriptionComponent } from './components/subscription.js?v=3.9';
-import { NotificationsComponent } from './components/notifications.js?v=3.9';
-import { SupportComponent } from './components/support.js?v=3.9';
+import { api } from './api.js?v=4.9';
+import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=4.9';
+import { AuthComponent } from './components/auth.js?v=4.9';
+import { DashboardComponent } from './components/dashboard.js?v=4.9';
+import { TransactionsComponent } from './components/transactions.js?v=4.9';
+import { WalletsComponent } from './components/wallets.js?v=4.9';
+import { CategoriesComponent } from './components/categories.js?v=4.9';
+import { BudgetsComponent } from './components/budgets.js?v=4.9';
+import { SavingsComponent } from './components/savings.js?v=4.9';
+import { AnalyticsComponent } from './components/analytics.js?v=4.9';
+import { AIAssistantComponent } from './components/ai_assistant.js?v=4.9';
+import { BadgesComponent } from './components/badges.js?v=4.9';
+import { AdminComponent } from './components/admin.js?v=4.9';
+import { SubscriptionComponent } from './components/subscription.js?v=4.9';
+import { NotificationsComponent } from './components/notifications.js?v=4.9';
+import { SupportComponent } from './components/support.js?v=4.9';
 
 class App {
   constructor() {
@@ -50,6 +50,15 @@ class App {
     window.fintrackSubscription = this.subscription;
     window.fintrackNotifications = this.notifications;
     window.fintrackSupport = this.support;
+    window.switchPortal = (portal) => this.switchPortal(portal);
+  }
+
+  switchPortal(portal) {
+    if (portal === 'admin') {
+      this.navigate('admin_dashboard');
+    } else {
+      this.navigate('dashboard');
+    }
   }
 
   async init() {
@@ -63,7 +72,7 @@ class App {
       console.warn('[FinTrack] Lỗi cấu hình Chart.js:', chartErr);
     }
 
-    // 2. Listen for unauthorized 401 events
+    // 2. Listen for unauthorized 401 & account locked 403 events
     try {
       window.addEventListener('fintrack:unauthorized', () => {
         this.currentUser = null;
@@ -71,8 +80,17 @@ class App {
           this.auth.renderAuthModal(false);
         }
       });
+
+      window.addEventListener('fintrack:account_locked', (e) => {
+        this.currentUser = null;
+        const msg = e.detail?.message || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.';
+        this.showToast(msg, 'error');
+        if (this.auth?.renderAuthModal) {
+          this.auth.renderAuthModal(false);
+        }
+      });
     } catch (eventErr) {
-      console.warn('[FinTrack] Lỗi gắn listener unauthorized:', eventErr);
+      console.warn('[FinTrack] Lỗi gắn listener auth events:', eventErr);
     }
 
     // 3. Bind UI navigation
@@ -104,6 +122,18 @@ class App {
     // 5. Fetch current user & start application
     try {
       this.currentUser = await api.getMe();
+      if (!this.currentUser || this.currentUser.status === 'LOCKED' || this.currentUser.is_active === false) {
+        api.setToken('');
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        this.currentUser = null;
+        this.showToast('Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên.', 'error');
+        if (this.auth?.renderAuthModal) {
+          this.auth.renderAuthModal(false);
+        }
+        return;
+      }
       this.initApp();
     } catch (e) {
       console.warn('[FinTrack] Session expired hoặc không thể xác thực tài khoản:', e);
@@ -452,20 +482,27 @@ class App {
         const days = this.currentUser.days_remaining;
         const isExpiringSoon = days !== null && days !== undefined && days <= 5;
 
-        if (plan === 'PREMIUM') {
+        if (plan === 'PLATINUM') {
+          const daysText = days !== null && days !== undefined 
+            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-emerald-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
+            : '';
+          planEl.innerHTML = `<i class="fa-solid fa-gem text-[10px] text-emerald-300"></i> <span>PLATINUM VIP</span> ${daysText}`;
+          planEl.title = `Gói FinTrack Platinum VIP ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
+          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-md shadow-emerald-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
+        } else if (plan === 'PREMIUM') {
           const daysText = days !== null && days !== undefined 
             ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-amber-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
             : '';
-          planEl.innerHTML = `<i class="fa-solid fa-crown text-[10px] text-amber-400"></i> <span>VIP</span> ${daysText}`;
-          planEl.title = `Gói VIP Premium ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
-          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'} border shadow-sm cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
+          planEl.innerHTML = `<i class="fa-solid fa-crown text-[10px] text-amber-400"></i> <span>PREMIUM</span> ${daysText}`;
+          planEl.title = `Gói FinTrack Premium ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
+          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-md shadow-amber-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
         } else if (plan === 'PRO') {
           const daysText = days !== null && days !== undefined 
-            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-indigo-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
+            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-purple-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
             : '';
-          planEl.innerHTML = `<i class="fa-solid fa-bolt text-[10px] text-indigo-400"></i> <span>PRO</span> ${daysText}`;
-          planEl.title = `Gói FinTrack Pro ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
-          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'} border shadow-sm cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
+          planEl.innerHTML = `<i class="fa-solid fa-bolt text-[10px] text-purple-300"></i> <span>VIP PRO</span> ${daysText}`;
+          planEl.title = `Gói FinTrack VIP Pro ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
+          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-md shadow-purple-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
         } else {
           planEl.innerHTML = `<i class="fa-solid fa-seedling text-[10px] text-emerald-400"></i> <span>FREE</span> <span class="text-[8px] text-slate-400 font-normal lowercase">(vĩnh viễn)</span>`;
           planEl.title = 'Gói Miễn Phí (Vĩnh viễn) - Nhấn để nâng cấp VIP';
@@ -478,19 +515,21 @@ class App {
       // Update Sidebar Subscription Menu Badge
       const subSidebarBtn = document.querySelector('.nav-btn[data-tab="subscription"]');
       if (subSidebarBtn) {
-        const plan = (this.currentUser.plan || 'FREE').toUpperCase();
-        const days = this.currentUser.days_remaining;
-        const subBadge = subSidebarBtn.querySelector('span:last-child');
+        const plan = (this.currentUser.plan_tier || this.currentUser.plan || 'FREE').toUpperCase();
+        const subBadge = subSidebarBtn.querySelector('#sidebar-subscription-badge') || subSidebarBtn.querySelector('span:last-child');
         if (subBadge) {
-          if (plan === 'PREMIUM') {
-            subBadge.innerHTML = `👑 VIP ${days !== null && days !== undefined ? `(${days} ngày)` : ''}`;
-            subBadge.className = 'ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-extrabold';
+          if (plan === 'PLATINUM') {
+            subBadge.innerHTML = '💎 PLATINUM';
+            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 whitespace-nowrap';
+          } else if (plan === 'PREMIUM' || plan === 'VIP') {
+            subBadge.innerHTML = '👑 PREMIUM';
+            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap';
           } else if (plan === 'PRO') {
-            subBadge.innerHTML = `⭐ PRO ${days !== null && days !== undefined ? `(${days} ngày)` : ''}`;
-            subBadge.className = 'ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-extrabold';
+            subBadge.innerHTML = '⚡ PRO';
+            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 whitespace-nowrap';
           } else {
             subBadge.innerHTML = '👑 Nâng Cấp';
-            subBadge.className = 'ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 font-extrabold';
+            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap';
           }
         }
       }
@@ -501,26 +540,27 @@ class App {
         const plan = (this.currentUser.plan || 'FREE').toUpperCase();
         const days = this.currentUser.days_remaining;
         const isExpiringSoon = days !== null && days !== undefined && days <= 5;
-        const isPaid = plan === 'PRO' || plan === 'PREMIUM';
+        const isPaid = plan === 'PRO' || plan === 'PREMIUM' || plan === 'PLATINUM';
 
         if (isPaid) {
+          const isPlatinum = plan === 'PLATINUM';
           const isPremium = plan === 'PREMIUM';
-          sidebarUserFooter.className = `p-3 rounded-2xl bg-slate-900/90 border ${isExpiringSoon ? 'border-rose-500/40 shadow-rose-500/10' : isPremium ? 'border-amber-500/40 shadow-amber-500/10' : 'border-indigo-500/40 shadow-indigo-500/10'} shadow-lg text-xs space-y-1.5`;
+          sidebarUserFooter.className = `p-3 rounded-2xl bg-slate-900/90 border ${isExpiringSoon ? 'border-rose-500/40 shadow-rose-500/10' : isPlatinum ? 'border-emerald-500/50 shadow-emerald-500/20' : isPremium ? 'border-amber-500/40 shadow-amber-500/10' : 'border-purple-500/40 shadow-purple-500/10'} shadow-lg text-xs space-y-1.5`;
           sidebarUserFooter.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="font-black text-[11px] flex items-center gap-1.5 ${isPremium ? 'text-amber-300' : 'text-indigo-300'}">
-                <i class="fa-solid ${isPremium ? 'fa-crown' : 'fa-bolt'} text-[10px]"></i>
-                <span>${isPremium ? 'VIP Unlimited' : 'FinTrack Pro'}</span>
+              <span class="font-black text-[11px] flex items-center gap-1.5 ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-300' : 'text-purple-300'}">
+                <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : 'fa-bolt'} text-[10px]"></i>
+                <span>${isPlatinum ? 'Platinum VIP' : isPremium ? 'FinTrack Premium' : 'FinTrack VIP Pro'}</span>
               </span>
-              <span class="text-[9px] font-mono font-bold ${isExpiringSoon ? 'text-rose-400 animate-pulse' : 'text-emerald-400'}">
+              <span class="text-[9px] font-mono font-bold ${isExpiringSoon ? 'text-rose-400 animate-pulse' : isPlatinum ? 'text-emerald-300' : 'text-emerald-400'}">
                 ${days !== null && days !== undefined ? (days > 0 ? `Còn ${days} ngày` : 'Đã hết hạn') : 'Đang hoạt động'}
               </span>
             </div>
             <p class="text-[10px] text-slate-400">
-              ${this.currentUser.plan_expires_at ? `Hạn dùng: <b class="text-slate-300 font-mono">${formatDateVN(this.currentUser.plan_expires_at)}</b>` : 'Gói thành viên cao cấp'}
+              ${this.currentUser.plan_expires_at ? `Hạn dùng: <b class="text-slate-300 font-mono">${formatDateVN(this.currentUser.plan_expires_at)}</b>` : 'Gói thành viên VIP'}
             </p>
             <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold transition flex items-center justify-center gap-1 border border-slate-700 shadow-sm active:scale-95">
-              <i class="fa-solid fa-clock-rotate-left text-[9px] ${isPremium ? 'text-amber-400' : 'text-indigo-400'}"></i>
+              <i class="fa-solid fa-clock-rotate-left text-[9px] ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : 'text-purple-300'}"></i>
               <span>${isExpiringSoon ? 'Gia hạn gói ngay' : 'Quản lý thời hạn'}</span>
             </button>
           `;
@@ -537,7 +577,7 @@ class App {
             <p class="text-[10px] text-slate-400 leading-tight">
               Mở khóa AI không giới hạn & Cố vấn 50/30/20.
             </p>
-            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1.5 rounded-xl gradient-amber text-slate-950 text-[10px] font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[10px] font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1">
               <i class="fa-solid fa-crown text-[9px]"></i>
               <span>Nâng Cấp VIP Ngay</span>
             </button>
@@ -570,12 +610,12 @@ class App {
       if (sidebarAdminSec) {
         if (hasAdminAccess) {
           sidebarAdminSec.classList.remove('hidden');
-          const title = sidebarAdminSec.querySelector('span:nth-child(2)');
-          const badge = sidebarAdminSec.querySelector('span:last-child');
+          const title = document.getElementById('admin-portal-nav-text') || sidebarAdminSec.querySelector('#admin-portal-nav-text');
+          const badge = document.getElementById('admin-portal-role-badge') || sidebarAdminSec.querySelector('#admin-portal-role-badge');
           if (title) title.textContent = isRootAdmin ? 'Vào Admin Portal' : 'Vào Quản Trị Viên Portal';
           if (badge) {
             badge.textContent = isRootAdmin ? 'Root' : 'Mod';
-            badge.className = `ml-auto text-[9px] px-1.5 py-0.5 rounded-full ${isRootAdmin ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'} font-black border`;
+            badge.className = `text-[10px] font-black px-2 py-0.5 rounded-full ${isRootAdmin ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' : 'bg-purple-500/20 text-purple-400 border border-purple-500/40'} uppercase`;
           }
         } else {
           sidebarAdminSec.classList.add('hidden');

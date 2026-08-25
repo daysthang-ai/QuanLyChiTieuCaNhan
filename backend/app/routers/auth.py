@@ -38,6 +38,13 @@ def get_current_user(
     user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
         raise credentials_exception
+
+    # Enforce Account Lockout
+    if not user.is_active or user.status == "LOCKED" or getattr(user, 'is_banned', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản này đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên. Vui lòng liên hệ hỗ trợ."
+        )
     return user
 
 def get_current_admin_or_moderator_user(
@@ -150,6 +157,13 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
             detail="Email hoặc mật khẩu không chính xác"
         )
 
+    # Check Account Lockout
+    if not user.is_active or user.status == "LOCKED" or getattr(user, 'is_banned', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên. Vui lòng liên hệ hỗ trợ."
+        )
+
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": user.role})
     return {
         "access_token": access_token,
@@ -165,6 +179,13 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email hoặc mật khẩu không chính xác"
+        )
+
+    # Check Account Lockout
+    if not user.is_active or user.status == "LOCKED" or getattr(user, 'is_banned', False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên. Vui lòng liên hệ hỗ trợ."
         )
 
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": user.role})
@@ -232,7 +253,7 @@ def change_password(
 
 @router.get("/plans")
 def get_available_plans():
-    """Lấy danh sách thông tin chi tiết các gói dịch vụ (Free, Pro, VIP Premium)."""
+    """Lấy danh sách thông tin chi tiết 4 gói dịch vụ (Free, Pro, Premium, Platinum VIP)."""
     return [
         {
             "id": "FREE",
@@ -241,16 +262,16 @@ def get_available_plans():
             "price": 0,
             "billing_cycle": "Miễn phí vĩnh viễn",
             "ai_limits": 10,
-            "ai_limits_text": "10 lượt gọi AI / ngày (10 AI calls/day)",
+            "ai_limits_text": "10 lượt gọi AI / ngày (300 lượt/tháng)",
             "badge": "FREE",
             "badge_color": "bg-slate-800 text-slate-400 border-slate-700",
             "highlight": False,
+            "max_wallets": 2,
             "features": [
-                "10 lượt gọi AI bóc tách & cố vấn / ngày",
-                "Quản lý tối đa 2 ví tài chính",
+                "10 lượt gọi AI / ngày (300 lượt/tháng)",
+                "Quản lý tối đa 2 ví tài chính cơ bản",
                 "Theo dõi thu - chi & danh mục chuẩn",
-                "Cảnh báo hạn mức ngân sách cơ bản",
-                "Xem biểu đồ tổng quan 30 ngày"
+                "Cảnh báo hạn mức & Báo cáo 30 ngày"
             ]
         },
         {
@@ -260,37 +281,58 @@ def get_available_plans():
             "price": 49000,
             "billing_cycle": "49.000 ₫ / tháng (hoặc 490k/năm)",
             "ai_limits": 100,
-            "ai_limits_text": "100 lượt gọi AI / ngày (100 AI calls/day)",
-            "badge": "⭐ BEST SELLER",
+            "ai_limits_text": "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
+            "badge": "⭐ POPULAR",
             "badge_color": "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
-            "highlight": True,
+            "highlight": False,
+            "max_wallets": 5,
             "features": [
-                "100 lượt gọi AI bóc tách & cố vấn / ngày",
-                "Không giới hạn số lượng ví & tài khoản",
-                "AI Cố vấn tài chính 50/30/20 chuyên sâu",
-                "Không giới hạn hạn mức ngân sách",
-                "Xuất báo cáo Excel (.xlsx) & PDF chi tiết",
-                "Huy hiệu tài chính Pro độc quyền"
+                "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
+                "Quản lý tối đa 5 ví tài chính",
+                "Cố vấn tài chính 50/30/20 chuyên sâu",
+                "Xuất báo cáo Excel/PDF cơ bản",
+                "Không giới hạn hạn mức ngân sách"
             ]
         },
         {
             "id": "PREMIUM",
-            "name": "VIP Premium Unlimited",
-            "tagline": "Trải nghiệm đỉnh cao không giới hạn cho gia đình & nhà đầu tư",
+            "name": "FinTrack Premium",
+            "tagline": "Dành cho cá nhân & gia đình quản lý tài chính nâng cao",
             "price": 99000,
             "billing_cycle": "99.000 ₫ / tháng (hoặc 990k/năm)",
-            "ai_limits": 999999,
-            "ai_limits_text": "Không giới hạn (VIP Unlimited AI)",
-            "badge": "👑 VIP UNLIMITED",
+            "ai_limits": 300,
+            "ai_limits_text": "1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
+            "badge": "⭐ BEST SELLER",
             "badge_color": "bg-amber-500/20 text-amber-300 border-amber-500/40",
-            "highlight": False,
+            "highlight": True,
+            "max_wallets": 10,
             "features": [
-                "KHÔNG GIỚI HẠN lượt gọi AI (VIP Unlimited)",
-                "Ưu tiên xử lý AI Engine tốc độ cao (Fast Response)",
-                "Full tính năng bóc tách & Trợ lý 24/7",
-                "Dự phóng dòng tiền & cảnh báo lạm phát",
-                "Sao lưu dữ liệu tự động & xuất snapshot",
-                "Huy hiệu VIP Hoàng Gia & Hỗ trợ kỹ thuật 24/7"
+                "Hạn mức 1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
+                "Quản lý tối đa 10 ví tài chính",
+                "Bóc tách hóa đơn & Dự báo dòng tiền thông minh",
+                "Xuất báo cáo chi tiết & Phân tích chuyên sâu",
+                "Hỗ trợ kỹ thuật ưu tiên qua Ticket (phản hồi trong 24h)"
+            ]
+        },
+        {
+            "id": "PLATINUM",
+            "name": "FinTrack Platinum VIP",
+            "tagline": "Trải nghiệm đỉnh cao không giới hạn toàn diện cho nhà đầu tư",
+            "price": 199000,
+            "billing_cycle": "199.000 ₫ / tháng (hoặc 1.990k/năm)",
+            "ai_limits": -1,
+            "ai_limits_text": "VIP Unlimited (Không giới hạn Token / Lượt gọi AI)",
+            "badge": "👑💎 PLATINUM VIP",
+            "badge_color": "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+            "highlight": False,
+            "max_wallets": -1,
+            "features": [
+                "KHÔNG GIỚI HẠN Token / Lượt gọi AI (VIP Unlimited AI)",
+                "Quản lý Không giới hạn số lượng ví & tài khoản ngân hàng",
+                "Ưu tiên xử lý AI Engine tốc độ cao nhất (Fast Response)",
+                "Trợ lý AI phân tích danh mục đầu tư & cảnh báo rủi ro 24/7",
+                "Tự động sao lưu dữ liệu đám mây (Cloud Snapshot)",
+                "Huy hiệu Platinum độc quyền & Hỗ trợ kỹ thuật 1-1 riêng biệt"
             ]
         }
     ]
@@ -301,18 +343,26 @@ def upgrade_plan(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Người dùng đăng ký / nâng cấp gói cước (FREE, PRO, PREMIUM), tự động trừ tiền ví và tính ngày hết hạn."""
+    """Người dùng đăng ký / nâng cấp gói cước (FREE, PRO, PREMIUM, PLATINUM), tự động trừ tiền ví và tính ngày hết hạn."""
     raw_plan = plan_data.get("plan", "").upper()
-    new_plan = "PREMIUM" if raw_plan in ["VIP", "PREMIUM"] else raw_plan
+    if raw_plan in ["PLATINUM", "VIP_PLATINUM"]:
+        new_plan = "PLATINUM"
+    elif raw_plan in ["VIP", "PREMIUM"]:
+        new_plan = "PREMIUM"
+    elif raw_plan in ["FREE", "PRO"]:
+        new_plan = raw_plan
+    else:
+        new_plan = raw_plan
+
     wallet_id = plan_data.get("wallet_id")
     months = int(plan_data.get("duration_months") or plan_data.get("months") or 1)
     if months not in [1, 3, 6, 12]:
         months = 1
 
-    if new_plan not in ["FREE", "PRO", "PREMIUM"]:
+    if new_plan not in ["FREE", "PRO", "PREMIUM", "PLATINUM"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Gói dịch vụ không hợp lệ. Chỉ chấp nhận: FREE, PRO, PREMIUM"
+            detail="Gói dịch vụ không hợp lệ. Chỉ chấp nhận: FREE, PRO, PREMIUM, PLATINUM"
         )
 
     # Determine duration days
@@ -330,19 +380,19 @@ def upgrade_plan(
 
     # Pricing table based on duration
     if months == 12:
-        price_map = {"FREE": 0.0, "PRO": 490000.0, "PREMIUM": 990000.0}
+        price_map = {"FREE": 0.0, "PRO": 490000.0, "PREMIUM": 990000.0, "PLATINUM": 1990000.0}
     elif months == 6:
-        price_map = {"FREE": 0.0, "PRO": 264000.0, "PREMIUM": 534000.0}
+        price_map = {"FREE": 0.0, "PRO": 264000.0, "PREMIUM": 534000.0, "PLATINUM": 1069000.0}
     elif months == 3:
-        price_map = {"FREE": 0.0, "PRO": 139000.0, "PREMIUM": 279000.0}
+        price_map = {"FREE": 0.0, "PRO": 139000.0, "PREMIUM": 279000.0, "PLATINUM": 567000.0}
     else:
-        price_map = {"FREE": 0.0, "PRO": 49000.0, "PREMIUM": 99000.0}
+        price_map = {"FREE": 0.0, "PRO": 49000.0, "PREMIUM": 99000.0, "PLATINUM": 199000.0}
 
     price = price_map.get(new_plan, 0.0)
     payment_method = plan_data.get("payment_method", "WALLET").upper() # WALLET, DIRECT_DEBIT
     bank_code = plan_data.get("bank_code", "")
 
-    # If upgrading to a paid plan (PRO or PREMIUM), deduct balance and record transaction
+    # If upgrading to a paid plan (PRO, PREMIUM, PLATINUM), deduct balance and record transaction
     if price > 0:
         target_wallet = None
         if payment_method == "DIRECT_DEBIT":
@@ -398,7 +448,7 @@ def upgrade_plan(
                     wallet_scope="real",
                     balance=0.0,
                     currency=current_user.currency or "VND",
-                    account_number_masked="MB-0987654321",
+                    account_number_masked="MB-0374617569",
                     icon="credit-card",
                     color="#F59E0B",
                     is_active=True
@@ -466,11 +516,23 @@ def upgrade_plan(
             current_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
 
         current_user.plan = new_plan
-        current_user.plan_tier = "Pro" if new_plan == "PRO" else "VIP Premium"
+        if new_plan == "PLATINUM":
+            current_user.plan_tier = "FinTrack Platinum VIP"
+        elif new_plan == "PREMIUM":
+            current_user.plan_tier = "FinTrack Premium"
+        elif new_plan == "PRO":
+            current_user.plan_tier = "FinTrack Pro"
+        else:
+            current_user.plan_tier = "Free"
         current_user.is_plan_active = True
 
         # Generate notification into 'Hộp Thư & Thông Báo'
-        plan_title = "FinTrack VIP Premium" if new_plan == "PREMIUM" else "FinTrack Pro"
+        plan_title_map = {
+            "PLATINUM": "FinTrack Platinum VIP",
+            "PREMIUM": "FinTrack Premium",
+            "PRO": "FinTrack Pro"
+        }
+        plan_title = plan_title_map.get(new_plan, new_plan)
         method_desc = "1-Click Direct Debit (Ngân hàng Liên Kết)" if payment_method == "DIRECT_DEBIT" else f"Ví {target_wallet.name if target_wallet else 'nội bộ'}"
         notif = Notification(
             user_id=current_user.id,

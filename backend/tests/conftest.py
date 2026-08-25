@@ -75,9 +75,9 @@ def test_user(db_session):
         db_session.add(cat)
 
     # Add test wallets
-    w1 = Wallet(user_id=user.id, name="Techcombank", wallet_type="BANK", balance=10000000.0, color="#DC2626")
-    w2 = Wallet(user_id=user.id, name="Ví MoMo", wallet_type="EWALLET", balance=2000000.0, color="#A21CAF")
-    w3 = Wallet(user_id=user.id, name="Tiền mặt", wallet_type="CASH", balance=500000.0, color="#16A34A")
+    w1 = Wallet(user_id=user.id, name="Techcombank", wallet_type="BANK", wallet_scope="real", balance=10000000.0, color="#DC2626")
+    w2 = Wallet(user_id=user.id, name="Ví MoMo", wallet_type="EWALLET", wallet_scope="virtual", balance=2000000.0, color="#A21CAF")
+    w3 = Wallet(user_id=user.id, name="Tiền mặt", wallet_type="CASH", wallet_scope="virtual", balance=500000.0, color="#16A34A")
     db_session.add_all([w1, w2, w3])
 
     db_session.commit()

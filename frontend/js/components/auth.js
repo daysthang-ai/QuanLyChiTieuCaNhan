@@ -14,14 +14,19 @@ export class AuthComponent {
         <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden border border-slate-800 animate-in fade-in zoom-in duration-200 text-slate-100">
           
           <!-- Decorative top glowing gradient bar -->
-          <div class="absolute top-0 left-0 right-0 h-1.5 gradient-emerald"></div>
+          <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400"></div>
 
           <!-- Header / Brand -->
           <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl gradient-emerald text-white text-2xl font-bold shadow-lg shadow-emerald-500/30 mb-3">
-              <i class="fa-solid fa-gem text-amber-300 text-xl"></i>
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 via-pink-500 to-amber-400 p-[2px] shadow-xl shadow-pink-500/25 mb-3">
+              <div class="w-full h-full bg-slate-950/80 backdrop-blur-md rounded-[14px] flex items-center justify-center">
+                <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-amber-300 to-yellow-200 text-2xl drop-shadow-[0_0_10px_rgba(244,63,94,0.6)]"></i>
+              </div>
             </div>
-            <h2 class="text-2xl font-black text-slate-100 tracking-tight">FinTrack <span class="text-emerald-400">AI</span></h2>
+            <div class="flex items-center justify-center gap-1.5 leading-none mb-1">
+              <span class="text-2xl font-black tracking-tight text-white font-sans">FinTrack</span>
+              <span class="text-xs font-black px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow-sm shadow-pink-500/40 tracking-wider">AI</span>
+            </div>
             <p class="text-slate-400 text-xs mt-1">
               ${isRegister ? 'Tạo tài khoản quản lý chi tiêu thông minh' : 'Hệ thống Quản lý Chi tiêu Cá nhân & Cố vấn AI'}
             </p>
@@ -176,6 +181,14 @@ export class AuthComponent {
         res = await api.login(email, password);
       }
 
+      if (!res.user || res.user.status === 'LOCKED' || res.user.is_active === false) {
+        api.setToken('');
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        throw new Error('Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên. Vui lòng liên hệ hỗ trợ.');
+      }
+
       api.setToken(res.access_token);
       this.app.currentUser = res.user;
 
@@ -192,6 +205,9 @@ export class AuthComponent {
 
   logout() {
     api.setToken('');
+    localStorage.removeItem('fintrack_token');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
     this.app.currentUser = null;
     this.app.showToast('Đã đăng xuất tài khoản', 'info');
     this.renderAuthModal(false);

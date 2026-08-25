@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { formatVND, formatDateVN } from '../utils/formatters.js';
+import { api } from '../api.js?v=4.9';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=4.9';
 
 export class AIAssistantComponent {
   constructor(app) {
@@ -380,14 +380,31 @@ export class AIAssistantComponent {
 
   renderMarkdownSimple(md) {
     if (!md) return '';
-    return md
-      .replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-slate-100 mt-2 mb-1">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-slate-100 mt-3 mb-1.5">$1</h2>')
-      .replace(/^\• (.*$)/gim, '<li class="ml-3 list-disc text-slate-300 my-0.5">$1</li>')
-      .replace(/^\- (.*$)/gim, '<li class="ml-3 list-disc text-slate-300 my-0.5">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-3 list-decimal text-slate-300 my-0.5">$1</li>')
-      .replace(/\*\*(.*?)\*\*/gim, '<b class="font-bold text-white">$1</b>')
-      .replace(/`([^`]+)`/gim, '<code class="bg-slate-800 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-[11px] border border-slate-700">$1</code>')
-      .replace(/\n\n/gim, '<br/>');
+    let text = md;
+
+    // Horizontal rule
+    text = text.replace(/^---$/gim, '<hr class="border-slate-800 my-2.5" />');
+
+    // Headers
+    text = text.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-slate-100 mt-2.5 mb-1">$1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2 class="text-sm font-bold text-indigo-200 mt-3 mb-1.5">$1</h2>');
+    text = text.replace(/^# (.*$)/gim, '<h1 class="text-base font-black text-white mt-3 mb-2">$1</h1>');
+
+    // Bold & Italic
+    text = text.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-white">$1</strong>');
+    text = text.replace(/\*(.*?)\*/gim, '<em class="text-slate-300 italic">$1</em>');
+
+    // Inline code
+    text = text.replace(/`([^`]+)`/gim, '<code class="bg-slate-950 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-[11px] border border-slate-800">$1</code>');
+
+    // Lists
+    text = text.replace(/^[\•\-\*]\s+(.*$)/gim, '<li class="ml-3 list-disc text-slate-300 my-0.5">$1</li>');
+    text = text.replace(/^(\d+)\.\s+(.*$)/gim, '<li class="ml-3 list-decimal text-slate-300 my-0.5"><span class="font-semibold text-slate-200">$2</span></li>');
+
+    // Line breaks
+    text = text.replace(/\n\n/gim, '<div class="h-2"></div>');
+    text = text.replace(/\n/gim, '<br/>');
+
+    return text;
   }
 }

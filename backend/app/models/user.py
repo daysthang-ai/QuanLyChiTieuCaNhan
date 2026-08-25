@@ -13,8 +13,8 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(20), default="USER", nullable=False)  # USER, MODERATOR, ADMIN
     status = Column(String(20), default="ACTIVE", nullable=False)  # ACTIVE, LOCKED
-    plan = Column(String(20), default="FREE", nullable=False)  # FREE, PRO, PREMIUM
-    plan_tier = Column(String(50), default="Free", nullable=False)  # Free, Pro, VIP, Premium
+    plan = Column(String(20), default="FREE", nullable=False)  # FREE, PRO, PREMIUM, PLATINUM
+    plan_tier = Column(String(50), default="Free", nullable=False)  # Free, Pro, Premium, Platinum VIP
     plan_activated_at = Column(DateTime, nullable=True)
     plan_expires_at = Column(DateTime, nullable=True)
     is_plan_active = Column(Boolean, default=True, nullable=False)
@@ -45,10 +45,20 @@ class User(Base):
         return diff.days + (1 if diff.seconds > 0 else 0)
 
     @property
+    def is_active(self) -> bool:
+        return (self.status or "ACTIVE").upper() == "ACTIVE"
+
+    @property
+    def is_banned(self) -> bool:
+        return (self.status or "ACTIVE").upper() == "LOCKED"
+
+    @property
     def plan_name(self) -> str:
         p = (self.plan or "FREE").upper()
-        if p == "PREMIUM":
-            return "VIP Premium Unlimited"
+        if p == "PLATINUM":
+            return "FinTrack Platinum VIP"
+        elif p == "PREMIUM":
+            return "FinTrack Premium"
         elif p == "PRO":
             return "FinTrack Pro"
         return "FinTrack Free (Miễn phí)"

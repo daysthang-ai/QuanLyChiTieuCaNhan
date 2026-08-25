@@ -13,7 +13,7 @@ class SubscriptionOrder(Base):
     id = Column(Integer, primary_key=True, index=True)
     order_code = Column(String(50), unique=True, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    plan_code = Column(String(20), nullable=False)  # PRO, PREMIUM
+    plan_code = Column(String(20), nullable=False)  # PRO, PREMIUM, PLATINUM
     plan_duration_days = Column(Integer, default=30, nullable=False)
     amount = Column(Float, nullable=False)
     payment_method = Column(String(30), default="MB_VIETQR", nullable=False)  # MB_VIETQR, DIRECT_DEBIT, BANK_TRANSFER

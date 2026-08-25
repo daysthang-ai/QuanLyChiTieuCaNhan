@@ -26,7 +26,13 @@ class AIService:
         # 1. Google Gemini API
         if provider == "gemini" and settings.GEMINI_API_KEY:
             # Fallback list of modern Gemini models
-            candidate_models = [settings.GEMINI_MODEL, "gemini-3.6-flash", "gemini-flash-latest", "gemini-3.7-flash"]
+            candidate_models = [
+                settings.GEMINI_MODEL,
+                "gemini-1.5-flash",
+                "gemini-2.0-flash",
+                "gemini-1.5-pro",
+                "gemini-1.5-flash-latest"
+            ]
             # Deduplicate preserving order
             unique_models = []
             for m in candidate_models:
@@ -62,7 +68,7 @@ class AIService:
                             # Model not found, try next candidate model
                             continue
                         else:
-                            print(f"[AIService] Gemini API HTTP {resp.status_code} on model {model_name}: {resp.text[:120]}")
+                            print(f"[AIService] Gemini API HTTP {resp.status_code} on model {model_name}: {resp.text[:150]}")
                 except Exception as e:
                     print(f"[AIService] Gemini API error with model {model_name}: {e}")
                     continue
@@ -484,6 +490,19 @@ class AIService:
     # =========================================================================
     # 3. INTERACTIVE FINANCIAL Q&A CHATBOT
     # =========================================================================
+    def _is_cross_user_pii_query(self, q: str) -> bool:
+        """Detects queries attempting to access other users' private financial data."""
+        q_lower = q.lower()
+        pii_keywords = [
+            "người khác", "người dùng khác", "user khác", "tài khoản khác",
+            "ai đó", "danh sách người khác", "xem của người khác",
+            "tiền của người khác", "thu chi của người khác", "họ đã tiêu gì",
+            "tài khoản người khác", "xem tài khoản người khác", "ai tiêu nhiều nhất",
+            "xem người khác", "ai giàu nhất", "ai có nhiều tiền nhất",
+            "dữ liệu người khác", "thông tin người khác", "ví người khác", "lương người khác"
+        ]
+        return any(kw in q_lower for kw in pii_keywords)
+
     async def chat_financial_assistant(
         self,
         query: str,
@@ -494,10 +513,26 @@ class AIService:
     ) -> Dict[str, Any]:
         """
         Answers user's financial queries based on real user transaction context safely.
+        Enforces strict Zero-PII privacy boundaries and contextual advisory.
         """
         start_time = time.time()
         curr_date = current_date_str or datetime.date.today().isoformat()
         clean_query = sanitize_text_for_ai(query.strip())
+
+        # 1. Privacy / Cross-User Guardrail Interception (Zero-PII)
+        if self._is_cross_user_pii_query(clean_query):
+            elapsed_ms = int((time.time() - start_time) * 1000)
+            return {
+                "query": query,
+                "response_markdown": "🔒 **Bảo Mật Dữ Liệu Tài Chính (Zero-PII)**\n\nFinTrack AI cam kết bảo mật 100% dữ liệu tài chính riêng tư của từng cá nhân. Tôi không thể cung cấp hoặc truy cập thông tin thu/chi của bất kỳ người dùng nào khác trên hệ thống.\n\nNếu bạn cần xem hoặc phân tích báo cáo tài chính của chính mình, tôi luôn sẵn sàng hỗ trợ bạn bất cứ lúc nào!",
+                "suggested_followups": [
+                    "Tổng chi tiêu tháng này của tôi là bao nhiêu?",
+                    "Tôi có đang vượt ngân sách danh mục nào không?",
+                    "Gợi ý cách phân bổ lương theo quy tắc 50/30/20"
+                ],
+                "generated_by": "privacy_guardrail",
+                "response_time_ms": elapsed_ms
+            }
 
         # Build clean sanitized context string
         context_str = f"""- Tổng tài sản ròng: {format_currency_vnd(financial_context.get('total_net_worth', 0))}
@@ -568,54 +603,123 @@ class AIService:
         net = context.get('net_savings', 0)
         rate = context.get('savings_rate', 0)
 
-        # 1. Asking about Food / Dining / Eating out
-        if any(kw in q for kw in ["ăn", "uống", "ăn ngoài", "ăn uống", "cơm", "bún", "nhậu"]):
+        # 0. Privacy & Cross-User Guardrail (Zero-PII)
+        if self._is_cross_user_pii_query(q):
+            return """🔒 **Bảo Mật Dữ Liệu Tài Chính (Zero-PII)**
+
+FinTrack AI cam kết bảo mật 100% dữ liệu tài chính riêng tư của từng cá nhân. Tôi không thể cung cấp hoặc truy cập thông tin thu/chi của bất kỳ người dùng nào khác trên hệ thống.
+
+Nếu bạn cần xem hoặc phân tích báo cáo tài chính của chính mình, tôi luôn sẵn sàng hỗ trợ bạn bất cứ lúc nào!"""
+
+        # 1. Asking about Salary Allocation & Budgeting for specific Salary amounts
+        salary_match = re.search(r'(?:lương|thu nhập|lương tháng)\s*(?:là|khoảng|được)?\s*(\d+[\.,]?\d*)\s*(triệu|trieu|tr|k|nghìn|ngàn|củ)?', q)
+        if salary_match or any(kw in q for kw in ["50/30/20", "50 30 20", "6 hũ", "phân bổ lương", "chia lương", "quản lý lương"]):
+            sal_amt = 0.0
+            if salary_match:
+                val = float(salary_match.group(1).replace(',', '.'))
+                unit = (salary_match.group(2) or '').lower()
+                if unit in ['k', 'nghìn', 'ngàn']:
+                    sal_amt = val * 1000
+                elif val < 1000:  # e.g. 5, 10, 15, 20
+                    sal_amt = val * 1_000_000
+                else:
+                    sal_amt = val
+            elif income > 0:
+                sal_amt = income
+            else:
+                sal_amt = 5_000_000.0  # Default demo salary
+
+            needs = sal_amt * 0.5
+            wants = sal_amt * 0.3
+            savings = sal_amt * 0.2
+
+            return f"""🎯 **Kế Hoạch Phân Bổ Chi Tiêu & Tiết Kiệm Theo Quy Tắc 50/30/20:**
+*(Áp dụng cho mức thu nhập: **{format_currency_vnd(sal_amt)}/tháng**)*
+
+---
+
+### 1. 🏠 Nhu Cầu Thiết Yếu - 50% (**{format_currency_vnd(needs)}**)
+- **Tiền trọ / Nhà ở + Điện nước**: Ưu tiên giữ dưới 25-30% thu nhập (~**{format_currency_vnd(sal_amt * 0.25)}**).
+- **Ăn uống & Nhu yếu phẩm cơ bản**: ~**{format_currency_vnd(sal_amt * 0.2)}** (tự nấu ăn tại nhà để tối ưu chi phí).
+- **Xăng xe & Đi lại**: ~**{format_currency_vnd(sal_amt * 0.05)}**.
+
+### 2. ☕ Chi Tiêu Cá Nhân & Linh Hoạt - 30% (**{format_currency_vnd(wants)}**)
+- Mua sắm đồ dùng cá nhân, cà phê gặp gỡ bạn bè, giải trí.
+- **Mẹo tối ưu**: Áp dụng quy tắc trì hoãn 48 giờ trước khi mua một món đồ không thực sự cần thiết.
+
+### 3. 💰 Tiết Kiệm & Quỹ Dự Phòng - 20% (**{format_currency_vnd(savings)}**)
+- **Quỹ khẩn cấp**: Trích ngay **{format_currency_vnd(savings)}** vào ngày nhận lương vào tài khoản tích lũy riêng.
+- Khi tích lũy đủ 3 - 6 tháng chi phí sinh hoạt, bạn có thể chuyển một phần sang đầu tư gia tăng tài sản.
+
+---
+💡 **Lời khuyên thực tế từ FinTrack AI**: *"Tiết kiệm trước - Chi tiêu sau"* là chìa khóa vàng giúp bạn luôn làm chủ tài chính và không rơi vào cảnh cạn túi cuối tháng!"""
+
+        # 2. Asking about Food / Dining / Eating out
+        if any(kw in q for kw in ["ăn", "uống", "ăn ngoài", "ăn uống", "cơm", "bún", "nhậu", "cà phê"]):
             food_total = 0.0
             for t in recent_tx:
                 cat = str(t.get("category_name", "")).lower()
-                if ("ăn" in cat or "food" in cat or "thực phẩm" in cat) and t.get("type") == "EXPENSE":
+                if ("ăn" in cat or "food" in cat or "thực phẩm" in cat or "uống" in cat) and t.get("type") == "EXPENSE":
                     food_total += float(t.get("amount", 0))
             if food_total > 0:
                 pct = round((food_total / expense * 100), 1) if expense > 0 else 0
                 return f"""📊 **Chi tiêu cho Danh mục Ăn uống & Thực phẩm:**
 - Tổng số tiền đã ghi nhận gần đây: **{format_currency_vnd(food_total)}** (chiếm khoảng **{pct}%** tổng chi tiêu).
-- **Nhận xét**: Chi tiêu ăn uống chiếm phần lớn ngân sách sinh hoạt. Bạn nên duy trì mức ăn uống ổn định và chuẩn bị bữa ăn tại nhà để tiết kiệm thêm."""
+- **Nhận xét**: Chi tiêu ăn uống chiếm tỷ trọng lớn trong ngân sách sinh hoạt. Bạn nên đặt hạn mức tuần và tăng cường tự nấu ăn tại nhà để tiết kiệm thêm 20-30% chi phí."""
             return f"""📊 **Chi tiêu Ăn uống**: Trong tháng này, tổng chi tiêu của bạn là **{format_currency_vnd(expense)}**. Bạn có thể xem chi tiết biểu đồ cơ cấu chi tiêu trên Dashboard."""
 
-        # 2. Asking about Total Expense / Income / Net Flow
-        if any(kw in q for kw in ["tổng chi", "đã tiêu bao nhiêu", "chi bao nhiêu", "hết bao nhiêu"]):
+        # 3. Asking about Total Expense / Income / Net Flow
+        if any(kw in q for kw in ["tổng chi", "đã tiêu bao nhiêu", "chi bao nhiêu", "hết bao nhiêu", "tiêu gì"]):
             return f"""💸 **Tổng kết chi tiêu tháng này của bạn:**
 - **Tổng số tiền đã chi**: **{format_currency_vnd(expense)}**
 - **Tổng thu nhập**: **{format_currency_vnd(income)}**
-- **Số dư ròng còn lại**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm: **{rate}%**)"""
+- **Số dư ròng còn lại**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm: **{rate}%**)
 
-        if any(kw in q for kw in ["tổng thu", "thu nhập", "kiếm được bao nhiêu", "nhận bao nhiêu"]):
+Bạn có thể vào mục **Sổ Giao Dịch** để xem chi tiết từng hóa đơn hoặc đặt câu hỏi về danh mục cụ thể!"""
+
+        if any(kw in q for kw in ["tổng thu", "thu nhập", "kiếm được bao nhiêu", "nhận bao nhiêu", "lương"]):
             return f"""📥 **Tổng kết thu nhập tháng này:**
 - **Tổng thu nhập**: **{format_currency_vnd(income)}**
 - **Đã chi tiêu**: **{format_currency_vnd(expense)}**
-- **Số tiền đã tích lũy**: **{format_currency_vnd(net)}**"""
+- **Số tiền đã tích lũy**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm: **{rate}%**)"""
 
-        # 3. Asking about Budgets / Overspending
-        if any(kw in q for kw in ["ngân sách", "vượt hạn mức", "bội chi", "hạn mức"]):
+        # 4. Asking about Budgets / Overspending
+        if any(kw in q for kw in ["ngân sách", "vượt hạn mức", "bội chi", "hạn mức", "vượt"]):
             return f"""🎯 **Tình trạng Ngân sách & Hạn mức tháng này:**
 {context.get('budget_summary', 'Bạn chưa thiết lập hạn mức cho các danh mục.')}
 
 💡 **Lời khuyên**: Hãy luôn duy trì mức chi tiêu các danh mục dưới ngưỡng 80% hạn mức để đảm bảo an toàn tài chính."""
 
-        # 4. Asking about Savings / How to save money
-        if any(kw in q for kw in ["tiết kiệm", "cách tiết kiệm", "làm sao để tiết kiệm", "tối ưu chi phí"]):
-            save_20 = income * 0.2
+        # 5. Asking about Wallets / Balances / Net Worth
+        if any(kw in q for kw in ["ví", "tài sản", "còn bao nhiêu tiền", "số dư"]):
+            return f"""💰 **Tài sản & Số dư khả dụng của bạn:**
+- **Tổng tài sản ròng**: **{format_currency_vnd(context.get('total_net_worth', 0))}**
+- **Dòng tiền ròng tháng này**: **{format_currency_vnd(net)}** (Thu: {format_currency_vnd(income)} | Chi: {format_currency_vnd(expense)})
+
+Bạn có thể quản lý chi tiết từng tài khoản tại mục **Quản Lý Ví**."""
+
+        # 6. Asking about Savings / How to save money
+        if any(kw in q for kw in ["tiết kiệm", "cách tiết kiệm", "làm sao để tiết kiệm", "tối ưu chi phí", "tiết kiệm tiền"]):
+            base_inc = income if income > 0 else 10_000_000.0
+            save_20 = base_inc * 0.2
             return f"""💡 **Chiến lược tối ưu hóa và tăng tốc tiết kiệm cho bạn:**
 1. **Trích lập 20% thu nhập ({format_currency_vnd(save_20)})**: Ngay khi có thu nhập về tài khoản, hãy tự động nạp vào Quỹ tiết kiệm hoặc tài khoản tích lũy sinh lời.
-2. **Quy tắc 50/30/20**: Giữ nhu cầu thiết yếu dưới 50% ({format_currency_vnd(income * 0.5)}) và hạn chế mua sắm ngẫu hứng.
-3. **Cắt giảm vi mô (Micro-savings)**: Cắt bớt 1 cốc cà phê ngoài hàng/ngày (~35.000 đ) giúp bạn tiết kiệm thêm hơn **1,000,000 đ/tháng**."""
+2. **Quy tắc 50/30/20**: Giữ nhu cầu thiết yếu dưới 50% ({format_currency_vnd(base_inc * 0.5)}) và hạn chế mua sắm ngẫu hứng.
+3. **Cắt giảm vi mô (Micro-savings)**: Cắt bớt 1 cốc cà phê ngoài hàng/ngày (~35.000 đ) giúp bạn tiết kiệm thêm hơn **1.000.000 đ/tháng**.
+4. **Theo dõi chi tiêu hàng ngày**: Ghi nhận ngay các giao dịch nhỏ lẻ vào FinTrack AI để không bị thất thoát ngân sách."""
 
-        # Default Helpful Response
-        return f"""Xin chào! Dưới đây là tóm tắt nhanh tình hình tài chính của bạn:
+        # Default Helpful Intelligent Advisory Response
+        return f"""👋 Xin chào! Tôi là **FinTrack AI Advisor** - Cố vấn tài chính thông minh của bạn.
+
+Dưới đây là tóm tắt nhanh tình hình tài chính của bạn:
 - 💰 **Tổng tài sản khả dụng**: **{format_currency_vnd(context.get('total_net_worth', 0))}**
 - 📥 **Thu nhập tháng**: **{format_currency_vnd(income)}** | 📤 **Chi tiêu**: **{format_currency_vnd(expense)}**
 - 🎯 **Tỷ lệ tiết kiệm**: **{rate}%**
 
-Bạn có thể hỏi tôi chi tiết hơn như: *"Tôi đã tiêu bao nhiêu cho ăn uống?"*, *"Tôi có đang vượt ngân sách không?"* hoặc *"Gợi ý cách tiết kiệm 3 triệu tháng tới?"*!"""
+Bạn có thể hỏi tôi bất kỳ câu hỏi nào như:
+- *"Lương 5 triệu thì nên chi tiêu và tiết kiệm thế nào?"*
+- *"Tôi đã tiêu bao nhiêu cho việc ăn uống tháng này?"*
+- *"Tôi có đang vượt ngân sách danh mục nào không?"*
+- *"Gợi ý 3 cách cắt giảm chi tiêu không thiết yếu?"*"""
 
 ai_service = AIService()

@@ -1,22 +1,22 @@
-﻿import pytest
+import pytest
 from fastapi.testclient import TestClient
 
 
 def test_subscription_order_flow(client: TestClient, auth_headers, admin_headers):
-    # 1. User creates a pending subscription order
+    # 1. User creates a pending subscription order for PLATINUM
     order_payload = {
-        "plan_code": "PREMIUM",
+        "plan_code": "PLATINUM",
         "plan_duration_days": 30,
-        "amount": 99000,
+        "amount": 199000,
         "payment_method": "MB_VIETQR",
-        "transfer_memo": "FTPREMIUM 1 123456"
+        "transfer_memo": "FTPLATINUM 1 123456"
     }
     create_res = client.post("/api/v1/subscriptions/create-order", json=order_payload, headers=auth_headers)
     assert create_res.status_code == 200
     order_data = create_res.json()["order"]
     order_id = order_data["id"]
     assert order_data["status"] == "PENDING"
-    assert order_data["plan_code"] == "PREMIUM"
+    assert order_data["plan_code"] == "PLATINUM"
 
     # 2. User views their orders
     my_orders_res = client.get("/api/v1/subscriptions/my-orders", headers=auth_headers)
@@ -34,10 +34,11 @@ def test_subscription_order_flow(client: TestClient, auth_headers, admin_headers
     assert approve_res.status_code == 200
     assert approve_res.json()["order"]["status"] == "APPROVED"
 
-    # Verify user plan upgraded to PREMIUM
+    # Verify user plan upgraded to PLATINUM
     user_me = client.get("/api/v1/auth/me", headers=auth_headers)
     assert user_me.status_code == 200
-    assert user_me.json()["plan"] == "PREMIUM"
+    assert user_me.json()["plan"] == "PLATINUM"
+    assert user_me.json()["plan_tier"] == "FinTrack Platinum VIP"
 
 
 def test_support_ticket_flow(client: TestClient, auth_headers, moderator_headers):

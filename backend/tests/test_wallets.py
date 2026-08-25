@@ -8,6 +8,12 @@ def test_list_wallets(client, auth_headers):
     assert "Ví MoMo" in names
 
 def test_create_wallet(client, auth_headers):
+    # Upgrade user to PRO to test creating up to 5 virtual wallets
+    client.post("/api/v1/auth/upgrade-plan", headers=auth_headers, json={
+        "plan": "PRO",
+        "duration_months": 1
+    })
+
     res = client.post("/api/v1/wallets/", headers=auth_headers, json={
         "name": "ZaloPay",
         "wallet_type": "EWALLET",
@@ -26,30 +32,30 @@ def test_transfer_between_wallets(client, auth_headers):
     # Fetch wallets
     res = client.get("/api/v1/wallets/", headers=auth_headers)
     wallets = {w["name"]: w for w in res.json()}
-    tcb = wallets["Techcombank"]
     momo = wallets["Ví MoMo"]
+    cash = wallets["Tiền mặt"]
 
-    # Transfer 1,000,000 from TCB (10M) to MoMo (2M)
+    # Transfer 1,000,000 from MoMo (2M) to Cash (500k)
     res_transfer = client.post("/api/v1/wallets/transfer", headers=auth_headers, json={
-        "from_wallet_id": tcb["id"],
-        "to_wallet_id": momo["id"],
+        "from_wallet_id": momo["id"],
+        "to_wallet_id": cash["id"],
         "amount": 1000000.0,
-        "note": "Nạp tiền vào MoMo"
+        "note": "Rút tiền mặt từ MoMo"
     })
     assert res_transfer.status_code == 200
     data = res_transfer.json()
-    assert data["from_wallet_balance"] == 9000000.0
-    assert data["to_wallet_balance"] == 3000000.0
+    assert data["from_wallet_balance"] == 1000000.0
+    assert data["to_wallet_balance"] == 1500000.0
 
 def test_transfer_insufficient_funds(client, auth_headers):
     res = client.get("/api/v1/wallets/", headers=auth_headers)
     wallets = {w["name"]: w for w in res.json()}
     cash = wallets["Tiền mặt"]  # 500k
-    tcb = wallets["Techcombank"]
+    momo = wallets["Ví MoMo"]
 
     res_transfer = client.post("/api/v1/wallets/transfer", headers=auth_headers, json={
         "from_wallet_id": cash["id"],
-        "to_wallet_id": tcb["id"],
+        "to_wallet_id": momo["id"],
         "amount": 1000000.0  # More than 500k
     })
     assert res_transfer.status_code == 400
@@ -118,5 +124,34 @@ def test_open_banking_link_bank(client, auth_headers):
     assert res_notifs.status_code == 200
     notif_titles = [n["title"] for n in res_notifs.json()["notifications"]]
     assert any("Liên Kết Ngân Hàng" in t for t in notif_titles)
+
+def test_wallet_limits_by_tier(client, auth_headers):
+    # 1. Free user has max 2 virtual wallets (seeded with MoMo & Tiền mặt)
+    # Trying to create a 3rd virtual wallet must fail with 400
+    res_fail = client.post("/api/v1/wallets/", headers=auth_headers, json={
+        "name": "Ví Vượt Hạn Mức Free",
+        "wallet_type": "CASH",
+        "balance": 100000.0,
+        "color": "#10B981"
+    })
+    assert res_fail.status_code == 400
+    assert "quản lý tối đa 2 ví" in res_fail.json()["detail"]
+
+    # 2. Upgrade to Platinum VIP (unlimited virtual wallets)
+    res_up = client.post("/api/v1/auth/upgrade-plan", headers=auth_headers, json={
+        "plan": "PLATINUM",
+        "duration_months": 1
+    })
+    assert res_up.status_code == 200
+
+    # 3. Create wallet again -> must succeed with 201 Created
+    res_ok = client.post("/api/v1/wallets/", headers=auth_headers, json={
+        "name": "Ví Platinum Không Giới Hạn",
+        "wallet_type": "CASH",
+        "balance": 100000.0,
+        "color": "#10B981"
+    })
+    assert res_ok.status_code == 201
+    assert res_ok.json()["name"] == "Ví Platinum Không Giới Hạn"
 
 

@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { formatVND, formatDateVN, formatDateTimeVN } from '../utils/formatters.js';
+import { api } from '../api.js?v=4.1';
+import { formatVND, formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=4.1';
 
 // Fallback plans data in case of network latency
 const FALLBACK_PLANS = [
@@ -10,16 +10,16 @@ const FALLBACK_PLANS = [
     price: 0,
     billing_cycle: "Miễn phí vĩnh viễn",
     ai_limits: 10,
-    ai_limits_text: "10 lượt gọi AI / ngày (10 AI calls/day)",
+    ai_limits_text: "10 lượt gọi AI / ngày (300 lượt/tháng)",
     badge: "FREE",
     badge_color: "bg-slate-800 text-slate-400 border-slate-700",
     highlight: false,
+    max_wallets: 2,
     features: [
-      "10 lượt gọi AI bóc tách & cố vấn / ngày",
-      "Quản lý tối đa 2 ví tài chính",
+      "10 lượt gọi AI / ngày (300 lượt/tháng)",
+      "Quản lý tối đa 2 ví tài chính cơ bản",
       "Theo dõi thu - chi & danh mục chuẩn",
-      "Cảnh báo hạn mức ngân sách cơ bản",
-      "Xem biểu đồ tổng quan 30 ngày"
+      "Cảnh báo hạn mức & Báo cáo 30 ngày"
     ]
   },
   {
@@ -29,37 +29,58 @@ const FALLBACK_PLANS = [
     price: 49000,
     billing_cycle: "49.000 ₫ / tháng (hoặc 490k/năm)",
     ai_limits: 100,
-    ai_limits_text: "100 lượt gọi AI / ngày (100 AI calls/day)",
-    badge: "⭐ BEST SELLER",
+    ai_limits_text: "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
+    badge: "⭐ POPULAR",
     badge_color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
-    highlight: true,
+    highlight: false,
+    max_wallets: 5,
     features: [
-      "100 lượt gọi AI bóc tách & cố vấn / ngày",
-      "Không giới hạn số lượng ví & tài khoản",
-      "AI Cố vấn tài chính 50/30/20 chuyên sâu",
-      "Không giới hạn hạn mức ngân sách",
-      "Xuất báo cáo Excel (.xlsx) & PDF chi tiết",
-      "Huy hiệu tài chính Pro độc quyền"
+      "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
+      "Quản lý tối đa 5 ví tài chính",
+      "Cố vấn tài chính 50/30/20 chuyên sâu",
+      "Xuất báo cáo Excel/PDF cơ bản",
+      "Không giới hạn hạn mức ngân sách"
     ]
   },
   {
     id: "PREMIUM",
-    name: "VIP Premium Unlimited",
-    tagline: "Trải nghiệm đỉnh cao không giới hạn cho gia đình & nhà đầu tư",
+    name: "FinTrack Premium",
+    tagline: "Dành cho cá nhân & gia đình quản lý tài chính nâng cao",
     price: 99000,
     billing_cycle: "99.000 ₫ / tháng (hoặc 990k/năm)",
-    ai_limits: 999999,
-    ai_limits_text: "Không giới hạn (VIP Unlimited AI)",
-    badge: "👑 VIP UNLIMITED",
+    ai_limits: 300,
+    ai_limits_text: "1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
+    badge: "⭐ BEST SELLER",
     badge_color: "bg-amber-500/20 text-amber-300 border-amber-500/40",
     highlight: false,
+    max_wallets: 10,
     features: [
-      "KHÔNG GIỚI HẠN lượt gọi AI (VIP Unlimited)",
-      "Ưu tiên xử lý AI Engine tốc độ cao (Fast Response)",
-      "Full tính năng bóc tách & Trợ lý 24/7",
-      "Dự phóng dòng tiền & cảnh báo lạm phát",
-      "Sao lưu dữ liệu tự động & xuất snapshot",
-      "Huy hiệu VIP Hoàng Gia & Hỗ trợ kỹ thuật 24/7"
+      "Hạn mức 1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
+      "Quản lý tối đa 10 ví tài chính",
+      "Bóc tách hóa đơn & Dự báo dòng tiền thông minh",
+      "Xuất báo cáo chi tiết & Phân tích chuyên sâu",
+      "Hỗ trợ kỹ thuật ưu tiên qua Ticket (phản hồi trong 24h)"
+    ]
+  },
+  {
+    id: "PLATINUM",
+    name: "FinTrack Platinum VIP",
+    tagline: "Trải nghiệm đỉnh cao không giới hạn toàn diện cho nhà đầu tư",
+    price: 199000,
+    billing_cycle: "199.000 ₫ / tháng (hoặc 1.990k/năm)",
+    ai_limits: -1,
+    ai_limits_text: "VIP Unlimited (Không giới hạn Token / Lượt gọi AI)",
+    badge: "👑💎 PLATINUM VIP",
+    badge_color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    highlight: true,
+    max_wallets: -1,
+    features: [
+      "KHÔNG GIỚI HẠN Token / Lượt gọi AI (VIP Unlimited AI)",
+      "Quản lý Không giới hạn số lượng ví & tài khoản ngân hàng",
+      "Ưu tiên xử lý AI Engine tốc độ cao nhất (Fast Response)",
+      "Trợ lý AI phân tích danh mục đầu tư & cảnh báo rủi ro 24/7",
+      "Tự động sao lưu dữ liệu đám mây (Cloud Snapshot)",
+      "Huy hiệu Platinum độc quyền & Hỗ trợ kỹ thuật 1-1 riêng biệt"
     ]
   }
 ];
@@ -72,8 +93,8 @@ if (api) {
     };
   }
   if (typeof api.upgradePlan !== 'function') {
-    api.upgradePlan = function(plan, walletId = null, durationMonths = 1) {
-      const payload = { plan, duration_months: durationMonths };
+    api.upgradePlan = function(plan, walletId = null, durationMonths = 1, paymentMethod = 'WALLET', bankCode = '') {
+      const payload = { plan, duration_months: durationMonths, payment_method: paymentMethod, bank_code: bankCode };
       if (walletId) payload.wallet_id = parseInt(walletId);
       return this.request ? this.request('/auth/upgrade-plan', {
         method: 'POST',
@@ -147,12 +168,15 @@ export class SubscriptionComponent {
   renderContent(container) {
     const user = this.app.currentUser || {};
     const currentPlan = (user.plan || 'FREE').toUpperCase();
-    const planTier = user.plan_tier || (currentPlan === 'PREMIUM' ? 'VIP Premium' : currentPlan === 'PRO' ? 'Pro' : 'Free');
     const daysRemaining = user.days_remaining;
     const planActivatedAt = user.plan_activated_at;
     const planExpiresAt = user.plan_expires_at;
-    const isPaid = currentPlan === 'PRO' || currentPlan === 'PREMIUM';
+    const isPaid = currentPlan === 'PRO' || currentPlan === 'PREMIUM' || currentPlan === 'PLATINUM';
     const isExpiringSoon = isPaid && (daysRemaining !== null && daysRemaining !== undefined && daysRemaining <= 5);
+
+    const isPlatinum = currentPlan === 'PLATINUM';
+    const isPremium = currentPlan === 'PREMIUM';
+    const isPro = currentPlan === 'PRO';
 
     // Elapsed percentage calculation for progress bar
     let elapsedPercent = 0;
@@ -168,74 +192,74 @@ export class SubscriptionComponent {
     const q = this.quota || {
       plan: currentPlan,
       used_today: 0,
-      daily_limit: 10,
-      remaining_today: 10,
-      is_unlimited: false,
-      percentage: 0
+      daily_limit: isPlatinum ? 'Unlimited' : isPremium ? 300 : isPro ? 100 : 10,
+      remaining_today: isPlatinum ? 'Không giới hạn' : 10,
+      is_unlimited: isPlatinum,
+      percentage: isPlatinum ? 100 : 0
     };
 
     container.innerHTML = `
-      <div class="max-w-6xl mx-auto space-y-7 animate-in fade-in duration-300">
+      <div class="w-full max-w-7xl mx-auto space-y-7 animate-in fade-in duration-300">
         
         <!-- Header Banner -->
         <div class="relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-amber-500/30 shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#1e1508]">
           <!-- Glow orbs -->
-          <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl pointer-events-none"></div>
-          <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none"></div>
+          <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-purple-500/15 blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl pointer-events-none"></div>
           <div class="absolute top-0 right-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
 
           <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="flex items-center gap-4">
-              <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 text-slate-950 flex items-center justify-center text-3xl shadow-xl shadow-amber-500/30 flex-shrink-0 animate-bounce">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400 text-white flex items-center justify-center text-3xl shadow-xl shadow-purple-500/30 flex-shrink-0 animate-bounce">
                 <i class="fa-solid fa-crown"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
                   <h1 class="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
-                    Gói Dịch Vụ & Thời Hạn <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-yellow-400">FinTrack VIP</span>
+                    Bảng Giá Dịch Vụ & Thời Hạn <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300">FinTrack VIP</span>
                   </h1>
                 </div>
                 <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                  Mở rộng lượt gọi AI bóc tách tự nhiên, kích hoạt Cố vấn tài chính 50/30/20 thông minh và theo dõi hạn dùng gói cước chi tiết theo thời gian thực.
+                  Nâng cấp 4 cấp độ gói cước (Free, Pro, Premium, Platinum VIP) để mở rộng hạn mức Token AI, số lượng ví tài chính và kích hoạt Cố vấn tài chính chuyên sâu 24/7.
                 </p>
               </div>
             </div>
 
             <!-- Current Plan Badge Widget -->
-            <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[200px]">
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[220px]">
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Gói Tài Khoản Hiện Tại</span>
-              <span class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${currentPlan === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-500/20' : currentPlan === 'PRO' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
-                ${currentPlan === 'PREMIUM' ? '👑 VIP PREMIUM' : currentPlan === 'PRO' ? '⭐ FINTRACK PRO' : '🌱 FREE PLAN'}
+              <span class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isPlatinum ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : isPremium ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-500/20' : isPro ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-lg shadow-indigo-500/20' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+                ${isPlatinum ? '👑💎 PLATINUM VIP' : isPremium ? '👑 FINTRACK PREMIUM' : isPro ? '⭐ FINTRACK PRO' : '🌱 FREE PLAN'}
               </span>
             </div>
           </div>
         </div>
 
         <!-- 1. DARK CYBER CARD: TRẠNG THÁI GÓI ĐANG SỬ DỤNG (Thời hạn & Tiến độ) -->
-        <div class="glass-card p-6 rounded-3xl border ${isExpiringSoon ? 'border-rose-500/60 shadow-xl shadow-rose-500/20' : currentPlan === 'PREMIUM' ? 'border-amber-500/50 shadow-xl shadow-amber-500/15' : currentPlan === 'PRO' ? 'border-indigo-500/50 shadow-xl shadow-indigo-500/15' : 'border-slate-800'} relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900/90 to-slate-950">
+        <div class="glass-card p-6 rounded-3xl border ${isExpiringSoon ? 'border-rose-500/60 shadow-xl shadow-rose-500/20' : isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-xl shadow-amber-500/15' : isPro ? 'border-indigo-500/50 shadow-xl shadow-indigo-500/15' : 'border-slate-800'} relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900/90 to-slate-950">
           
           <!-- Background Cyber Glow -->
-          <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full ${isExpiringSoon ? 'bg-rose-500/10' : currentPlan === 'PREMIUM' ? 'bg-amber-500/10' : currentPlan === 'PRO' ? 'bg-indigo-500/10' : 'bg-emerald-500/5'} blur-3xl pointer-events-none"></div>
+          <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full ${isExpiringSoon ? 'bg-rose-500/10' : isPlatinum ? 'bg-emerald-500/15' : isPremium ? 'bg-amber-500/10' : isPro ? 'bg-indigo-500/10' : 'bg-emerald-500/5'} blur-3xl pointer-events-none"></div>
 
           <div class="relative z-10 space-y-5">
             
             <!-- Top Row: Icon, Tier Title, and Status Badges -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
               <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl ${currentPlan === 'PREMIUM' ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/30' : currentPlan === 'PRO' ? 'gradient-indigo text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-emerald-400 border border-slate-700'} flex items-center justify-center text-2xl flex-shrink-0">
-                  <i class="fa-solid ${currentPlan === 'PREMIUM' ? 'fa-crown' : currentPlan === 'PRO' ? 'fa-gem' : 'fa-seedling'}"></i>
+                <div class="w-14 h-14 rounded-2xl ${isPlatinum ? 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-xl shadow-emerald-500/30' : isPremium ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/30' : isPro ? 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-emerald-400 border border-slate-700'} flex items-center justify-center text-2xl flex-shrink-0">
+                  <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : isPro ? 'fa-bolt' : 'fa-seedling'}"></i>
                 </div>
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
                     <h3 class="text-base sm:text-lg font-black text-slate-100">
-                      ${currentPlan === 'PREMIUM' ? '👑 VIP Premium Unlimited' : currentPlan === 'PRO' ? '⭐ FinTrack Pro Edition' : '🌱 Gói Miễn Phí (FinTrack Free)'}
+                      ${isPlatinum ? '👑💎 FinTrack Platinum VIP Edition' : isPremium ? '👑 FinTrack Premium Edition' : isPro ? '⚡ FinTrack Pro Edition' : '🌱 Gói Miễn Phí (FinTrack Free)'}
                     </h3>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' : currentPlan === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : currentPlan === 'PRO' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' : isPlatinum ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : isPremium ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : isPro ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
                       ${isExpiringSoon ? '⚠️ Sắp hết hạn' : isPaid ? 'Đang kích hoạt' : 'Vĩnh viễn'}
                     </span>
                   </div>
                   <p class="text-xs text-slate-400 mt-0.5">
-                    ${currentPlan === 'PREMIUM' ? 'Toàn quyền sử dụng AI không giới hạn & Cố vấn tài chính chuyên sâu 24/7' : currentPlan === 'PRO' ? '100 lượt gọi AI/ngày, quản lý không giới hạn ví & xuất báo cáo chuyên sâu' : 'Gói khởi đầu cơ bản &bull; Giới hạn 10 lượt gọi AI/ngày'}
+                    ${isPlatinum ? 'KHÔNG GIỚI HẠN Token / Lượt gọi AI, không giới hạn ví & Trợ lý phân tích đầu tư 24/7' : isPremium ? 'Hạn mức 1.000 Token AI/tháng, quản lý 10 ví tài chính & Bóc tách hóa đơn thông minh' : isPro ? '100 lượt gọi AI/ngày, quản lý 5 ví & Cố vấn tài chính 50/30/20 chuyên sâu' : 'Gói khởi đầu cơ bản &bull; Giới hạn 10 lượt gọi AI/ngày & 2 ví'}
                   </p>
                 </div>
               </div>
@@ -243,14 +267,14 @@ export class SubscriptionComponent {
               <!-- Action Button -->
               <div class="flex items-center gap-2.5 self-start sm:self-auto">
                 ${isPaid ? `
-                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('${currentPlan}')" class="px-4 py-2 rounded-xl ${isExpiringSoon ? 'gradient-rose text-white shadow-rose-500/30 animate-pulse' : currentPlan === 'PREMIUM' ? 'gradient-amber text-slate-950 shadow-amber-500/20' : 'gradient-indigo text-white shadow-indigo-500/20'} text-xs font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
+                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('${currentPlan}')" class="px-4 py-2 rounded-xl ${isExpiringSoon ? 'gradient-rose text-white shadow-rose-500/30 animate-pulse' : isPlatinum ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white shadow-emerald-500/25' : isPremium ? 'gradient-amber text-slate-950 shadow-amber-500/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20'} text-xs font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     <span>${isExpiringSoon ? 'Gia Hạn Ngay' : 'Gia Hạn Thêm'}</span>
                   </button>
                 ` : `
-                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PREMIUM')" class="px-4 py-2 rounded-xl gradient-amber text-slate-950 text-xs font-black shadow-md shadow-amber-500/25 hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
+                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PLATINUM')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-crown"></i>
-                    <span>Nâng Cấp VIP Ngay</span>
+                    <span>Nâng Cấp Lên Platinum</span>
                   </button>
                 `}
               </div>
@@ -262,7 +286,7 @@ export class SubscriptionComponent {
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 
                 <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30 flex-shrink-0">
+                  <div class="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30 flex-shrink-0">
                     <i class="fa-solid fa-calendar-plus"></i>
                   </div>
                   <div>
@@ -306,7 +330,7 @@ export class SubscriptionComponent {
                   </span>
                 </div>
                 <div class="w-full h-3 rounded-full bg-slate-950 border border-slate-800 overflow-hidden relative p-0.5">
-                  <div class="h-full rounded-full transition-all duration-700 ${isExpiringSoon ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-red-600 animate-pulse' : currentPlan === 'PREMIUM' ? 'gradient-amber' : 'gradient-indigo'}" 
+                  <div class="h-full rounded-full transition-all duration-700 ${isExpiringSoon ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-red-600 animate-pulse' : isPlatinum ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400' : isPremium ? 'gradient-amber' : 'gradient-purple'}" 
                     style="width: ${Math.min(100, Math.max(4, elapsedPercent))}%;"></div>
                 </div>
               </div>
@@ -338,9 +362,9 @@ export class SubscriptionComponent {
                     <p class="text-[11px] text-slate-400">Không giới hạn thời hạn sử dụng. Nâng cấp lên gói VIP bất cứ lúc nào để mở rộng hạn mức.</p>
                   </div>
                 </div>
-                <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PREMIUM')" class="px-4 py-2 rounded-xl gradient-amber text-slate-950 font-black shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition flex-shrink-0 flex items-center gap-1.5">
+                <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PLATINUM')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white font-black shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition flex-shrink-0 flex items-center gap-1.5">
                   <i class="fa-solid fa-crown text-xs"></i>
-                  <span>Nâng Cấp VIP Ngay</span>
+                  <span>Nâng Cấp Lên Platinum</span>
                 </button>
               </div>
             `}
@@ -352,21 +376,21 @@ export class SubscriptionComponent {
         <div class="glass-card p-5 rounded-3xl border border-slate-800 bg-slate-900/60">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/80">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">
+              <div class="w-8 h-8 rounded-xl ${isPlatinum ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : isPremium ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-purple-500/15 text-purple-300 border border-purple-500/30'} flex items-center justify-center text-sm">
                 <i class="fa-solid fa-bolt"></i>
               </div>
               <div>
-                <h3 class="text-xs font-extrabold text-slate-100 uppercase tracking-wider">Hạn Mức Sử Dụng AI Hôm Nay (Realtime 24h)</h3>
-                <p class="text-[11px] text-slate-400">Tự động làm mới vào 00:00 mỗi ngày</p>
+                <h3 class="text-xs font-extrabold text-slate-100 uppercase tracking-wider">Hạn Mức Sử Dụng Token / Lượt Gọi AI Trong Ngày (Realtime 24h)</h3>
+                <p class="text-[11px] text-slate-400">Tự động làm mới vào 00:00 mỗi ngày &bull; Gói: <b class="${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-300' : isPro ? 'text-purple-300' : 'text-slate-300'}">${user.plan_name || 'FinTrack Free'}</b></p>
               </div>
             </div>
             
             <div class="text-right">
               <span class="text-xs font-mono font-bold text-slate-200">
-                Đã dùng: <b class="text-indigo-400">${q.used_today}</b> / ${q.is_unlimited ? '∞ Không giới hạn' : `<b class="text-slate-100">${q.daily_limit}</b> lượt`}
+                Đã dùng: <b class="${isPlatinum ? 'text-emerald-400' : isPremium ? 'text-amber-400' : isPro ? 'text-purple-400' : 'text-indigo-400'}">${q.used_today}</b> / ${q.is_unlimited ? '∞ Không giới hạn' : `<b class="text-slate-100">${q.daily_limit}</b> lượt`}
               </span>
-              <span class="text-[10px] text-emerald-400 block font-mono">
-                ${q.is_unlimited ? '⚡ VIP Unlimited' : `Còn lại: ${q.remaining_today} lượt`}
+              <span class="text-[10px] ${q.is_unlimited ? 'text-emerald-400' : 'text-emerald-400'} block font-mono">
+                ${q.is_unlimited ? '⚡ VIP Unlimited AI (Không giới hạn)' : `Còn lại: ${q.remaining_today} lượt`}
               </span>
             </div>
           </div>
@@ -374,118 +398,19 @@ export class SubscriptionComponent {
           <!-- Progress Bar -->
           <div class="space-y-1.5">
             <div class="w-full h-3 rounded-full bg-slate-950 border border-slate-800 overflow-hidden relative">
-              <div class="h-full rounded-full transition-all duration-500 ${q.is_unlimited ? 'w-full bg-gradient-to-r from-amber-500 to-yellow-400' : q.percentage > 80 ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-indigo-500 to-emerald-400'}" 
+              <div class="h-full rounded-full transition-all duration-500 ${q.is_unlimited ? 'w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400' : q.percentage > 80 ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-indigo-500 to-emerald-400'}" 
                 style="width: ${q.is_unlimited ? 100 : Math.min(100, Math.max(5, q.percentage))}%;"></div>
             </div>
             <div class="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>0 lượt</span>
-              <span>${q.is_unlimited ? 'VIP Không giới hạn' : `${q.percentage}% đã sử dụng`}</span>
+              <span>${q.is_unlimited ? '👑 Platinum Unlimited AI' : `${q.percentage}% đã sử dụng`}</span>
               <span>${q.is_unlimited ? 'VIP ∞' : `${q.daily_limit} lượt/ngày`}</span>
             </div>
           </div>
         </div>
 
-        <!-- 3. Pricing Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          ${this.plans.map(plan => {
-            const isCurrent = plan.id === currentPlan;
-            const isPro = plan.id === 'PRO';
-            const isPremium = plan.id === 'PREMIUM';
-
-            let cardBorder = 'border-slate-800';
-            let cardBg = 'bg-slate-900/60';
-            let btnClass = 'bg-slate-800 hover:bg-slate-700 text-slate-200';
-            let btnText = isCurrent ? '✓ Đang Sử Dụng' : 'Chọn Gói Này';
-
-            if (isPro) {
-              cardBorder = isCurrent ? 'border-indigo-500 ring-2 ring-indigo-500/30' : 'border-indigo-500/40 hover:border-indigo-500/80';
-              cardBg = 'bg-gradient-to-b from-indigo-950/30 via-slate-900/80 to-slate-900/60';
-              btnClass = isCurrent ? 'bg-indigo-600/40 text-indigo-200 border border-indigo-500/50 hover:bg-indigo-600/60' : 'gradient-indigo text-white font-black shadow-lg shadow-indigo-500/30 hover:scale-[1.02]';
-              btnText = isCurrent ? '⚡ Gia Hạn Thêm' : '⚡ Nâng Cấp Lên PRO';
-            } else if (isPremium) {
-              cardBorder = isCurrent ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-amber-500/40 hover:border-amber-500/80';
-              cardBg = 'bg-gradient-to-b from-amber-950/30 via-slate-900/80 to-slate-900/60';
-              btnClass = isCurrent ? 'bg-amber-600/40 text-amber-200 border border-amber-500/50 hover:bg-amber-600/60' : 'gradient-amber text-slate-950 font-black shadow-lg shadow-amber-500/30 hover:scale-[1.02]';
-              btnText = isCurrent ? '👑 Gia Hạn Thêm' : '👑 Kích Hoạt VIP Ngay';
-            } else {
-              // FREE
-              if (isCurrent) {
-                btnClass = 'bg-slate-800/80 text-slate-400 border border-slate-700 cursor-default';
-                btnText = '✓ Đang Sử Dụng Gói Free';
-              } else {
-                btnClass = 'bg-slate-800 hover:bg-slate-700 text-slate-300';
-                btnText = 'Chuyển Về Gói Free';
-              }
-            }
-
-            return `
-              <div class="glass-card p-6 rounded-3xl flex flex-col justify-between relative border ${cardBorder} ${cardBg} transition-all duration-300 hover:shadow-2xl">
-                
-                ${plan.highlight ? `
-                  <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
-                    ⭐ PHỔ BIẾN NHẤT
-                  </div>
-                ` : isPremium ? `
-                  <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-md">
-                    👑 VIP UNLIMITED
-                  </div>
-                ` : ''}
-
-                <div>
-                  <!-- Plan Title & Badge -->
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-base font-black text-slate-100">${plan.name}</h3>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${plan.badge_color}">
-                      ${plan.badge}
-                    </span>
-                  </div>
-
-                  <p class="text-xs text-slate-400 min-h-[34px] mb-4">${plan.tagline}</p>
-
-                  <!-- Price -->
-                  <div class="py-3 mb-4 border-y border-slate-800/80">
-                    <div class="flex items-baseline gap-1">
-                      <span class="text-3xl font-black font-mono ${isPremium ? 'text-amber-400' : isPro ? 'text-indigo-400' : 'text-slate-100'}">
-                        ${plan.price === 0 ? '0 ₫' : formatVND(plan.price)}
-                      </span>
-                      <span class="text-xs text-slate-400 font-medium">/ tháng</span>
-                    </div>
-                    <span class="text-[10px] text-slate-500 font-mono block mt-1">${plan.billing_cycle}</span>
-                  </div>
-
-                  <!-- AI Quota Highlight Box -->
-                  <div class="p-3 rounded-2xl ${isPremium ? 'bg-amber-950/40 border border-amber-500/30 text-amber-300' : isPro ? 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-300' : 'bg-slate-950 border border-slate-800 text-slate-300'} mb-5 text-xs font-bold flex items-center gap-2.5">
-                    <i class="fa-solid fa-wand-magic-sparkles text-sm ${isPremium ? 'text-amber-400' : isPro ? 'text-indigo-400' : 'text-slate-400'}"></i>
-                    <span>${plan.ai_limits_text}</span>
-                  </div>
-
-                  <!-- Features List -->
-                  <div class="space-y-2.5 text-xs mb-6">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Quyền Lợi Bao Gồm:</span>
-                    ${plan.features.map(f => `
-                      <div class="flex items-start gap-2 text-slate-300">
-                        <i class="fa-solid fa-circle-check text-emerald-400 text-xs mt-0.5 flex-shrink-0"></i>
-                        <span class="leading-tight">${f}</span>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-
-                <!-- Action Button -->
-                <button type="button" 
-                  class="w-full py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${btnClass}"
-                  ${isCurrent && plan.id === 'FREE' ? 'disabled' : ''}
-                  onclick="window.fintrackSubscription.openUpgradeModal('${plan.id}')">
-                  <span>${btnText}</span>
-                  ${!(isCurrent && plan.id === 'FREE') ? '<i class="fa-solid fa-arrow-right text-[10px]"></i>' : ''}
-                </button>
-
-              </div>
-            `;
-          }).join('')}
-
-        </div>
+        <!-- 3. Pricing Cards Grid (4 Tiers) -->
+        ${this.renderSubscriptionPlans(currentPlan)}
 
         <!-- Guarantee & FAQ Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
@@ -514,8 +439,8 @@ export class SubscriptionComponent {
               <i class="fa-solid fa-headset"></i>
             </div>
             <div>
-              <span class="font-bold text-slate-200 block">Hỗ Trợ Ưu Tiên 24/7</span>
-              <span class="text-[10px] text-slate-400">Đội ngũ kỹ thuật hỗ trợ xuyên suốt</span>
+              <span class="font-bold text-slate-200 block">Hỗ Trợ Kỹ Thuật VIP 24/7</span>
+              <span class="text-[10px] text-slate-400">Ưu tiên xử lý & Hỗ trợ kỹ thuật 1-1 Platinum</span>
             </div>
           </div>
         </div>
@@ -555,6 +480,166 @@ export class SubscriptionComponent {
     this.loadUserSubscriptionOrders();
   }
 
+  // Render the 4 Pricing Cards Grid in a balanced 4-column layout
+  renderSubscriptionPlans(currentPlanParam = null) {
+    const currentUser = this.app?.currentUser || {};
+    const tierRank = { 'FREE': 0, 'PRO': 1, 'PREMIUM': 2, 'VIP': 2, 'PLATINUM': 3 };
+    const userPlanKey = (currentPlanParam || currentUser.plan_tier || currentUser.plan || 'FREE').toUpperCase();
+    const userRank = tierRank[userPlanKey] ?? 0;
+
+    return `
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-7xl mx-auto">
+        ${this.plans.map(plan => {
+          const planCode = (plan.code || plan.id || '').toUpperCase();
+          const targetRank = tierRank[planCode] ?? 0;
+          const isPlat = planCode === 'PLATINUM';
+          const isPrem = planCode === 'PREMIUM' || planCode === 'VIP';
+          const isP = planCode === 'PRO';
+
+          let cardStyle = 'border border-slate-700/80 bg-slate-900/60 shadow-lg shadow-slate-950/60 rounded-2xl p-6 flex flex-col justify-between';
+          let aiBoxStyle = 'border border-slate-800 bg-slate-950/80 text-slate-300';
+          let aiIconColor = 'text-slate-400';
+          let checkIconColor = 'text-slate-400';
+          let btnClass = 'border border-slate-700 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 transition-all';
+          let btnText = 'Chọn Gói Này';
+          let isDisabled = false;
+
+          // Card Border, Glow & Cyber Gradient Theme
+          if (isPlat) {
+            // Platinum VIP: Màu Xanh Ngọc Lục Bảo - Emerald
+            cardStyle = 'border-2 border-emerald-400 bg-gradient-to-b from-emerald-950/50 via-slate-900/90 to-slate-950 shadow-2xl shadow-emerald-950/90 hover:shadow-emerald-400/40 rounded-2xl p-6 flex flex-col justify-between transition-all ring-1 ring-emerald-500/40 relative';
+            aiBoxStyle = 'border border-emerald-400/50 bg-emerald-950/70 text-emerald-300';
+            aiIconColor = 'text-emerald-300';
+            checkIconColor = 'text-emerald-400';
+          } else if (isPrem) {
+            // Premium: Màu Vàng Kim - Amber/Gold
+            cardStyle = 'border-2 border-amber-500/90 bg-gradient-to-b from-amber-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-amber-950/80 hover:shadow-amber-500/35 rounded-2xl p-6 flex flex-col justify-between transition-all relative';
+            aiBoxStyle = 'border border-amber-500/50 bg-amber-950/60 text-amber-300';
+            aiIconColor = 'text-amber-300';
+            checkIconColor = 'text-amber-400';
+          } else if (isP) {
+            // Pro: Màu Xanh Tím - Indigo
+            cardStyle = 'border-2 border-indigo-500/80 bg-gradient-to-b from-indigo-950/40 via-slate-900/90 to-slate-950 shadow-xl shadow-indigo-950/80 hover:shadow-indigo-500/30 rounded-2xl p-6 flex flex-col justify-between transition-all relative';
+            aiBoxStyle = 'border border-indigo-500/40 bg-indigo-950/60 text-indigo-300';
+            aiIconColor = 'text-indigo-300';
+            checkIconColor = 'text-indigo-400';
+          } else {
+            // Free: Slate / Xám mờ
+            cardStyle = 'border border-slate-700/80 bg-slate-900/60 shadow-lg shadow-slate-950/60 rounded-2xl p-6 flex flex-col justify-between relative';
+            aiBoxStyle = 'border border-slate-800 bg-slate-950/80 text-slate-300';
+            aiIconColor = 'text-slate-400';
+            checkIconColor = 'text-slate-400';
+          }
+
+          // Button Logic Based on Tier Hierarchy
+          if (targetRank === userRank) {
+            if (planCode === 'FREE') {
+              btnText = '✓ Đang Sử Dụng Gói Free';
+              btnClass = 'border border-slate-700 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 transition-all cursor-default font-bold';
+              isDisabled = true;
+            } else if (isPrem) {
+              btnText = '👑 Gia Hạn Thêm';
+              btnClass = 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-950/60 transition-all';
+            } else if (isPlat) {
+              btnText = '👑 Gia Hạn Thêm';
+              btnClass = 'bg-emerald-600/40 text-emerald-200 border border-emerald-500/50 hover:bg-emerald-600/60 font-bold shadow-lg shadow-emerald-900/60 transition-all';
+            } else {
+              btnText = '👑 Gia Hạn Thêm';
+              btnClass = 'bg-indigo-600/40 text-indigo-200 border border-indigo-500/50 hover:bg-indigo-600/60 font-semibold shadow-md shadow-indigo-900/50 transition-all';
+            }
+          } else if (targetRank > userRank) {
+            if (isP) {
+              btnText = '⚡ Nâng Cấp Lên PRO';
+              btnClass = 'bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-900/50 hover:scale-[1.02] transition-all';
+            } else if (isPrem) {
+              btnText = '👑 Nâng Cấp Lên Premium';
+              btnClass = 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-950/60 hover:scale-[1.02] transition-all';
+            } else if (isPlat) {
+              btnText = '💎 Nâng Cấp Lên Platinum';
+              btnClass = 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-900/60 hover:scale-[1.02] transition-all';
+            } else {
+              btnText = `Nâng Cấp Lên ${plan.name}`;
+              btnClass = 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-900/60 hover:scale-[1.02] transition-all';
+            }
+          } else {
+            // targetRank < userRank
+            btnText = `Chuyển Về Gói ${plan.name || planCode}`;
+            btnClass = 'border border-slate-700 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 transition-all font-bold';
+          }
+
+          return `
+            <div class="${cardStyle}">
+              
+              ${isPlat ? `
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-xs px-2.5 py-1 rounded-full font-bold shadow-lg shadow-emerald-950/50">💎 PLATINUM VIP</span>
+                </div>
+              ` : isPrem ? `
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span class="bg-amber-500/20 text-amber-300 border border-amber-500/50 text-xs px-2.5 py-1 rounded-full font-black uppercase tracking-wider shadow-md">⭐ BEST SELLER</span>
+                </div>
+              ` : isP ? `
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs px-2.5 py-1 rounded-full font-black uppercase tracking-wider shadow-md">⭐ PHỔ BIẾN</span>
+                </div>
+              ` : ''}
+
+              <div>
+                <!-- Plan Title & Badge -->
+                <div class="flex items-center justify-between mb-2.5 ${isPlat || isPrem || isP ? 'mt-1' : ''}">
+                  <h3 class="text-base font-black text-slate-100">${plan.name}</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${plan.badge_color}">
+                    ${plan.badge}
+                  </span>
+                </div>
+
+                <p class="text-xs text-slate-400 min-h-[34px] mb-3 leading-relaxed">${plan.tagline}</p>
+
+                <!-- Price -->
+                <div class="py-3 mb-3 border-y border-slate-800/80">
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-2xl sm:text-3xl font-black font-mono ${isPlat ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300' : isPrem ? 'text-amber-400' : isP ? 'text-indigo-400' : 'text-slate-100'}">
+                      ${plan.price === 0 ? '0 ₫' : formatVND(plan.price)}
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium">/ tháng</span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-mono block mt-1">${plan.billing_cycle}</span>
+                </div>
+
+                <!-- AI Quota Highlight Box -->
+                <div class="p-2.5 rounded-xl ${aiBoxStyle} mb-4 text-xs font-bold flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-sm ${aiIconColor}"></i>
+                  <span class="leading-tight">${plan.ai_limits_text}</span>
+                </div>
+
+                <!-- Features List -->
+                <div class="space-y-2 text-xs mb-5">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Quyền Lợi Gói:</span>
+                  ${plan.features.map(f => `
+                    <div class="flex items-start gap-2 text-slate-300">
+                      <i class="fa-solid fa-circle-check ${checkIconColor} text-xs mt-0.5 flex-shrink-0"></i>
+                      <span class="leading-tight text-[11px]">${f}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <button type="button" 
+                class="w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${btnClass}"
+                ${isDisabled ? 'disabled' : ''}
+                onclick="window.fintrackSubscription.openUpgradeModal('${plan.id}')">
+                <span>${btnText}</span>
+                ${!isDisabled ? '<i class="fa-solid fa-arrow-right text-[10px]"></i>' : ''}
+              </button>
+
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
   // Open Upgrade / Payment Confirmation Modal with Duration Selection & Live Wallet Deduction
   async openUpgradeModal(planId) {
     const modalEl = document.getElementById('generic-modal');
@@ -562,28 +647,40 @@ export class SubscriptionComponent {
 
     const plan = this.plans.find(p => p.id === planId) || {
       id: planId,
-      name: planId === 'PREMIUM' ? 'VIP Premium Unlimited' : planId === 'PRO' ? 'FinTrack Pro' : 'FinTrack Free',
-      price: planId === 'PREMIUM' ? 99000 : planId === 'PRO' ? 49000 : 0,
-      ai_limits_text: planId === 'PREMIUM' ? 'Không giới hạn (VIP Unlimited)' : planId === 'PRO' ? '100 lượt gọi AI / ngày' : '10 lượt gọi AI / ngày'
+      name: planId === 'PLATINUM' ? 'FinTrack Platinum VIP' : planId === 'PREMIUM' ? 'FinTrack Premium' : planId === 'PRO' ? 'FinTrack Pro' : 'FinTrack Free',
+      price: planId === 'PLATINUM' ? 199000 : planId === 'PREMIUM' ? 99000 : planId === 'PRO' ? 49000 : 0,
+      ai_limits_text: planId === 'PLATINUM' ? 'Không giới hạn (VIP Unlimited AI)' : planId === 'PREMIUM' ? '1.000 Token AI / tháng' : planId === 'PRO' ? '100 lượt gọi AI / ngày' : '10 lượt gọi AI / ngày'
     };
 
     const isFree = plan.id === 'FREE';
+    const isPlatinum = plan.id === 'PLATINUM';
+    const isPremium = plan.id === 'PREMIUM';
+    const isPro = plan.id === 'PRO';
     let selectedMonths = 1;
 
     // Pricing mapping based on duration
     const getDurationPricing = (months) => {
       if (isFree) return { price: 0, days: 0, note: 'Vĩnh viễn' };
-      if (planId === 'PREMIUM') {
-        if (months === 12) return { price: 990000, days: 365, note: 'Tiết kiệm 17% (Tặng 2 tháng)' };
+      if (planId === 'PLATINUM') {
+        if (months === 12) return { price: 1990000, days: 365, note: 'Tặng 2 tháng (Tiết kiệm 17%)' };
+        if (months === 6) return { price: 1069000, days: 180, note: 'Tiết kiệm 10%' };
+        if (months === 3) return { price: 567000, days: 90, note: 'Tiết kiệm 5%' };
+        return { price: 199000, days: 30, note: 'Chu kỳ 1 tháng' };
+      } else if (planId === 'PREMIUM') {
+        if (months === 12) return { price: 990000, days: 365, note: 'Tặng 2 tháng (Tiết kiệm 17%)' };
+        if (months === 6) return { price: 534000, days: 180, note: 'Tiết kiệm 10%' };
         if (months === 3) return { price: 279000, days: 90, note: 'Tiết kiệm 5%' };
         return { price: 99000, days: 30, note: 'Chu kỳ 1 tháng' };
       } else {
         // PRO
-        if (months === 12) return { price: 490000, days: 365, note: 'Tiết kiệm 17% (Tặng 2 tháng)' };
+        if (months === 12) return { price: 490000, days: 365, note: 'Tặng 2 tháng (Tiết kiệm 17%)' };
+        if (months === 6) return { price: 264000, days: 180, note: 'Tiết kiệm 10%' };
         if (months === 3) return { price: 139000, days: 90, note: 'Tiết kiệm 5%' };
         return { price: 49000, days: 30, note: 'Chu kỳ 1 tháng' };
       }
     };
+
+    const initialPricing = getDurationPricing(1);
 
     let wallets = [];
     try {
@@ -597,23 +694,33 @@ export class SubscriptionComponent {
     const userId = this.app.currentUser?.id || 1;
     const memoDigits = Math.floor(100000 + Math.random() * 900000);
     const transferMemo = `FT${planId} ${userId} ${memoDigits}`;
+    const isCurrentPlanSelected = (this.app.currentUser?.plan || '').toUpperCase() === planId;
+    const modalTitle = isFree ? 'Chuyển Sang Gói Free' : isCurrentPlanSelected ? `Gia Hạn ${plan.name}` : `Nâng Cấp Lên ${plan.name}`;
 
     let selectedPaymentMethod = 'VIETQR'; // 'VIETQR', 'WALLET', or 'DIRECT_DEBIT'
 
+    const activePillStyle = isPlatinum
+      ? 'border border-emerald-500 bg-emerald-500/20 text-emerald-300'
+      : isPremium
+      ? 'border border-amber-500 bg-amber-500/20 text-amber-300'
+      : isPro
+      ? 'border border-indigo-500 bg-indigo-500/20 text-indigo-300'
+      : 'border border-slate-500 bg-slate-500/20 text-slate-300';
+
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${planId === 'PREMIUM' ? 'border-amber-500/40' : planId === 'PRO' ? 'border-indigo-500/40' : 'border-slate-800'} animate-in fade-in zoom-in duration-200">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-2xl shadow-amber-500/20' : isPro ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/20' : 'border-slate-800'} animate-in fade-in zoom-in duration-200">
           
           <button id="sub-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
 
           <div class="flex items-center gap-3.5 mb-5 pb-3 border-b border-slate-800">
-            <div class="w-12 h-12 rounded-2xl ${planId === 'PREMIUM' ? 'gradient-amber text-slate-950' : planId === 'PRO' ? 'gradient-indigo text-white' : 'bg-slate-800 text-slate-300'} flex items-center justify-center text-xl shadow-lg flex-shrink-0">
-              <i class="fa-solid ${planId === 'PREMIUM' ? 'fa-crown' : planId === 'PRO' ? 'fa-bolt' : 'fa-seedling'}"></i>
+            <div class="w-12 h-12 rounded-2xl ${isPlatinum ? 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-lg shadow-emerald-500/25' : isPremium ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/25' : isPro ? 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-slate-800 text-slate-300'} flex items-center justify-center text-xl shadow-lg flex-shrink-0">
+              <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : isPro ? 'fa-bolt' : 'fa-seedling'}"></i>
             </div>
             <div>
-              <h3 class="text-base font-black text-slate-100">${isFree ? 'Chuyển Sang Gói Free' : `Kích Hoạt / Gia Hạn ${plan.name}`}</h3>
+              <h3 class="text-base font-black text-slate-100">${modalTitle}</h3>
               <p class="text-xs text-slate-400">Tự động tính ngày hết hạn & Phương thức thanh toán tức thời</p>
             </div>
           </div>
@@ -623,17 +730,17 @@ export class SubscriptionComponent {
             <div class="mb-4">
               <label class="block font-bold text-slate-300 text-xs mb-2">Chọn Thời Hạn Đăng Ký / Gia Hạn:</label>
               <div class="grid grid-cols-3 gap-2" id="duration-selector-group">
-                <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-amber-500 bg-amber-500/20 text-amber-300" data-months="1">
+                <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition ${activePillStyle}" data-months="1">
                   <div>1 Tháng</div>
-                  <span class="text-[9px] font-mono opacity-80">30 ngày</span>
+                  <span class="text-[9px] font-mono opacity-80">${formatVND(getDurationPricing(1).price)}</span>
                 </button>
                 <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="3">
                   <div>3 Tháng</div>
-                  <span class="text-[9px] font-mono text-emerald-400">-5% off</span>
+                  <span class="text-[9px] font-mono text-emerald-400">${formatVND(getDurationPricing(3).price)} (-5%)</span>
                 </button>
                 <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="12">
                   <div>1 Năm (12T)</div>
-                  <span class="text-[9px] font-mono text-amber-300">Tặng 2 tháng</span>
+                  <span class="text-[9px] font-mono text-amber-300">${formatVND(getDurationPricing(12).price)}</span>
                 </button>
               </div>
             </div>
@@ -666,7 +773,7 @@ export class SubscriptionComponent {
             </div>
             <div class="flex justify-between">
               <span class="text-slate-400">Hạn Mức AI Kích Hoạt:</span>
-              <span class="font-mono font-bold ${planId === 'PREMIUM' ? 'text-amber-400' : 'text-indigo-400'}">${plan.ai_limits_text}</span>
+              <span class="font-mono font-bold ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : isPro ? 'text-indigo-300' : 'text-slate-300'}">${plan.ai_limits_text}</span>
             </div>
             ${!isFree ? `
               <div class="flex justify-between">
@@ -676,18 +783,18 @@ export class SubscriptionComponent {
             ` : ''}
             <div class="flex justify-between border-t border-slate-800 pt-2 text-sm">
               <span class="font-bold text-slate-200">Số Tiền Cần Thanh Toán:</span>
-              <span class="font-mono font-black ${planId === 'PREMIUM' ? 'text-amber-400' : planId === 'PRO' ? 'text-indigo-400' : 'text-emerald-400'}" id="sub-total-price">
-                ${isFree ? '0 ₫ (Miễn Phí)' : formatVND(plan.price)}
+              <span class="font-mono font-black ${isPlatinum ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400' : isPremium ? 'text-amber-400' : isPro ? 'text-indigo-400' : 'text-emerald-400'}" id="sub-total-price">
+                ${isFree ? '0 ₫ (Miễn Phí)' : formatVND(initialPricing.price)}
               </span>
             </div>
           </div>
 
           ${!isFree ? `
             <!-- Option 1: VietQR MB Bank Payment Container -->
-            <div id="container-pay-vietqr" class="p-4 rounded-2xl bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-purple-950/30 border border-amber-500/30 text-xs mb-5 space-y-3">
+            <div id="container-pay-vietqr" class="p-4 rounded-2xl ${isPlatinum ? 'bg-gradient-to-br from-emerald-950/20 via-slate-900/90 to-teal-950/30 border border-emerald-500/30' : isPremium ? 'bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-yellow-950/30 border border-amber-500/30' : isPro ? 'bg-gradient-to-br from-indigo-950/20 via-slate-900/90 to-purple-950/30 border border-indigo-500/30' : 'bg-slate-900/90 border border-slate-800'} text-xs mb-5 space-y-3">
               <div class="flex flex-col sm:flex-row items-center gap-4">
                 <div class="p-2 bg-white rounded-2xl shadow-xl flex-shrink-0">
-                  <img id="sub-vietqr-img" src="https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${plan.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG" 
+                  <img id="sub-vietqr-img" src="https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${initialPricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG" 
                        alt="VietQR Chuyển Khoản" 
                        class="w-32 h-32 object-contain rounded-lg"
                        onerror="this.src='/TKnganhangMB.jpg'" />
@@ -699,7 +806,7 @@ export class SubscriptionComponent {
                   </div>
                   <div class="flex justify-between border-b border-slate-800/80 pb-1">
                     <span class="text-slate-400 font-sans">Số tài khoản:</span>
-                    <span class="font-bold text-emerald-400 select-all">0987654321</span>
+                    <span class="font-bold text-emerald-400 select-all">0374617569</span>
                   </div>
                   <div class="flex justify-between border-b border-slate-800/80 pb-1">
                     <span class="text-slate-400 font-sans">Chủ tài khoản:</span>
@@ -712,7 +819,7 @@ export class SubscriptionComponent {
                 </div>
               </div>
               <p class="text-[10px] text-slate-400 text-center font-sans">
-                💡 Sau khi chuyển khoản thành công, nhấn <b>"Tôi Đã Chuyển Khoản"</b> để hệ thống ghi nhận đơn và kích hoạt tự động.
+                💡 Sau khi chuyển khoản thành công, nhấn <b>"${isCurrentPlanSelected ? 'Tôi Đã Chuyển Khoản Gia Hạn' : 'Tôi Đã Chuyển Khoản'}"</b> để hệ thống ghi nhận đơn và kích hoạt tự động.
               </p>
             </div>
 
@@ -785,9 +892,9 @@ export class SubscriptionComponent {
             <button type="button" id="sub-modal-cancel" class="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
               Hủy Bỏ
             </button>
-            <button type="button" id="sub-modal-confirm" class="w-2/3 py-2.5 rounded-xl text-xs font-bold shadow-lg transition active:scale-95 flex items-center justify-center gap-2 ${planId === 'PREMIUM' ? 'gradient-amber text-slate-950 shadow-amber-500/25' : planId === 'PRO' ? 'gradient-indigo text-white shadow-indigo-500/25' : 'gradient-emerald text-white shadow-emerald-500/25'}">
+            <button type="button" id="sub-modal-confirm" class="w-2/3 py-2.5 rounded-xl text-xs font-bold shadow-lg transition active:scale-95 flex items-center justify-center gap-2 ${isPlatinum ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/40 hover:scale-[1.02]' : isPremium ? 'bg-amber-600 hover:bg-amber-500 text-slate-950 font-black shadow-amber-950/40 hover:scale-[1.02]' : isPro ? 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-indigo-950/40 hover:scale-[1.02]' : 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold'}">
               <i class="fa-solid fa-check"></i>
-              <span id="sub-confirm-btn-text">${isFree ? 'Xác Nhận Đổi Sang Free' : `🚀 Tôi Đã Chuyển Khoản`}</span>
+              <span id="sub-confirm-btn-text">${isFree ? 'Xác Nhận Đổi Sang Free' : isCurrentPlanSelected ? `🚀 Gia Hạn ${formatVND(initialPricing.price)}` : `🚀 Tôi Đã Chuyển Khoản ${formatVND(initialPricing.price)}`}</span>
             </button>
           </div>
 
@@ -853,14 +960,22 @@ export class SubscriptionComponent {
       const pricing = getDurationPricing(selectedMonths);
       if (totalPriceEl) totalPriceEl.textContent = formatVND(pricing.price);
 
-      // Update VietQR dynamic image URL
+      // Update VietQR dynamic image URL with current calculated price and memo
       if (qrImg) {
-        qrImg.src = `https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${pricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG`;
+        qrImg.src = `https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${pricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG`;
       }
       
       if (confirmBtnText) {
         if (isFree) {
           confirmBtnText.textContent = 'Xác Nhận Đổi Sang Free';
+        } else if (isCurrentPlanSelected) {
+          if (selectedPaymentMethod === 'VIETQR') {
+            confirmBtnText.textContent = `🚀 Tôi Đã Chuyển Khoản ${formatVND(pricing.price)}`;
+          } else if (selectedPaymentMethod === 'DIRECT_DEBIT') {
+            confirmBtnText.textContent = `Gia Hạn ${formatVND(pricing.price)} qua Direct Debit`;
+          } else {
+            confirmBtnText.textContent = `Gia Hạn ${formatVND(pricing.price)} qua Ví`;
+          }
         } else if (selectedPaymentMethod === 'VIETQR') {
           confirmBtnText.textContent = `🚀 Tôi Đã Chuyển Khoản ${formatVND(pricing.price)}`;
         } else if (selectedPaymentMethod === 'DIRECT_DEBIT') {
@@ -922,7 +1037,7 @@ export class SubscriptionComponent {
         selectedMonths = parseInt(btn.getAttribute('data-months') || '1');
         modalEl.querySelectorAll('.duration-pill').forEach(b => {
           if (parseInt(b.getAttribute('data-months')) === selectedMonths) {
-            b.className = 'duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-amber-500 bg-amber-500/20 text-amber-300';
+            b.className = `duration-pill px-3 py-2 rounded-xl text-xs font-bold transition ${activePillStyle}`;
           } else {
             b.className = 'duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600';
           }
@@ -1100,14 +1215,16 @@ export class SubscriptionComponent {
                 const isApproved = o.status === 'APPROVED';
                 const isPending = o.status === 'PENDING';
                 const isRejected = o.status === 'REJECTED';
+                const isPlat = (o.plan_code || '').toUpperCase() === 'PLATINUM';
+                const isPrem = (o.plan_code || '').toUpperCase() === 'PREMIUM';
 
                 return `
                   <tr class="hover:bg-slate-800/40 transition">
                     <td class="py-3 font-bold text-amber-300">#${o.order_code}</td>
                     <td class="py-3 text-slate-400 whitespace-nowrap">${o.created_at || '---'}</td>
                     <td class="py-3">
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${o.plan_code === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}">
-                        ${o.plan_code} VIP
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isPlat ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : isPrem ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}">
+                        ${isPlat ? '👑💎 PLATINUM VIP' : isPrem ? '👑 PREMIUM' : '⭐ FINTRACK VIP'}
                       </span>
                     </td>
                     <td class="py-3 font-bold text-slate-100">${formatVND(o.amount || 0)}</td>

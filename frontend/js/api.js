@@ -46,8 +46,27 @@ class APIClient {
       if (response.status === 401) {
         // Unauthorized
         this.setToken('');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('token');
         window.dispatchEvent(new CustomEvent('fintrack:unauthorized'));
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      }
+
+      if (response.status === 403) {
+        let errData = null;
+        try {
+          errData = await response.clone().json();
+        } catch (_) {}
+        const detail = (errData && (errData.detail || errData.message)) || '';
+        if (detail.toLowerCase().includes('khóa') || detail.toLowerCase().includes('banned') || detail.toLowerCase().includes('locked')) {
+          this.setToken('');
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('fintrack_token');
+          localStorage.removeItem('token');
+          window.dispatchEvent(new CustomEvent('fintrack:account_locked', { detail: { message: detail } }));
+          throw new Error(detail || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.');
+        }
       }
 
       // Handle download responses (blob)

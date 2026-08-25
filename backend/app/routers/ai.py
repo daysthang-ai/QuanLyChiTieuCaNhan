@@ -19,11 +19,11 @@ router = APIRouter(prefix="/ai", tags=["Trí Tuệ Nhân Tạo (FinTrack AI Engi
 
 def check_ai_rate_limit(user: User, db: Session):
     """Kiểm tra hạn mức gọi AI trong ngày của người dùng theo gói dịch vụ."""
-    plan = user.plan or "FREE"
-    if plan == "PREMIUM":
-        return  # VIP Unlimited
+    plan = (user.plan or "FREE").upper()
+    if plan == "PLATINUM":
+        return  # VIP Unlimited AI
 
-    limits = {"FREE": 10, "PRO": 100}
+    limits = {"FREE": 10, "PRO": 100, "PREMIUM": 300}
     limit = limits.get(plan, 10)
     today = datetime.date.today()
 
@@ -35,7 +35,7 @@ def check_ai_rate_limit(user: User, db: Session):
     if today_calls >= limit:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"⚡ Bạn đã dùng hết hạn mức {limit} lượt gọi AI/ngày của gói {plan}. Hãy nâng cấp lên PRO hoặc VIP PREMIUM để mở rộng hạn mức!"
+            detail=f"⚡ Bạn đã dùng hết hạn mức {limit} lượt gọi AI/ngày của gói {plan}. Hãy nâng cấp lên FinTrack Platinum VIP để mở khóa AI không giới hạn!"
         )
 
 @router.get("/quota")
@@ -50,19 +50,20 @@ def get_user_ai_quota(
         func.date(AIChatLog.created_at) == today
     ).scalar() or 0
 
-    plan = current_user.plan or "FREE"
-    limits = {"FREE": 10, "PRO": 100, "PREMIUM": 999999}
+    plan = (current_user.plan or "FREE").upper()
+    is_unlimited = (plan == "PLATINUM")
+    limits = {"FREE": 10, "PRO": 100, "PREMIUM": 300, "PLATINUM": -1}
     limit = limits.get(plan, 10)
-    is_unlimited = (plan == "PREMIUM")
-    remaining = 999999 if is_unlimited else max(0, limit - today_calls)
+    remaining = "Không giới hạn" if is_unlimited else max(0, limit - today_calls)
 
     return {
         "plan": plan,
+        "plan_name": current_user.plan_name,
         "used_today": today_calls,
-        "daily_limit": limit if not is_unlimited else "Unlimited",
-        "remaining_today": remaining if not is_unlimited else "Không giới hạn",
+        "daily_limit": "Unlimited" if is_unlimited else limit,
+        "remaining_today": remaining,
         "is_unlimited": is_unlimited,
-        "percentage": 100 if is_unlimited else min(100, round((today_calls / limit) * 100))
+        "percentage": 100 if is_unlimited else min(100, round((today_calls / max(1, limit)) * 100))
     }
 
 @router.post("/parse-transaction", response_model=AIParsedTransactionResponse)

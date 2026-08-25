@@ -727,9 +727,15 @@ export class AdminComponent {
                   </div>
                   <div class="p-2 rounded-xl bg-amber-950/40 border border-amber-500/30 text-[11px] flex items-center justify-between">
                     <span class="flex items-center gap-1.5 text-amber-300 font-bold">
-                      <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Gói VIP:
+                      <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Gói Premium:
                     </span>
                     <span class="font-mono font-bold text-amber-200">${plans.counts[2] || 0} (${plans.percentages[2] || 0}%)</span>
+                  </div>
+                  <div class="p-2 rounded-xl bg-purple-950/40 border border-purple-500/30 text-[11px] flex items-center justify-between">
+                    <span class="flex items-center gap-1.5 text-purple-300 font-bold">
+                      <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Platinum VIP:
+                    </span>
+                    <span class="font-mono font-bold text-purple-200">${plans.counts[3] || 0} (${plans.percentages[3] || 0}%)</span>
                   </div>
                 </div>
               </div>
@@ -1172,7 +1178,7 @@ export class AdminComponent {
 
     if (filterId === 'users_active') statusFilter = 'ACTIVE';
     else if (filterId === 'users_locked') statusFilter = 'LOCKED';
-    else if (filterId === 'users_paid') plan = 'PRO,PREMIUM';
+    else if (filterId === 'users_paid') plan = 'PRO,PREMIUM,PLATINUM';
     else if (filterId === 'users_admins') role = 'ADMIN';
 
     await this.loadUsersList(search, role, plan, statusFilter);
@@ -1250,7 +1256,7 @@ export class AdminComponent {
                     </span>
                   </td>
                   <td class="py-3">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black ${u.plan === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : u.plan === 'PRO' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-400'}">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black ${u.plan === 'PLATINUM' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : u.plan === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : u.plan === 'PRO' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-slate-800 text-slate-400'}">
                       ${u.plan}
                     </span>
                   </td>
@@ -1419,9 +1425,10 @@ export class AdminComponent {
               <div>
                 <label class="block font-bold text-slate-400 mb-1">Gói Tài Khoản</label>
                 <select id="detail-user-plan" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100">
-                  <option value="FREE" ${userPlan === 'FREE' ? 'selected' : ''}>Gói FREE (10 AI calls/ngày)</option>
-                  <option value="PRO" ${userPlan === 'PRO' ? 'selected' : ''}>Gói PRO (100 AI calls/ngày)</option>
-                  <option value="PREMIUM" ${userPlan === 'PREMIUM' ? 'selected' : ''}>Gói PREMIUM (VIP Unlimited)</option>
+                  <option value="FREE" ${userPlan === 'FREE' ? 'selected' : ''}>Gói FREE (10 AI calls/ngày, 2 ví)</option>
+                  <option value="PRO" ${userPlan === 'PRO' ? 'selected' : ''}>Gói PRO (100 AI calls/ngày, 5 ví)</option>
+                  <option value="PREMIUM" ${userPlan === 'PREMIUM' ? 'selected' : ''}>Gói PREMIUM (300 AI calls/ngày, 10 ví)</option>
+                  <option value="PLATINUM" ${userPlan === 'PLATINUM' ? 'selected' : ''}>👑💎 Gói PLATINUM VIP (Unlimited AI & Ví)</option>
                 </select>
               </div>
             </div>
@@ -2308,7 +2315,8 @@ export class AdminComponent {
                     <option value="ALL">🌐 Toàn bộ người dùng (All Users)</option>
                     <option value="FREE">👤 Chỉ người dùng Gói Free</option>
                     <option value="PRO">⭐ Chỉ người dùng Gói Pro</option>
-                    <option value="PREMIUM">👑 Chỉ người dùng VIP Premium</option>
+                    <option value="PREMIUM">👑 Chỉ người dùng FinTrack Premium</option>
+                    <option value="PLATINUM">👑💎 Chỉ người dùng Platinum VIP</option>
                     <option value="USER">📩 Gửi riêng cho 1 người dùng cụ thể</option>
                   </select>
                 </div>
@@ -2716,7 +2724,8 @@ export class AdminComponent {
                     <option value="ALL">🌐 Toàn bộ người dùng (All Users)</option>
                     <option value="FREE">👤 Chỉ người dùng Gói Free</option>
                     <option value="PRO">⭐ Chỉ người dùng Gói Pro</option>
-                    <option value="PREMIUM">👑 Chỉ người dùng VIP Premium</option>
+                    <option value="PREMIUM">👑 Chỉ người dùng FinTrack Premium</option>
+                    <option value="PLATINUM">👑💎 Chỉ người dùng Platinum VIP</option>
                     <option value="USER">📩 Gửi riêng cho 1 người dùng cụ thể</option>
                   </select>
                 </div>
@@ -2884,7 +2893,7 @@ export class AdminComponent {
       if (this.activeNotifFilter === 'notif_broadcast') {
         notifs = notifs.filter(n => n.target_type === 'ALL' && !n.user_id);
       } else if (this.activeNotifFilter === 'notif_vip') {
-        notifs = notifs.filter(n => ['PRO', 'PREMIUM', 'VIP'].includes(n.target_type));
+        notifs = notifs.filter(n => ['PRO', 'PREMIUM', 'PLATINUM', 'VIP'].includes(n.target_type));
       } else if (this.activeNotifFilter === 'notif_personal') {
         notifs = notifs.filter(n => n.user_id != null);
       }
@@ -3171,8 +3180,8 @@ export class AdminComponent {
                     <div class="text-[10px] text-slate-400 font-mono">${o.user_email}</div>
                   </td>
                   <td class="py-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${o.plan_code === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}">
-                      ${o.plan_code === 'PREMIUM' ? '👑 VIP Premium' : '⭐ FinTrack Pro'} (${o.plan_duration_days} ngày)
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${o.plan_code === 'PLATINUM' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : o.plan_code === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}">
+                      ${o.plan_code === 'PLATINUM' ? '👑💎 Platinum VIP' : o.plan_code === 'PREMIUM' ? '👑 Premium' : '⭐ FinTrack VIP'} (${o.plan_duration_days} ngày)
                     </span>
                     <div class="font-mono font-bold text-slate-200 mt-1">${formatVND(o.amount)}</div>
                   </td>

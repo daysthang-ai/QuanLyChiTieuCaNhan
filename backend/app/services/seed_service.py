@@ -103,7 +103,7 @@ def seed_user_financials(db: Session, target_user: User, is_admin: bool = False,
                 {"name": "Ví MoMo VIP", "wallet_type": "EWALLET", "wallet_scope": "virtual", "balance": 5650000.0, "account_number_masked": "****0909", "icon": "mobile-screen", "color": "#A21CAF"},
                 {"name": "Tiền mặt", "wallet_type": "CASH", "wallet_scope": "virtual", "balance": 3500000.0, "account_number_masked": None, "icon": "money-bill-wave", "color": "#16A34A"},
                 {"name": "Sổ Tiết Kiệm Vietcombank", "wallet_type": "SAVINGS", "wallet_scope": "virtual", "balance": 250000000.0, "account_number_masked": "****8888", "icon": "piggy-bank", "color": "#059669"},
-                {"name": "Ví Thanh Toán Dịch Vụ & VIP FinTrack", "wallet_type": "BANK", "wallet_scope": "real", "balance": 2000000.0, "account_number_masked": "MB-0987654321", "icon": "credit-card", "color": "#F59E0B"}
+                {"name": "Ví Thanh Toán Dịch Vụ & VIP FinTrack", "wallet_type": "BANK", "wallet_scope": "real", "balance": 2000000.0, "account_number_masked": "MB-0374617569", "icon": "credit-card", "color": "#F59E0B"}
             ]
         else:
             wallets_data = [
@@ -111,7 +111,7 @@ def seed_user_financials(db: Session, target_user: User, is_admin: bool = False,
                 {"name": "Ví MoMo", "wallet_type": "EWALLET", "wallet_scope": "virtual", "balance": 2850000.0, "account_number_masked": "****0909", "icon": "mobile-screen", "color": "#A21CAF"},
                 {"name": "Tiền mặt", "wallet_type": "CASH", "wallet_scope": "virtual", "balance": 1500000.0, "account_number_masked": None, "icon": "money-bill-wave", "color": "#16A34A"},
                 {"name": "Sổ tiết kiệm VPBank", "wallet_type": "SAVINGS", "wallet_scope": "virtual", "balance": 50000000.0, "account_number_masked": "****9999", "icon": "piggy-bank", "color": "#059669"},
-                {"name": "Ví Thanh Toán Dịch Vụ & VIP FinTrack", "wallet_type": "BANK", "wallet_scope": "real", "balance": 500000.0, "account_number_masked": "MB-0987654321", "icon": "credit-card", "color": "#F59E0B"}
+                {"name": "Ví Thanh Toán Dịch Vụ & VIP FinTrack", "wallet_type": "BANK", "wallet_scope": "real", "balance": 500000.0, "account_number_masked": "MB-0374617569", "icon": "credit-card", "color": "#F59E0B"}
             ]
         for w_data in wallets_data:
             existing_w = db.query(Wallet).filter(Wallet.user_id == target_user.id, Wallet.name == w_data["name"]).first()
@@ -413,9 +413,9 @@ def seed_database(db: Session):
             SubscriptionOrder(
                 order_code="ORD-849201",
                 user_id=demo_user.id,
-                plan_code="PREMIUM",
+                plan_code="PLATINUM",
                 plan_duration_days=30,
-                amount=99000.0,
+                amount=199000.0,
                 payment_method="MB_VIETQR",
                 transfer_memo="NAP VIP 2 NGUYENVANAN 849201",
                 status="PENDING",
@@ -453,9 +453,9 @@ def seed_database(db: Session):
             SubscriptionOrder(
                 order_code="ORD-559203",
                 user_id=demo_user.id,
-                plan_code="PREMIUM",
+                plan_code="PLATINUM",
                 plan_duration_days=365,
-                amount=990000.0,
+                amount=1990000.0,
                 payment_method="MB_VIETQR",
                 transfer_memo="NAP VIP 2 NGUYENVANAN 559203",
                 status="APPROVED",

@@ -28,7 +28,7 @@ def list_wallets(
             wallet_scope="real",
             balance=500000.0 if current_user.email == "user@fintrack.ai" else 0.0,
             currency=current_user.currency or "VND",
-            account_number_masked="MB-0987654321",
+            account_number_masked="MB-0374617569",
             icon="credit-card",
             color="#F59E0B",
             is_active=True
@@ -51,13 +51,30 @@ def create_wallet(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Tạo ví hoặc tài khoản thanh toán mới (mặc định scope = 'virtual' cho ví kế toán cá nhân)."""
+    scope = (wallet_in.wallet_scope or "virtual").lower()
+    if scope != "real" and current_user.role != "ADMIN":
+        plan = (current_user.plan or "FREE").upper()
+        wallet_limits = {"FREE": 2, "PRO": 5, "PREMIUM": 10, "PLATINUM": -1}
+        limit = wallet_limits.get(plan, 2)
+        if limit != -1:
+            current_wallet_count = db.query(Wallet).filter(
+                Wallet.user_id == current_user.id,
+                Wallet.wallet_scope == "virtual",
+                Wallet.is_active == True
+            ).count()
+            if current_wallet_count >= limit:
+                tier_name = current_user.plan_name
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Gói {tier_name} chỉ cho phép quản lý tối đa {limit} ví tài chính. Hãy nâng cấp lên gói cao hơn hoặc FinTrack Platinum VIP để không giới hạn số lượng ví!"
+                )
+
     account_num_masked = mask_account_number(wallet_in.account_number_masked) if wallet_in.account_number_masked else None
     new_wallet = Wallet(
         user_id=current_user.id,
         name=wallet_in.name,
         wallet_type=wallet_in.wallet_type,
-        wallet_scope=wallet_in.wallet_scope or "virtual",
+        wallet_scope=scope,
         balance=wallet_in.balance,
         currency=wallet_in.currency or current_user.currency,
         account_number_masked=account_num_masked,

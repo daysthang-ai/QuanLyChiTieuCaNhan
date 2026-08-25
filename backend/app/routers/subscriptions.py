@@ -13,7 +13,7 @@ from backend.app.routers.auth import get_current_user
 router = APIRouter(prefix="/subscriptions", tags=["Gói Dịch Vụ & Đơn Nạp Tiền (Subscriptions)"])
 
 class SubscriptionOrderCreate(BaseModel):
-    plan_code: str = Field(..., description="PRO or PREMIUM")
+    plan_code: str = Field(..., description="PRO, PREMIUM, or PLATINUM")
     amount: float = Field(..., description="Số tiền thanh toán")
     plan_duration_days: Optional[int] = 30
     payment_method: Optional[str] = "MB_VIETQR"
@@ -30,8 +30,8 @@ def create_subscription_order(
     Người dùng tạo đơn thanh toán gói VIP / Nạp tiền (Trạng thái PENDING - Chờ duyệt).
     """
     plan_code = data.plan_code.upper()
-    if plan_code not in ["PRO", "PREMIUM"]:
-        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận PRO hoặc PREMIUM.")
+    if plan_code not in ["PRO", "PREMIUM", "PLATINUM"]:
+        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận PRO, PREMIUM hoặc PLATINUM.")
 
     # Generate unique order code: ORD-XXXXXX
     random_digits = f"{random.randint(100000, 999999)}"

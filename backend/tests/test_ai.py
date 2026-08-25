@@ -53,3 +53,12 @@ def test_ai_chat_endpoint(client, auth_headers):
     assert "response_markdown" in data
     assert len(data["response_markdown"]) > 0
     assert len(data["suggested_followups"]) >= 1
+
+def test_ai_quota_endpoint(client, auth_headers):
+    res = client.get("/api/v1/ai/quota", headers=auth_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert "plan" in data
+    assert "daily_limit" in data
+    assert "remaining_today" in data
+    assert "is_unlimited" in data

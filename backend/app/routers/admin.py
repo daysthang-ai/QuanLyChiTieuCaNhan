@@ -226,16 +226,18 @@ def get_admin_dashboard(
     free_users = db.query(func.count(User.id)).filter((User.plan == "FREE") | (User.plan == None)).scalar() or 0
     pro_users_count = db.query(func.count(User.id)).filter(User.plan == "PRO").scalar() or 0
     prem_users_count = db.query(func.count(User.id)).filter(User.plan == "PREMIUM").scalar() or 0
+    plat_users_count = db.query(func.count(User.id)).filter(User.plan == "PLATINUM").scalar() or 0
     
     plan_distribution = {
-        "labels": ["Gói Free (Miễn phí)", "Gói Pro (99k)", "Gói Premium VIP (199k)"],
-        "counts": [free_users, pro_users_count, prem_users_count],
+        "labels": ["Gói Free (0đ)", "Gói Pro (49k)", "Gói Premium (99k)", "Gói Platinum VIP (199k)"],
+        "counts": [free_users, pro_users_count, prem_users_count, plat_users_count],
         "percentages": [
             round((free_users / max(1, total_users)) * 100, 1),
             round((pro_users_count / max(1, total_users)) * 100, 1),
-            round((prem_users_count / max(1, total_users)) * 100, 1)
+            round((prem_users_count / max(1, total_users)) * 100, 1),
+            round((plat_users_count / max(1, total_users)) * 100, 1)
         ],
-        "colors": ["#64748B", "#6366F1", "#F59E0B"]
+        "colors": ["#64748B", "#6366F1", "#F59E0B", "#A855F7"]
     }
 
     # 6. User Growth Trend (6 months) for Central Chart 1
@@ -385,7 +387,7 @@ def update_user_plan(
     current_admin: User = Depends(get_current_admin_or_moderator_user),
     db: Session = Depends(get_db)
 ):
-    """Xem và cấp gói tài khoản (FREE, PRO, PREMIUM) cho người dùng."""
+    """Xem và cấp gói tài khoản (FREE, PRO, PREMIUM, PLATINUM) cho người dùng."""
     target_user = db.query(User).filter(User.id == user_id).first()
     if not target_user:
         raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
@@ -399,7 +401,14 @@ def update_user_plan(
         target_user.plan_expires_at = None
         target_user.is_plan_active = True
     else:
-        target_user.plan_tier = "Pro" if new_plan == "PRO" else "VIP Premium"
+        if new_plan == "PLATINUM":
+            target_user.plan_tier = "FinTrack Platinum VIP"
+        elif new_plan == "PREMIUM":
+            target_user.plan_tier = "FinTrack Premium"
+        elif new_plan == "PRO":
+            target_user.plan_tier = "FinTrack Pro"
+        else:
+            target_user.plan_tier = "Free"
         target_user.plan_activated_at = now
         target_user.plan_expires_at = now + datetime.timedelta(days=30)
         target_user.is_plan_active = True
@@ -447,7 +456,14 @@ def update_user_profile(
             target_user.plan_expires_at = None
             target_user.is_plan_active = True
         else:
-            target_user.plan_tier = "Pro" if new_plan == "PRO" else "VIP Premium"
+            if new_plan == "PLATINUM":
+                target_user.plan_tier = "FinTrack Platinum VIP"
+            elif new_plan == "PREMIUM":
+                target_user.plan_tier = "FinTrack Premium"
+            elif new_plan == "PRO":
+                target_user.plan_tier = "FinTrack Pro"
+            else:
+                target_user.plan_tier = "Free"
             target_user.plan_activated_at = now
             target_user.plan_expires_at = now + datetime.timedelta(days=30)
             target_user.is_plan_active = True
@@ -1141,7 +1157,14 @@ def approve_subscription_order(
         target_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
 
     target_user.plan = order.plan_code.upper()
-    target_user.plan_tier = "VIP Premium Unlimited" if order.plan_code.upper() == "PREMIUM" else "FinTrack Pro"
+    if target_user.plan == "PLATINUM":
+        target_user.plan_tier = "FinTrack Platinum VIP"
+    elif target_user.plan == "PREMIUM":
+        target_user.plan_tier = "FinTrack Premium"
+    elif target_user.plan == "PRO":
+        target_user.plan_tier = "FinTrack Pro"
+    else:
+        target_user.plan_tier = "Free"
     target_user.is_plan_active = True
     target_user.updated_at = now
 

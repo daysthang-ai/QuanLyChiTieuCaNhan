@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js';
+import { api } from '../api.js?v=4.9';
+import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js?v=4.9';
 
 export class TransactionsComponent {
   constructor(app) {
@@ -116,7 +116,7 @@ export class TransactionsComponent {
               <thead class="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
                 <tr>
                   <th class="py-3 px-4">Thời Gian</th>
-                  <th class="py-3 px-4">Loại</th>
+                  <th class="py-3 px-4 w-28 min-w-[100px] text-center">Loại</th>
                   <th class="py-3 px-4">Danh Mục</th>
                   <th class="py-3 px-4">Ghi Chú</th>
                   <th class="py-3 px-4">Ví Thanh Toán</th>
@@ -249,18 +249,24 @@ export class TransactionsComponent {
         const isIncome = t.type === 'INCOME';
         const isTransfer = t.type === 'TRANSFER';
         const typeBadge = isIncome 
-          ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 font-bold text-[10px] border border-emerald-500/20">Thu nhập</span>`
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap shadow-sm shadow-emerald-950/40">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i> Thu nhập
+            </span>`
           : isTransfer
-          ? `<span class="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-400 font-bold text-[10px] border border-indigo-500/20">Chuyển tiền</span>`
-          : `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 font-bold text-[10px] border border-rose-500/20">Chi tiêu</span>`;
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 whitespace-nowrap shadow-sm shadow-cyan-950/40">
+              <i class="fa-solid fa-right-left text-[10px]"></i> Chuyển ví
+            </span>`
+          : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 whitespace-nowrap shadow-sm shadow-rose-950/40">
+              <i class="fa-solid fa-arrow-up text-[10px]"></i> Chi tiêu
+            </span>`;
 
         const sign = isIncome ? '+' : isTransfer ? '⮂' : '-';
-        const amountColor = isIncome ? 'text-emerald-400' : isTransfer ? 'text-indigo-400' : 'text-rose-400';
+        const amountColor = isIncome ? 'text-emerald-400' : isTransfer ? 'text-cyan-400' : 'text-rose-400';
 
         const catName = t.category ? t.category.name : isTransfer ? 'Chuyển nội bộ' : 'Chung';
         const rawCatIcon = t.category ? (t.category.icon || 'receipt') : 'arrow-right-arrow-left';
         const catIcon = rawCatIcon.replace(/^fa-solid\s+|^fa-regular\s+|^fa-brands\s+|^fa-/, '');
-        const catColor = t.category ? (t.category.color || '#6366F1') : '#6366F1';
+        const catColor = t.category ? (t.category.color || '#6366F1') : '#06B6D4';
         const walletName = t.wallet ? t.wallet.name : '';
 
         return `
@@ -268,7 +274,7 @@ export class TransactionsComponent {
             <td class="py-3 px-4 text-slate-400 font-medium whitespace-nowrap text-[11px]">
               ${formatDateTimeVN(t.transaction_date)}
             </td>
-            <td class="py-3 px-4">${typeBadge}</td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">${typeBadge}</td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
                 <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${catColor}">

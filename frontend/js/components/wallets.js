@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { formatVND, formatDateVN } from '../utils/formatters.js';
+import { api } from '../api.js?v=4.1';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=4.1';
 
 export class WalletsComponent {
   constructor(app) {
@@ -95,7 +95,7 @@ export class WalletsComponent {
         wallet_scope: 'real',
         balance: 0,
         currency: 'VND',
-        account_number_masked: 'MB-0987654321'
+        account_number_masked: 'MB-0374617569'
       };
 
       const virtualWallets = this.wallets.filter(w => w.wallet_scope !== 'real');
@@ -145,7 +145,7 @@ export class WalletsComponent {
               <div class="flex flex-wrap items-center gap-4 text-xs font-mono pt-1 text-slate-400">
                 <div class="flex items-center gap-1.5">
                   <i class="fa-solid fa-building-columns text-amber-400"></i>
-                  <span>MB Bank: <strong class="text-slate-200">0987654321</strong></span>
+                  <span>MB Bank: <strong class="text-slate-200">0374617569</strong></span>
                 </div>
                 <div class="flex items-center gap-1.5">
                   <i class="fa-solid fa-user-shield text-amber-400"></i>
@@ -465,7 +465,7 @@ export class WalletsComponent {
     const generateVietQRUrl = (amt) => {
       const sanitizedAmt = Math.round(parseFloat(amt) || 0);
       const memoParam = encodeURIComponent(userCode);
-      return `https://img.vietqr.io/image/MB-0987654321-compact2.png?amount=${sanitizedAmt}&addInfo=${memoParam}&accountName=DANG%20QUYET%20THANG`;
+      return `https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${sanitizedAmt}&addInfo=${memoParam}&accountName=DANG%20QUYET%20THANG`;
     };
 
     modalEl.innerHTML = `
@@ -536,7 +536,7 @@ export class WalletsComponent {
                 <div class="flex justify-between items-center text-slate-300">
                   <span class="text-slate-400 font-sans">Số tài khoản Admin:</span>
                   <button type="button" id="btn-copy-real-acc" class="font-bold text-cyan-400 flex items-center gap-1.5 hover:text-cyan-300 transition" title="Click để sao chép số tài khoản">
-                    <span id="real-qr-acc-text">0987654321</span>
+                    <span id="real-qr-acc-text">0374617569</span>
                     <i class="fa-regular fa-copy text-[11px]"></i>
                   </button>
                 </div>
@@ -610,8 +610,8 @@ export class WalletsComponent {
     });
 
     document.getElementById('btn-copy-real-acc')?.addEventListener('click', () => {
-      navigator.clipboard?.writeText('0987654321');
-      this.app.showToast('Đã sao chép số tài khoản MB Bank Admin (0987654321)!', 'success');
+      navigator.clipboard?.writeText('0374617569');
+      this.app.showToast('Đã sao chép số tài khoản MB Bank Admin (0374617569)!', 'success');
     });
 
     document.getElementById('btn-copy-real-memo')?.addEventListener('click', () => {
