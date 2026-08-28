@@ -1,93 +1,249 @@
 erDiagram
-    users ||--o{ wallets : "owns"
-    users ||--o{ categories : "creates"
-    users ||--o{ transactions : "performs"
-    users ||--o{ budgets : "sets"
-    users ||--o{ saving_goals : "targets"
-    users ||--o{ ai_logs : "records"
+    %% =========================================================================
+    %% FINTRACK AI - SƠ ĐỒ THỰC THỂ QUAN HỆ CƠ SỞ DỮ LIỆU (11 BẢNG CHUẨN 3NF)
+    %% =========================================================================
 
-    wallets ||--o{ transactions : "balances"
-    categories ||--o{ transactions : "classifies"
-    categories ||--o{ budgets : "limits"
+    USERS ||--o{ WALLETS : "sở hữu (1:N)"
+    USERS ||--o{ CATEGORIES : "tạo danh mục cá nhân (1:N)"
+    USERS ||--o{ TRANSACTIONS : "thực hiện bút toán (1:N)"
+    USERS ||--o{ BUDGETS : "thiết lập hạn mức (1:N)"
+    USERS ||--o{ SAVING_GOALS : "đặt mục tiêu tích lũy (1:N)"
+    USERS ||--o{ AI_CHAT_LOGS : "lưu nhật ký AI (1:N)"
+    USERS ||--o{ NOTIFICATIONS : "nhận thông báo (1:N)"
+    USERS ||--o{ SUBSCRIPTION_ORDERS : "đặt mua gói VIP (1:N)"
+    USERS ||--o{ SUPPORT_TICKETS : "gửi yêu cầu hỗ trợ (1:N)"
 
-    users {
-        int id PK "Primary Key"
-        string email UK "Unique Email / Account"
-        string password_hash "Bcrypt Hashed"
-        string full_name "User Display Name"
-        string role "USER or ADMIN"
-        string currency "VND or USD"
-        int target_income "Monthly Target Income"
-        string subscription_tier "FREE / PRO / VIP"
-        boolean is_active "Active Status"
-        datetime created_at "Registration Timestamp"
+    WALLETS ||--o{ TRANSACTIONS : "nguồn tiền thanh toán (1:N)"
+    CATEGORIES ||--o{ TRANSACTIONS : "phân loại thu chi (1:N)"
+    CATEGORIES ||--o{ BUDGETS : "áp dụng hạn mức (1:N)"
+
+    SYSTEM_BANK_ACCOUNTS ||--o{ BANK_TRANSACTIONS : "tiếp nhận dòng tiền (1:N)"
+    SUBSCRIPTION_ORDERS ||--o| BANK_TRANSACTIONS : "đối soát khớp lệnh webhook (1:1)"
+
+    %% -------------------------------------------------------------------------
+    %% 1. BẢNG USERS (Người dùng & Phân quyền RBAC)
+    %% -------------------------------------------------------------------------
+    USERS {
+        int id PK "Khóa chính tự tăng"
+        string email UK "Email đăng nhập duy nhất"
+        string full_name "Họ và tên người dùng"
+        string hashed_password "Mật khẩu mã hóa Bcrypt"
+        string role "Vai trò: USER | MODERATOR | ADMIN"
+        string status "Trạng thái: ACTIVE | LOCKED"
+        string plan "Gói dịch vụ: FREE | PRO | PREMIUM | PLATINUM"
+        string plan_tier "Tên gói hiển thị"
+        datetime plan_activated_at "Thời điểm kích hoạt gói"
+        datetime plan_expires_at "Thời điểm hết hạn gói"
+        boolean is_plan_active "Trạng thái gói hiệu lực"
+        string currency "Đơn vị tiền tệ: VND | USD"
+        string avatar_url "Đường dẫn ảnh đại diện"
+        datetime created_at "Thời điểm đăng ký"
+        datetime updated_at "Thời điểm cập nhật"
     }
 
-    wallets {
-        int id PK "Primary Key"
-        int user_id FK "References users.id"
-        string name "Wallet Name (Techcombank, MoMo...)"
-        string type "CASH / BANK / EWALLET / SAVINGS"
-        int balance "Current Available Balance"
-        string account_number "Masked Account Number"
-        string color "Hex Color Code"
-        string icon "FontAwesome Icon"
-        boolean is_active "Active Status"
+    %% -------------------------------------------------------------------------
+    %% 2. BẢNG WALLETS (Ví 2 Tầng: Virtual Sandbox & Real Payment)
+    %% -------------------------------------------------------------------------
+    WALLETS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (CASCADE)"
+        string name "Tên ví (MB Bank, MoMo, Tiền mặt)"
+        string wallet_type "Loại ví: CASH | BANK | EWALLET | SAVINGS"
+        string wallet_scope "Phạm vi: virtual (Kế toán) | real (Nạp tiền thật)"
+        float balance "Số dư khả dụng"
+        string currency "Đơn vị tiền tệ"
+        string account_number_masked "Số tài khoản che bảo mật"
+        string icon "FontAwesome icon"
+        string color "Mã màu Hex nhận diện"
+        boolean is_active "Trạng thái hoạt động"
+        boolean is_linked "Liên kết ngân hàng"
+        string bank_code "Mã ngân hàng (MB, TCB, VCB...)"
+        boolean auto_debit_enabled "Tự động trích nợ"
+        datetime linked_at "Thời điểm liên kết"
+        datetime created_at "Thời điểm tạo"
+        datetime updated_at "Thời điểm cập nhật"
     }
 
-    categories {
-        int id PK "Primary Key"
-        int user_id FK "References users.id (Nullable)"
-        string name "Category Name"
-        string type "EXPENSE or INCOME"
-        string group_50_30_20 "NEEDS / WANTS / SAVINGS"
-        string icon "Category Icon"
-        string color "Hex Color Code"
-        boolean is_default "System Default Flag"
+    %% -------------------------------------------------------------------------
+    %% 3. BẢNG CATEGORIES (Danh mục Thu - Chi Chuẩn 50/30/20)
+    %% -------------------------------------------------------------------------
+    CATEGORIES {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (NULL nếu danh mục chung)"
+        string name "Tên danh mục (Ăn uống, Mua sắm...)"
+        string type "Loại: EXPENSE | INCOME"
+        string group "Nhóm 50/30/20: NEEDS | WANTS | SAVINGS | INCOME"
+        string icon "Icon biểu diện"
+        string color "Mã màu Hex"
+        boolean is_default "Đánh dấu danh mục hệ thống"
+        datetime created_at "Thời điểm tạo"
     }
 
-    transactions {
-        int id PK "Primary Key"
-        int user_id FK "References users.id"
-        int wallet_id FK "References wallets.id"
-        int category_id FK "References categories.id"
-        int amount "Transaction Amount (VND)"
-        string type "EXPENSE / INCOME / TRANSFER"
-        date transaction_date "Transaction Date"
-        string description "Note / Description"
-        string tags "Tags (e.g. #family)"
-        string receipt_image "Receipt File Path"
-        boolean is_ai_generated "AI Parser Flag"
+    %% -------------------------------------------------------------------------
+    %% 4. BẢNG TRANSACTIONS (Bút toán Giao dịch Thu / Chi / Chuyển Ví)
+    %% -------------------------------------------------------------------------
+    TRANSACTIONS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (CASCADE)"
+        int wallet_id FK "FK -> wallets.id (RESTRICT)"
+        int category_id FK "FK -> categories.id (RESTRICT, Nullable)"
+        int to_wallet_id FK "FK -> wallets.id (Dành cho TRANSFER)"
+        string type "Loại: EXPENSE | INCOME | TRANSFER"
+        float amount "Số tiền giao dịch"
+        datetime transaction_date "Ngày phát sinh giao dịch"
+        text note "Ghi chú chi tiết"
+        string receipt_url "Đường dẫn ảnh hóa đơn"
+        string created_by_ai "Nguồn gốc: AI_PARSED | MANUAL"
+        datetime created_at "Thời điểm tạo bút toán"
     }
 
-    budgets {
-        int id PK "Primary Key"
-        int user_id FK "References users.id"
-        int category_id FK "References categories.id"
-        int month "Applied Month (1-12)"
-        int year "Applied Year (e.g. 2026)"
-        int limit_amount "Max Spending Ceiling"
-        float alert_thresh "Alert Threshold (e.g. 0.80)"
+    %% -------------------------------------------------------------------------
+    %% 5. BẢNG BUDGETS (Hạn mức Ngân sách Tháng)
+    %% -------------------------------------------------------------------------
+    BUDGETS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (CASCADE)"
+        int category_id FK "FK -> categories.id (CASCADE)"
+        float amount_limit "Hạn mức tối đa theo tháng"
+        string period "Chu kỳ: MONTHLY | WEEKLY"
+        string month_year "Tháng áp dụng (YYYY-MM)"
+        boolean alert_80_sent "Cờ đã gửi cảnh báo 80%"
+        boolean alert_100_sent "Cờ đã gửi cảnh báo bội chi 100%"
+        datetime created_at "Thời điểm tạo"
+        datetime updated_at "Thời điểm cập nhật"
     }
 
-    saving_goals {
-        int id PK "Primary Key"
-        int user_id FK "References users.id"
-        string goal_name "Goal Name (Travel, Car...)"
-        int target_amount "Target Amount (VND)"
-        int current_amount "Current Saved Amount"
-        date deadline "Target Deadline Date"
-        string color "Hex Color Code"
-        string icon "Goal Icon"
-        boolean is_completed "Completion Status"
+    %% -------------------------------------------------------------------------
+    %% 6. BẢNG SAVING_GOALS (Mục tiêu Tiết kiệm & Tích lũy)
+    %% -------------------------------------------------------------------------
+    SAVING_GOALS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (CASCADE)"
+        string name "Tên mục tiêu (Mua xe, Du lịch...)"
+        float target_amount "Số tiền mục tiêu cần đạt"
+        float current_amount "Số tiền hiện đã tích lũy"
+        date target_date "Hạn chót hoàn thành"
+        string status "Trạng thái: ACTIVE | COMPLETED | PAUSED"
+        string icon "Icon mục tiêu"
+        string color "Mã màu đại diện"
+        text note "Ghi chú kế hoạch"
+        datetime created_at "Thời điểm tạo"
+        datetime updated_at "Thời điểm cập nhật"
     }
 
-    ai_logs {
-        int id PK "Primary Key"
-        int user_id FK "References users.id"
-        string log_type "AI_PARSE / AI_ADVISOR / HEALTH_CHECK"
-        int prompt_tokens "Input Token Count"
-        int completion_tokens "Output Token Count"
-        int latency_ms "Processing Time in ms"
-        datetime created_at "Request Timestamp"
+    %% -------------------------------------------------------------------------
+    %% 7. BẢNG AI_CHAT_LOGS (Nhật ký Tương tác & Audit LLM Token)
+    %% -------------------------------------------------------------------------
+    AI_CHAT_LOGS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (CASCADE)"
+        text query_text "Câu hỏi người dùng (Đã qua Zero-PII)"
+        text response_text "Phản hồi từ mô hình Gemini"
+        string prompt_template_used "Mẫu Prompt hệ thống áp dụng"
+        int response_time_ms "Độ trễ xử lý (mili-giây)"
+        datetime created_at "Thời điểm ghi nhận"
+    }
+
+    %% -------------------------------------------------------------------------
+    %% 8. BẢNG NOTIFICATIONS (Hộp thư Thông báo Cá nhân & Broadcast)
+    %% -------------------------------------------------------------------------
+    NOTIFICATIONS {
+        int id PK "Khóa chính"
+        int user_id FK "FK -> users.id (NULL nếu Broadcast toàn sàn)"
+        string target_type "Đối tượng: ALL | FREE | PRO | PREMIUM | USER"
+        string title "Tiêu đề thông báo"
+        text message "Nội dung chi tiết thông báo"
+        string type "Phân loại: INFO | SUCCESS | WARNING | MAINTENANCE | PROMOTION"
+        string icon "FontAwesome icon"
+        string link_tab "Tab điều hướng nhanh khi click"
+        boolean is_read "Đã đọc (cho tin cá nhân)"
+        boolean is_pinned "Ghim lên đầu danh sách"
+        string created_by_role "Người gửi: ADMIN | MODERATOR"
+        datetime created_at "Thời điểm phát thông báo"
+    }
+
+    %% -------------------------------------------------------------------------
+    %% 9. BẢNG SUBSCRIPTION_ORDERS (Đơn hàng Nạp Tiền & Đăng ký Gói VIP)
+    %% -------------------------------------------------------------------------
+    SUBSCRIPTION_ORDERS {
+        int id PK "Khóa chính"
+        string order_code UK "Mã đơn hàng định danh (FT-xxxxxx)"
+        int user_id FK "FK -> users.id (CASCADE)"
+        string plan_code "Gói cước: PRO | PREMIUM | PLATINUM"
+        int plan_duration_days "Thời hạn gói (30, 90, 180, 365 ngày)"
+        float amount "Số tiền thanh toán (VNĐ)"
+        string payment_method "Phương thức: MB_VIETQR | DIRECT_DEBIT | BANK_TRANSFER"
+        string transfer_memo "Cú pháp chuyển khoản (vd: NAP VIP FT-123456)"
+        string status "Trạng thái: PENDING | APPROVED | REJECTED"
+        text proof_image "Ảnh chụp ủy nhiệm chi / bill ngân hàng"
+        text rejection_reason "Lý do từ chối nếu có"
+        string approved_by "Người duyệt: AUTO_WEBHOOK_SEPAY | ADMIN"
+        datetime created_at "Thời điểm tạo đơn"
+        datetime updated_at "Thời điểm phê duyệt"
+    }
+
+    %% -------------------------------------------------------------------------
+    %% 10. BẢNG SUPPORT_TICKETS (Trung tâm Hỗ trợ & Khiếu nại)
+    %% -------------------------------------------------------------------------
+    SUPPORT_TICKETS {
+        int id PK "Khóa chính"
+        string ticket_code UK "Mã ticket (TK-xxxxxx)"
+        int user_id FK "FK -> users.id (CASCADE)"
+        string title "Tiêu đề khiếu nại / yêu cầu"
+        string category "Phân loại: BILLING | TECHNICAL | ACCOUNT | FEATURE_REQUEST"
+        string priority "Mức ưu tiên: LOW | MEDIUM | HIGH | URGENT"
+        string status "Trạng thái: OPEN | IN_PROGRESS | RESOLVED | CLOSED"
+        text message "Nội dung phản ánh từ người dùng"
+        text admin_reply "Phản hồi giải quyết từ Admin"
+        string replied_by "Tên quản trị viên xử lý"
+        datetime replied_at "Thời điểm phản hồi"
+        datetime created_at "Thời điểm gửi ticket"
+        datetime updated_at "Thời điểm cập nhật"
+    }
+
+    %% -------------------------------------------------------------------------
+    %% 11. BẢNG BANK_TRANSACTIONS (Lịch sử Biến Động Số Dư Ngân Hàng & Webhook)
+    %% -------------------------------------------------------------------------
+    BANK_TRANSACTIONS {
+        int id PK "Khóa chính"
+        int bank_account_id FK "FK -> system_bank_accounts.id (SET NULL)"
+        string bank_code "Mã ngân hàng nhận (MB, VCB...)"
+        string account_number "Số tài khoản nhận"
+        string reference_code "Mã tham chiếu ngân hàng / SePay TID"
+        string sender_name "Tên người chuyển tiền"
+        string sender_account "Số tài khoản người chuyển"
+        float amount "Số tiền biến động (VNĐ)"
+        text description "Nội dung chuyển khoản (Memo)"
+        datetime transaction_date "Thời điểm giao dịch ngân hàng"
+        string status "Trạng thái khớp: MATCHED | UNMATCHED | MANUALLY_MATCHED"
+        string matched_order_code "Mã đơn hàng khớp lệnh (order_code)"
+        int matched_user_id "ID người dùng được kích hoạt"
+        string matched_user_name "Họ tên người dùng được kích hoạt"
+        text notes "Ghi chú đối soát của kế toán/admin"
+        datetime created_at "Thời điểm ghi nhận webhook"
+    }
+
+    %% -------------------------------------------------------------------------
+    %% BẢNG PHỤ TRỢ HỆ THỐNG (SYSTEM GATEWAY & SETTINGS)
+    %% -------------------------------------------------------------------------
+    SYSTEM_BANK_ACCOUNTS {
+        int id PK "Khóa chính"
+        string bank_code "Mã ngân hàng (MB)"
+        string bank_name "Tên ngân hàng"
+        string account_number "Số tài khoản thụ hưởng của sàn"
+        string account_name "Tên chủ tài khoản thụ hưởng"
+        string branch "Chi nhánh ngân hàng"
+        string qr_template "Mẫu VietQR: compact2 | qr_only"
+        string memo_prefix "Tiền tố cú pháp chuyển tiền: NAP VIP"
+        boolean is_active "Cổng đang kích hoạt"
+        datetime created_at "Thời điểm tạo"
+        datetime updated_at "Thời điểm cập nhật"
+    }
+
+    SYSTEM_SETTINGS {
+        int id PK "Khóa chính"
+        string key UK "Khóa cấu hình (sepay_token, smtp_host...)"
+        text value "Giá trị cấu hình"
+        string description "Mô tả tham số cấu hình"
+        datetime updated_at "Thời điểm cập nhật"
     }

@@ -1,17 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
+/* Đăng ký thuộc tính góc xoay cho viền động của Logo & Brand Badge */
+@property --logo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotateLogoAngle {
+  0% {
+    --logo-angle: 0deg;
+  }
+  100% {
+    --logo-angle: 360deg;
+  }
+}
+
 :root {
   --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --bg-main: #080c15;
   --bg-card: #111827;
   --bg-card-hover: #172033;
   --bg-input: #151d30;
-  --border-card: rgba(51, 65, 85, 0.45);
+  --border-card: rgba(51, 65, 85, 0.5);
   --border-subtle: rgba(51, 65, 85, 0.3);
-  --primary-emerald: #10b981;
-  --primary-emerald-glow: #34d399;
-  --primary-indigo: #6366f1;
-  --accent-purple: #8b5cf6;
+  --primary-cyan: #06b6d4;
+  --primary-cyan-bright: #00f2fe;
+  --positive-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-magenta: #ec4899;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
@@ -28,28 +45,92 @@ html, body {
   color-scheme: dark;
 }
 
-/* Glassmorphism Dark Cards with Hover Motion */
+/* Glassmorphism Dark Cards (Layered Glass Effect - 120 FPS GPU Acceleration) */
 .glass-card {
-  background: rgba(17, 24, 39, 0.85) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-card) !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(51, 65, 85, 0.4);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .glass-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(51, 65, 85, 0.75) !important;
-  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.08) !important;
+  transform: translateY(-3px) translateZ(0);
+  box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Ép Viền Tĩnh Rõ Nét Cho Từng Card Chức Năng Cụ Thể (High Specificity) */
+#sidebar, .card-sidebar {
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+#kpi-card-networth, .card-kpi-networth {
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+}
+#kpi-card-networth:hover, .card-kpi-networth:hover {
+  border-color: rgba(6, 182, 212, 0.6) !important;
+}
+
+#kpi-card-income, .card-kpi-income {
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+#kpi-card-income:hover, .card-kpi-income:hover {
+  border-color: rgba(16, 185, 129, 0.65) !important;
+}
+
+#kpi-card-expense, .card-kpi-expense {
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+#kpi-card-expense:hover, .card-kpi-expense:hover {
+  border-color: rgba(244, 63, 94, 0.65) !important;
+}
+
+#kpi-card-savings, .card-kpi-savings {
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+#kpi-card-savings:hover, .card-kpi-savings:hover {
+  border-color: rgba(16, 185, 129, 0.65) !important;
+}
+
+#cashflow-chart-card, .card-cashflow-chart {
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+}
+#cashflow-chart-card:hover, .card-cashflow-chart:hover {
+  border-color: rgba(6, 182, 212, 0.6) !important;
+}
+
+#category-donut-card, .card-category-donut {
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+#category-donut-card:hover, .card-category-donut:hover {
+  border-color: rgba(244, 63, 94, 0.65) !important;
+}
+
+#budget-watchlist-card, .card-budget-watchlist {
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+#budget-watchlist-card:hover, .card-budget-watchlist:hover {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+}
+
+#recent-txs-card, .card-recent-txs {
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+#recent-txs-card:hover, .card-recent-txs:hover {
+  border-color: rgba(6, 182, 212, 0.55) !important;
 }
 
 .glass-nav {
-  background: rgba(13, 19, 34, 0.94) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-card) !important;
+  background: rgba(13, 19, 34, 0.88) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid rgba(6, 182, 212, 0.35) !important;
   transition: all 0.3s ease;
+  transform: translateZ(0);
 }
 
 /* ==========================================================================
@@ -683,26 +764,10 @@ tbody tr:hover {
 
 
 /* ==========================================================================
-   NEO-FUTURISTIC CLEAN DARK GLASS & SYNCHRONIZED NEON BORDER (8s 60fps)
+   STATIC BORDER & 3-TONE NEO-FINTECH UI (120 FPS ULTRA-SMOOTH)
    ========================================================================== */
 
-/* 1. Global Angle Property for Synchronized Rotation */
-@property --border-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes borderRotate {
-  0% {
-    --border-angle: 0deg;
-  }
-  100% {
-    --border-angle: 360deg;
-  }
-}
-
-/* 2. Canvas Nền Ngoài (Outer Dark Slate Canvas) */
+/* 1. Canvas Nền Ngoài (Outer Dark Slate Canvas) */
 html, body {
   font-family: var(--font-main);
   background-color: #07090e !important;
@@ -713,19 +778,21 @@ html, body {
   color-scheme: dark;
 }
 
-/* 3. Đốm Sáng Neon Mờ (Ambient Glow Orbs) */
+/* 2. Đốm Sáng Mờ Tĩnh Tinh Tế (Ambient Glow Orbs - Hardware Accelerated) */
 .ambient-glow {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .glow-orb-left {
   width: 550px;
   height: 550px;
-  background: radial-gradient(circle, rgba(0, 255, 170, 0.28) 0%, rgba(0, 229, 255, 0.12) 50%, transparent 70%);
-  filter: blur(100px);
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.14) 0%, rgba(0, 242, 254, 0.04) 50%, transparent 70%);
+  filter: blur(60px);
   position: fixed;
   top: 15%;
   left: -100px;
@@ -734,8 +801,8 @@ html, body {
 .glow-orb-right {
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(176, 38, 255, 0.3) 0%, rgba(0, 229, 255, 0.18) 50%, transparent 70%);
-  filter: blur(110px);
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(236, 72, 153, 0.04) 50%, transparent 70%);
+  filter: blur(65px);
   position: fixed;
   top: 5%;
   right: -120px;
@@ -744,14 +811,14 @@ html, body {
 .glow-orb-bottom {
   width: 500px;
   height: 450px;
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.22) 0%, rgba(16, 185, 129, 0.15) 50%, transparent 70%);
-  filter: blur(90px);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.04) 50%, transparent 70%);
+  filter: blur(55px);
   position: fixed;
   bottom: -80px;
   left: 30%;
 }
 
-/* 4. Thanh Tab Ngang Toàn Chiều Rộng (Full-Width Header) */
+/* 3. Thanh Tab Ngang Toàn Chiều Rộng (Full-Width Header với Nền Kính Trong Suốt) */
 #top-glass-header, .glass-nav {
   position: sticky;
   top: 0;
@@ -760,15 +827,16 @@ html, body {
   max-width: 100% !important;
   margin: 0 0 20px 0 !important;
   border-radius: 0 0 20px 20px !important;
-  background: rgba(11, 15, 25, 0.78) !important;
-  backdrop-filter: blur(30px) !important;
-  -webkit-backdrop-filter: blur(30px) !important;
+  background: rgba(11, 19, 41, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  border-bottom: 1px solid rgba(0, 255, 170, 0.25) !important;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 255, 170, 0.08) !important;
-  transition: all 0.3s ease;
+  border-bottom: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.15) !important;
+  transition: all 0.25s ease;
+  transform: translateZ(0);
 }
 
 @media (min-width: 768px) {
@@ -778,59 +846,39 @@ html, body {
   }
 }
 
-/* 5. Khung Kính Tổng với Viền Chạy Màu Neon Đồng Bộ (Main Glass Container) */
-#main-glass-wrapper {
+/* 4. Khung Kính Tổng với Viền Neon Phát Sáng & Nền Kính Trong Suốt (Master Floating Glass Container) */
+#main-glass-wrapper, #master-glass-wrapper {
   position: relative;
   z-index: 10;
   margin: 0 auto 24px auto !important;
   max-width: 98% !important;
   width: 1750px !important;
   border-radius: 28px !important;
-  background: rgba(11, 15, 25, 0.78) !important;
-  backdrop-filter: blur(30px) !important;
-  -webkit-backdrop-filter: blur(30px) !important;
-  box-shadow: 0 0 25px rgba(0, 255, 170, 0.2), 
-              0 0 45px rgba(176, 38, 255, 0.15) !important;
+  background: rgba(11, 19, 41, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15), 0 20px 40px -15px rgba(0, 0, 0, 0.7) !important;
   min-height: calc(100vh - 130px);
   display: flex;
   overflow: hidden;
-  border: none !important;
+  contain: paint;
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+#sidebar {
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
 }
 
 @media (min-width: 768px) {
-  #main-glass-wrapper {
+  #main-glass-wrapper, #master-glass-wrapper {
     max-width: 96% !important;
     border-radius: 28px !important;
   }
 }
 
-/* Lớp viền 1.5px chạy màu bằng CSS Mask (Không bị loang màu vào trong) */
-#main-glass-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 28px;
-  padding: 1.5px;
-  background: conic-gradient(
-    from var(--border-angle, 0deg),
-    #00FFAA 0%,
-    #00E5FF 20%,
-    #B026FF 40%,
-    #FF007A 60%,
-    #FFAA00 80%,
-    #00FFAA 100%
-  );
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 20;
-  animation: borderRotate 8s linear infinite;
-}
-
-/* 6. Animated Neon Gradient Glow Border cho Icon Logo & Badges (Đồng bộ 8s) */
+/* 5. Animated Neon Gradient Glow Border cho Icon Logo & Brand Badges (Purple -> Pink/Rose -> Amber/Orange) */
 .logo-neon-glow-wrapper, .neon-border-sync {
   position: relative;
   width: 42px;
@@ -839,11 +887,14 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 16px rgba(176, 38, 255, 0.35), 0 0 22px rgba(0, 255, 170, 0.25);
-  transition: all 0.35s ease;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(11, 19, 41, 0.95) 80%);
+  box-shadow: 0 4px 20px -2px rgba(236, 72, 153, 0.4), 0 0 10px rgba(245, 158, 11, 0.3);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
   flex-shrink: 0;
-  background: rgba(11, 15, 25, 0.94);
   overflow: hidden;
+  contain: paint;
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
 .logo-neon-glow-wrapper::before, .neon-border-sync::before {
@@ -851,15 +902,14 @@ html, body {
   position: absolute;
   inset: 0;
   border-radius: 14px;
-  padding: 1.5px;
+  padding: 2px;
   background: conic-gradient(
-    from var(--border-angle, 0deg),
-    #00FFAA 0%,
-    #00E5FF 20%,
-    #B026FF 40%,
-    #FF007A 60%,
-    #FFAA00 80%,
-    #00FFAA 100%
+    from var(--logo-angle),
+    #8b5cf6,
+    #ec4899,
+    #f59e0b,
+    #ec4899,
+    #8b5cf6
   );
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
@@ -868,17 +918,19 @@ html, body {
   mask-composite: exclude;
   pointer-events: none;
   z-index: 2;
-  animation: borderRotate 8s linear infinite;
+  animation: rotateLogoAngle 10s linear infinite;
+  will-change: --logo-angle;
+  transform: translateZ(0);
 }
 
 .logo-neon-glow-wrapper:hover, .neon-border-sync:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 25px rgba(255, 0, 122, 0.5), 0 0 32px rgba(0, 255, 170, 0.45);
+  transform: scale(1.08) translateZ(0);
+  box-shadow: 0 6px 24px -2px rgba(236, 72, 153, 0.55), 0 0 16px rgba(245, 158, 11, 0.45);
 }
 
 .logo-neon-inner {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   width: 100%;
   height: 100%;
   background: transparent;
@@ -887,24 +939,23 @@ html, body {
   justify-content: center;
 }
 
-/* 7. Các Thẻ Card Con Bên Trong (Sạch Sẽ, Tối Trong Suốt 100%) */
-.glass-card {
-  background: rgba(18, 24, 38, 0.65) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  border-radius: 18px !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4) !important;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+.logo-neon-inner i {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
 }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0, 255, 170, 0.25) !important;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 0 18px rgba(0, 255, 170, 0.12) !important;
+@media (prefers-reduced-motion: reduce) {
+  .logo-neon-glow-wrapper::before, .neon-border-sync::before {
+    animation: none !important;
+    background: linear-gradient(
+      135deg,
+      #8b5cf6 0%,
+      #ec4899 50%,
+      #f59e0b 100%
+    ) !important;
+  }
 }
 
-/* 8. Tương Phản Màu Chữ & Điểm Nhấn */
+/* 6. Tương Phản Màu Chữ & Điểm Nhấn */
 .text-white, .text-slate-100 {
   color: #FFFFFF !important;
 }
@@ -913,36 +964,47 @@ html, body {
   color: #94A3B8 !important;
 }
 
-/* Nút CTA Chính (Solid Neon) */
+/* Nút CTA Chính (Cyan -> Emerald Gradient Tĩnh) */
 .btn-neon-cta, .gradient-indigo {
-  background: linear-gradient(90deg, #00FFAA, #00E5FF) !important;
-  color: #07090e !important;
+  background: linear-gradient(135deg, #06B6D4, #10B981) !important;
+  color: #020617 !important;
   font-weight: 700 !important;
-  border: none !important;
-  box-shadow: 0 0 15px rgba(0, 255, 170, 0.4) !important;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.2) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease, box-shadow 0.2s ease !important;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .btn-neon-cta:hover, .gradient-indigo:hover {
-  box-shadow: 0 0 25px rgba(0, 255, 170, 0.6) !important;
-  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.02) translateZ(0) !important;
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.35) !important;
+  filter: brightness(1.08);
+}
+
+.btn-neon-cta:active, .gradient-indigo:active {
+  transform: scale(0.97) translateZ(0) !important;
 }
 
 .gradient-indigo i, .btn-neon-cta i {
-  color: #07090e !important;
+  color: #020617 !important;
 }
 
-/* Badges */
-.badge-neon-teal {
-  background: rgba(0, 255, 170, 0.1) !important;
-  color: #00FFAA !important;
-  border: 1px solid rgba(0, 255, 170, 0.4) !important;
-  box-shadow: 0 0 10px rgba(0, 255, 170, 0.15) !important;
+/* Badges 3 Tone Tĩnh */
+.badge-neon-cyan {
+  background: rgba(6, 182, 212, 0.1) !important;
+  color: #06B6D4 !important;
+  border: 1px solid rgba(6, 182, 212, 0.3) !important;
 }
 
-.badge-neon-violet {
-  background: rgba(176, 38, 255, 0.1) !important;
-  color: #B026FF !important;
-  border: 1px solid rgba(176, 38, 255, 0.4) !important;
-  box-shadow: 0 0 10px rgba(176, 38, 255, 0.15) !important;
+.badge-neon-emerald {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #10B981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.badge-neon-rose {
+  background: rgba(244, 63, 94, 0.1) !important;
+  color: #F43F5E !important;
+  border: 1px solid rgba(244, 63, 94, 0.3) !important;
 }

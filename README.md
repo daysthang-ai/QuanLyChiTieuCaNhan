@@ -2,25 +2,29 @@
 
 > **Dự án / Học Phần Ứng Dụng Trí Tuệ Nhân Tạo**  
 > **Đề tài:** Nghiên cứu và xây dựng Nền tảng Quản lý Tài chính Cá nhân Thông minh ứng dụng Generative AI & Kiến trúc Micro-Fintech 2 Tầng.  
-> **Nhóm thực hiện:** Nhóm 03 
+> **Nhóm thực hiện:** Nhóm 03 (Đặng Quyết Thắng, Nguyễn Văn Tiến, Quách Minh Hiếu)  
+> **Giảng viên hướng dẫn:** ThS. Hà Thị Thanh  
+> **Đơn vị:** Khoa CNTT - Trường Đại học CNTT & Truyền thông (ICTU) - 2026
 
 ---
 
 ## 📌 BẢNG MỤC LỤC
 1. [Giới Thiệu Dự Án & Điểm Nổi Bật](#-1-giới-thiệu-dự-án--điểm-nổi-bật)
-2. [Kiến Trúc & Thiết Kế CSDL 9 Bảng (Chuẩn 3NF)](#-2-kiến-trúc--thiết-kế-csdl-9-bảng-chuẩn-3nf)
-3. [Mô Hình Dịch Vụ & Cổng Thanh Toán VietQR MB Bank](#-3-mô-hình-dịch-vụ--cổng-thanh-toán-vietqr-mb-bank)
-4. [Phân Hệ Quản Trị Hệ Thống (Admin & Moderator Console)](#-4-phân-hệ-quản-trị-hệ-thống-admin--moderator-console)
-5. [Tài Khoản Mẫu Trải Nghiệm (Demo Credentials)](#-5-tài-khoản-mẫu-trải-nghiệm-demo-credentials)
-6. [Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh (Quickstart)](#-6-hướng-dẫn-cài-đặt--khởi-chạy-nhanh-quickstart)
-7. [Kiểm Thử Phần Mềm (Automated Testing & Test Cases)](#-7-kiểm-thử-phần-mềm-automated-testing--test-cases)
-8. [Phân Công Trách Nhiệm Thành Viên (Nhóm 03)](#-8-phân-công-trách-nhiệm-thành-viên-nhóm-03)
+2. [Tech Stack Đầy Đủ (Công Nghệ Cài Đặt)](#-2-tech-stack-đầy-đủ-công-nghệ-cài-đặt)
+3. [Đặc Tả Kiến Trúc & Thiết Kế Đột Phá](#-3-đặc-tả-kiến-trúc--thiết-kế-đột-phá)
+4. [Mô Hình CSDL 11 Bảng Thực Thể Chuẩn 3NF](#-4-mô-hình-csdl-11-bảng-thực-thể-chuẩn-3nf)
+5. [Cổng Thanh Toán VietQR & Webhook SePay Tự Động](#-5-cổng-thanh-toán-vietqr--webhook-sepay-tự-động)
+6. [Phân Hệ Quản Trị Hệ Thống (Admin Control Center)](#-6-phân-hệ-quản-trị-hệ-thống-admin-control-center)
+7. [Tài Khoản Mẫu Trải Nghiệm (Demo Credentials)](#-7-tài-khoản-mẫu-trải-nghiệm-demo-credentials)
+8. [Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh (Quickstart)](#-8-hướng-dẫn-cài-đặt--khởi-chạy-nhanh-quickstart)
+9. [Kiểm Thử Phần Mềm (Automated Testing & Test Cases)](#-9-kiểm-thử-phần-mềm-automated-testing--test-cases)
+10. [Phân Công Trách Nhiệm Thành Viên (Nhóm 03)](#-10-phân-công-trách-nhiệm-thành-viên-nhóm-03)
 
 ---
 
 ## 🌟 1. Giới Thiệu Dự Án & Điểm Nổi Bật
 
-**FinTrack AI** là nền tảng quản lý tài chính cá nhân toàn diện, ứng dụng công nghệ **Generative AI (Google Gemini 1.5 Pro / Flash)** kết hợp với giao diện **Single Page Application (SPA)** chuẩn phong cách **Dark Cyber Glassmorphism**, mang lại trải nghiệm quản lý dòng tiền mượt mà, trực quan và bảo mật.
+**FinTrack AI** là nền tảng quản lý tài chính cá nhân toàn diện, kết hợp công nghệ **Generative AI (Google Gemini 1.5 Pro / 3.7 Flash)** với giao diện **Single Page Application (SPA)** phong cách **Neo-Futuristic Glassmorphism**, mang lại trải nghiệm ghi chép mượt mà, phân tích dòng tiền chuyên sâu và bảo mật dữ liệu tuyệt đối.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -30,55 +34,90 @@
 │  Bóc tách giao dịch tự   │  Chẩn đoán sức khỏe dòng │  Streak kỷ luật,  │
 │  nhiên tiếng Việt 1-click│  tiền & cảnh báo bội chi │  6 bậc level & XP │
 ├──────────────────────────┴──────────────────────────┴───────────────────┤
-│  🛡️ 2-LAYER SECURITY: Zero-PII Sanitizer & Hard Lockout Enforcement     │
-│  💳 2-SCOPE LEDGER: Tách biệt Ví Kế Toán Ảo (Sandbox) & Ví Tiền Thật   │
+│  🛡️ 2-LAYER SECURITY: Zero-PII Leakage Engine & Hard Lockout 2 Tầng      │
+│  💳 2-SCOPE LEDGER: Ví Ảo Kế Toán (Sandbox) & Ví Thật Nạp Tiền (Real)   │
+│  🏦 AUTO WEBHOOK: Tích hợp SePay / Casso qua Cloudflare Tunnel          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 🎯 Các Điểm Đột Phá Công Nghệ:
+---
 
-- [x] **Giao diện Single Page Application (SPA) Dark Cyber Modern**:
-  - Tối ưu hóa UI/UX với hiệu ứng kính mờ (Glassmorphism), Sunset Glow Gradients, Responsive đa thiết bị từ Mobile đến Desktop 4K.
-  - Tích hợp biểu đồ động **Chart.js** (Cashflow 6 tháng, Donut cơ cấu danh mục, thanh tiến trình ngân sách).
+## 🛠️ 2. Tech Stack Đầy Đủ (Công Nghệ Cài Đặt)
 
-- [x] **Kiến trúc Đa Ví 2 Tầng Độc Lập (2-Scope Ledger Architecture)**:
-  - `virtual` (*Ví Kế Toán Cá Nhân / Sandbox*): Theo dõi tiền mặt, ví thẻ, sổ kế toán thu - chi hàng ngày mà không phát sinh giao dịch tiền tệ thật.
-  - `real` (*Ví Nạp Tiền / Thanh Toán Thực Tế*): Lưu trữ số dư thực tế nạp từ VietQR ngân hàng để nâng cấp các gói dịch vụ VIP.
-
-- [x] **Trí Tuệ Nhân Tạo Google Gemini 1.5 Pro / Flash**:
-  - **FinTrack AI Natural Language Parser**: Người dùng chỉ cần gõ/nói câu tiếng Việt tự nhiên (*"Ăn trưa bún bò 45k trả qua MoMo hôm qua"*), AI tự bóc tách chính xác: Loại giao dịch (`EXPENSE`), Số tiền (`45.000 đ`), Danh mục (`Ăn uống`), Ví (`Ví MoMo`), Thời gian (`Hôm qua`).
-  - **Trợ lý Cố vấn Tài chính Thông minh (AI Financial Health Advisor)**: Phân tích cơ cấu dòng tiền theo quy tắc vàng **50/30/20** (50% Thiết yếu - 30% Mong muốn - 20% Tích lũy), phát hiện rủi ro và đề xuất 3 giải pháp tối ưu.
-  - **Hỏi đáp Dữ liệu Tài chính 24/7 (Financial Q&A)**: Phản hồi tự nhiên mọi câu hỏi tài chính, lập kế hoạch phân bổ lương cụ thể theo con số thực tế.
-
-- [x] **Hệ thống Gamification & Cấp Độ Thành Tích**:
-  - Chuỗi ngày kỷ luật tài chính (**Discipline Streak**).
-  - Hệ thống **6 Cấp bậc Cột mốc (Level Road Map)**: *Khởi Đầu (Lv.0)* $\rightarrow$ *Đồng (Lv.1-2)* $\rightarrow$ *Bạc (Lv.3-4)* $\rightarrow$ *Vàng (Lv.5-6)* $\rightarrow$ *Kim Cương (Lv.7-8)* $\rightarrow$ *Huyền Thoại (Lv.9-10 Max)*.
-  - Bộ sưu tập **24 Huy hiệu Thành tích** mở khóa theo từng mốc tích lũy và kiểm soát ngân sách.
-
-- [x] **Bảo Mật Zero-PII Leakage & Khóa Cứng 2 Tầng (Hard Lockout Enforcement)**:
-  - Tự động khử dữ liệu nhạy cảm cá nhân (Masking STK, Email, SĐT) trước khi chuyển vào Context của LLM.
-  - Cơ chế **Zero-PII Guardrail**: Bắt buộc AI từ chối 100% các yêu cầu truy vấn thông tin tài chính của người dùng khác.
-  - Cơ chế **Hard Lockout 2 tầng**: Chặn đứng token tại FastAPI Backend Dependency (`HTTP 403`) và Frontend Client Interceptor tự động hủy session, điều hướng ra ngoài ngay lập tức nếu tài khoản bị khóa bởi Admin.
+| Thành Phần | Công Nghệ & Thư Viện | Phiên Bản | Vai Trò & Chức Năng Chính |
+| :--- | :--- | :---: | :--- |
+| **Backend Framework** | **FastAPI** | `0.109.0+` | Web framework RESTful API bất đồng bộ hiệu năng cao, Dependency Injection, Swagger OpenAPI docs. |
+| **Runtime & Language** | **Python** | `3.10+` (Khuyến nghị 3.12) | Môi trường thực thi mã nguồn xử lý logic và tính toán tài chính. |
+| **ASGI Web Server** | **Uvicorn** | `0.27.0+` | Server web chuẩn ASGI, hỗ trợ Hot-reload và đa luồng. |
+| **Database & ORM** | **SQLite 3NF + SQLAlchemy** | `2.0.25+` | CSDL quan hệ chuẩn hóa bậc 3 (**3NF**), tối ưu hóa chế độ Write-Ahead Logging (**WAL Mode**). |
+| **Frontend Architecture**| **Single Page App (SPA)** | ES6+ Modules | Điều hướng component mượt mà không tải lại trang (`switchTab`), Event-driven State Management. |
+| **UI Design System** | **Tailwind CSS + Custom CSS** | `3.4+` | Neo-Futuristic Glassmorphism, GPU-Accelerated Glowing Neon Border (@property 120fps), Ambient Glow Shadow. |
+| **Data Visualization** | **Chart.js** | `4.4.1` | Biểu đồ Doughnut cơ cấu chi tiêu với tâm rỗng (Cutout 74%), Biểu đồ Cột - Đường xu hướng dòng tiền. |
+| **AI LLM Provider** | **Google Gemini API** | `1.5 Pro / 3.7 Flash` | Bóc tách ngôn ngữ tự nhiên tiếng Việt (**FinTrack AI Parser**) và Cố vấn sức khỏe tài chính (**AI Advisor**). |
+| **Payment Gateway** | **SePay Webhook & VietQR** | MB Bank Napas 247 | Tiếp nhận Webhook biến động số dư, tự động khớp đơn hàng nạp VIP và cộng tiền ví 100% tự động. |
+| **Tunnel Proxy** | **Cloudflare Tunnel (cloudflared)** | Latest | Mở cổng an toàn từ Localhost ra Internet công khai phục vụ nhận Webhook từ SePay / Casso. |
+| **Security & Auth** | **PyJWT + Passlib (Bcrypt)** | `2.8.0` / `1.7.4` | Mã hóa mật khẩu một chiều có Salt, cấp và xác thực JSON Web Token thời hạn 24 giờ. |
+| **Testing Framework** | **Pytest + HTTPX** | `8.0.0+` / `0.26.0` | Kiểm thử đơn vị (Unit Test) và kiểm thử tích hợp (Integration Test) toàn bộ API endpoints. |
 
 ---
 
-## 🗄️ 2. Kiến Trúc & Thiết Kế CSDL 9 Bảng (Chuẩn 3NF)
+## 🏛️ 3. Đặc Tả Kiến Trúc & Thiết Kế Đột Phá
 
-Cơ sở dữ liệu được thiết kế chuẩn hóa bậc 3 (**Third Normal Form - 3NF**), tối ưu hóa tính toàn vẹn dữ liệu và hỗ trợ Cascade Delete an toàn:
+### 🌟 3.1. Giao Diện Neo-Futuristic Glassmorphism
+- **Master Floating Glass Container (`#main-glass-wrapper` / `#master-glass-wrapper`)**: Khung chứa ứng dụng độc lập lơ lửng, bo góc lớn `28px`, phủ lớp kính mờ tối trong suốt `background: rgba(11, 15, 25, 0.82)`, `backdrop-filter: blur(24px)`.
+- **GPU-Accelerated Glowing Neon Border (120fps Ultra-Smooth)**: Lớp viền 1.5px xoay góc thuần túy chu kỳ 16s sang trọng bằng kỹ thuật CSS `@property --neon-angle` trên GPU Compositor (`contain: paint`, `isolation: isolate`, `will-change: --neon-angle`, `transform: translateZ(0)`), không bao giờ trigger repaint lên nội dung bên trong, kèm fallback `prefers-reduced-motion` tự động chuyển sang gradient tĩnh cho máy yếu / tiết kiệm pin.
+
+### 🍩 3.2. Widget "Cơ Cấu Chi Tiêu" (Doughnut Chart)
+- **Kiến trúc Chart.js Doughnut**: Tỷ lệ tâm rỗng `cutout: 74%`, tích hợp Custom Canvas Center Plugin hiển thị trực tiếp nhãn *"Tổng chi"* và con số lũy kế tháng (ví dụ: `18.45M ₫`).
+- **Bộ màu Neon 6 Danh Mục Chuẩn**:
+  1. 🟣 **Nhà ở & Chi phí cố định**: `#B026FF` (Cyber Purple)
+  2. 🟢 **Ăn uống & Thực phẩm**: `#00FFAA` (Aura Green)
+  3. 🔵 **Mua sắm & Công nghệ**: `#00E5FF` (Nebula Cyan)
+  4. 🌸 **Cà phê & Giải trí**: `#FF007A` (Neon Rose)
+  5. 🟠 **Đi lại & Xăng xe**: `#FFAA00` (Amber Glow)
+  6. 🔷 **Sức khỏe & Thể thao / Y tế**: `#3B82F6` (Electric Blue)
+
+### 💳 3.3. Kiến Trúc Ví 2 Tầng Độc Lập (2-Scope Ledger Architecture)
+Hệ thống phân tách rạch ròi 2 phạm vi ví để đảm bảo an toàn kế toán:
+1. **`virtual` (Ví ảo Sandbox Ledger)**: Sử dụng ghi chép thu - chi cá nhân hàng ngày (Tiền mặt, MB Bank cá nhân, Ví MoMo, Sổ tiết kiệm). Mọi số dư là số liệu giả lập phục vụ thống kê cá nhân.
+2. **`real` (Ví thật Real Payment Wallet)**: Đại diện cho tài khoản nạp tiền dịch vụ của người dùng (`Ví Dịch Vụ & VIP FinTrack`), ghi nhận biến động khi nạp tiền thật qua cổng VietQR ngân hàng để nâng cấp gói VIP.
+
+### 🛡️ 3.4. Cơ Chế Bảo Mật Zero-PII Leakage & Hard Lockout 2 Tầng
+- **Zero-PII Leakage Engine**: Toàn bộ dữ liệu định danh (Họ tên, Email, Số điện thoại, Số tài khoản ngân hàng) được bóc tách và khử sạch bằng Regex Masking tại Backend trước khi đóng gói context chuyển sang Google Gemini API.
+- **Hard Lockout 2 Tầng**:
+  - *Tầng 1 (Backend FastAPI Dependency)*: Chặn đứng token tại mọi Endpoint trả về ngay lập tức `HTTP 403 Forbidden` kèm mã `ACCOUNT_LOCKED`.
+  - *Tầng 2 (Frontend Client Interceptor)*: Lớp `api.js` tự động hủy toàn bộ session trong `localStorage`, hiển thị cảnh báo và cưỡng chế điều hướng ra màn hình đăng nhập.
+
+### 🎛️ 3.5. Admin Control Center với 5 Tab Chức Năng Cốt Lõi
+Trong phân hệ Cài Đặt Hệ Thống (`admin_settings`), Admin được trang bị 5 tab chuyên sâu:
+1. 💳 **Cổng VietQR Admin (Live Preview)**: Cấu hình số tài khoản thụ hưởng của sàn, chọn ngân hàng (MB, VCB, TCB...), xem trước mã VietQR động theo thời gian thực.
+2. 📢 **Broadcast Thông Báo**: Soạn thảo tiêu đề, nội dung, phân loại (Info, Warning, Promotion) và phát thông báo tức thì tới toàn sàn hoặc từng nhóm gói cước.
+3. 📧 **SMTP Mail Server**: Cấu hình máy chủ gửi email (SMTP Host, Port, Sender, SSL/TLS).
+4. 💾 **Sao Lưu / Khôi Phục Database**: Tạo bản Snapshot CSDL toàn sàn dưới dạng JSON/DB và phục hồi dữ liệu an toàn khi gặp sự cố.
+5. 🔐 **Khóa API & Bảo Mật**: Quản lý khóa SePay Webhook Secret, Google Gemini API Key, thời hạn JWT và chính sách bảo mật.
+
+---
+
+## 🗄️ 4. Mô Hình CSDL 11 Bảng Thực Thể Chuẩn 3NF
+
+Cơ sở dữ liệu FinTrack AI được chuẩn hóa bậc 3 (**3NF**), liên kết toàn vẹn qua các khóa ngoại:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ WALLETS : owns
-    USERS ||--o{ CATEGORIES : creates
-    USERS ||--o{ TRANSACTIONS : logs
-    USERS ||--o{ BUDGETS : sets
-    USERS ||--o{ SAVINGS_GOALS : targets
-    USERS ||--o{ SUBSCRIPTION_ORDERS : purchases
-    USERS ||--o{ NOTIFICATIONS : receives
-    USERS ||--o{ SUPPORT_TICKETS : creates
-    CATEGORIES ||--o{ TRANSACTIONS : classifies
-    CATEGORIES ||--o{ BUDGETS : bounds
-    WALLETS ||--o{ TRANSACTIONS : pays_through
+    USERS ||--o{ WALLETS : "sở hữu (1:N)"
+    USERS ||--o{ CATEGORIES : "tạo danh mục (1:N)"
+    USERS ||--o{ TRANSACTIONS : "thực hiện (1:N)"
+    USERS ||--o{ BUDGETS : "thiết lập hạn mức (1:N)"
+    USERS ||--o{ SAVING_GOALS : "đặt mục tiêu (1:N)"
+    USERS ||--o{ AI_CHAT_LOGS : "nhật ký AI (1:N)"
+    USERS ||--o{ NOTIFICATIONS : "nhận thông báo (1:N)"
+    USERS ||--o{ SUBSCRIPTION_ORDERS : "đặt mua gói VIP (1:N)"
+    USERS ||--o{ SUPPORT_TICKETS : "gửi ticket (1:N)"
+    WALLETS ||--o{ TRANSACTIONS : "nguồn tiền (1:N)"
+    CATEGORIES ||--o{ TRANSACTIONS : "phân loại (1:N)"
+    CATEGORIES ||--o{ BUDGETS : "áp dụng (1:N)"
+    SYSTEM_BANK_ACCOUNTS ||--o{ BANK_TRANSACTIONS : "tiếp nhận (1:N)"
+    SUBSCRIPTION_ORDERS ||--o| BANK_TRANSACTIONS : "khớp lệnh webhook (1:1)"
 
     USERS {
         int id PK
@@ -118,148 +157,140 @@ erDiagram
         int id PK
         int user_id FK
         int category_id FK
-        string month_year
         float amount_limit
+        string month_year
     }
-    SAVINGS_GOALS {
+    SAVING_GOALS {
         int id PK
         int user_id FK
         string name
         float target_amount
         float current_amount
     }
-    SUBSCRIPTION_ORDERS {
+    AI_CHAT_LOGS {
         int id PK
         int user_id FK
-        string order_code UK
-        string plan_code
-        float amount
-        string status "PENDING | APPROVED | REJECTED"
+        text query_text
+        text response_text
+        int response_time_ms
     }
     NOTIFICATIONS {
         int id PK
         int user_id FK
+        string target_type
         string title
-        string message
-        string type
-        boolean is_read
+        text message
+    }
+    SUBSCRIPTION_ORDERS {
+        int id PK
+        string order_code UK
+        int user_id FK
+        string plan_code
+        float amount
+        string status "PENDING | APPROVED | REJECTED"
     }
     SUPPORT_TICKETS {
         int id PK
+        string ticket_code UK
         int user_id FK
-        string subject
-        string content
-        string status "OPEN | IN_PROGRESS | RESOLVED | CLOSED"
+        string title
+        string status
+    }
+    BANK_TRANSACTIONS {
+        int id PK
+        int bank_account_id FK
+        string reference_code
+        float amount
+        text description
+        string status "MATCHED | UNMATCHED"
     }
 ```
 
-### 📋 Bảng Đặc Tả 9 Thực Thể Cơ Sở Dữ Liệu:
-
-| STT | Tên Bảng (Table Name) | Mô Tả Chức Năng | Khóa Ngoại & Ràng Buộc Chính |
-| :---: | :--- | :--- | :--- |
-| **1** | `users` | Quản lý thông tin định danh, mật khẩu bcrypt, vai trò phân quyền, cấp độ gói VIP và trạng thái kích hoạt/khóa tài khoản. | Khóa chính `id`, Email Unique, Enum `status`, `role`, `plan`. |
-| **2** | `wallets` | Quản lý danh sách ví tài sản, phân tách phạm vi ví (`virtual` sổ chi tiêu vs `real` nạp tiền thật). | `user_id` $\rightarrow$ `users.id` (Cascade). |
-| **3** | `categories` | Phân loại danh mục chi tiêu/thu nhập, chuẩn hóa theo 4 nhóm 50/30/20 (`NEEDS`, `WANTS`, `SAVINGS`, `INCOME`). | `user_id` $\rightarrow$ `users.id` (Hỗ trợ danh mục mặc định toàn hệ thống). |
-| **4** | `transactions` | Nhật ký ghi nhận các khoản thu - chi - chuyển ví, đính kèm hóa đơn, gắn cờ nhận diện tạo bởi AI (`created_by_ai`). | `user_id`, `wallet_id`, `category_id` (Tự động cập nhật số dư ví). |
-| **5** | `budgets` | Thiết lập hạn mức ngân sách tháng cho từng danh mục, tự động tính toán tỷ lệ % và trạng thái (`NORMAL`, `WARNING`, `OVERSPENT`). | `user_id`, `category_id`, Unique cặp (`user_id`, `category_id`, `month_year`). |
-| **6** | `savings_goals` | Theo dõi mục tiêu tích lũy tài chính (mua xe, mua nhà, quỹ khẩn cấp), số tiền mục tiêu và hạn chót. | `user_id` $\rightarrow$ `users.id`. |
-| **7** | `subscription_orders` | Lưu trữ đơn hàng đăng ký / gia hạn các gói cước VIP, mã đơn định danh, phương thức thanh toán VietQR và trạng thái duyệt. | `user_id` $\rightarrow$ `users.id`, `order_code` Unique. |
-| **8** | `notifications` | Hộp thư thông báo biến động số dư, cảnh báo vượt ngưỡng 80%/100% ngân sách, thông báo duyệt đơn VIP và thông báo hệ thống. | `user_id` $\rightarrow$ `users.id`. |
-| **9** | `support_tickets` | Tiếp nhận và quản lý các yêu cầu khiếu nại, trợ giúp kỹ thuật và hỗ trợ thanh toán nạp gói của người dùng. | `user_id` $\rightarrow$ `users.id`. |
+### 📋 Danh Mục 11 Bảng Cơ Sở Dữ Liệu:
+1. `users`: Tài khoản định danh, phân quyền RBAC (`USER`, `MODERATOR`, `ADMIN`), gói VIP và trạng thái khóa.
+2. `wallets`: Quản lý ví 2 tầng (`virtual` kế toán cá nhân vs `real` nạp tiền thật).
+3. `categories`: Cây danh mục thu/chi phân bổ chuẩn theo 4 nhóm quy tắc 50/30/20.
+4. `transactions`: Nhật ký bút toán thu - chi - chuyển ví, đính kèm ảnh bill và cờ `created_by_ai`.
+5. `budgets`: Hạn mức chi tiêu theo tháng, cờ cảnh báo 80% (`alert_80_sent`) và 100% (`alert_100_sent`).
+6. `saving_goals`: Mục tiêu tích lũy tài chính, tiến độ hoàn thành và hạn chót.
+7. `ai_chat_logs`: Nhật ký truy vấn AI đã qua bóc tách Zero-PII, đo lường độ trễ response time.
+8. `notifications`: Hộp thư thông báo cá nhân và thông báo Broadcast toàn sàn.
+9. `subscription_orders`: Đơn hàng thanh toán gói cước VIP với mã đơn duy nhất (`FT-xxxxxx`).
+10. `support_tickets`: Yêu cầu khiếu nại, phản ánh chất lượng dịch vụ của người dùng.
+11. `bank_transactions`: Lịch sử biến động số dư tài khoản ngân hàng sàn tiếp nhận từ Webhook SePay/Casso.
 
 ---
 
-## 💳 3. Mô Hình Dịch Vụ & Cổng Thanh Toán VietQR MB Bank
+## 💳 5. Cổng Thanh Toán VietQR & Webhook SePay Tự Động
 
-FinTrack AI vận hành mô hình dịch vụ **Freemium & Subscription Tiering** chuyên nghiệp, đáp ứng từ nhu cầu cá nhân cơ bản đến quản trị tài chính nâng cao:
+### 👑 Bảng So Sánh 4 Gói Cước Dịch Vụ:
 
-### 👑 Bảng So Sánh 4 Gói Dịch Vụ VIP:
-
-| Tính Năng / Quyền Lợi | 🥉 GÓI FREE | 🥈 GÓI PRO | 🥇 GÓI PREMIUM | 💎 PLATINUM VIP |
+| Quyền Lợi / Tính Năng | 🥉 GÓI FREE | 🥈 GÓI PRO | 🥇 GÓI PREMIUM | 💎 PLATINUM VIP |
 | :--- | :---: | :---: | :---: | :---: |
-| **Mức Phí Dịch Vụ** | **0 đ / tháng** | **49.000 đ / tháng** | **99.000 đ / tháng** | **199.000 đ / tháng** |
+| **Giá Cước Dịch Vụ** | **0 đ / tháng** | **49.000 đ / tháng** | **99.000 đ / tháng** | **199.000 đ / tháng** |
 | **Số Lượng Ví Quản Lý** | Tối đa 2 Ví | Tối đa 5 Ví | Tối đa 15 Ví | **Không Giới Hạn** |
 | **Hạn Mức AI Gọi / Ngày** | 10 lượt / ngày | 100 lượt / ngày | 300 lượt / ngày | **Không Giới Hạn (Unlimited)** |
-| **Bóc Tách Giao Dịch AI** | Có (Cơ bản) | Có (Ưu tiên) | Có (Tốc độ cao) | **Cao Cấp Nhất** |
-| **Chẩn Đoán 50/30/20** | Cơ bản | Chuyên sâu | Chuyên sâu | **Báo Cáo Toàn Diện** |
-| **Xuất Dữ Liệu Excel / PDF**| ❌ Không | ✅ Excel + CSV | ✅ Excel + PDF + CSV | ✅ Đầy đủ + Định dạng VIP |
-| **Liên Kết Open Banking** | ❌ Không | ❌ Không | ✅ Có | ✅ Có (Tự động) |
-| **Huy Hiệu & Cấp Độ VIP** | Badge Cơ Bản | Badge Pro Cyan | Badge Premium Gold | **Badge Platinum Kim Cương** |
-| **Hỗ Trợ Kỹ Thuật** | Cộng đồng | 24/48h | Ưu tiên 12h | **Ưu Tiên 24/7 Riêng Biệt** |
+| **Bóc Tách Giao Dịch AI** | Tiêu chuẩn | Ưu tiên cao | Tốc độ cao | **Cao Cấp Nhất (Realtime)** |
+| **Cố Vấn Tài Chính 50/30/20** | Cơ bản | Chuyên sâu | Toàn diện | **Bác Sĩ Tài Chính VIP** |
+| **Xuất File Báo Cáo** | ❌ Không | ✅ Excel + CSV | ✅ Excel + PDF + CSV | ✅ Đầy đủ + Giao diện VIP |
+| **Liên Kết Open Banking** | ❌ Không | ❌ Không | ✅ Có | ✅ Tự Động Đồng Bộ |
+| **Huy Hiệu & Cấp Độ VIP** | Badge Member | Badge Pro Cyan | Badge Premium Gold | **Badge Diamond VIP** |
 
-### 🏧 Tích Hợp Cổng Thanh Toán Động VietQR Ngân Hàng MB Bank:
-- **Tên Ngân Hàng Tiếp Nhận**: Ngân hàng TMCP Quân Đội (**MB Bank**)
-- **Số Tài Khoản Tiếp Nhận**: `0374617569`
-- **Chủ Tài Khoản**: **DANG QUYET THANG**
-- **Cơ chế thanh toán**:
-  1. Người dùng chọn gói cước (1 tháng, 3 tháng, 6 tháng, 12 tháng).
-  2. Hệ thống khởi tạo `SubscriptionOrder` với mã đơn duy nhất (ví dụ: `FT-948210`).
-  3. Tự động sinh mã **VietQR chuẩn NAPAS 247** kèm số tiền và cú pháp chuyển tiền chuẩn: `VIP <MA_DON_HANG>` (ví dụ: `VIP FT-948210`).
-  4. Người dùng quét mã trên app ngân hàng $\rightarrow$ Admin phê duyệt đơn 1-Click tại Portal $\rightarrow$ Hệ thống tự động kích hoạt hạn sử dụng VIP và gửi thông báo chúc mừng vào hộp thư.
+### 🏧 Luồng Khớp Lệnh Thanh Toán Tự Động Qua SePay Webhook & Cloudflare Tunnel:
+1. Khách hàng bấm nâng cấp gói VIP $\rightarrow$ Hệ thống tạo `SubscriptionOrder` với mã đơn `FT-849202`.
+2. Hệ thống sinh mã **VietQR Napas 247** động kèm nội dung chuyển khoản chuẩn: `NAP VIP FT849202`.
+3. Khách hàng chuyển khoản $\rightarrow$ MB Bank ghi nhận biến động $\rightarrow$ **SePay** bắn Webhook payload tới endpoint công khai qua **Cloudflare Tunnel**.
+4. FastAPI Backend bóc tách Regex tìm mã đơn `FT-849202` $\rightarrow$ Khớp số tiền $\rightarrow$ Tự động chuyển trạng thái `APPROVED`, kích hoạt gói VIP và gửi thông báo chúc mừng tới người dùng trong vòng **< 1 giây**.
 
 ---
 
-## 🛡️ 4. Phân Hệ Quản Trị Hệ Thống (Admin & Moderator Console)
-
-FinTrack AI trang bị Trung tâm Kiểm soát Quản trị (**Control Center**) dành riêng cho Ban Quản trị:
+## 🛡️ 6. Phân Hệ Quản Trị Hệ Thống (Admin Control Center)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    ADMIN CONTROL CENTER (PORTAL)                        │
 ├─────────────────────────────────────────────────────────────────────────┤
-│ [📊 Analytics] : DAU/MAU, Doanh Thu, Chuyển Đổi VIP, Server Health      │
-│ [👥 User Mgmt] : Phân Quyền Root/Mod, Khóa Cứng (Hard Lockout), Reset PW │
-│ [💳 VIP Orders]: Duyệt Nạp 1-Click, Đối Soát VietQR MB Bank, Xuất CSV   │
-│ [🤖 AI Console]: Tinh Chỉnh System Prompt, Model Switching, Quotas/Day   │
-│ [🔒 Security]  : Audit Logs Hoạt Động, Broadcast Thông Báo Toàn Server  │
+│ [📊 Analytics]    : DAU/MAU, Doanh Thu, Chuyển Đổi VIP, Server Health   │
+│ [👥 User Mgmt]    : Phân Quyền Root/Mod, Khóa Cứng 2 Tầng, Reset Pass   │
+│ [💳 VIP Orders]   : Duyệt Nạp 1-Click, Đối Soát Webhook SePay, Xuất CSV │
+│ [🤖 AI Console]   : Tinh Chỉnh System Prompt, Model Switch, Token Limit │
+│ [🏛️ Master Data]  : Thiết Lập Danh Mục Mẫu 50/30/20 Cho Toàn Sàn        │
+│ [🔒 Audit Logs]   : Truy Vết Hành Động An Ninh, Export Kế Toán CSV      │
+│ [⚙️ Settings]     : Cổng VietQR, Broadcast, SMTP Server, Backup DB      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Dashboard Giám Sát Thời Gian Thực**:
-  - Theo dõi người dùng hoạt động ngày/tháng (DAU/MAU), tổng doanh thu nạp VIP.
-  - **Server Health Check**: Trạng thái FastAPI Server, SQLite WAL Mode, Độ trễ Gemini API Latency.
-  - **AI Token Monitor**: Giám sát lưu lượng tiêu thụ token và số lượng request AI toàn hệ thống.
-- **Quản Lý Người Dùng & Phân Quyền Phân Tầng**:
-  - Phân quyền 3 cấp độ: `USER`, `MODERATOR` (Quản trị viên duyệt đơn), `ADMIN` (Root Admin tối cao).
-  - Cơ chế khóa cứng tài khoản vi phạm (ngăn chặn đăng nhập & chặn request tại chỗ).
-- **Quản Trị AI Động (AI Management Console)**:
-  - Tùy chỉnh trực tiếp **System Prompt** cho bộ bóc tách giao dịch (Parser) và Cố vấn tài chính (Advisor) mà không cần restart server.
-  - Chuyển đổi linh hoạt giữa các model: `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, `gpt-4o`.
-- **Hệ Thống Nhật Ký An Ninh (Audit Logs) & Export CSV**:
-  - Ghi nhận mọi thao tác nhạy cảm (Khóa user, đổi quyền, duyệt tiền, sửa prompt).
-  - Xuất dữ liệu kế toán 1-Click sang file CSV chuẩn UTF-8 BOM.
-
 ---
 
-## 👥 5. Tài Khoản Mẫu Trải Nghiệm (Demo Credentials)
+## 👥 7. Tài Khoản Mẫu Trải Nghiệm (Demo Credentials)
 
-Hệ thống đã nạp sẵn bộ dữ liệu mẫu thực tế hỗ trợ chấm điểm và nghiệm thu đồ án:
+Hệ thống đã nạp sẵn dữ liệu chuẩn phục vụ hội đồng nghiệm thu:
 
-| STT | Vai Trò (Role) | Email Đăng Nhập | Mật Khẩu | Quyền Hạn & Dữ Liệu Khởi Tạo Sẵn |
+| STT | Vai Trò (Role) | Email Đăng Nhập | Mật Khẩu | Quyền Hạn & Dữ Liệu Sẵn Có |
 | :---: | :--- | :--- | :--- | :--- |
-| **1** | **Root Admin** | `admin@fintrack.ai` | `Admin@123456` | Toàn quyền Quản trị Tối cao: Quản lý người dùng, duyệt nạp VIP, tinh chỉnh AI Prompt, xem Audit Logs. |
-| **2** | **Moderator** | `mod@fintrack.ai` | `Mod@123456` | Quản trị viên phụ: Hỗ trợ duyệt đơn VIP, quản lý Ticket hỗ trợ người dùng. |
-| **3** | **Demo User** | `user@fintrack.ai` | `User@123456` | Người dùng thực tế: Đặng Quyết Thắng (**Gói Platinum VIP**, 4 Ví tài sản, 18 Danh mục, 30+ Giao dịch 3 tháng, Ngân sách và Mục tiêu tiết kiệm). |
+| **1** | **Root Admin** | `admin@fintrack.ai` | `Admin@123456` | Toàn quyền Quản trị Tối cao: Control Center, Cổng VietQR, AI Prompts, Token Quota, Audit Logs, Backup DB. |
+| **2** | **Moderator** | `mod@fintrack.ai` | `Mod@123456` | Quản trị viên phụ: Quản lý người dùng, duyệt đơn VIP, quản lý Ticket hỗ trợ, gửi thông báo. |
+| **3** | **Demo User** | `user@fintrack.ai` | `User@123456` | Người dùng thực tế: Đặng Quyết Thắng (**Gói Platinum VIP**, 5 Ví tài sản, 18 Danh mục, 30+ Giao dịch 3 tháng, Ngân sách và Mục tiêu). |
 
-*(Giao diện Đăng nhập hỗ trợ nút bấm 1-Click "Demo User" và "Demo Admin" để đăng nhập tức thì không cần gõ phím).*
+*(Giao diện Đăng nhập hỗ trợ nút bấm 1-Click "Demo User" và "Demo Admin" để truy cập tức thì).*
 
 ---
 
-## 🚀 6. Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh (Quickstart)
+## 🚀 8. Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh (Quickstart)
 
 ### 📋 Yêu Cầu Môi Trường:
 - **Hệ điều hành**: Windows 10/11, macOS, Linux (Ubuntu/Debian).
 - **Python**: Phiên bản `3.10` trở lên (Khuyến nghị `Python 3.12`).
-- **Trình duyệt**: Google Chrome, Microsoft Edge, Brave, Safari (Hỗ trợ ES6 Modules).
+- **Trình duyệt**: Chrome, Edge, Brave, Safari.
 
-### ⚙️ Các Bước Cài Đặt Chi Tiết:
+### ⚙️ Các Bước Cài Đặt & Khởi Chạy:
 
-#### Bước 1: Clone hoặc mở thư mục dự án
+#### Bước 1: Mở thư mục dự án
 ```bash
 cd "D:\Visua Studio Code\HeThongChiTieuCaNhan1.0"
 ```
 
-#### Bước 2: Tạo và kích hoạt môi trường ảo Python (Virtual Environment)
+#### Bước 2: Tạo và kích hoạt môi trường ảo Python
 ```bash
 # Trên Windows PowerShell:
 python -m venv venv
@@ -270,13 +301,13 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-#### Bước 3: Cài đặt các gói thư viện phụ thuộc
+#### Bước 3: Cài đặt các gói phụ thuộc
 ```bash
 pip install -r requirements.txt
 ```
 
 #### Bước 4: Cấu hình biến môi trường (`.env`)
-Tạo file `.env` tại thư mục gốc (hoặc chỉnh sửa file `.env` có sẵn):
+Tạo file `.env` tại thư mục gốc với các tham số chuẩn:
 ```ini
 PROJECT_NAME="FinTrack AI"
 API_V1_STR="/api/v1"
@@ -284,23 +315,30 @@ SECRET_KEY="fintrack-ai-super-secret-jwt-key-change-in-production-2026"
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ALGORITHM="HS256"
 
-# Database SQLite WAL
+# Database SQLite WAL Mode
 DATABASE_URL="sqlite:///./fintrack.db"
 
-# AI Configuration
+# AI Configuration (Google Gemini)
 AI_PROVIDER="gemini"
 GEMINI_API_KEY="YOUR_GOOGLE_GEMINI_API_KEY_HERE"
 GEMINI_MODEL="gemini-1.5-flash"
+
+# SePay Webhook Configuration
+SEPAY_API_TOKEN="YOUR_SEPAY_API_TOKEN_HERE"
+SEPAY_WEBHOOK_SECRET="YOUR_SEPAY_WEBHOOK_SECRET_HERE"
 ```
 
-#### Bước 5: Khởi chạy Server ứng dụng
-```bash
-# Cách 1: Sử dụng script runner
-python run.py
+#### Bước 5: Các Script Tiện Ích Khởi Chạy & Chuẩn Hóa Dữ Liệu
+Hệ thống cung cấp sẵn các script tiện ích tối ưu:
 
-# Cách 2: Chạy trực tiếp qua Uvicorn
-uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
-```
+| File Script | Công Dụng & Cách Thực Thi |
+| :--- | :--- |
+| **`run.py`** | Script Python Runner thông minh: Tự động kiểm tra venv, tự giải phóng port 8000 bị kẹt, tự bật trình duyệt khi server sẵn sàng.<br>`python run.py` |
+| **`run.bat`** / **`run.ps1`** | Script khởi chạy 1-Click trên Windows Command Prompt hoặc PowerShell.<br>`.\run.bat` hoặc `.\run.ps1` |
+| **`Khoi_Chay_FinTrack_AI.bat`** | File batch khởi chạy nhanh với giao diện console hiển thị UTF-8 tiếng Việt chuẩn. |
+| **`seed_admin_finance.py`** | Chuẩn hóa toàn bộ số liệu 5 ví, 30+ giao dịch mẫu, ngân sách và mục tiêu cho tài khoản Admin.<br>`python seed_admin_finance.py` |
+| **`reset_user_data.py`** | Đưa toàn bộ số dư ví và dữ liệu tài khoản `user@fintrack.ai` về trạng thái ban đầu (0 VNĐ).<br>`python reset_user_data.py` |
+| **`clean_db.py`** | Dọn sạch dữ liệu giao dịch rác, đưa số dư toàn bộ hệ thống về 0đ khởi tạo.<br>`python clean_db.py` |
 
 #### Bước 6: Truy cập ứng dụng
 - 🌐 **Giao diện Ứng Dụng (Frontend SPA)**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
@@ -309,52 +347,34 @@ uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 
 ---
 
-## 🧪 7. Kiểm Thử Phần Mềm (Automated Testing & Test Cases)
+## 🧪 9. Kiểm Thử Phần Mềm (Automated Testing & Test Cases)
 
-Hệ thống được kiểm thử tự động toàn diện thông qua framework `pytest` và `httpx`:
+Hệ thống được kiểm thử tự động toàn diện qua framework `pytest`:
 
 ```bash
-# Chạy toàn bộ 46 kịch bản kiểm thử tự động
 .\venv\Scripts\pytest.exe -v
 ```
 
-### 📊 Kết Quả Kiểm Thử:
-```
-============================= test session starts =============================
-platform win32 -- Python 3.12.4, pytest-9.1.1, pluggy-1.6.0
-collected 46 items
-
-backend/tests/test_admin.py ........                                     [ 17%]
-backend/tests/test_ai.py ......                                          [ 30%]
-backend/tests/test_auth.py ..........                                    [ 52%]
-backend/tests/test_badges.py .                                           [ 54%]
-backend/tests/test_budgets.py .                                          [ 56%]
-backend/tests/test_notifications.py .....                                [ 67%]
-backend/tests/test_transactions.py ....                                  [ 76%]
-backend/tests/test_vip_and_support.py ...                                [ 82%]
-backend/tests/test_wallets.py ...........                                [100%]
-
-============================== 46 passed in 18.32s =============================
-```
-
-- **Tỷ lệ Pass**: **46/46 Test Cases (100% Passed)**.
-- **Phạm vi kiểm thử**:
-  - Xác thực JWT Token, phân quyền Role-based Access Control (RBAC).
-  - Cơ chế khóa cứng tài khoản (Account Lockout Enforcement).
-  - Nghiệp vụ giao dịch, chuyển tiền, hoàn tiền ví tài khoản.
-  - Ngân sách cảnh báo ngưỡng 80% (Warning) & 100% (Overspent).
-  - Bộ bóc tách câu tự nhiên AI & Khử dữ liệu nhạy cảm Zero-PII.
-  - Luồng duyệt đơn nạp VIP và đối soát VietQR MB Bank.
+### 📊 Kết Quả Kiểm Thử Thực Tế:
+- **Tổng số ca kiểm thử**: **55 Test Cases**.
+- **Trạng thái**: **55/55 Passed (100%)**.
+- **Phạm vi kiểm thử bao phủ**:
+  - Xác thực JWT, Demo Access và phân quyền RBAC (`USER`, `MODERATOR`, `ADMIN`).
+  - Cơ chế khóa cứng tài khoản vi phạm (Hard Lockout 2 tầng).
+  - Nghiệp vụ đa ví 2 tầng, chuyển tiền nội bộ Double-Entry.
+  - Ngân sách cảnh báo ngưỡng 80% (Warning) và bội chi 100% (Overspent).
+  - Trình phân tích câu tự nhiên tiếng Việt (**AI Parser**) và khử dữ liệu nhạy cảm **Zero-PII**.
+  - Luồng tạo đơn VIP, cổng động VietQR và Webhook SePay tự động đối soát.
 
 ---
 
-## 👥 8. Phân Công Trách Nhiệm Thành Viên (Nhóm 03)
+## 👥 10. Phân Công Trách Nhiệm Thành Viên (Nhóm 03)
 
 | STT | Họ và Tên | Vai Trò | Nhiệm Vụ & Đóng Góp Chính Trong Dự Án |
 | :---: | :--- | :---: | :--- |
-| **1** | **Đặng Quyết Thắng** | **Trưởng nhóm** | • Quản lý tiến độ tổng thể, phân tích nghiệp vụ tài chính và quy tắc phân bổ 50/30/20.<br>• Thiết kế cấu trúc bảng giá 4 gói cước VIP và luồng đối soát thanh toán VietQR MB Bank.<br>• Trực tiếp biên soạn toàn bộ tài liệu báo cáo Word, mục lục, bảng biểu và Slide thuyết trình đồ án.<br>• Lập trình toàn bộ giao diện Frontend SPA (Client Dashboard, Admin Control Center, Gamification).<br>• Tích hợp Google Gemini API, xây dựng module bảo mật Zero-PII Leakage và Prompt AI.<br>• Thiết kế và thực hiện toàn diện 15 kịch bản kiểm thử (Test Cases). |
-| **2** | **Nguyễn Văn Tiến** | **Thành viên** | • Phân tích yêu cầu chức năng / phi chức năng và xây dựng bảng đặc tả Use Cases.<br>• Thiết kế mô hình dữ liệu quan hệ 9 bảng thực thể chuẩn 3NF và vẽ sơ đồ ERD chuẩn.<br>• Tham gia rà soát logic nghiệp vụ và hỗ trợ tài liệu báo cáo kỹ thuật. |
-| **3** | **Quách Minh Hiếu** | **Thành viên** | • Thiết kế và thực hiện toàn diện 15 kịch bản kiểm thử (Test Cases) hệ thống.<br>• Phối hợp tối ưu hóa các endpoint API Backend và kết nối truyền nhận dữ liệu với Frontend.<br>• Kiểm thử tính tương thích giao diện trên các kích thước màn hình. |
+| **1** | **Đặng Quyết Thắng** | **Trưởng nhóm** | • Quản lý tiến độ tổng thể, phân tích nghiệp vụ tài chính và quy tắc 50/30/20.<br>• Thiết kế kiến trúc ví 2 tầng, bảng giá 4 gói cước VIP và cổng thanh toán VietQR MB Bank tích hợp SePay Webhook.<br>• Lập trình toàn bộ giao diện Frontend SPA (Client Dashboard, Neo-Futuristic Glassmorphism, Admin Control Center, Gamification).<br>• Tích hợp Google Gemini API, xây dựng module bảo mật Zero-PII Leakage và Prompt AI.<br>• Trực tiếp biên soạn toàn bộ tài liệu báo cáo kỹ thuật và Slide thuyết trình. |
+| **2** | **Nguyễn Văn Tiến** | **Thành viên** | • Phân tích yêu cầu hệ thống và đặc tả chi tiết 19 Use Cases.<br>• Thiết kế mô hình CSDL quan hệ 11 bảng thực thể chuẩn 3NF và vẽ sơ đồ ERD chuẩn Mermaid.<br>• Tham gia xây dựng các endpoint API Backend và kết nối CSDL SQLAlchemy. |
+| **3** | **Quách Minh Hiếu** | **Thành viên** | • Xây dựng bộ kịch bản 16 Test Cases và thực thi 55 bài kiểm thử tự động với Pytest.<br>• Lập trình logic kiểm soát Hard Lockout 2 tầng và xử lý bảo mật mật khẩu Bcrypt.<br>• Phối hợp tối ưu hóa hiệu năng API và kiểm thử tương thích giao diện trên thiết bị di động. |
 
 ---
 

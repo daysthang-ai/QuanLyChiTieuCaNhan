@@ -9,6 +9,8 @@ export class DashboardComponent {
     this.selectedMonth = getCurrentMonthStr();
     this.selectedPeriod = 'this_month';
     this.isBalanceHidden = localStorage.getItem('fintrack_hide_balance') === 'true';
+    this.initialCashflowLoaded = false;
+    this.initialCategoryLoaded = false;
   }
 
   async render(container) {
@@ -20,10 +22,10 @@ export class DashboardComponent {
           <div>
             <h1 class="text-2xl font-black text-slate-100 tracking-tight flex items-center gap-2">
               <span>Tổng Quan Tài Chính</span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Live</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20">Live</span>
             </h1>
             <p class="text-slate-400 text-xs mt-0.5" id="dashboard-period-subtitle">
-              Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-emerald-400">${this.formatMonthLabel(this.selectedMonth)}</span>
+              Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.formatMonthLabel(this.selectedMonth)}</span>
             </p>
           </div>
 
@@ -32,13 +34,13 @@ export class DashboardComponent {
             
             <!-- Quick Time Filter Pills -->
             <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shadow-inner">
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_month' ? 'gradient-emerald text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_month">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_month">
                 Tháng này
               </button>
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'last_month' ? 'gradient-emerald text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="last_month">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'last_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="last_month">
                 Tháng trước
               </button>
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_quarter' ? 'gradient-emerald text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_quarter">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_quarter' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_quarter">
                 Quý này
               </button>
             </div>
@@ -47,11 +49,11 @@ export class DashboardComponent {
             <div class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-xs">
               <i class="fa-regular fa-calendar text-slate-400 text-[11px]"></i>
               <input type="month" id="dashboard-month-picker" value="${this.selectedMonth}" 
-                class="font-bold text-emerald-400 bg-transparent border-0 focus:outline-none cursor-pointer text-xs" title="Chọn tháng cụ thể" />
+                class="font-bold text-cyan-400 bg-transparent border-0 focus:outline-none cursor-pointer text-xs" title="Chọn tháng cụ thể" />
             </div>
 
             <!-- Primary Add Transaction Action -->
-            <button id="btn-add-tx-top" class="px-4 py-2 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center gap-1.5">
+            <button id="btn-add-tx-top" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/35 active:scale-95 transition-all duration-200 flex items-center gap-1.5 transform-gpu">
               <i class="fa-solid fa-plus text-xs"></i>
               <span>Ghi Thu - Chi</span>
             </button>
@@ -59,7 +61,7 @@ export class DashboardComponent {
           </div>
         </div>
 
-        <!-- 4 KPI Summary Cards -->
+        <!-- 4 KPI Summary Cards (3-Tone Neon Palette) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-cards-container">
           <div class="glass-card p-5 rounded-2xl animate-pulse flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-slate-800"></div>
@@ -72,25 +74,25 @@ export class DashboardComponent {
 
         <!-- Charts Row (Cashflow & Category Donut) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- 6 Months Cashflow Trend -->
-          <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+          <!-- 6 Months Cashflow Trend (Cyan Border: border: 1px solid rgba(6, 182, 212, 0.35)) -->
+          <div id="cashflow-chart-card" class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col justify-between border border-cyan-500/35 hover:border-cyan-500/60 shadow-md shadow-cyan-950/20 transform-gpu" style="border: 1px solid rgba(6, 182, 212, 0.35);">
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                  <i class="fa-solid fa-chart-column text-emerald-400"></i>
+                  <i class="fa-solid fa-chart-column text-cyan-400"></i>
                   Xu Hướng Dòng Tiền 6 Tháng
                 </h3>
                 <p class="text-xs text-slate-400">So sánh Thu nhập, Chi tiêu và Dư tích lũy ròng</p>
               </div>
               <div class="flex items-center gap-3 text-xs font-semibold">
                 <span class="inline-flex items-center gap-1.5 text-slate-300">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Thu
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/30"></span> Thu (+)
                 </span>
                 <span class="inline-flex items-center gap-1.5 text-slate-300">
-                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Chi
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/30"></span> Chi (-)
                 </span>
                 <span class="inline-flex items-center gap-1.5 text-slate-300">
-                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> Dư
+                  <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/30"></span> Dư ròng
                 </span>
               </div>
             </div>
@@ -99,17 +101,17 @@ export class DashboardComponent {
             </div>
           </div>
 
-          <!-- Category Breakdown Donut with Center Stat & Cyberpunk Custom Legend -->
-          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between" id="category-donut-card">
+          <!-- Category Breakdown Donut (Rose Border: border: 1px solid rgba(244, 63, 94, 0.4)) -->
+          <div id="category-donut-card" class="glass-card p-5 rounded-2xl flex flex-col justify-between border border-rose-500/40 hover:border-rose-500/60 shadow-md shadow-rose-950/20 transform-gpu" style="border: 1px solid rgba(244, 63, 94, 0.4);">
             <div class="flex items-center justify-between mb-2">
               <div>
                 <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                  <i class="fa-solid fa-chart-pie text-[#00FFAA]"></i>
+                  <i class="fa-solid fa-chart-pie text-cyan-400"></i>
                   Cơ Cấu Chi Tiêu
                 </h3>
                 <p class="text-xs text-slate-400">Tỷ trọng chi theo danh mục kỳ này</p>
               </div>
-              <span id="category-donut-total-badge" class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 text-[11px] font-mono font-bold text-[#00FFAA] border border-[#00FFAA]/30 shadow-sm shadow-[#00FFAA]/10">0 ₫</span>
+              <span id="category-donut-total-badge" class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 text-[11px] font-mono font-bold text-cyan-400 border border-cyan-500/30 shadow-sm shadow-cyan-500/10">0 ₫</span>
             </div>
             <div class="h-48 w-full relative flex items-center justify-center my-1">
               <canvas id="category-donut-chart"></canvas>
@@ -123,28 +125,28 @@ export class DashboardComponent {
         <!-- Row 3: Budget Alerts & Recent Transactions -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <!-- Budget Watchlist & Alerts -->
-          <div class="glass-card p-5 rounded-2xl">
+          <!-- Budget Watchlist & Alerts (Emerald Border: border: 1px solid rgba(16, 185, 129, 0.35)) -->
+          <div id="budget-watchlist-card" class="glass-card p-5 rounded-2xl border border-emerald-500/35 hover:border-emerald-500/60 shadow-md shadow-emerald-950/20 transform-gpu" style="border: 1px solid rgba(16, 185, 129, 0.35);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <i class="fa-solid fa-bullseye text-amber-400"></i>
+                <i class="fa-solid fa-bullseye text-cyan-400"></i>
                 Giám Sát Ngân Sách
               </h3>
-              <button id="btn-view-all-budgets" class="text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline">Chi tiết &rarr;</button>
+              <button id="btn-view-all-budgets" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline">Chi tiết &rarr;</button>
             </div>
             <div id="budget-alerts-list" class="space-y-3">
               <div class="text-xs text-slate-400 text-center py-6">Đang tải dữ liệu ngân sách...</div>
             </div>
           </div>
 
-          <!-- Recent Transactions -->
-          <div class="glass-card p-5 rounded-2xl lg:col-span-2">
+          <!-- Recent Transactions (Cyan Border: border: 1px solid rgba(6, 182, 212, 0.3)) -->
+          <div id="recent-txs-card" class="glass-card p-5 rounded-2xl lg:col-span-2 border border-cyan-500/30 hover:border-cyan-500/60 shadow-md shadow-cyan-950/20 transform-gpu" style="border: 1px solid rgba(6, 182, 212, 0.3);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-blue-400"></i>
+                <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
                 Giao Dịch Gần Đây
               </h3>
-              <button id="btn-view-all-txs" class="text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline">Xem tất cả &rarr;</button>
+              <button id="btn-view-all-txs" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline">Xem tất cả &rarr;</button>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
@@ -230,7 +232,7 @@ export class DashboardComponent {
   updatePeriodPillsUI() {
     document.querySelectorAll('.dash-period-pill').forEach(btn => {
       if (btn.getAttribute('data-period') === this.selectedPeriod) {
-        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition gradient-emerald text-white shadow-sm';
+        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm';
       } else {
         btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-400 hover:text-slate-200';
       }
@@ -238,7 +240,7 @@ export class DashboardComponent {
 
     const sub = document.getElementById('dashboard-period-subtitle');
     if (sub) {
-      sub.innerHTML = `Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-emerald-400">${this.formatMonthLabel(this.selectedMonth)}</span>`;
+      sub.innerHTML = `Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.formatMonthLabel(this.selectedMonth)}</span>`;
     }
   }
 
@@ -270,11 +272,11 @@ export class DashboardComponent {
     if (!container) return;
 
     const netWorthText = this.isBalanceHidden ? '•••••••• ₫' : formatVND(kpis.total_net_worth);
-    const eyeIconClass = this.isBalanceHidden ? 'fa-eye-slash text-amber-400' : 'fa-eye text-emerald-400';
+    const eyeIconClass = this.isBalanceHidden ? 'fa-eye-slash text-slate-400' : 'fa-eye text-cyan-400';
 
     container.innerHTML = `
-      <!-- 1. Total Net Worth with Eye Toggle -->
-      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-300 transition stagger-1">
+      <!-- 1. Total Net Worth (Cyan Border: border: 1px solid rgba(6, 182, 212, 0.35)) -->
+      <div id="kpi-card-networth" class="glass-card p-5 rounded-2xl relative overflow-hidden group border border-cyan-500/35 hover:border-cyan-500/65 shadow-md shadow-cyan-950/20 transition-all duration-200 stagger-1 transform-gpu" style="border: 1px solid rgba(6, 182, 212, 0.35);">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng Tài Sản Ròng</span>
@@ -282,29 +284,29 @@ export class DashboardComponent {
               <i class="fa-solid ${eyeIconClass} text-[11px]"></i>
             </button>
           </div>
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-base shadow-sm border border-emerald-500/20">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-base shadow-sm border border-cyan-500/20">
             <i class="fa-solid fa-wallet"></i>
           </div>
         </div>
         <div class="mt-2">
-          <span class="text-xl font-black text-slate-100 font-mono tracking-tight" id="dash-net-worth-val">${netWorthText}</span>
+          <span class="text-xl font-black text-slate-100 font-mono tracking-tight group-hover:text-cyan-300 transition-colors" id="dash-net-worth-val">${netWorthText}</span>
         </div>
         <div class="mt-1 text-[11px] text-slate-400 flex items-center gap-1">
-          <i class="fa-solid fa-circle-check text-emerald-400 text-[10px]"></i>
+          <i class="fa-solid fa-circle-check text-cyan-400 text-[10px]"></i>
           <span>Tổng số dư tất cả các ví khả dụng</span>
         </div>
       </div>
 
-      <!-- 2. Income this month -->
-      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-blue-300 transition stagger-2">
+      <!-- 2. Total Income this month (Emerald Border: border: 1px solid rgba(16, 185, 129, 0.4)) -->
+      <div id="kpi-card-income" class="glass-card p-5 rounded-2xl relative overflow-hidden group border border-emerald-500/40 hover:border-emerald-500/70 shadow-md shadow-emerald-950/20 transition-all duration-200 stagger-2 transform-gpu" style="border: 1px solid rgba(16, 185, 129, 0.4);">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng Thu Kỳ Này</span>
-          <div class="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-base shadow-sm border border-blue-500/20">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-base shadow-sm border border-emerald-500/20">
             <i class="fa-solid fa-circle-arrow-down"></i>
           </div>
         </div>
         <div class="mt-2">
-          <span class="text-xl font-black text-blue-400 font-mono tracking-tight">+${formatVND(kpis.total_income_month)}</span>
+          <span class="text-xl font-black text-emerald-400 font-mono tracking-tight">+${formatVND(kpis.total_income_month)}</span>
         </div>
         <div class="mt-1 text-[11px] ${kpis.income_change_vs_last_month_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium flex items-center gap-1">
           <i class="fa-solid ${kpis.income_change_vs_last_month_pct >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
@@ -312,8 +314,8 @@ export class DashboardComponent {
         </div>
       </div>
 
-      <!-- 3. Expense this month -->
-      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-red-300 transition stagger-3">
+      <!-- 3. Total Expense this month (Rose Border: border: 1px solid rgba(244, 63, 94, 0.4)) -->
+      <div id="kpi-card-expense" class="glass-card p-5 rounded-2xl relative overflow-hidden group border border-rose-500/40 hover:border-rose-500/70 shadow-md shadow-rose-950/20 transition-all duration-200 stagger-3 transform-gpu" style="border: 1px solid rgba(244, 63, 94, 0.4);">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng Chi Kỳ Này</span>
           <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-base shadow-sm border border-rose-500/20">
@@ -323,26 +325,27 @@ export class DashboardComponent {
         <div class="mt-2">
           <span class="text-xl font-black text-rose-400 font-mono tracking-tight">-${formatVND(kpis.total_expense_month)}</span>
         </div>
-        <div class="mt-1 text-[11px] ${kpis.expense_change_vs_last_month_pct <= 0 ? 'text-emerald-400' : 'text-amber-400'} font-medium flex items-center gap-1">
+        <div class="mt-1 text-[11px] ${kpis.expense_change_vs_last_month_pct <= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium flex items-center gap-1">
           <i class="fa-solid ${kpis.expense_change_vs_last_month_pct >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
           <span>${kpis.expense_change_vs_last_month_pct >= 0 ? '+' : ''}${kpis.expense_change_vs_last_month_pct}% so với tháng trước</span>
         </div>
       </div>
 
-      <!-- 4. Savings Rate -->
-      <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-indigo-300 transition stagger-4">
+      <!-- 4. Savings Rate (Emerald Border: border: 1px solid rgba(16, 185, 129, 0.4)) -->
+      <div id="kpi-card-savings" class="glass-card p-5 rounded-2xl relative overflow-hidden group border border-emerald-500/40 hover:border-emerald-500/65 shadow-md shadow-emerald-950/20 transition-all duration-200 stagger-4 transform-gpu" style="border: 1px solid rgba(16, 185, 129, 0.4);">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tỷ Lệ Tiết Kiệm</span>
-          <div class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-base shadow-sm border border-indigo-500/20">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-base shadow-sm border border-emerald-500/20">
             <i class="fa-solid fa-piggy-bank"></i>
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-xl font-black text-indigo-400 font-mono tracking-tight">${kpis.savings_rate_month}%</span>
+          <span class="text-xl font-black text-emerald-400 font-mono tracking-tight">${kpis.savings_rate_month}%</span>
           <span class="text-xs text-slate-400">(${formatVND(kpis.net_savings_month)})</span>
         </div>
-        <div class="mt-1 text-[11px] text-slate-400">
-          ${kpis.savings_rate_month >= 20 ? '✨ Đạt chuẩn tài chính 50/30/20' : '⚠️ Mục tiêu tối thiểu 20%'}
+        <div class="mt-1 text-[11px] ${kpis.savings_rate_month >= 20 ? 'text-emerald-400' : 'text-rose-400'} flex items-center gap-1">
+          <i class="fa-solid ${kpis.savings_rate_month >= 20 ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'} text-[10px]"></i>
+          <span>${kpis.savings_rate_month >= 20 ? 'Chuẩn tài chính 50/30/20' : 'Mục tiêu tối thiểu 20%'}</span>
         </div>
       </div>
     `;
@@ -377,18 +380,20 @@ export class DashboardComponent {
     const expenseData = data.map(d => d.expense);
     const netData = data.map(d => d.net_savings);
 
-    // Create high-DPI gradients
+    // 1. Mixed Positive Emerald -> Cyan Gradient (Income)
     const incomeGrad = ctx.createLinearGradient(0, 0, 0, 240);
-    incomeGrad.addColorStop(0, 'rgba(0, 255, 170, 0.95)');
-    incomeGrad.addColorStop(1, 'rgba(0, 255, 170, 0.2)');
+    incomeGrad.addColorStop(0, '#10B981');
+    incomeGrad.addColorStop(1, 'rgba(6, 182, 212, 0.35)');
 
+    // 2. Mixed Accent Rose -> Magenta Gradient (Expense)
     const expenseGrad = ctx.createLinearGradient(0, 0, 0, 240);
-    expenseGrad.addColorStop(0, 'rgba(176, 38, 255, 0.95)');
-    expenseGrad.addColorStop(1, 'rgba(176, 38, 255, 0.2)');
+    expenseGrad.addColorStop(0, '#F43F5E');
+    expenseGrad.addColorStop(1, 'rgba(236, 72, 153, 0.35)');
 
+    // 3. Mixed Primary Cyan -> Emerald Gradient Fill (Net Savings)
     const lineFillGrad = ctx.createLinearGradient(0, 0, 0, 240);
-    lineFillGrad.addColorStop(0, 'rgba(129, 140, 248, 0.25)');
-    lineFillGrad.addColorStop(1, 'rgba(129, 140, 248, 0.0)');
+    lineFillGrad.addColorStop(0, 'rgba(6, 182, 212, 0.35)');
+    lineFillGrad.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
 
     this.cashflowChart = new Chart(ctx, {
       type: 'bar',
@@ -399,7 +404,7 @@ export class DashboardComponent {
             label: 'Thu Nhập',
             data: incomeData,
             backgroundColor: incomeGrad,
-            hoverBackgroundColor: '#00FFAA',
+            hoverBackgroundColor: '#00F2FE',
             borderRadius: 8,
             barPercentage: 0.65,
             categoryPercentage: 0.8
@@ -408,7 +413,7 @@ export class DashboardComponent {
             label: 'Chi Tiêu',
             data: expenseData,
             backgroundColor: expenseGrad,
-            hoverBackgroundColor: '#B026FF',
+            hoverBackgroundColor: '#FB7185',
             borderRadius: 8,
             barPercentage: 0.65,
             categoryPercentage: 0.8
@@ -417,22 +422,27 @@ export class DashboardComponent {
             label: 'Dư Tích Lũy',
             data: netData,
             type: 'line',
-            borderColor: '#818cf8',
+            borderColor: '#06B6D4',
             backgroundColor: lineFillGrad,
-            borderWidth: 3,
+            borderWidth: 2.5,
             tension: 0.35,
             fill: true,
             pointRadius: 4,
             pointHoverRadius: 7,
-            pointBackgroundColor: '#818cf8',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 1.5
+            pointBackgroundColor: '#00F2FE',
+            pointBorderColor: '#FFFFFF',
+            pointBorderWidth: 2
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        resizeDelay: 200,
+        animation: {
+          duration: 900,
+          easing: 'easeOutQuart'
+        },
         interaction: {
           mode: 'index',
           intersect: false
@@ -440,10 +450,10 @@ export class DashboardComponent {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#111827',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: '#334155',
+            backgroundColor: '#0F172A',
+            titleColor: '#F8FAFC',
+            bodyColor: '#CBD5E1',
+            borderColor: 'rgba(6, 182, 212, 0.3)',
             borderWidth: 1,
             padding: 10,
             boxPadding: 4,
@@ -457,7 +467,7 @@ export class DashboardComponent {
           x: {
             grid: { display: false },
             ticks: {
-              color: '#94a3b8',
+              color: '#94A3B8',
               font: { family: 'Plus Jakarta Sans', size: 11 }
             }
           },
@@ -467,12 +477,11 @@ export class DashboardComponent {
               drawBorder: false
             },
             ticks: {
-              color: '#64748b',
+              color: '#64748B',
               font: { family: 'Plus Jakarta Sans', size: 10 },
               callback: (val) => {
-                if (val >= 1000000) return `${(val / 1000000).toFixed(0)}M`;
-                if (val <= -1000000) return `${(val / 1000000).toFixed(0)}M`;
-                if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+                if (val >= 1000000 || val <= -1000000) return `${(val / 1000000).toFixed(0)}M`;
+                if (val >= 1000 || val <= -1000) return `${(val / 1000).toFixed(0)}k`;
                 return val;
               }
             }
@@ -480,6 +489,7 @@ export class DashboardComponent {
         }
       }
     });
+    this.initialCashflowLoaded = true;
   }
 
   renderCategoryChart(breakdown) {
@@ -520,43 +530,53 @@ export class DashboardComponent {
       totalBadge.textContent = formatVND(totalExpense);
     }
 
-    // Mapping Neon Color Palette theo yêu cầu:
-    // Tiền nhà & Cố định: #B026FF (Quantum Violet)
-    // Ăn uống & Thực phẩm: #00FFAA (Aura Green)
-    // Mua sắm & Đồ công nghệ: #00E5FF (Nebula Cyan)
-    // Cà phê & Tiếp khách: #FF007A (Neon Rose)
-    // Đi lại & Xăng xe: #FFAA00 (Amber Glow)
-    // Sức khỏe & Thể thao: #3B82F6 (Electric Blue)
-    function getCategoryNeonColor(catName, index) {
-      const defaultPalette = ['#B026FF', '#00FFAA', '#00E5FF', '#FF007A', '#FFAA00', '#3B82F6', '#EC4899', '#10B981'];
-      if (!catName) return defaultPalette[index % defaultPalette.length];
+    // 3-Tone Neon Palette (Cyan, Emerald, Rose in varying shades/opacities)
+    const unifiedPalette = [
+      '#06B6D4', // Primary Cyan
+      '#F43F5E', // Accent Rose
+      '#10B981', // Positive Emerald
+      '#00F2FE', // Electric Cyan
+      '#EC4899', // Magenta Rose
+      '#059669', // Dark Emerald
+      '#0891B2', // Deep Cyan
+      '#E11D48'  // Crimson Rose
+    ];
+
+    function getCategoryUnifiedColor(catName, index) {
+      if (!catName) return unifiedPalette[index % unifiedPalette.length];
       const lower = catName.toLowerCase();
-      if (lower.includes('nhà') || lower.includes('thuê') || lower.includes('cố định')) return '#B026FF';
-      if (lower.includes('ăn') || lower.includes('thực phẩm') || lower.includes('uống')) return '#00FFAA';
-      if (lower.includes('mua sắm') || lower.includes('công nghệ') || lower.includes('sắm')) return '#00E5FF';
-      if (lower.includes('cà phê') || lower.includes('cafe') || lower.includes('tiếp khách') || lower.includes('đối tác') || lower.includes('giải trí')) return '#FF007A';
-      if (lower.includes('đi lại') || lower.includes('xăng') || lower.includes('di chuyển') || lower.includes('xe')) return '#FFAA00';
-      if (lower.includes('sức khỏe') || lower.includes('thể thao') || lower.includes('gym') || lower.includes('y tế')) return '#3B82F6';
-      return defaultPalette[index % defaultPalette.length];
+      // Essential & Fixed -> Primary Cyan
+      if (lower.includes('nhà') || lower.includes('thuê') || lower.includes('cố định') || lower.includes('điện') || lower.includes('nước') || lower.includes('xăng') || lower.includes('đi lại') || lower.includes('xe')) {
+        return '#06B6D4';
+      }
+      // Food & Health -> Positive Emerald
+      if (lower.includes('ăn') || lower.includes('thực phẩm') || lower.includes('uống') || lower.includes('sức khỏe') || lower.includes('y tế') || lower.includes('thể thao')) {
+        return '#10B981';
+      }
+      // Shopping & Entertainment -> Accent Rose
+      if (lower.includes('mua sắm') || lower.includes('công nghệ') || lower.includes('sắm') || lower.includes('cà phê') || lower.includes('cafe') || lower.includes('giải trí') || lower.includes('tiếp khách')) {
+        return '#F43F5E';
+      }
+      return unifiedPalette[index % unifiedPalette.length];
     }
 
     const labels = items.map(i => i.category_name);
     const dataVals = items.map(i => i.total_amount);
-    const colors = items.map((i, idx) => i.color || getCategoryNeonColor(i.category_name, idx));
+    const colors = items.map((i, idx) => getCategoryUnifiedColor(i.category_name, idx));
 
-    // Custom Cyberpunk HTML Legend
+    // Custom 3-Tone HTML Legend
     if (legendContainer) {
       legendContainer.innerHTML = items.map((item, idx) => {
         const color = colors[idx];
         const pct = item.percentage !== undefined ? item.percentage : (totalExpense > 0 ? ((item.total_amount / totalExpense) * 100).toFixed(1) : 0);
         return `
-          <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition group">
+          <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition group transform-gpu">
             <div class="flex items-center gap-2.5 min-w-0">
-              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color}; box-shadow: 0 0 8px ${color}80;"></span>
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color}; box-shadow: 0 0 6px ${color}50;"></span>
               <span class="text-xs font-semibold text-slate-200 truncate group-hover:text-white transition">${item.category_name}</span>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono" style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}40;">${pct}%</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono" style="background-color: ${color}15; color: ${color}; border: 1px solid ${color}35;">${pct}%</span>
               <span class="text-xs font-mono font-bold text-slate-100">${formatVND(item.total_amount)}</span>
             </div>
           </div>
@@ -588,7 +608,7 @@ export class DashboardComponent {
           displayAmount = `${inM}M ₫`;
         }
         ctx.font = '800 15px Plus Jakarta Sans, sans-serif';
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = '#06B6D4';
         ctx.fillText(displayAmount, centerX, centerY + 10);
 
         ctx.restore();
@@ -604,7 +624,7 @@ export class DashboardComponent {
           backgroundColor: colors,
           borderWidth: 2,
           borderColor: '#0B0F19',
-          hoverOffset: 6,
+          hoverOffset: 5,
           hoverBorderColor: '#FFFFFF'
         }]
       },
@@ -612,11 +632,12 @@ export class DashboardComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        resizeDelay: 200,
         cutout: '74%',
         animation: {
           animateRotate: true,
           animateScale: true,
-          duration: 1200,
+          duration: 900,
           easing: 'easeOutQuart'
         },
         plugins: {
@@ -624,10 +645,10 @@ export class DashboardComponent {
             display: false
           },
           tooltip: {
-            backgroundColor: 'rgba(11, 15, 25, 0.95)',
+            backgroundColor: '#0F172A',
             titleColor: '#FFFFFF',
-            bodyColor: '#00FFAA',
-            borderColor: 'rgba(0, 255, 170, 0.3)',
+            bodyColor: '#06B6D4',
+            borderColor: 'rgba(6, 182, 212, 0.3)',
             borderWidth: 1,
             padding: 10,
             boxPadding: 6,
@@ -643,6 +664,7 @@ export class DashboardComponent {
         }
       }
     });
+    this.initialCategoryLoaded = true;
   }
 
   renderBudgetAlerts(budgets) {
@@ -653,7 +675,7 @@ export class DashboardComponent {
       container.innerHTML = `
         <div class="text-center py-4 text-slate-400 text-xs">
           Chưa thiết lập hạn mức kỳ này.<br/>
-          <button id="btn-quick-set-budget" class="text-emerald-400 font-bold mt-1 hover:underline">+ Đặt hạn mức ngay</button>
+          <button id="btn-quick-set-budget" class="text-cyan-400 font-bold mt-1 hover:underline">+ Đặt hạn mức ngay</button>
         </div>
       `;
       document.getElementById('btn-quick-set-budget')?.addEventListener('click', () => this.app.navigate('budgets'));
@@ -663,12 +685,12 @@ export class DashboardComponent {
     container.innerHTML = budgets.slice(0, 4).map(b => {
       const isOver = b.status === 'OVERSPENT';
       const isWarn = b.status === 'WARNING';
-      const colorClass = isOver ? 'bg-rose-500' : isWarn ? 'bg-amber-500' : 'bg-emerald-500';
-      const textClass = isOver ? 'text-rose-400' : isWarn ? 'text-amber-400' : 'text-emerald-400';
+      const colorClass = isOver ? 'bg-rose-500' : isWarn ? 'bg-rose-400' : 'bg-emerald-500';
+      const textClass = isOver ? 'text-rose-400' : isWarn ? 'text-rose-400' : 'text-emerald-400';
       const badgeText = isOver ? `Vượt ${Math.round(b.percentage - 100)}%` : isWarn ? `Đã dùng ${b.percentage}%` : 'An toàn';
 
       return `
-        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-slate-600 transition">
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-slate-600 transition transform-gpu">
           <div class="flex items-center justify-between text-xs mb-1.5">
             <span class="font-bold text-slate-200">${b.category ? b.category.name : 'Danh mục'}</span>
             <span class="font-bold ${textClass} text-[11px]">${badgeText}</span>
@@ -676,7 +698,7 @@ export class DashboardComponent {
           <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
             <div class="${colorClass} progress-animated h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, b.percentage)}%"></div>
           </div>
-          <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+          <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
             <span>Đã chi: ${formatVND(b.spent_amount)}</span>
             <span>Hạn mức: ${formatVND(b.amount_limit)}</span>
           </div>
@@ -698,20 +720,20 @@ export class DashboardComponent {
       const isIncome = t.type === 'INCOME';
       const isTransfer = t.type === 'TRANSFER';
       const sign = isIncome ? '+' : isTransfer ? '⮂' : '-';
-      const amountColor = isIncome ? 'text-emerald-400' : isTransfer ? 'text-indigo-400' : 'text-rose-400';
+      const amountColor = isIncome ? 'text-emerald-400' : isTransfer ? 'text-cyan-400' : 'text-rose-400';
 
       const catName = t.category ? t.category.name : isTransfer ? 'Chuyển tiền' : 'Chung';
-      const catColor = t.category ? (t.category.color || '#10B981') : '#6366F1';
+      const catColor = isIncome ? '#10B981' : isTransfer ? '#06B6D4' : '#F43F5E';
       const catIcon = t.category ? (t.category.icon || 'receipt') : 'arrow-right-arrow-left';
 
       return `
         <tr class="hover:bg-slate-800/50 transition">
-          <td class="py-2.5 text-slate-400 text-[11px] whitespace-nowrap">
+          <td class="py-2.5 text-slate-400 text-[11px] whitespace-nowrap font-mono">
             ${formatDateVN(t.transaction_date)}
           </td>
           <td class="py-2.5">
             <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${catColor}">
+              <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${catColor}30; color: ${catColor}; border: 1px solid ${catColor}50;">
                 <i class="fa-solid fa-${catIcon}"></i>
               </span>
               <div class="min-w-0">
@@ -721,7 +743,7 @@ export class DashboardComponent {
             </div>
           </td>
           <td class="py-2.5 text-slate-400 text-[11px] whitespace-nowrap">
-            <span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300">${t.wallet ? t.wallet.name : ''}</span>
+            <span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-slate-300">${t.wallet ? t.wallet.name : ''}</span>
           </td>
           <td class="py-2.5 text-right font-black font-mono text-xs ${amountColor} whitespace-nowrap">
             ${sign} ${formatVND(t.amount)}
