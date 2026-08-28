@@ -9,7 +9,7 @@ export class WalletsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div class="space-y-8 animate-in fade-in duration-300">
+      <div id="tab-wallets" class="user-tab-pane space-y-8 animate-in fade-in duration-300">
         
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
@@ -451,26 +451,35 @@ export class WalletsComponent {
   }
 
   // -------------------------------------------------------------
-  // 2. MODAL NẠP TIỀN THẬT (QUÉT VIETQR MB BANK ADMIN)
+  // 2. MODAL NẠP TIỀN THẬT (QUÉT VIETQR MB BANK ADMIN & TỰ ĐỘNG 100%)
   // -------------------------------------------------------------
-  openRealDepositModal(walletId = null) {
+  async openRealDepositModal(walletId = null) {
     const realWallet = this.wallets.find(w => w.wallet_scope === 'real') || this.wallets[0];
     const modalEl = document.getElementById('modal-deposit-wallet') || document.getElementById('generic-modal');
     if (!modalEl || !realWallet) return;
 
     let selectedAmount = 200000;
-    const currentUser = this.app.currentUser || { id: 1, full_name: 'USER' };
-    const userCode = `NAP VIP ${currentUser.id} ${(currentUser.full_name || 'USER').toUpperCase().replace(/\\s+/g, '')}`;
+    let currentOrder = null;
+    let pollInterval = null;
+    let debounceTimer = null;
+    let isProcessed = false;
 
-    const generateVietQRUrl = (amt) => {
-      const sanitizedAmt = Math.round(parseFloat(amt) || 0);
-      const memoParam = encodeURIComponent(userCode);
-      return `https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${sanitizedAmt}&addInfo=${memoParam}&accountName=DANG%20QUYET%20THANG`;
+    const close = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+      modalEl.innerHTML = '';
     };
 
+    // Initial render modal shell
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-amber-500/50 animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-amber-500/50 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
           
           <!-- Cyber Ambient Background Glow -->
           <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-amber-500/15 blur-3xl pointer-events-none"></div>
@@ -483,7 +492,7 @@ export class WalletsComponent {
               </div>
               <div>
                 <h3 class="text-base font-black text-slate-100">Nạp Tiền Thật (Cổng Dịch Vụ & VIP)</h3>
-                <p class="text-xs text-slate-400">Số dư hiện tại: <span class="font-mono text-amber-400 font-bold">${formatVND(realWallet.balance)}</span></p>
+                <p class="text-xs text-slate-400">Số dư hiện tại: <span class="font-mono text-amber-400 font-bold" id="modal-real-current-balance">${formatVND(realWallet.balance)}</span></p>
               </div>
             </div>
             <button id="real-deposit-close" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center transition">
@@ -491,165 +500,305 @@ export class WalletsComponent {
             </button>
           </div>
 
-          <!-- Form -->
-          <form id="real-deposit-form" class="mt-4 space-y-4 relative z-10">
-            
-            <!-- Amount Input & Quick Buttons -->
-            <div>
-              <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Số Tiền Nạp (VNĐ) *</label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-400 font-bold text-base">₫</span>
-                <input type="number" id="real-deposit-amount" required min="10000" step="10000" value="${selectedAmount}"
-                  class="w-full pl-9 pr-3.5 py-3 text-lg font-black text-slate-100 font-mono rounded-2xl border border-slate-700 bg-slate-900/90 focus:ring-2 focus:ring-amber-500 focus:outline-none" />
-              </div>
+          <!-- Live Webhook Listening Status Badge -->
+          <div class="mt-3 py-1.5 px-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-[11px]">
+            <span class="text-amber-300 font-bold flex items-center gap-1.5" id="modal-webhook-status-text">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+              Lắng nghe Webhook Ngân Hàng (Polling 3s)...
+            </span>
+            <span class="font-mono font-black text-amber-400">Tự Động 100%</span>
+          </div>
 
-              <!-- Quick Selection Pills -->
-              <div class="grid grid-cols-5 gap-1.5 mt-2">
-                <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="100000">+100k</button>
-                <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-amber-500 bg-amber-500/20 text-amber-300 hover:border-amber-500 transition active:scale-95" data-amount="200000">+200k</button>
-                <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="500000">+500k</button>
-                <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="1000000">+1tr</button>
-                <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="5000000">+5tr</button>
-              </div>
-            </div>
-
-            <!-- Dynamic VietQR Container -->
-            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/40 flex flex-col items-center justify-center text-center space-y-3">
+          <!-- Form Body Container -->
+          <div id="real-deposit-modal-body">
+            <form id="real-deposit-form" class="mt-3 space-y-4 relative z-10">
               
-              <!-- Dynamic VietQR Code Image -->
-              <div class="relative group">
-                <img id="real-vietqr-img" src="${generateVietQRUrl(selectedAmount)}" alt="Mã VietQR Nạp Tiền MB Bank" 
-                  class="max-w-[190px] sm:max-w-[210px] mx-auto rounded-2xl shadow-xl border-2 border-amber-500/50 p-1.5 bg-white object-contain transition hover:scale-105" />
-                <div class="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full gradient-amber text-[10px] font-black text-slate-950 shadow-md flex items-center gap-1">
-                  <i class="fa-solid fa-qrcode text-[9px]"></i>
-                  <span>VietQR Admin MB</span>
+              <!-- Amount Input & Quick Buttons -->
+              <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Số Tiền Nạp (VNĐ) *</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-400 font-bold text-base">₫</span>
+                  <input type="number" id="deposit-amount-input" name="deposit-amount" required min="2000" step="1000" value="${selectedAmount}"
+                    class="w-full pl-9 pr-3.5 py-3 text-lg font-black text-slate-100 font-mono rounded-2xl border border-slate-700 bg-slate-900/90 focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+                </div>
+
+                <!-- Quick Selection Pills -->
+                <div class="grid grid-cols-5 gap-1.5 mt-2">
+                  <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="100000">+100k</button>
+                  <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-amber-500 bg-amber-500/20 text-amber-300 hover:border-amber-500 transition active:scale-95" data-amount="200000">+200k</button>
+                  <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="500000">+500k</button>
+                  <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="1000000">+1tr</button>
+                  <button type="button" class="real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95" data-amount="5000000">+5tr</button>
                 </div>
               </div>
 
-              <!-- Transfer Info Table -->
-              <div class="w-full text-xs space-y-2 font-mono bg-slate-950/90 p-3 rounded-xl border border-slate-800 text-left">
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400 font-sans">Ngân hàng thụ hưởng:</span>
-                  <span class="font-bold text-slate-100">MB Bank (Ngân Hàng Quân Đội)</span>
+              <!-- Dynamic VietQR Container -->
+              <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/40 flex flex-col items-center justify-center text-center space-y-3 relative" id="real-qr-card-box">
+                
+                <!-- Loading Indicator Overlay for QR Creation -->
+                <div id="real-qr-loading-overlay" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-xs z-20 rounded-2xl flex flex-col items-center justify-center space-y-2">
+                  <i class="fa-solid fa-spinner fa-spin text-amber-400 text-2xl"></i>
+                  <span class="text-xs text-slate-300 font-bold">Đang sinh mã VietQR mới...</span>
                 </div>
 
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400 font-sans">Số tài khoản Admin:</span>
-                  <button type="button" id="btn-copy-real-acc" class="font-bold text-cyan-400 flex items-center gap-1.5 hover:text-cyan-300 transition" title="Click để sao chép số tài khoản">
-                    <span id="real-qr-acc-text">0374617569</span>
-                    <i class="fa-regular fa-copy text-[11px]"></i>
-                  </button>
+                <!-- Dynamic VietQR Code Image -->
+                <div class="relative group">
+                  <img id="real-vietqr-img" src="" alt="Mã VietQR Nạp Tiền" 
+                    class="max-w-[190px] sm:max-w-[210px] min-h-[190px] mx-auto rounded-2xl shadow-xl border-2 border-amber-500/50 p-1.5 bg-white object-contain transition hover:scale-105" />
+                  <div class="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full gradient-amber text-[10px] font-black text-slate-950 shadow-md flex items-center gap-1">
+                    <i class="fa-solid fa-qrcode text-[9px]"></i>
+                    <span id="real-qr-bank-tag">VietQR Napas</span>
+                  </div>
                 </div>
 
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400 font-sans">Chủ tài khoản:</span>
-                  <span class="font-bold text-amber-300">DANG QUYET THANG</span>
+                <!-- Transfer Info Table -->
+                <div class="w-full text-xs space-y-2 font-mono bg-slate-950/90 p-3 rounded-xl border border-slate-800 text-left">
+                  <div class="flex justify-between items-center text-slate-300">
+                    <span class="text-slate-400 font-sans">Mã đơn nạp:</span>
+                    <span class="font-bold text-amber-400" id="real-qr-order-code-text">ORD-...</span>
+                  </div>
+
+                  <div class="flex justify-between items-center text-slate-300">
+                    <span class="text-slate-400 font-sans">Ngân hàng thụ hưởng:</span>
+                    <span class="font-bold text-slate-100" id="real-qr-bank-name-text">MB Bank</span>
+                  </div>
+
+                  <div class="flex justify-between items-center text-slate-300">
+                    <span class="text-slate-400 font-sans">Số tài khoản Admin:</span>
+                    <button type="button" id="btn-copy-real-acc" class="font-bold text-cyan-400 flex items-center gap-1.5 hover:text-cyan-300 transition" title="Click để sao chép số tài khoản">
+                      <span id="real-qr-acc-text">...</span>
+                      <i class="fa-regular fa-copy text-[11px]"></i>
+                    </button>
+                  </div>
+
+                  <div class="flex justify-between items-center text-slate-300">
+                    <span class="text-slate-400 font-sans">Chủ tài khoản:</span>
+                    <span class="font-bold text-amber-300" id="real-qr-acc-name-text">...</span>
+                  </div>
+
+                  <div class="flex justify-between items-center text-slate-300">
+                    <span class="text-slate-400 font-sans">Số tiền nạp:</span>
+                    <span class="font-black text-amber-400 text-sm" id="real-qr-amount-display">${formatVND(selectedAmount)}</span>
+                  </div>
+
+                  <div class="flex justify-between items-center text-slate-300 border-t border-slate-800 pt-1.5">
+                    <span class="text-slate-400 font-sans">Nội dung CK (Bắt buộc):</span>
+                    <button type="button" id="btn-copy-real-memo" class="font-black text-amber-400 flex items-center gap-1.5 hover:text-amber-300 transition" title="Click để sao chép nội dung">
+                      <span id="real-qr-memo-text">FT NAP ...</span>
+                      <i class="fa-regular fa-copy text-[11px]"></i>
+                    </button>
+                  </div>
                 </div>
 
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400 font-sans">Số tiền nạp:</span>
-                  <span class="font-black text-amber-400 text-sm" id="real-qr-amount-display">${formatVND(selectedAmount)}</span>
-                </div>
+              </div>
 
-                <div class="flex justify-between items-center text-slate-300 border-t border-slate-800 pt-1.5">
-                  <span class="text-slate-400 font-sans">Nội dung CK (Bắt buộc):</span>
-                  <button type="button" id="btn-copy-real-memo" class="font-black text-amber-400 flex items-center gap-1.5 hover:text-amber-300 transition" title="Click để sao chép nội dung">
-                    <span id="real-qr-memo-text">${userCode}</span>
-                    <i class="fa-regular fa-copy text-[11px]"></i>
+              <!-- Action buttons with unified Demo Transfer Mode -->
+              <div class="space-y-2.5 pt-1">
+                <button type="button" id="btn-demo-transfer" class="btn-primary w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg shadow-amber-500/25 active:scale-95 text-xs sm:text-sm">
+                  <i class="fa-solid fa-bolt"></i>
+                  <span>Demo Chuyển Tiền (Giả Lập Nhận Tiền Tức Thì)</span>
+                </button>
+                <div class="flex items-center justify-between text-xs text-slate-400 px-1 pt-0.5">
+                  <span class="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
+                    <i class="fa-solid fa-shield-halved"></i> SePay / VietQR Auto Sync
+                  </span>
+                  <button type="button" id="real-deposit-cancel" class="text-slate-400 hover:text-slate-200 underline text-xs font-medium transition">
+                    Hủy bỏ
                   </button>
                 </div>
               </div>
 
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex items-center gap-3 pt-2">
-              <button type="button" id="real-deposit-cancel" class="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
-                Hủy Bỏ
-              </button>
-              <button type="submit" id="real-deposit-submit-btn" class="w-2/3 py-2.5 rounded-xl gradient-amber text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-circle-check text-sm"></i>
-                <span>Tôi Đã Chuyển Tiền Thật</span>
-              </button>
-            </div>
-
-          </form>
+            </form>
+          </div>
 
         </div>
       </div>
     `;
 
-    const close = () => { modalEl.innerHTML = ''; };
     document.getElementById('real-deposit-close')?.addEventListener('click', close);
     document.getElementById('real-deposit-cancel')?.addEventListener('click', close);
 
-    const amountInput = document.getElementById('real-deposit-amount');
+    const amountInput = document.getElementById('deposit-amount-input') || document.getElementById('real-deposit-amount');
     const qrImgEl = document.getElementById('real-vietqr-img');
     const qrAmountDisplay = document.getElementById('real-qr-amount-display');
-    const submitBtn = document.getElementById('real-deposit-submit-btn');
+    const qrLoadingOverlay = document.getElementById('real-qr-loading-overlay');
+    const orderCodeText = document.getElementById('real-qr-order-code-text');
+    const bankNameText = document.getElementById('real-qr-bank-name-text');
+    const accNumText = document.getElementById('real-qr-acc-text');
+    const accNameText = document.getElementById('real-qr-acc-name-text');
+    const memoText = document.getElementById('real-qr-memo-text');
+    const bankTag = document.getElementById('real-qr-bank-tag');
 
-    const updateRealQR = () => {
-      const amt = parseFloat(amountInput.value || '0');
-      if (qrAmountDisplay) qrAmountDisplay.textContent = formatVND(amt);
-      if (qrImgEl) qrImgEl.src = generateVietQRUrl(amt);
+    // Function to generate and update deposit order dynamically
+    const generateDepositOrder = async (amt) => {
+      const sanitizedAmt = Math.max(2000, Math.round(parseFloat(amt) || 2000));
+      selectedAmount = sanitizedAmt;
+      if (qrAmountDisplay) qrAmountDisplay.textContent = formatVND(sanitizedAmt);
+      if (qrLoadingOverlay) qrLoadingOverlay.classList.remove('hidden');
+
+      try {
+        const orderRes = await api.createDepositOrder(sanitizedAmt);
+        if (orderRes && orderRes.order_code) {
+          currentOrder = orderRes;
+
+          if (qrImgEl) qrImgEl.src = orderRes.vietqr_url;
+          if (orderCodeText) orderCodeText.textContent = orderRes.order_code;
+          if (memoText) memoText.textContent = orderRes.transfer_memo;
+
+          if (orderRes.bank_info) {
+            if (bankNameText) bankNameText.textContent = orderRes.bank_info.bank_name;
+            if (accNumText) accNumText.textContent = orderRes.bank_info.account_number;
+            if (accNameText) accNameText.textContent = orderRes.bank_info.account_name;
+            if (bankTag) bankTag.textContent = `VietQR ${orderRes.bank_info.bank_code}`;
+          }
+        }
+      } catch (err) {
+        this.app.showToast(err.message || 'Lỗi khởi tạo đơn nạp VietQR', 'error');
+      } finally {
+        if (qrLoadingOverlay) qrLoadingOverlay.classList.add('hidden');
+      }
     };
 
-    amountInput?.addEventListener('input', updateRealQR);
+    // Initialize first order immediately
+    await generateDepositOrder(selectedAmount);
 
+    // Debounce amount change on typing
+    amountInput?.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value || '0');
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (val >= 2000) {
+          generateDepositOrder(val);
+        }
+      }, 400);
+    });
+
+    // Quick selection buttons
     modalEl.querySelectorAll('.real-quick-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const val = parseFloat(btn.getAttribute('data-amount') || '0');
-        amountInput.value = val;
+        const val = parseFloat(btn.getAttribute('data-amount') || '200000');
+        if (amountInput) amountInput.value = val;
         modalEl.querySelectorAll('.real-quick-btn').forEach(b => {
           b.className = (parseFloat(b.getAttribute('data-amount')) === val)
             ? 'real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-amber-500 bg-amber-500/20 text-amber-300 hover:border-amber-500 transition active:scale-95'
             : 'real-quick-btn py-1.5 rounded-xl text-[11px] font-bold font-mono border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-500 hover:text-amber-400 transition active:scale-95';
         });
-        updateRealQR();
+        generateDepositOrder(val);
       });
     });
 
+    // Copy Account Number
     document.getElementById('btn-copy-real-acc')?.addEventListener('click', () => {
-      navigator.clipboard?.writeText('0374617569');
-      this.app.showToast('Đã sao chép số tài khoản MB Bank Admin (0374617569)!', 'success');
+      const acc = accNumText?.textContent?.trim() || '0374617569';
+      navigator.clipboard?.writeText(acc);
+      this.app.showToast(`Đã sao chép STK Admin (${acc})!`, 'success');
     });
 
+    // Copy Transfer Memo
     document.getElementById('btn-copy-real-memo')?.addEventListener('click', () => {
-      navigator.clipboard?.writeText(userCode);
-      this.app.showToast(`Đã sao chép cú pháp chuyển khoản: ${userCode}`, 'success');
+      const memo = memoText?.textContent?.trim() || (currentOrder?.transfer_memo || 'FT NAP');
+      navigator.clipboard?.writeText(memo);
+      this.app.showToast(`Đã sao chép nội dung CK: ${memo}`, 'success');
     });
 
-    document.getElementById('real-deposit-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Demo Transfer Button Event Handler (Unified Instant Receive)
+    document.getElementById('btn-demo-transfer')?.addEventListener('click', async (e) => {
+      if (!currentOrder?.order_code) return;
+      const btn = e.currentTarget;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang giả lập chuyển tiền...`;
+      btn.disabled = true;
+
       try {
-        const amount = parseFloat(amountInput.value);
-        if (!amount || amount <= 0) {
-          this.app.showToast('Vui lòng nhập số tiền nạp hợp lệ (> 0 đ)', 'error');
-          return;
-        }
-
-        if (submitBtn) {
-          submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang xác nhận chuyển khoản...`;
-          submitBtn.disabled = true;
-        }
-
-        const res = await api.depositToWallet(realWallet.id, amount, 'QR_CODE', `Nạp tiền thật vào Ví Dịch Vụ & VIP FinTrack qua VietQR MB Bank (${userCode})`);
-        close();
-
-        if (window.confetti) {
-          window.confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
-        }
-
-        this.app.showToast(`Đã ghi nhận chuyển tiền thành công ${formatVND(amount)} vào Ví Tiền Thật!`, 'success');
-        await this.loadWallets();
-      } catch (err) {
-        this.app.showToast(err.message || 'Lỗi nạp tiền thật', 'error');
-        if (submitBtn) {
-          submitBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Thử Lại`;
-          submitBtn.disabled = false;
-        }
+        await api.mockMBReceive(currentOrder.order_code, selectedAmount, currentOrder.transfer_memo);
+        this.app.showToast('✅ Đã nhận tiền thành công!', 'success');
+        handleSuccessApproved();
+      } catch (mockErr) {
+        this.app.showToast(mockErr.message || 'Lỗi gửi tín hiệu giả lập', 'error');
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
       }
     });
+
+    // Success transition handler
+    const handleSuccessApproved = async () => {
+      if (isProcessed) return;
+      isProcessed = true;
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+
+      if (window.confetti) {
+        window.confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+      }
+
+      // Refresh user data & wallet balances
+      let updatedRealWallet = null;
+      try {
+        this.app.currentUser = await api.getMe();
+        this.app.renderUserProfileHeader();
+        await this.loadWallets();
+        updatedRealWallet = this.wallets.find(w => w.wallet_scope === 'real') || realWallet;
+      } catch (_) {}
+
+      const bodyEl = document.getElementById('real-deposit-modal-body');
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div class="py-8 px-4 text-center space-y-4 animate-in fade-in zoom-in duration-300">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 mx-auto flex items-center justify-center text-3xl shadow-lg shadow-emerald-500/30 animate-bounce">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-black text-slate-100">Nạp Tiền Thành Công 100%!</h3>
+              <p class="text-xs text-slate-400 mt-1">Giao dịch đã được hệ thống ghi nhận và đối soát tự động</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-900 border border-emerald-500/30 text-xs font-mono space-y-1.5 text-left max-w-xs mx-auto">
+              <div class="flex justify-between text-slate-400">
+                <span>Mã đơn:</span>
+                <span class="font-bold text-amber-400">${currentOrder?.order_code || 'ORD'}</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Số tiền nạp:</span>
+                <span class="font-bold text-emerald-400">+${formatVND(selectedAmount)}</span>
+              </div>
+              <div class="flex justify-between text-slate-400 border-t border-slate-800 pt-1">
+                <span>Số dư mới:</span>
+                <span class="font-black text-amber-300 font-mono text-sm">${formatVND(updatedRealWallet ? updatedRealWallet.balance : (realWallet.balance + selectedAmount))}</span>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-500">Cửa sổ sẽ tự động đóng sau giây lát...</p>
+          </div>
+        `;
+      }
+
+      this.app.showToast(`🎉 MB Bank ghi nhận tiền về! Đã tự động cộng +${formatVND(selectedAmount)} vào Ví Tiền Thật!`, 'success');
+
+      if (this.app.updateNotificationBadge) {
+        this.app.updateNotificationBadge(false);
+      }
+
+      // Auto close after 2 seconds
+      setTimeout(() => {
+        close();
+        const mainContainer = document.getElementById('main-content-view');
+        if (mainContainer && this.render) {
+          this.render(mainContainer);
+        }
+      }, 2000);
+    };
+
+    // Start 3-second Polling mechanism
+    pollInterval = setInterval(async () => {
+      if (isProcessed || !currentOrder?.order_code) return;
+      try {
+        const statusRes = await api.getDepositOrderStatus(currentOrder.order_code);
+        const orderData = statusRes.order || statusRes;
+        if (statusRes.status === 'APPROVED' || statusRes.is_approved || orderData.status === 'APPROVED') {
+          handleSuccessApproved();
+        }
+      } catch (_) {}
+    }, 3000);
   }
 
   // -------------------------------------------------------------

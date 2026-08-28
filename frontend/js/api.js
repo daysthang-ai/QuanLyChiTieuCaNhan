@@ -579,8 +579,92 @@ class APIClient {
     });
   }
 
+  createDepositOrder(amount) {
+    return this.request('/payments/create-deposit-order', {
+      method: 'POST',
+      body: JSON.stringify({ amount: parseFloat(amount) })
+    });
+  }
+
   getMySubscriptionOrders() {
     return this.request('/subscriptions/my-orders');
+  }
+
+  getOrderStatus(orderCode) {
+    return this.request(`/payments/order-status/${encodeURIComponent(orderCode)}`);
+  }
+
+  getDepositOrderStatus(orderCode) {
+    return this.request(`/payments/order-status/${encodeURIComponent(orderCode)}`);
+  }
+
+  mockReceiveMoney(orderCode = null, amount = null, description = null, userId = null) {
+    return this.request('/payments/mock-receive-money', {
+      method: 'POST',
+      body: JSON.stringify({
+        order_code: orderCode,
+        amount: amount,
+        description: description,
+        user_id: userId
+      })
+    });
+  }
+
+  mockMBReceive(orderCode, amount = null, description = null) {
+    return this.request('/payments/mock-mb-receive', {
+      method: 'POST',
+      body: JSON.stringify({
+        order_code: orderCode,
+        amount: amount,
+        description: description
+      })
+    });
+  }
+
+  // --- Payment Gateway Configuration & VietQR ---
+  getActiveBankGateway() {
+    return this.request('/public/active-bank-gateway');
+  }
+
+  getPublicPaymentGatewayInfo() {
+    return this.request('/public/active-bank-gateway');
+  }
+
+  getAdminBankGateway() {
+    return this.request('/admin/bank-gateway');
+  }
+
+  getAdminPaymentSettings() {
+    return this.request('/admin/bank-gateway');
+  }
+
+  saveAdminBankGateway(data) {
+    return this.request('/admin/bank-gateway', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  updateAdminPaymentSettings(data) {
+    return this.request('/admin/bank-gateway', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  getAdminBankTransactions(statusFilter = 'ALL', search = '', limit = 50) {
+    const params = new URLSearchParams();
+    if (statusFilter && statusFilter !== 'ALL') params.append('status_filter', statusFilter);
+    if (search) params.append('search', search);
+    if (limit) params.append('limit', limit);
+    return this.request(`/admin/bank-gateway/transactions?${params.toString()}`);
+  }
+
+  manualMatchBankTransaction(txId, payload) {
+    return this.request(`/admin/bank-gateway/transactions/${txId}/manual-match`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
   }
 
   getAdminSubscriptionOrders(statusFilter = 'ALL', search = '') {

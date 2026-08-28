@@ -8,6 +8,8 @@ from backend.app.models.ai_log import AIChatLog
 from backend.app.models.notification import Notification, NotificationRead, NotificationDismiss
 from backend.app.models.subscription_order import SubscriptionOrder
 from backend.app.models.support_ticket import SupportTicket
+from backend.app.models.system_setting import SystemSetting
+from backend.app.models.system_bank_account import SystemBankAccount, BankTransaction
 
 __all__ = [
     "User",
@@ -21,5 +23,8 @@ __all__ = [
     "NotificationRead",
     "NotificationDismiss",
     "SubscriptionOrder",
-    "SupportTicket"
+    "SupportTicket",
+    "SystemSetting",
+    "SystemBankAccount",
+    "BankTransaction"
 ]

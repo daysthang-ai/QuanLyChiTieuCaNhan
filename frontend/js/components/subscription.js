@@ -199,7 +199,7 @@ export class SubscriptionComponent {
     };
 
     container.innerHTML = `
-      <div class="w-full max-w-7xl mx-auto space-y-7 animate-in fade-in duration-300">
+      <div id="tab-subscription" class="user-tab-pane w-full max-w-7xl mx-auto space-y-7 animate-in fade-in duration-300">
         
         <!-- Header Banner -->
         <div class="relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-amber-500/30 shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#1e1508]">
@@ -689,6 +689,22 @@ export class SubscriptionComponent {
       wallets = [];
     }
 
+    let gateway = {
+      bank_code: 'MB',
+      bank_id: 'MB',
+      bank_name: 'MB Bank (Ngân Hàng Quân Đội)',
+      account_number: '0374617569',
+      account_name: 'DANG QUYET THANG',
+      qr_template: 'compact2',
+      memo_prefix: 'NAP VIP'
+    };
+    try {
+      const gwRes = await api.getActiveBankGateway();
+      if (gwRes && gwRes.account_number) {
+        gateway = gwRes;
+      }
+    } catch (_) {}
+
     const realWallets = wallets.filter(w => w.wallet_scope === 'real');
     const paymentWallets = realWallets.length > 0 ? realWallets : wallets;
     const userId = this.app.currentUser?.id || 1;
@@ -709,7 +725,7 @@ export class SubscriptionComponent {
 
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-2xl shadow-amber-500/20' : isPro ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/20' : 'border-slate-800'} animate-in fade-in zoom-in duration-200">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-2xl shadow-amber-500/20' : isPro ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/20' : 'border-slate-800'} animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
           
           <button id="sub-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>
@@ -790,11 +806,11 @@ export class SubscriptionComponent {
           </div>
 
           ${!isFree ? `
-            <!-- Option 1: VietQR MB Bank Payment Container -->
+            <!-- Option 1: Dynamic VietQR Payment Container -->
             <div id="container-pay-vietqr" class="p-4 rounded-2xl ${isPlatinum ? 'bg-gradient-to-br from-emerald-950/20 via-slate-900/90 to-teal-950/30 border border-emerald-500/30' : isPremium ? 'bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-yellow-950/30 border border-amber-500/30' : isPro ? 'bg-gradient-to-br from-indigo-950/20 via-slate-900/90 to-purple-950/30 border border-indigo-500/30' : 'bg-slate-900/90 border border-slate-800'} text-xs mb-5 space-y-3">
               <div class="flex flex-col sm:flex-row items-center gap-4">
                 <div class="p-2 bg-white rounded-2xl shadow-xl flex-shrink-0">
-                  <img id="sub-vietqr-img" src="https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${initialPricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG" 
+                  <img id="sub-vietqr-img" src="https://img.vietqr.io/image/${gateway.bank_id}-${gateway.account_number}-${gateway.qr_template || 'compact2'}.png?amount=${initialPricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=${encodeURIComponent(gateway.account_name)}" 
                        alt="VietQR Chuyển Khoản" 
                        class="w-32 h-32 object-contain rounded-lg"
                        onerror="this.src='/TKnganhangMB.jpg'" />
@@ -802,15 +818,15 @@ export class SubscriptionComponent {
                 <div class="space-y-1.5 flex-1 font-mono text-[11px] w-full">
                   <div class="flex justify-between border-b border-slate-800/80 pb-1">
                     <span class="text-slate-400 font-sans">Ngân hàng:</span>
-                    <span class="font-bold text-slate-100">MB Bank (Quân Đội)</span>
+                    <span class="font-bold text-slate-100">${gateway.bank_name}</span>
                   </div>
                   <div class="flex justify-between border-b border-slate-800/80 pb-1">
                     <span class="text-slate-400 font-sans">Số tài khoản:</span>
-                    <span class="font-bold text-emerald-400 select-all">0374617569</span>
+                    <span class="font-bold text-emerald-400 select-all">${gateway.account_number}</span>
                   </div>
                   <div class="flex justify-between border-b border-slate-800/80 pb-1">
                     <span class="text-slate-400 font-sans">Chủ tài khoản:</span>
-                    <span class="font-bold text-slate-100">DANG QUYET THANG</span>
+                    <span class="font-bold text-slate-100">${gateway.account_name}</span>
                   </div>
                   <div class="flex justify-between pt-0.5">
                     <span class="text-slate-400 font-sans">Nội dung CK:</span>
@@ -962,7 +978,7 @@ export class SubscriptionComponent {
 
       // Update VietQR dynamic image URL with current calculated price and memo
       if (qrImg) {
-        qrImg.src = `https://img.vietqr.io/image/MB-0374617569-compact2.png?amount=${pricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=DANG%20QUYET%20THANG`;
+        qrImg.src = `https://img.vietqr.io/image/${gateway.bank_id}-${gateway.account_number}-${gateway.qr_template || 'compact2'}.png?amount=${pricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=${encodeURIComponent(gateway.account_name)}`;
       }
       
       if (confirmBtnText) {
@@ -1123,26 +1139,38 @@ export class SubscriptionComponent {
     });
   }
 
-  // Display status popup notification when order is created
+  // Display status popup notification when order is created with auto-polling & mock trigger
   showOrderSubmittedModal(order) {
     const modalEl = document.getElementById('generic-modal');
     if (!modalEl) return;
 
+    let pollInterval = null;
+    let isFinished = false;
+
+    const cleanup = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      modalEl.innerHTML = '';
+    };
+
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-amber-500/40 animate-in fade-in zoom-in duration-200 text-center space-y-4">
+      <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-amber-500/50 animate-in fade-in zoom-in duration-200 text-center space-y-4">
           
           <div class="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto shadow-lg shadow-amber-500/10">
-            <i class="fa-solid fa-hourglass-half animate-pulse"></i>
+            <i class="fa-solid fa-satellite-dish animate-pulse text-amber-300"></i>
           </div>
 
           <div>
-            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider">
-              ⏳ Đang Chờ Phê Duyệt
-            </span>
-            <h3 class="text-lg font-black text-slate-100 mt-2">Đơn Hàng #${order.order_code || '---'} Đã Được Tiếp Nhận!</h3>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+              <span>Đang Lắng Nghe Webhook MB Bank (Tự Động 100%)</span>
+            </div>
+            <h3 class="text-lg font-black text-slate-100 mt-2.5">Đơn Hàng #${order.order_code || '---'} Đã Khởi Tạo!</h3>
             <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-              Đơn thanh toán đang được xử lý và chờ duyệt bởi Quản trị viên. Hệ thống sẽ tự động kích hoạt gói và gửi thông báo ngay khi đối soát thành công.
+              Hệ thống đang tự động lắng nghe giao dịch chuyển khoản từ MB Bank. Ngay khi tiền vào STK <b>0374617569</b>, gói VIP sẽ được kích hoạt tức thì!
             </p>
           </div>
 
@@ -1157,24 +1185,97 @@ export class SubscriptionComponent {
             </div>
             <div class="flex justify-between">
               <span class="text-slate-400 font-sans">Nội dung CK:</span>
-              <span class="font-bold text-slate-200 select-all">${order.transfer_memo || '---'}</span>
+              <span class="font-bold text-amber-400 select-all">${order.transfer_memo || '---'}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-400 font-sans">Trạng thái:</span>
-              <span class="font-bold text-amber-400">⏳ PENDING (Chờ duyệt)</span>
+              <span class="text-slate-400 font-sans">Trạng thái đối soát:</span>
+              <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-spinner fa-spin text-xs"></i>
+                <span id="sub-modal-status-text">Chờ MB Bank Báo Tiền Về...</span>
+              </span>
             </div>
           </div>
 
-          <button type="button" id="btn-close-submitted-modal" class="w-full py-2.5 rounded-xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 active:scale-95 transition">
-            Đã Hiểu & Theo Dõi Đơn Hàng
+          <!-- Mock Bank Button for Live Demo / Defense -->
+          <div class="p-3 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-left space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-cyan-300 flex items-center gap-1">
+                <i class="fa-solid fa-flask-vial"></i> Mô Phỏng Webhook (Dành Cho Demo)
+              </span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">Test Mode</span>
+            </div>
+            <button type="button" id="btn-trigger-mock-bank-sub" class="w-full py-2.5 rounded-xl gradient-cyan text-slate-950 font-black text-xs shadow-md hover:shadow-cyan-500/30 active:scale-95 transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-bolt"></i>
+              <span>⚡ Giả Lập MB Bank Báo Tiền Về Ngay</span>
+            </button>
+          </div>
+
+          <button type="button" id="btn-close-submitted-modal" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+            Đóng Cửa Sổ (Hệ thống vẫn tự duyệt ngầm)
           </button>
         </div>
       </div>
     `;
 
-    document.getElementById('btn-close-submitted-modal')?.addEventListener('click', () => {
-      modalEl.innerHTML = '';
+    document.getElementById('btn-close-submitted-modal')?.addEventListener('click', cleanup);
+
+    // Mock Bank Button Event Handler
+    document.getElementById('btn-trigger-mock-bank-sub')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi Webhook MB Bank...`;
+      btn.disabled = true;
+
+      try {
+        const mockRes = await api.mockReceiveMoney(order.order_code, order.amount, order.transfer_memo, order.user_id);
+        this.app.showToast('✅ MB Bank đã gửi biến động số dư thành công! Hệ thống đang kích hoạt...', 'info');
+      } catch (mockErr) {
+        this.app.showToast(mockErr.message || 'Lỗi gửi tín hiệu giả lập', 'error');
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Thử Lại`;
+        btn.disabled = false;
+      }
     });
+
+    // Start 3-second Polling mechanism
+    pollInterval = setInterval(async () => {
+      if (isFinished) return;
+      try {
+        const statusRes = await api.getOrderStatus(order.order_code);
+        const orderData = statusRes.order || statusRes;
+        if (statusRes.status === 'APPROVED' || statusRes.is_approved || orderData.status === 'APPROVED') {
+          isFinished = true;
+          cleanup();
+
+          // Trigger Confetti Celebration
+          if (window.confetti) {
+            window.confetti({
+              particleCount: 160,
+              spread: 90,
+              origin: { y: 0.6 }
+            });
+          }
+
+          // Show Toast
+          this.app.showToast(`🎉 Thanh toán thành công! Gói ${order.plan_code} VIP đã được hệ thống kích hoạt tự động 100% qua MB Bank!`, 'success');
+
+          // Refresh User Data & Header UI immediately
+          try {
+            this.app.currentUser = await api.getMe();
+            this.app.renderUserProfileHeader();
+          } catch (_) {}
+
+          // Refresh view & notifications
+          const mainContainer = document.getElementById('main-content-view');
+          if (mainContainer) {
+            this.render(mainContainer);
+          }
+          if (this.app.updateNotificationBadge) {
+            this.app.updateNotificationBadge(false);
+          }
+        }
+      } catch (err) {
+        // Silent catch for background poll
+      }
+    }, 3000);
   }
 
   // Load personal VIP orders history list

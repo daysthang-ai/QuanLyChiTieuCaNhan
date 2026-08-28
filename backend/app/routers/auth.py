@@ -97,9 +97,10 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         full_name=user_in.full_name,
         hashed_password=get_password_hash(user_in.password),
         role="USER",
+        status="ACTIVE",
         plan="FREE",
         plan_tier="Free",
-        plan_activated_at=datetime.datetime.utcnow(),
+        plan_activated_at=None,
         plan_expires_at=None,
         is_plan_active=True,
         currency=user_in.currency or "VND"
@@ -121,19 +122,25 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         )
         db.add(cat)
 
-    # Initialize default Cash and Bank wallets
+    # Initialize default 4 personal accounting (virtual) wallets + 1 real payment wallet with balance = 0 VNĐ
     default_wallets = [
-        {"name": "Tiền mặt", "wallet_type": "CASH", "balance": 0.0, "icon": "money-bill-wave", "color": "#16A34A"},
-        {"name": "Tài khoản Ngân hàng", "wallet_type": "BANK", "balance": 0.0, "icon": "building-columns", "color": "#3B82F6"}
+        {"name": "Tiền mặt", "wallet_type": "CASH", "wallet_scope": "virtual", "balance": 0.0, "icon": "money-bill-wave", "color": "#10B981"},
+        {"name": "MB Bank", "wallet_type": "BANK", "wallet_scope": "virtual", "balance": 0.0, "icon": "building-columns", "color": "#3B82F6"},
+        {"name": "Ví MoMo", "wallet_type": "EWALLET", "wallet_scope": "virtual", "balance": 0.0, "icon": "wallet", "color": "#D946EF"},
+        {"name": "Sổ Tiết Kiệm", "wallet_type": "SAVINGS", "wallet_scope": "virtual", "balance": 0.0, "icon": "piggy-bank", "color": "#8B5CF6"},
+        {"name": "Ví Dịch Vụ & VIP FinTrack", "wallet_type": "EWALLET", "wallet_scope": "real", "balance": 0.0, "icon": "wallet", "color": "#F59E0B"}
     ]
     for w_data in default_wallets:
         w = Wallet(
             user_id=new_user.id,
             name=w_data["name"],
             wallet_type=w_data["wallet_type"],
+            wallet_scope=w_data["wallet_scope"],
             balance=w_data["balance"],
             icon=w_data["icon"],
-            color=w_data["color"]
+            color=w_data["color"],
+            currency=new_user.currency or "VND",
+            is_active=True
         )
         db.add(w)
 

@@ -19,6 +19,7 @@ class Notification(Base):
     icon = Column(String(50), default="bell", nullable=False)
     link_tab = Column(String(50), nullable=True)  # dashboard, subscription, budgets, wallets, etc.
     is_read = Column(Boolean, default=False, nullable=False)
+    is_pinned = Column(Boolean, default=False, nullable=False)
     created_by_role = Column(String(20), default="ADMIN", nullable=True)  # ADMIN, MODERATOR
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 

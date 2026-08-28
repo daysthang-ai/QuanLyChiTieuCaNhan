@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=4.9';
-import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js?v=4.9';
+import { api } from '../api.js?v=5.5';
+import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js?v=5.5';
 
 export class TransactionsComponent {
   constructor(app) {
@@ -20,7 +20,7 @@ export class TransactionsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div class="space-y-6 animate-in fade-in duration-300">
+      <div id="tab-transactions" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header & Action Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

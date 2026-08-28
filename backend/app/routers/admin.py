@@ -753,12 +753,66 @@ def get_system_audit_logs(
     now = datetime.datetime.utcnow()
     
     logs = [
-        {"id": 101, "timestamp": now.strftime("%d/%m/%Y %H:%M:%S"), "type": "SECURITY", "user": current_admin.email, "ip": "127.0.0.1", "action": "Admin Login", "details": "Đăng nhập xác thực 2FA thành công", "level": "INFO"},
-        {"id": 102, "timestamp": (now - datetime.timedelta(minutes=10)).strftime("%d/%m/%Y %H:%M:%S"), "type": "DATA_CHANGE", "user": "user@fintrack.ai", "ip": "113.161.72.10", "action": "Add Transaction", "details": "Ghi nhận khoản chi Ăn trưa 45,000đ", "level": "INFO"},
-        {"id": 103, "timestamp": (now - datetime.timedelta(minutes=35)).strftime("%d/%m/%Y %H:%M:%S"), "type": "AI_API", "user": "user@fintrack.ai", "ip": "113.161.72.10", "action": "AI Natural Parse", "details": "Gemini 1.5 Pro parsed query in 410ms", "level": "INFO"},
-        {"id": 104, "timestamp": (now - datetime.timedelta(hours=1, minutes=15)).strftime("%d/%m/%Y %H:%M:%S"), "type": "SECURITY", "user": "unknown@hacker.io", "ip": "45.133.1.92", "action": "Failed Login Attempt", "details": "Mật khẩu không chính xác (3 lần)", "level": "WARNING"},
-        {"id": 105, "timestamp": (now - datetime.timedelta(hours=3)).strftime("%d/%m/%Y %H:%M:%S"), "type": "ERROR_LOG", "user": "System Cron", "ip": "127.0.0.1", "action": "External API Health Check", "details": "OpenAI Backup Endpoint Timeout (Recovered)", "level": "ERROR"},
-        {"id": 106, "timestamp": (now - datetime.timedelta(hours=6)).strftime("%d/%m/%Y %H:%M:%S"), "type": "BACKUP", "user": "System Daemon", "ip": "127.0.0.1", "action": "DB Snapshot Backup", "details": "Tạo bản sao lưu fintrack.db thành công", "level": "INFO"}
+        {
+            "id": 101,
+            "timestamp": now.strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "SECURITY",
+            "user": "admin@fintrack.ai",
+            "ip": "14.239.88.102",
+            "action": "Admin Login",
+            "details": "Đăng nhập thành công từ IP 14.239.88.102 (admin@fintrack.ai - Xác thực 2FA thành công)",
+            "level": "INFO"
+        },
+        {
+            "id": 102,
+            "timestamp": (now - datetime.timedelta(minutes=8)).strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "DATA_CHANGE",
+            "user": "SePay Webhook",
+            "ip": "103.20.148.5",
+            "action": "Webhook Payment Success",
+            "details": "Webhook SePay nhận giao dịch nạp tiền 199.000đ thành công mã #ORD-849202",
+            "level": "SUCCESS"
+        },
+        {
+            "id": 103,
+            "timestamp": (now - datetime.timedelta(minutes=25)).strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "CONFIG",
+            "user": "admin@fintrack.ai",
+            "ip": "14.239.88.102",
+            "action": "Update VietQR Gateway",
+            "details": "Cập nhật cấu hình cổng thanh toán VietQR (MB Bank) và Webhook secret",
+            "level": "INFO"
+        },
+        {
+            "id": 104,
+            "timestamp": (now - datetime.timedelta(hours=1, minutes=10)).strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "BACKUP",
+            "user": "System Cron Daemon",
+            "ip": "127.0.0.1",
+            "action": "DB Snapshot Auto Backup",
+            "details": "Hệ thống tự động sao lưu toàn bộ cơ sở dữ liệu fintrack.db (Snapshot 180 KB)",
+            "level": "INFO"
+        },
+        {
+            "id": 105,
+            "timestamp": (now - datetime.timedelta(hours=2, minutes=30)).strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "AI_API",
+            "user": "user.vip@gmail.com",
+            "ip": "113.161.72.10",
+            "action": "AI Natural Parse",
+            "details": "AI Natural Language Parser xử lý thành công 24 giao dịch giọng nói / text không có độ trễ (Latency 390ms)",
+            "level": "SUCCESS"
+        },
+        {
+            "id": 106,
+            "timestamp": (now - datetime.timedelta(hours=4)).strftime("%d/%m/%Y %H:%M:%S"),
+            "type": "SECURITY",
+            "user": "Security Sentinel",
+            "ip": "127.0.0.1",
+            "action": "Security Audit Scanner",
+            "details": "Quét lỗ hổng định kỳ, 0 cảnh báo an ninh, bảo vệ phiên đăng nhập an toàn",
+            "level": "INFO"
+        }
     ]
 
     if log_type and log_type != "ALL":
@@ -1561,4 +1615,307 @@ def export_audit_logs_csv(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+
+
+# =====================================================================
+# MODULE 11: CẤU HÌNH MAIL (SMTP)
+# =====================================================================
+
+class SMTPConfig(BaseModel):
+    host: str
+    port: int
+    sender_email: str
+    app_password: str
+    sender_name: str
+
+@router.get("/smtp-config")
+def get_smtp_config(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    from backend.app.models.system_setting import SystemSetting
+    
+    keys = ["smtp_host", "smtp_port", "smtp_sender_email", "smtp_app_password", "smtp_sender_name"]
+    settings = db.query(SystemSetting).filter(SystemSetting.key.in_(keys)).all()
+    setting_map = {s.key: s.value for s in settings}
+    
+    return {
+        "success": True,
+        "config": {
+            "host": setting_map.get("smtp_host", ""),
+            "port": int(setting_map.get("smtp_port", 587)),
+            "sender_email": setting_map.get("smtp_sender_email", ""),
+            "app_password": setting_map.get("smtp_app_password", ""),
+            "sender_name": setting_map.get("smtp_sender_name", "FinTrack AI")
+        }
+    }
+
+@router.post("/smtp-config")
+def update_smtp_config(
+    data: SMTPConfig,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    from backend.app.models.system_setting import SystemSetting
+    
+    configs = {
+        "smtp_host": data.host,
+        "smtp_port": str(data.port),
+        "smtp_sender_email": data.sender_email,
+        "smtp_app_password": data.app_password,
+        "smtp_sender_name": data.sender_name
+    }
+    
+    for k, v in configs.items():
+        s = db.query(SystemSetting).filter(SystemSetting.key == k).first()
+        if s:
+            s.value = v
+        else:
+            s = SystemSetting(key=k, value=v, description=f"SMTP Configuration: {k}")
+            db.add(s)
+            
+    db.commit()
+    return {"success": True, "message": "Đã lưu cấu hình SMTP thành công!"}
+
+class TestSMTP(BaseModel):
+    test_email: str
+
+@router.post("/test-smtp")
+def test_smtp_connection(
+    data: TestSMTP,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    import smtplib
+    from email.message import EmailMessage
+    from backend.app.models.system_setting import SystemSetting
+    
+    keys = ["smtp_host", "smtp_port", "smtp_sender_email", "smtp_app_password", "smtp_sender_name"]
+    settings = db.query(SystemSetting).filter(SystemSetting.key.in_(keys)).all()
+    setting_map = {s.key: s.value for s in settings}
+    
+    host = setting_map.get("smtp_host")
+    port = int(setting_map.get("smtp_port", 587))
+    sender_email = setting_map.get("smtp_sender_email")
+    app_password = setting_map.get("smtp_app_password")
+    sender_name = setting_map.get("smtp_sender_name")
+    
+    if not host or not sender_email or not app_password:
+        raise HTTPException(status_code=400, detail="Vui lòng cấu hình SMTP trước khi gửi test.")
+        
+    try:
+        msg = EmailMessage()
+        msg.set_content(f"Chào {current_admin.full_name},\n\nĐây là email test từ hệ thống FinTrack AI. Kết nối SMTP của bạn đang hoạt động tốt!\n\nTrân trọng,\nAdmin FinTrack.")
+        msg['Subject'] = "[FinTrack AI] Test SMTP Connection"
+        msg['From'] = f"{sender_name} <{sender_email}>"
+        msg['To'] = data.test_email
+
+        # If port is 465 it usually requires SMTP_SSL
+        if port == 465:
+            server = smtplib.SMTP_SSL(host, port)
+        else:
+            server = smtplib.SMTP(host, port)
+            server.starttls()
+            
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+        server.quit()
+        
+        return {"success": True, "message": f"Đã gửi email test thành công tới {data.test_email}!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi gửi email: {str(e)}")
+
+# =====================================================================
+# MODULE 12: KHÓA API & BẢO MẬT
+# =====================================================================
+
+class SecurityKeysConfig(BaseModel):
+    openai_api_key: str
+    gemini_api_key: str
+    default_ai_model: str
+    sepay_api_token: str
+    sepay_webhook_secret: str
+    telegram_bot_token: str
+    maintenance_mode: bool
+    rate_limit: int
+
+@router.get("/security-keys")
+def get_security_keys(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    from backend.app.models.system_setting import SystemSetting
+    
+    keys = ["openai_api_key", "gemini_api_key", "default_ai_model", 
+            "sepay_api_token", "sepay_webhook_secret", "telegram_bot_token",
+            "maintenance_mode", "rate_limit"]
+            
+    settings = db.query(SystemSetting).filter(SystemSetting.key.in_(keys)).all()
+    setting_map = {s.key: s.value for s in settings}
+    
+    return {
+        "success": True,
+        "config": {
+            "openai_api_key": setting_map.get("openai_api_key", ""),
+            "gemini_api_key": setting_map.get("gemini_api_key", ""),
+            "default_ai_model": setting_map.get("default_ai_model", "gemini-1.5-pro"),
+            "sepay_api_token": setting_map.get("sepay_api_token", ""),
+            "sepay_webhook_secret": setting_map.get("sepay_webhook_secret", ""),
+            "telegram_bot_token": setting_map.get("telegram_bot_token", ""),
+            "maintenance_mode": setting_map.get("maintenance_mode", "false").lower() == "true",
+            "rate_limit": int(setting_map.get("rate_limit", 100))
+        }
+    }
+
+@router.post("/security-keys")
+def update_security_keys(
+    data: SecurityKeysConfig,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    from backend.app.models.system_setting import SystemSetting
+    
+    configs = {
+        "openai_api_key": data.openai_api_key,
+        "gemini_api_key": data.gemini_api_key,
+        "default_ai_model": data.default_ai_model,
+        "sepay_api_token": data.sepay_api_token,
+        "sepay_webhook_secret": data.sepay_webhook_secret,
+        "telegram_bot_token": data.telegram_bot_token,
+        "maintenance_mode": str(data.maintenance_mode).lower(),
+        "rate_limit": str(data.rate_limit)
+    }
+    
+    for k, v in configs.items():
+        s = db.query(SystemSetting).filter(SystemSetting.key == k).first()
+        if s:
+            s.value = v
+        else:
+            s = SystemSetting(key=k, value=v, description=f"Security/API config: {k}")
+            db.add(s)
+            
+    db.commit()
+    return {"success": True, "message": "Đã lưu cấu hình API & Bảo mật thành công!"}
+
+# =====================================================================
+# MODULE 13: PHÁT THÔNG BÁO (BROADCAST)
+# =====================================================================
+
+class BroadcastCreate(BaseModel):
+    title: str
+    type: str
+    message: str
+    is_pinned: bool
+
+@router.post("/broadcast")
+def create_broadcast(
+    data: BroadcastCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    icon = "bell"
+    if data.type == "MAINTENANCE": icon = "triangle-exclamation"
+    elif data.type == "PROMOTION": icon = "crown"
+    elif data.type == "SUCCESS": icon = "check-circle"
+    
+    new_notif = Notification(
+        target_type="ALL",
+        title=data.title,
+        message=data.message,
+        type=data.type,
+        icon=icon,
+        created_by_role="ADMIN",
+        is_pinned=data.is_pinned
+    )
+    db.add(new_notif)
+    db.commit()
+    return {"success": True, "message": "Đã phát thông báo thành công!"}
+
+@router.get("/broadcasts")
+def get_broadcasts(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    broadcasts = db.query(Notification).filter(Notification.target_type == "ALL").order_by(Notification.is_pinned.desc(), desc(Notification.created_at)).all()
+    
+    result = []
+    for b in broadcasts:
+        result.append({
+            "id": b.id,
+            "title": b.title,
+            "type": b.type,
+            "message": b.message,
+            "is_pinned": getattr(b, 'is_pinned', False),
+            "created_at": b.created_at.isoformat() if b.created_at else None
+        })
+        
+    return {"success": True, "data": result}
+
+@router.delete("/broadcast/{id}")
+def delete_broadcast(
+    id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    b = db.query(Notification).filter(Notification.id == id, Notification.target_type == "ALL").first()
+    if not b:
+        raise HTTPException(status_code=404, detail="Không tìm thấy thông báo này.")
+        
+    db.delete(b)
+    db.commit()
+    return {"success": True, "message": "Đã xóa thông báo."}
+
+# =====================================================================
+# MODULE 14: SAO LƯU DATABASE
+# =====================================================================
+import os
+from fastapi import File, UploadFile
+import shutil
+
+@router.get("/db/info")
+def get_db_info(current_admin: User = Depends(get_current_admin_user)):
+    db_path = "fintrack.db"
+    size = 0
+    if os.path.exists(db_path):
+        size = os.path.getsize(db_path)
+    
+    return {
+        "success": True,
+        "size_bytes": size,
+        "status": "ONLINE",
+        "last_backup": datetime.datetime.now().isoformat()
+    }
+
+@router.get("/db/download")
+def download_db(current_admin: User = Depends(get_current_admin_user)):
+    db_path = "fintrack.db"
+    if not os.path.exists(db_path):
+        raise HTTPException(status_code=404, detail="Database file not found.")
+    
+    return StreamingResponse(
+        open(db_path, "rb"),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename=fintrack_backup_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.db"}
+    )
+
+@router.post("/db/restore")
+def restore_db(
+    file: UploadFile = File(...),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    if not file.filename.endswith(".db"):
+        raise HTTPException(status_code=400, detail="Chỉ chấp nhận file .db")
+        
+    db_path = "fintrack.db"
+    backup_path = f"fintrack_old_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+    
+    if os.path.exists(db_path):
+        shutil.copy2(db_path, backup_path)
+        
+    with open(db_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"success": True, "message": "Đã khôi phục cơ sở dữ liệu thành công!"}
+
 

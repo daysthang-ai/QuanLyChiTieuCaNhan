@@ -10,6 +10,24 @@ def test_register_success(client):
     assert "access_token" in data
     assert data["user"]["email"] == "newuser@fintrack.ai"
     assert data["user"]["full_name"] == "Lê Văn Mới"
+    assert data["user"]["plan"] == "FREE"
+    assert data["user"]["plan_tier"] == "Free"
+    assert data["user"]["plan_expires_at"] is None
+
+    # Check that new user has 4 virtual wallets + 1 real wallet with 0 balance
+    token = data["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    wallets_res = client.get("/api/v1/wallets/", headers=headers)
+    assert wallets_res.status_code == 200
+    wallets = wallets_res.json()
+    assert len(wallets) >= 5
+    wallet_names = [w["name"] for w in wallets]
+    assert "Tiền mặt" in wallet_names
+    assert "MB Bank" in wallet_names
+    assert "Ví MoMo" in wallet_names
+    assert "Sổ Tiết Kiệm" in wallet_names
+    assert all(w["balance"] == 0.0 for w in wallets)
+
 
 def test_register_duplicate_email(client, test_user):
     res = client.post("/api/v1/auth/register", json={

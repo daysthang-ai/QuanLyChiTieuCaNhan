@@ -13,6 +13,7 @@ from backend.app.routers.admin import router as admin_router
 from backend.app.routers.notifications import router as notifications_router
 from backend.app.routers.subscriptions import router as subscriptions_router
 from backend.app.routers.support import router as support_router
+from backend.app.routers.payments import router as payments_router
 
 __all__ = [
     "auth_router",
@@ -29,5 +30,6 @@ __all__ = [
     "admin_router",
     "notifications_router",
     "subscriptions_router",
-    "support_router"
+    "support_router",
+    "payments_router"
 ]

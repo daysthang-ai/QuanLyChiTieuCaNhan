@@ -10,7 +10,7 @@ export class SavingsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div class="space-y-6 animate-in fade-in duration-300">
+      <div id="tab-savings" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

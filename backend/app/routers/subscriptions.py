@@ -30,8 +30,9 @@ def create_subscription_order(
     Người dùng tạo đơn thanh toán gói VIP / Nạp tiền (Trạng thái PENDING - Chờ duyệt).
     """
     plan_code = data.plan_code.upper()
-    if plan_code not in ["PRO", "PREMIUM", "PLATINUM"]:
-        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận PRO, PREMIUM hoặc PLATINUM.")
+    valid_plans = ["PRO", "PREMIUM", "PLATINUM", "REAL_WALLET", "WALLET_TOPUP", "VIP"]
+    if plan_code not in valid_plans:
+        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chấp nhận: PRO, PREMIUM, PLATINUM, hoặc REAL_WALLET.")
 
     # Generate unique order code: ORD-XXXXXX
     random_digits = f"{random.randint(100000, 999999)}"

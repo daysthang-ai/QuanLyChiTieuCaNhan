@@ -14,7 +14,7 @@ export class NotificationsComponent {
   async render(container) {
     this.isLoading = true;
     container.innerHTML = `
-      <div class="space-y-6 animate-in fade-in duration-300">
+      <div id="tab-notifications" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- 1. Header Banner -->
         <div class="relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-pink-500/25 shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#190d20]">

@@ -41,7 +41,7 @@ mindmap
 ```
 
 ### Persona 1: Đặng Quyết Thắng (End User - Người dùng cá nhân)
-- **Độ tuổi**: 24 tuổi - Kỹ sư phần mềm / Nhân viên văn phòng tại Thái Nguyên.
+- **Độ tuổi**: 20 tuổi - Kỹ sư phần mềm / Nhân viên văn phòng tại Thái Nguyên.
 - **Mục tiêu**: Cần ghi chép nhanh các khoản chi nhỏ lẻ hàng ngày bằng câu nói tự nhiên, muốn phân bổ thu nhập 25.000.000 đ theo quy tắc 50/30/20 để tiết kiệm mua xe máy và đi du lịch.
 - **Nỗi đau (Pain points)**: Lười nhập form thủ công nhiều trường, lo ngại phần mềm tài chính làm lộ số tài khoản ngân hàng và thông tin cá nhân.
 

@@ -13,7 +13,8 @@ from backend.app.routers import (
     auth_router, wallets_router, categories_router,
     transactions_router, budgets_router, saving_goals_router,
     analytics_router, exports_router, ai_router, backup_router, badges_router,
-    admin_router, notifications_router, subscriptions_router, support_router
+    admin_router, notifications_router, subscriptions_router, support_router,
+    payments_router
 )
 
 # Initialize Database Schema
@@ -137,6 +138,8 @@ app.include_router(admin_router, prefix=api_v1_prefix)
 app.include_router(notifications_router, prefix=api_v1_prefix)
 app.include_router(subscriptions_router, prefix=api_v1_prefix)
 app.include_router(support_router, prefix=api_v1_prefix)
+app.include_router(payments_router, prefix=api_v1_prefix)
+app.include_router(payments_router, prefix="/api")
 
 # Mount Uploads directory
 uploads_dir = Path(settings.UPLOAD_DIR)
@@ -148,18 +151,16 @@ frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
 if frontend_dir.exists():
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="frontend_static")
 
-@app.get("/")
+@app.get("/", response_class=FileResponse)
 async def root():
     """Serves the FinTrack AI Single Page Application."""
     index_file = frontend_dir / "index.html"
     if index_file.exists():
-        return FileResponse(str(index_file))
-    return {
-        "app": "FinTrack AI",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "message": "Backend API is running. Frontend static files will be served when available."
-    }
+        return FileResponse(str(index_file), media_type="text/html; charset=utf-8")
+    return HTMLResponse(
+        content="<html><head><meta charset='utf-8'></head><body><h3>FinTrack AI Backend API is running.</h3></body></html>",
+        media_type="text/html; charset=utf-8"
+    )
 
 @app.get("/TKnganhangMB.jpg")
 @app.get("/TknganhangMB.jpg")

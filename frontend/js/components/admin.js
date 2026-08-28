@@ -225,6 +225,23 @@ export class AdminComponent {
         ];
         break;
 
+      // 4. Cổng Ngân Hàng & VietQR (Bank Gateway & VietQR)
+      case 'admin_bank_gateway':
+      case 'bank_gateway':
+      case 'admin_bank':
+        sectionMeta = {
+          title: 'CỔNG NGÂN HÀNG & VIETQR',
+          icon: 'fa-building-columns text-amber-400',
+          color: 'from-amber-500/20 to-yellow-500/10 text-amber-300 border-amber-500/30'
+        };
+        currentActiveSubtab = this.activeBankGatewayFilter || 'bank_config';
+        subtabs = [
+          { id: 'bank_config', icon: 'fa-qrcode text-amber-400', label: '💳 Cấu Hình Cổng Thụ Hưởng' },
+          { id: 'bank_txs', icon: 'fa-clock-rotate-left text-cyan-400', label: '📊 Biến Động Số Dư & Lịch Sử' },
+          { id: 'bank_automation', icon: 'fa-robot text-emerald-400', label: '🤖 Cú Pháp & Tự Động Duyệt' }
+        ];
+        break;
+
       // 4. Quản Trị AI & Token (AI & Engine) - Root: 4 (Moderator Hidden)
       case 'admin_ai':
       case 'ai':
@@ -327,12 +344,13 @@ export class AdminComponent {
           icon: 'fa-sliders text-purple-400',
           color: 'from-purple-500/20 to-indigo-500/10 text-purple-300 border-purple-500/30'
         };
-        currentActiveSubtab = this.activeSettingsFilter || 'settings_broadcast';
+        currentActiveSubtab = this.activeSettingsFilter || 'settings_gateway';
         subtabs = [
-          { id: 'settings_broadcast', icon: 'fa-bullhorn text-rose-400', label: '📢 Phát Thông Báo' },
-          { id: 'settings_smtp', icon: 'fa-envelope text-blue-400', label: '📧 Cấu hình Mail (SMTP)' },
-          { id: 'settings_backup', icon: 'fa-database text-teal-400', label: '💾 Sao Lưu Database' },
-          { id: 'settings_security', icon: 'fa-key text-amber-400', label: '🔐 Khóa API & Bảo Mật' }
+          { id: 'settings_gateway', icon: 'fa-qrcode text-amber-400', label: '💳 Cổng VietQR Admin', desc: 'Cấu hình STK ngân hàng thụ hưởng nhận tiền nạp tự động' },
+          { id: 'settings_broadcast', icon: 'fa-bullhorn text-rose-400', label: '📢 Phát Thông Báo', desc: 'Gửi thông báo toàn sàn' },
+          { id: 'settings_smtp', icon: 'fa-envelope text-blue-400', label: '📧 Cấu hình Mail (SMTP)', desc: 'Cổng gửi email hệ thống' },
+          { id: 'settings_backup', icon: 'fa-database text-teal-400', label: '💾 Sao Lưu Database', desc: 'Sao lưu và phục hồi dữ liệu' },
+          { id: 'settings_security', icon: 'fa-key text-amber-400', label: '🔐 Khóa API & Bảo Mật', desc: 'Cấu hình bảo mật hệ thống' }
         ];
         break;
 
@@ -459,6 +477,14 @@ export class AdminComponent {
         this.renderAdminSubTabs(this.activeAdminTab);
         this.applyTicketsFilter(subtabId);
         break;
+
+      case 'admin_bank_gateway':
+      case 'bank_gateway':
+      case 'admin_bank':
+        this.activeBankGatewayFilter = subtabId;
+        this.renderAdminSubTabs(this.activeAdminTab);
+        this.applyBankGatewayFilter(subtabId);
+        break;
     }
   }
 
@@ -506,6 +532,11 @@ export class AdminComponent {
       case 'subscriptions':
       case 'billing':
         await this.renderSubscriptionsTab(container);
+        break;
+      case 'admin_bank_gateway':
+      case 'bank_gateway':
+      case 'admin_bank':
+        await this.renderBankGatewayTab(container);
         break;
       case 'admin_support':
       case 'support':
@@ -3575,6 +3606,1666 @@ export class AdminComponent {
     this.activeTicketsFilter = subtabId;
     this.loadAdminSupportTickets();
   }
+
+  // =========================================================================
+  // 9. SETTINGS & DYNAMIC PAYMENT GATEWAY TAB
+  // =========================================================================
+  async renderSettingsTab(container) {
+    this.destroyCharts();
+    container.innerHTML = `
+      <div id="admin-settings-content-wrapper" class="space-y-6 admin-subtab-content-anim">
+        <div class="py-16 text-center text-slate-500 text-xs animate-pulse">
+          <i class="fa-solid fa-spinner fa-spin text-rose-500 mb-2 block text-xl"></i>
+          Đang tải cấu hình hệ thống & cổng thanh toán...
+        </div>
+      </div>
+    `;
+
+    await this.loadSettingsTabContent();
+  }
+
+  applySettingsFilter(subtabId) {
+    this.activeSettingsFilter = subtabId;
+    this.loadSettingsTabContent();
+  }
+
+  async loadSettingsTabContent() {
+    const wrapper = document.getElementById('admin-settings-content-wrapper');
+    if (!wrapper) return;
+
+    const filter = this.activeSettingsFilter || 'settings_gateway';
+
+    if (filter === 'settings_gateway') {
+      await this.renderPaymentGatewaySettings(wrapper);
+    } else if (filter === 'settings_broadcast') {
+      await this.renderSettingsBroadcast(wrapper);
+    } else if (filter === 'settings_smtp') {
+      await this.renderSettingsSmtp(wrapper);
+    } else if (filter === 'settings_backup') {
+      await this.renderSettingsBackup(wrapper);
+    } else if (filter === 'settings_security') {
+      await this.renderSettingsSecurity(wrapper);
+    }
+  }
+
+  // --- TAB: PHÁT THÔNG BÁO ---
+  async renderSettingsBroadcast(wrapper) {
+    wrapper.innerHTML = `
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5 h-fit">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-paper-plane text-rose-400"></i>
+              <span>Soạn Thông Báo Mới</span>
+            </h4>
+          </div>
+          <form id="form-admin-broadcast" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Tiêu đề *</label>
+              <input type="text" id="bc-title" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-rose-500" placeholder="Nhập tiêu đề thông báo...">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Loại thông báo *</label>
+              <select id="bc-type" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-rose-500">
+                <option value="INFO">Thông báo hệ thống</option>
+                <option value="MAINTENANCE">Cảnh báo bảo trì</option>
+                <option value="PROMOTION">Khuyến mãi VIP</option>
+                <option value="SUCCESS">Cập nhật tính năng</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Nội dung chi tiết *</label>
+              <textarea id="bc-message" required rows="4" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-rose-500" placeholder="Nội dung..."></textarea>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="bc-pinned" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-rose-500">
+              <label for="bc-pinned" class="text-xs text-slate-300 font-bold">Ghim lên đầu trang</label>
+            </div>
+            <button type="submit" id="btn-submit-bc" class="w-full py-3 rounded-xl gradient-rose text-white font-black text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bullhorn"></i> Phát Thông Báo Ngay
+            </button>
+          </form>
+        </div>
+        <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-teal-400"></i>
+              <span>Lịch Sử Đã Phát</span>
+            </h4>
+            <button id="btn-refresh-bc" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition">
+              <i class="fa-solid fa-rotate-right text-xs"></i>
+            </button>
+          </div>
+          <div id="bc-list-container" class="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+            <div class="py-8 text-center text-slate-500 text-xs"><i class="fa-solid fa-spinner fa-spin mb-2"></i> Đang tải...</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const loadBroadcasts = async () => {
+      const container = document.getElementById('bc-list-container');
+      try {
+        const res = await api.request('/admin/broadcasts');
+        if (!res.data || res.data.length === 0) {
+          container.innerHTML = '<div class="py-8 text-center text-slate-500 text-xs">Chưa có thông báo nào được phát.</div>';
+          return;
+        }
+        container.innerHTML = res.data.map(b => {
+          let typeColor = 'text-blue-400';
+          let typeLabel = 'Hệ Thống';
+          if(b.type === 'MAINTENANCE') { typeColor = 'text-rose-400'; typeLabel = 'Bảo Trì'; }
+          if(b.type === 'PROMOTION') { typeColor = 'text-amber-400'; typeLabel = 'Khuyến Mãi'; }
+          if(b.type === 'SUCCESS') { typeColor = 'text-emerald-400'; typeLabel = 'Cập Nhật'; }
+          
+          return `
+            <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2 relative group transition hover:border-slate-700">
+              ${b.is_pinned ? '<div class="absolute top-0 right-4 -mt-2 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[9px] font-bold"><i class="fa-solid fa-thumbtack"></i> Ghim</div>' : ''}
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold ${typeColor} px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800">${typeLabel}</span>
+                  <span class="text-[10px] text-slate-500"><i class="fa-regular fa-clock"></i> ${new Date(b.created_at).toLocaleString()}</span>
+                </div>
+                <button class="btn-delete-bc text-rose-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition text-xs" data-id="${b.id}" title="Thu hồi/Xóa">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+              <h5 class="text-sm font-bold text-slate-200">${b.title}</h5>
+              <p class="text-[11px] text-slate-400 whitespace-pre-line">${b.message}</p>
+            </div>
+          `;
+        }).join('');
+
+        container.querySelectorAll('.btn-delete-bc').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            if(!confirm('Bạn có chắc chắn muốn thu hồi/xóa thông báo này?')) return;
+            const id = e.currentTarget.getAttribute('data-id');
+            try {
+              await api.request('/admin/broadcast/' + id, { method: 'DELETE' });
+              this.app.showToast('Đã xóa thông báo', 'success');
+              loadBroadcasts();
+            } catch (err) {
+              this.app.showToast('Lỗi xóa: ' + err.message, 'error');
+            }
+          });
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="py-8 text-center text-rose-400 text-xs">Lỗi tải dữ liệu</div>';
+      }
+    };
+
+    document.getElementById('btn-refresh-bc')?.addEventListener('click', loadBroadcasts);
+    document.getElementById('form-admin-broadcast')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-bc');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang phát...';
+      try {
+        await api.request('/admin/broadcast', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: document.getElementById('bc-title').value.trim(),
+            type: document.getElementById('bc-type').value,
+            message: document.getElementById('bc-message').value.trim(),
+            is_pinned: document.getElementById('bc-pinned').checked
+          })
+        });
+        this.app.showToast('Đã phát thông báo toàn sàn!', 'success');
+        e.target.reset();
+        loadBroadcasts();
+      } catch(err) {
+        this.app.showToast('Lỗi: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bullhorn"></i> Phát Thông Báo Ngay';
+      }
+    });
+
+    loadBroadcasts();
+  }
+
+  // --- TAB: CẤU HÌNH MAIL SMTP ---
+  async renderSettingsSmtp(wrapper) {
+    wrapper.innerHTML = `
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-envelope text-blue-400"></i>
+              <span>Cấu Hình Máy Chủ Gửi Mail (SMTP)</span>
+            </h4>
+          </div>
+          <form id="form-smtp" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">SMTP Server (Host) *</label>
+                <input type="text" id="smtp-host" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500" placeholder="smtp.gmail.com">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Port *</label>
+                <input type="number" id="smtp-port" required value="465" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500" placeholder="465 hoặc 587">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Email gửi (Sender Email) *</label>
+              <input type="email" id="smtp-email" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500" placeholder="abc@gmail.com">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Mật khẩu ứng dụng (App Password) *</label>
+              <input type="password" id="smtp-pass" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500">
+              <p class="text-[10px] text-slate-500 mt-1">Dùng App Password (Mật khẩu ứng dụng 16 ký tự), không dùng mật khẩu email thật.</p>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Tên người gửi (Sender Name) *</label>
+              <input type="text" id="smtp-name" required value="FinTrack AI" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
+              <button type="submit" id="btn-save-smtp" class="flex-1 py-3 rounded-xl gradient-blue text-white font-black text-xs shadow-lg shadow-blue-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình SMTP
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-teal-500/30 shadow-xl space-y-4">
+          <h4 class="text-sm font-black text-slate-100 flex items-center gap-2 pb-2 border-b border-slate-800">
+            <i class="fa-solid fa-flask-vial text-teal-400"></i>
+            <span>Gửi mail thử nghiệm (Test Connection)</span>
+          </h4>
+          <form id="form-test-smtp" class="flex items-end gap-3">
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-slate-300 mb-1">Email nhận test *</label>
+              <input type="email" id="smtp-test-email" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-teal-500" placeholder="admin@domain.com">
+            </div>
+            <button type="submit" id="btn-test-smtp" class="px-6 py-2.5 rounded-xl bg-teal-500/20 text-teal-400 font-bold text-xs border border-teal-500/40 hover:bg-teal-500/30 active:scale-95 transition flex items-center gap-2 h-[38px] mt-auto">
+              <i class="fa-solid fa-paper-plane"></i> Gửi Mail Test
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await api.request('/admin/smtp-config');
+      if (res.config) {
+        document.getElementById('smtp-host').value = res.config.host || '';
+        document.getElementById('smtp-port').value = res.config.port || 587;
+        document.getElementById('smtp-email').value = res.config.sender_email || '';
+        document.getElementById('smtp-pass').value = res.config.app_password || '';
+        document.getElementById('smtp-name').value = res.config.sender_name || 'FinTrack AI';
+      }
+    } catch (e) {
+      this.app.showToast('Lỗi tải cấu hình SMTP', 'error');
+    }
+
+    document.getElementById('form-smtp')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-smtp');
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+      try {
+        await api.request('/admin/smtp-config', {
+          method: 'POST',
+          body: JSON.stringify({
+            host: document.getElementById('smtp-host').value.trim(),
+            port: parseInt(document.getElementById('smtp-port').value),
+            sender_email: document.getElementById('smtp-email').value.trim(),
+            app_password: document.getElementById('smtp-pass').value.trim(),
+            sender_name: document.getElementById('smtp-name').value.trim()
+          })
+        });
+        this.app.showToast('Lưu cấu hình thành công', 'success');
+      } catch (err) {
+        this.app.showToast('Lỗi: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình SMTP';
+      }
+    });
+
+    document.getElementById('form-test-smtp')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-test-smtp');
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+      try {
+        await api.request('/admin/test-smtp', {
+          method: 'POST',
+          body: JSON.stringify({
+            test_email: document.getElementById('smtp-test-email').value.trim()
+          })
+        });
+        this.app.showToast('Đã gửi email test thành công!', 'success');
+      } catch (err) {
+        this.app.showToast('Lỗi gửi mail: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Mail Test';
+      }
+    });
+  }
+
+  // --- TAB: SAO LƯU DATABASE ---
+  async renderSettingsBackup(wrapper) {
+    wrapper.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex items-center gap-4 pb-4 border-b border-slate-800">
+            <div class="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-2xl shadow-lg border border-teal-500/30">
+              <i class="fa-solid fa-download"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-slate-100">Sao Lưu Dữ Liệu</h4>
+              <p class="text-[10px] text-slate-400">Tải bản sao database SQLite (fintrack.db)</p>
+            </div>
+          </div>
+          
+          <div class="space-y-2 py-2">
+            <div class="flex justify-between text-xs text-slate-300">
+              <span>Trạng thái:</span> <span class="font-bold text-emerald-400" id="db-status">Đang tải...</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-300">
+              <span>Dung lượng DB:</span> <span class="font-mono font-bold text-amber-300" id="db-size">...</span>
+            </div>
+          </div>
+
+          <button id="btn-download-db" class="w-full py-3 rounded-xl gradient-teal text-slate-950 font-black text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Tải Bản Sao Lưu (.db)
+          </button>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-rose-500/30 shadow-xl space-y-4">
+          <div class="flex items-center gap-4 pb-4 border-b border-slate-800">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl shadow-lg border border-rose-500/30">
+              <i class="fa-solid fa-upload"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-slate-100">Khôi phục dữ liệu (Restore)</h4>
+              <p class="text-[10px] text-rose-400 font-bold">Cảnh báo an toàn: Sẽ ghi đè toàn bộ dữ liệu!</p>
+            </div>
+          </div>
+          
+          <form id="form-restore-db" class="space-y-4">
+            <div class="border-2 border-dashed border-slate-700 rounded-2xl p-6 text-center hover:border-rose-500/50 transition bg-slate-950 relative">
+              <input type="file" id="db-upload" accept=".db" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+              <i class="fa-solid fa-file-arrow-up text-2xl text-slate-500 mb-2"></i>
+              <p class="text-xs text-slate-400" id="db-upload-name">Kéo thả file .db vào đây hoặc Click</p>
+            </div>
+            
+            <button type="submit" id="btn-restore-db" class="w-full py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation"></i> Tải Lên & Khôi Phục
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    try {
+      const info = await api.request('/admin/db/info');
+      document.getElementById('db-status').textContent = info.status;
+      document.getElementById('db-size').textContent = (info.size_bytes / 1024 / 1024).toFixed(2) + ' MB';
+    } catch (e) {
+      document.getElementById('db-status').textContent = 'Error';
+    }
+
+    document.getElementById('btn-download-db')?.addEventListener('click', () => {
+      window.location.href = api.baseUrl + '/admin/db/download?token=' + localStorage.getItem('token');
+    });
+
+    const fileInput = document.getElementById('db-upload');
+    const fileNameDisp = document.getElementById('db-upload-name');
+    fileInput?.addEventListener('change', (e) => {
+      if(e.target.files.length > 0) {
+        fileNameDisp.innerHTML = `<span class="text-emerald-400 font-bold">${e.target.files[0].name}</span>`;
+      }
+    });
+
+    document.getElementById('form-restore-db')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if(!fileInput.files.length) return;
+      if(!confirm('CẢNH BÁO: Dữ liệu hiện tại sẽ bị xóa hoàn toàn. Bạn có chắc chắn muốn khôi phục?')) return;
+
+      const btn = document.getElementById('btn-restore-db');
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang khôi phục...';
+      
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const response = await fetch(api.baseUrl + '/admin/db/restore', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+          body: formData
+        });
+        const res = await response.json();
+        if(res.success) {
+          this.app.showToast('Khôi phục thành công! Hệ thống sẽ tải lại.', 'success');
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          this.app.showToast(res.detail || 'Lỗi khôi phục', 'error');
+        }
+      } catch (err) {
+        this.app.showToast('Lỗi: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Tải Lên & Khôi Phục';
+      }
+    });
+  }
+
+  // --- TAB: KHÓA API & BẢO MẬT ---
+  async renderSettingsSecurity(wrapper) {
+    wrapper.innerHTML = `
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-amber-400"></i>
+              <span>Khóa API & Bảo Mật Hệ Thống</span>
+            </h4>
+          </div>
+          <form id="form-security-keys" class="space-y-6">
+            
+            <div class="space-y-4">
+              <h5 class="text-xs font-bold text-amber-300 border-l-2 border-amber-500 pl-2">AI Models & API Keys</h5>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">OpenAI API Key</label>
+                  <input type="password" id="sec-openai" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Gemini API Key</label>
+                  <input type="password" id="sec-gemini" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-amber-500">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Model Mặc Định</label>
+                <select id="sec-model" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-amber-500">
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                  <option value="gpt-4o-mini">GPT-4o Mini</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="space-y-4 pt-4 border-t border-slate-800">
+              <h5 class="text-xs font-bold text-cyan-300 border-l-2 border-cyan-500 pl-2">SePay & Webhook Ngân Hàng</h5>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">SePay API Token</label>
+                  <input type="password" id="sec-sepay-token" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1">Webhook Secret Key</label>
+                  <input type="password" id="sec-sepay-secret" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-cyan-500">
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4 pt-4 border-t border-slate-800">
+              <h5 class="text-xs font-bold text-blue-300 border-l-2 border-blue-500 pl-2">Telegram & Cấu Hình Khác</h5>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Telegram Bot Token (Nhận thông báo)</label>
+                <input type="password" id="sec-tele" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-700">
+                <div>
+                  <h6 class="text-xs font-bold text-slate-200">Maintenance Mode (Chế Độ Bảo Trì)</h6>
+                  <p class="text-[10px] text-slate-500">Bật/Tắt chế độ bảo trì toàn site.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="sec-maintenance" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                </label>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Giới hạn số lần thử đăng nhập (Rate Limit)</label>
+                <input type="number" id="sec-rate-limit" value="100" class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800">
+              <button type="submit" id="btn-save-sec" class="w-full py-3 rounded-xl gradient-amber text-slate-950 font-black text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-lock"></i> Lưu Cấu Hình API & Bảo Mật
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await api.request('/admin/security-keys');
+      if (res.config) {
+        document.getElementById('sec-openai').value = res.config.openai_api_key || '';
+        document.getElementById('sec-gemini').value = res.config.gemini_api_key || '';
+        document.getElementById('sec-model').value = res.config.default_ai_model || 'gemini-1.5-pro';
+        document.getElementById('sec-sepay-token').value = res.config.sepay_api_token || '';
+        document.getElementById('sec-sepay-secret').value = res.config.sepay_webhook_secret || '';
+        document.getElementById('sec-tele').value = res.config.telegram_bot_token || '';
+        document.getElementById('sec-maintenance').checked = res.config.maintenance_mode || false;
+        document.getElementById('sec-rate-limit').value = res.config.rate_limit || 100;
+      }
+    } catch (err) {
+      this.app.showToast('Lỗi tải cấu hình bảo mật', 'error');
+    }
+
+    document.getElementById('form-security-keys')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-sec');
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+      try {
+        await api.request('/admin/security-keys', {
+          method: 'POST',
+          body: JSON.stringify({
+            openai_api_key: document.getElementById('sec-openai').value.trim(),
+            gemini_api_key: document.getElementById('sec-gemini').value.trim(),
+            default_ai_model: document.getElementById('sec-model').value,
+            sepay_api_token: document.getElementById('sec-sepay-token').value.trim(),
+            sepay_webhook_secret: document.getElementById('sec-sepay-secret').value.trim(),
+            telegram_bot_token: document.getElementById('sec-tele').value.trim(),
+            maintenance_mode: document.getElementById('sec-maintenance').checked,
+            rate_limit: parseInt(document.getElementById('sec-rate-limit').value)
+          })
+        });
+        this.app.showToast('Lưu cấu hình thành công', 'success');
+      } catch (err) {
+        this.app.showToast('Lỗi: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Lưu Cấu Hình API & Bảo Mật';
+      }
+    });
+  }
+
+  async renderPaymentGatewaySettings(wrapper) {
+    wrapper.innerHTML = `
+      <div class="py-12 text-center text-slate-500 text-xs animate-pulse">
+        <i class="fa-solid fa-spinner fa-spin text-amber-400 mb-2 block text-xl"></i>
+        Đang nạp thông tin cổng thanh toán VietQR...
+      </div>
+    `;
+
+    try {
+      const res = await api.getAdminPaymentSettings();
+      const settings = (res && res.settings) ? res.settings : {
+        bank_id: 'MB',
+        bank_name: 'MB Bank (Ngân Hàng Quân Đội)',
+        account_number: '0374617569',
+        account_name: 'DANG QUYET THANG',
+        qr_template: 'compact2'
+      };
+      const availableBanks = (res && res.available_banks) ? res.available_banks : [
+        { id: 'MB', name: 'MB Bank (Ngân Hàng Quân Đội)' },
+        { id: 'VCB', name: 'Vietcombank (Ngoại Thương Việt Nam)' },
+        { id: 'TCB', name: 'Techcombank (Kỹ Thương Việt Nam)' },
+        { id: 'ICB', name: 'VietinBank (Công Thương Việt Nam)' },
+        { id: 'BIDV', name: 'BIDV (Đầu Tư và Phát Triển)' },
+        { id: 'ACB', name: 'ACB (Á Châu)' },
+        { id: 'VPB', name: 'VPBank (Việt Nam Thịnh Vượng)' },
+        { id: 'TPB', name: 'TPBank (Tiên Phong)' },
+        { id: 'STB', name: 'Sacombank (Sài Gòn Thương Tín)' },
+        { id: 'HDB', name: 'HDBank (Phát Triển TP.HCM)' }
+      ];
+
+      const currentBankId = (settings.bank_id || 'MB').toUpperCase();
+      const currentAccNum = settings.account_number || '0374617569';
+      const currentAccName = settings.account_name || 'DANG QUYET THANG';
+      const currentTemplate = settings.qr_template || 'compact2';
+
+      const generatePreviewQR = (bankId, accNum, template, accName) => {
+        const sanitizedAcc = (accNum || '0374617569').replace(/\s+/g, '');
+        const encodedName = encodeURIComponent((accName || 'DANG QUYET THANG').toUpperCase());
+        return `https://img.vietqr.io/image/${bankId}-${sanitizedAcc}-${template}.png?amount=50000&addInfo=TEST%20GATEWAY&accountName=${encodedName}`;
+      };
+
+      wrapper.innerHTML = `
+        <div class="space-y-6">
+          
+          <!-- Banner Header -->
+          <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/20 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/10">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                  <span>Cổng Thanh Toán VietQR Thụ Hưởng Động</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    🟢 Live Gateway
+                  </span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">
+                  Cấu hình tài khoản ngân hàng thụ hưởng nhận tiền nạp tự động 100% của toàn bộ sàn FinTrack AI.
+                </p>
+              </div>
+            </div>
+
+            <div class="px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs font-mono text-right">
+              <span class="text-slate-500 block text-[10px]">Cổng Hiện Tại:</span>
+              <span class="font-bold text-amber-300">${settings.bank_name || settings.bank_id} - ${currentAccNum}</span>
+            </div>
+          </div>
+
+          <!-- Main Two-Column Gateway Form & Live Preview Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left 7 cols: Gateway Configuration Form -->
+            <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+                  <i class="fa-solid fa-building-columns text-amber-400"></i>
+                  <span>Thông Tin Tài Khoản Ngân Hàng Nhận Tiền</span>
+                </h4>
+                <span class="text-[11px] text-slate-400 font-mono">Chuẩn VietQR Napas247</span>
+              </div>
+
+              <form id="form-admin-payment-gateway" class="space-y-4">
+                
+                <!-- Bank Select Dropdown -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    1. Ngân Hàng Thụ Hưởng (VietQR ID) *
+                  </label>
+                  <select id="admin-gateway-bank-select" required
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                    ${availableBanks.map(b => `
+                      <option value="${b.id}" data-name="${b.name}" ${b.id.toUpperCase() === currentBankId ? 'selected' : ''}>
+                        [${b.id}] ${b.name}
+                      </option>
+                    `).join('')}
+                  </select>
+                </div>
+
+                <!-- Account Number -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    2. Số Tài Khoản Nhận Tiền *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                      <i class="fa-solid fa-credit-card text-xs"></i>
+                    </span>
+                    <input type="text" id="admin-gateway-acc-num" required value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                  </div>
+                  <span class="text-[10px] text-slate-500 mt-1 block">Nhập số tài khoản ngân hàng chính xác để tạo mã QR chuẩn.</span>
+                </div>
+
+                <!-- Account Holder Name -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    3. Tên Chủ Tài Khoản (Cardholder Name) *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                      <i class="fa-solid fa-user-check text-xs"></i>
+                    </span>
+                    <input type="text" id="admin-gateway-acc-name" required value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-sm font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase" />
+                  </div>
+                  <span class="text-[10px] text-slate-500 mt-1 block">Tên in trên thẻ/tài khoản (viết hoa không dấu hoặc có dấu).</span>
+                </div>
+
+                <!-- VietQR Template Style -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    4. Kiểu Mẫu Khung VietQR (Template)
+                  </label>
+                  <select id="admin-gateway-template-select"
+                    class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500">
+                    <option value="compact2" ${currentTemplate === 'compact2' ? 'selected' : ''}>compact2 (Đẹp & Chuẩn Napas 24/7 có logo ngân hàng)</option>
+                    <option value="compact" ${currentTemplate === 'compact' ? 'selected' : ''}>compact (Mẫu gọn)</option>
+                    <option value="qr_only" ${currentTemplate === 'qr_only' ? 'selected' : ''}>qr_only (Chỉ mã QR thuần không khung)</option>
+                  </select>
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit" id="btn-save-admin-gateway"
+                    class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk text-sm"></i>
+                    <span>Lưu & Kích Hoạt Cổng Ngân Hàng Mới</span>
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- Right 5 cols: Live Realtime QR Preview Box -->
+            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/90 border border-amber-500/30 shadow-xl flex flex-col items-center justify-between text-center space-y-4">
+              
+              <div class="w-full text-left border-b border-slate-800 pb-3 flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Mã QR Trực Quan (Live Preview)
+                </span>
+                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">VietQR API</span>
+              </div>
+
+              <!-- Dynamic QR Image -->
+              <div class="relative group my-2">
+                <div class="p-3 bg-white rounded-3xl shadow-2xl border-2 border-amber-500/50 max-w-[230px] mx-auto transition transform hover:scale-105">
+                  <img id="admin-gateway-preview-img" src="${generatePreviewQR(currentBankId, currentAccNum, currentTemplate, currentAccName)}" 
+                    alt="VietQR Preview" class="w-full h-auto object-contain rounded-xl"
+                    onerror="this.src='/TKnganhangMB.jpg'" />
+                </div>
+                <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1">
+                  <i class="fa-solid fa-shield-check"></i>
+                  <span id="admin-gateway-badge-bank">${currentBankId}</span>
+                </div>
+              </div>
+
+              <!-- Live Meta Info Box -->
+              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800/90 text-left text-xs font-mono space-y-1.5">
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Ngân hàng:</span>
+                  <span class="font-bold text-slate-100" id="preview-meta-bank">${settings.bank_name || currentBankId}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Số tài khoản:</span>
+                  <span class="font-bold text-cyan-400" id="preview-meta-acc">${currentAccNum}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Chủ tài khoản:</span>
+                  <span class="font-bold text-amber-300" id="preview-meta-name">${currentAccName}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300 border-t border-slate-800/80 pt-1">
+                  <span class="text-slate-500 font-sans">Nội dung test:</span>
+                  <span class="text-slate-400 text-[11px]">TEST GATEWAY</span>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-slate-400 font-sans leading-relaxed">
+                💡 Khi Admin nhấn Lưu, toàn bộ người dùng khi mở modal nạp tiền / mua gói VIP sẽ quét mã QR chuyển khoản trực tiếp về tài khoản ngân hàng này.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      // Live Preview Events
+      const bankSelect = document.getElementById('admin-gateway-bank-select');
+      const accNumInput = document.getElementById('admin-gateway-acc-num');
+      const accNameInput = document.getElementById('admin-gateway-acc-name');
+      const templateSelect = document.getElementById('admin-gateway-template-select');
+      const previewImg = document.getElementById('admin-gateway-preview-img');
+      const metaBank = document.getElementById('preview-meta-bank');
+      const metaAcc = document.getElementById('preview-meta-acc');
+      const metaName = document.getElementById('preview-meta-name');
+      const badgeBank = document.getElementById('admin-gateway-badge-bank');
+
+      const updateLivePreview = () => {
+        const bId = bankSelect?.value || 'MB';
+        const selOption = bankSelect?.options[bankSelect.selectedIndex];
+        const bName = selOption?.getAttribute('data-name') || bId;
+        const aNum = accNumInput?.value?.trim() || '';
+        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+        const tmpl = templateSelect?.value || 'compact2';
+
+        if (previewImg) previewImg.src = generatePreviewQR(bId, aNum, tmpl, aName);
+        if (metaBank) metaBank.textContent = bName;
+        if (metaAcc) metaAcc.textContent = aNum || '---';
+        if (metaName) metaName.textContent = aName || '---';
+        if (badgeBank) badgeBank.textContent = bId;
+      };
+
+      bankSelect?.addEventListener('change', updateLivePreview);
+      accNumInput?.addEventListener('input', updateLivePreview);
+      accNameInput?.addEventListener('input', updateLivePreview);
+      templateSelect?.addEventListener('change', updateLivePreview);
+
+      // Submit Form
+      document.getElementById('form-admin-payment-gateway')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('btn-save-admin-gateway');
+        const bId = bankSelect?.value || 'MB';
+        const selOption = bankSelect?.options[bankSelect.selectedIndex];
+        const bName = selOption?.getAttribute('data-name') || `Ngân Hàng ${bId}`;
+        const aNum = accNumInput?.value?.trim() || '';
+        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+        const tmpl = templateSelect?.value || 'compact2';
+
+        if (!aNum || !aName) {
+          this.app.showToast('Vui lòng điền đầy đủ số tài khoản và tên chủ tài khoản', 'error');
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu cấu hình cổng ngân hàng...`;
+          submitBtn.disabled = true;
+        }
+
+        try {
+          const updateRes = await api.updateAdminPaymentSettings({
+            bank_id: bId,
+            bank_name: bName,
+            account_number: aNum,
+            account_name: aName,
+            qr_template: tmpl
+          });
+
+          if (window.confetti) {
+            window.confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+          }
+
+          this.app.showToast(updateRes.message || 'Đã lưu và kích hoạt cổng ngân hàng mới thành công!', 'success');
+          await this.renderPaymentGatewaySettings(wrapper);
+        } catch (saveErr) {
+          this.app.showToast(saveErr.message || 'Lỗi khi lưu cấu hình cổng ngân hàng', 'error');
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-floppy-disk text-sm"></i> Lưu & Kích Hoạt Lại`;
+            submitBtn.disabled = false;
+          }
+        }
+      });
+
+    } catch (err) {
+      wrapper.innerHTML = `
+        <div class="p-8 text-center text-rose-400 text-xs rounded-3xl bg-slate-900 border border-rose-500/30">
+          <i class="fa-solid fa-triangle-exclamation text-xl mb-2 block"></i>
+          Không thể tải cấu hình cổng thanh toán: ${err.message || 'Lỗi kết nối'}.
+        </div>
+      `;
+    }
+  }
+
+  // =========================================================================
+  // 10. TAB: CỔNG NGÂN HÀNG & VIETQR (BANK GATEWAY & TRANSACTIONS)
+  // =========================================================================
+  async renderBankGatewayTab(container) {
+    this.destroyCharts();
+    container.innerHTML = `
+      <div id="admin-bank-gateway-content-wrapper" class="space-y-6 admin-subtab-content-anim">
+        <div class="py-16 text-center text-slate-500 text-xs animate-pulse">
+          <i class="fa-solid fa-spinner fa-spin text-amber-400 mb-2 block text-xl"></i>
+          Đang đồng bộ dữ liệu Cổng Ngân Hàng & VietQR...
+        </div>
+      </div>
+    `;
+
+    await this.loadBankGatewayContent();
+  }
+
+  applyBankGatewayFilter(subtabId) {
+    this.activeBankGatewayFilter = subtabId;
+    this.loadBankGatewayContent();
+  }
+
+  async loadBankGatewayContent() {
+    const wrapper = document.getElementById('admin-bank-gateway-content-wrapper');
+    if (!wrapper) return;
+
+    const filter = this.activeBankGatewayFilter || 'bank_config';
+
+    if (filter === 'bank_config') {
+      await this.renderBankConfigModule(wrapper);
+    } else if (filter === 'bank_txs') {
+      await this.renderBankTransactionsModule(wrapper);
+    } else if (filter === 'bank_automation') {
+      await this.renderBankAutomationModule(wrapper);
+    }
+  }
+
+  // --- MODULE 1: CẤU HÌNH TÀI KHOẢN NGÂN HÀNG THỤ HƯỞNG ---
+  async renderBankConfigModule(wrapper) {
+    wrapper.innerHTML = `
+      <div class="py-12 text-center text-slate-500 text-xs animate-pulse">
+        <i class="fa-solid fa-spinner fa-spin text-amber-400 mb-2 block text-xl"></i>
+        Đang nạp thông tin cổng ngân hàng...
+      </div>
+    `;
+
+    try {
+      const res = await api.getAdminBankGateway();
+      const activeGateway = res?.active_gateway || {
+        bank_code: 'MB',
+        bank_name: 'MB Bank (Ngân Hàng Quân Đội)',
+        account_number: '0374617569',
+        account_name: 'DANG QUYET THANG',
+        branch: 'Hội Sở Chính',
+        qr_template: 'compact2',
+        memo_prefix: 'NAP VIP',
+        is_active: true
+      };
+      const availableBanks = res?.available_banks || [
+        { id: 'MB', code: 'MB', name: 'MB Bank (Ngân Hàng Quân Đội)' },
+        { id: 'TCB', code: 'TCB', name: 'Techcombank (Kỹ Thương Việt Nam)' },
+        { id: 'VCB', code: 'VCB', name: 'Vietcombank (Ngoại Thương Việt Nam)' },
+        { id: 'ICB', code: 'ICB', name: 'VietinBank (Công Thương Việt Nam)' },
+        { id: 'BIDV', code: 'BIDV', name: 'BIDV (Đầu Tư và Phát Triển)' },
+        { id: 'ACB', code: 'ACB', name: 'ACB (Á Châu)' },
+        { id: 'VPB', code: 'VPB', name: 'VPBank (Việt Nam Thịnh Vượng)' },
+        { id: 'TPB', code: 'TPB', name: 'TPBank (Tiên Phong)' },
+        { id: 'STB', code: 'STB', name: 'Sacombank (Sài Gòn Thương Tín)' },
+        { id: 'MOMO', code: 'MOMO', name: 'Ví MoMo (VietQR Napas)' }
+      ];
+
+      const currentBankCode = (activeGateway.bank_code || 'MB').toUpperCase();
+      const currentAccNum = activeGateway.account_number || '0374617569';
+      const currentAccName = activeGateway.account_name || 'DANG QUYET THANG';
+      const currentBranch = activeGateway.branch || 'Hội Sở Chính';
+      const currentTemplate = activeGateway.qr_template || 'compact2';
+
+      const generatePreviewQR = (bankCode, accNum, template, accName) => {
+        const sanitizedAcc = (accNum || '0374617569').replace(/\s+/g, '');
+        const encodedName = encodeURIComponent((accName || 'DANG QUYET THANG').toUpperCase());
+        return `https://img.vietqr.io/image/${bankCode}-${sanitizedAcc}-${template}.png?amount=100000&addInfo=TEST%20GATEWAY&accountName=${encodedName}`;
+      };
+
+      wrapper.innerHTML = `
+        <div class="space-y-6">
+          
+          <!-- Banner Header -->
+          <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-950/50 via-slate-900 to-amber-950/30 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-building-columns"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                  <span>Cấu Hình Tài Khoản Ngân Hàng Thụ Hưởng (Admin Bank Gateway)</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider">
+                    🟢 Live Napas 24/7
+                  </span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">
+                  Thiết lập tài khoản ngân hàng thực tế để đồng bộ trực tiếp sang mã VietQR nạp tiền của toàn bộ User.
+                </p>
+              </div>
+            </div>
+
+            <div class="px-4 py-2 rounded-2xl bg-slate-950/90 border border-slate-800 text-xs font-mono text-right">
+              <span class="text-slate-500 block text-[10px]">Cổng Đang Kích Hoạt:</span>
+              <span class="font-bold text-amber-300">${activeGateway.bank_name || currentBankCode} - ${currentAccNum}</span>
+            </div>
+          </div>
+
+          <!-- Main Form & Live Preview Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left 7 cols: Gateway Configuration Form -->
+            <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/95 border border-slate-800 shadow-xl space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+                  <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                  <span>Thông Tin Ngân Hàng Liên Kết</span>
+                </h4>
+                <span class="text-[11px] text-slate-400 font-mono">Chuẩn VietQR Napas247</span>
+              </div>
+
+              <form id="form-admin-bank-gateway-module" class="space-y-4">
+                
+                <!-- 1. Bank Select -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    1. Chọn Ngân Hàng Thụ Hưởng *
+                  </label>
+                  <select id="gateway-bank-select" required
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                    ${availableBanks.map(b => `
+                      <option value="${b.code || b.id}" data-name="${b.name}" ${(b.code || b.id).toUpperCase() === currentBankCode ? 'selected' : ''}>
+                        [${b.code || b.id}] ${b.name}
+                      </option>
+                    `).join('')}
+                  </select>
+                </div>
+
+                <!-- 2. Account Number -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    2. Số Tài Khoản Ngân Hàng (Account Number) *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                      <i class="fa-solid fa-credit-card text-xs"></i>
+                    </span>
+                    <input type="text" id="gateway-acc-num" required value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                  </div>
+                </div>
+
+                <!-- 3. Account Name -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    3. Tên Chủ Tài Khoản (Account Holder Name) *
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                      <i class="fa-solid fa-user-check text-xs"></i>
+                    </span>
+                    <input type="text" id="gateway-acc-name" required value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-sm font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase" />
+                  </div>
+                  <span class="text-[10px] text-slate-500 mt-1 block">Tên tự động chuẩn hóa chữ hoa in trên thẻ/tài khoản.</span>
+                </div>
+
+                <!-- 4. Branch / Note -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    4. Chi Nhánh / Ghi Chú (Tùy chọn)
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                      <i class="fa-solid fa-location-dot text-xs"></i>
+                    </span>
+                    <input type="text" id="gateway-branch" value="${currentBranch}" placeholder="Ví dụ: Hội Sở Chính / Chi Nhánh Ba Đình"
+                      class="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:ring-2 focus:ring-amber-500" />
+                  </div>
+                </div>
+
+                <!-- 5. VietQR Template -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                    5. Mẫu Khung VietQR (Template)
+                  </label>
+                  <select id="gateway-template-select"
+                    class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500">
+                    <option value="compact2" ${currentTemplate === 'compact2' ? 'selected' : ''}>compact2 (Đẹp & Chuẩn Napas 24/7 có logo ngân hàng)</option>
+                    <option value="compact" ${currentTemplate === 'compact' ? 'selected' : ''}>compact (Mẫu gọn)</option>
+                    <option value="qr_only" ${currentTemplate === 'qr_only' ? 'selected' : ''}>qr_only (Chỉ mã QR thuần)</option>
+                  </select>
+                </div>
+
+                <!-- 6. Toggle Default Gateway Switch -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                  <div class="space-y-0.5">
+                    <span class="text-xs font-bold text-slate-200 block">Kích hoạt làm cổng thanh toán mặc định toàn sàn</span>
+                    <span class="text-[11px] text-slate-400 block">Toàn bộ Modal Nạp Tiền Thật & Mua Gói VIP sẽ đồng bộ ngay lập tức.</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="gateway-is-active" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit" id="btn-save-bank-gateway-module"
+                    class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                    <span>Lưu & Đồng Bộ Toàn Sàn</span>
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- Right 5 cols: Live Realtime QR Preview Box -->
+            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 shadow-2xl flex flex-col items-center justify-between text-center space-y-4">
+              
+              <div class="w-full text-left border-b border-slate-800 pb-3 flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Mã VietQR (Live Preview)
+                </span>
+                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">VietQR API</span>
+              </div>
+
+              <!-- Dynamic QR Image -->
+              <div class="relative group my-2">
+                <div class="p-3 bg-white rounded-3xl shadow-2xl border-2 border-amber-500/50 max-w-[240px] mx-auto transition transform hover:scale-105">
+                  <img id="gateway-preview-qr-img" src="${generatePreviewQR(currentBankCode, currentAccNum, currentTemplate, currentAccName)}" 
+                    alt="VietQR Live Preview" class="w-full h-auto object-contain rounded-xl"
+                    onerror="this.src='/TKnganhangMB.jpg'" />
+                </div>
+                <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1">
+                  <i class="fa-solid fa-shield-check"></i>
+                  <span id="gateway-badge-bank">${currentBankCode}</span>
+                </div>
+              </div>
+
+              <!-- Live Meta Info Box -->
+              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs font-mono space-y-2">
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Ngân hàng:</span>
+                  <span class="font-bold text-slate-100" id="gw-preview-bank">${activeGateway.bank_name || currentBankCode}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Số tài khoản:</span>
+                  <span class="font-bold text-cyan-400" id="gw-preview-acc">${currentAccNum}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-500 font-sans">Chủ tài khoản:</span>
+                  <span class="font-bold text-amber-300" id="gw-preview-name">${currentAccName}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300 border-t border-slate-800/80 pt-1.5">
+                  <span class="text-slate-500 font-sans">Số tiền mẫu:</span>
+                  <span class="text-emerald-400 font-bold">100.000 ₫</span>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-sans text-left flex items-start gap-2">
+                <i class="fa-solid fa-circle-info mt-0.5 shrink-0"></i>
+                <span>Khi nhấn Lưu, toàn bộ người dùng khi mở modal nạp tiền sẽ quét mã QR về đúng tài khoản thụ hưởng này!</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      // Live Preview Events
+      const bankSelect = document.getElementById('gateway-bank-select');
+      const accNumInput = document.getElementById('gateway-acc-num');
+      const accNameInput = document.getElementById('gateway-acc-name');
+      const templateSelect = document.getElementById('gateway-template-select');
+      const previewImg = document.getElementById('gateway-preview-qr-img');
+      const gwBank = document.getElementById('gw-preview-bank');
+      const gwAcc = document.getElementById('gw-preview-acc');
+      const gwName = document.getElementById('gw-preview-name');
+      const badgeBank = document.getElementById('gateway-badge-bank');
+
+      const updateLivePreview = () => {
+        const bCode = bankSelect?.value || 'MB';
+        const selOption = bankSelect?.options[bankSelect.selectedIndex];
+        const bName = selOption?.getAttribute('data-name') || bCode;
+        const aNum = accNumInput?.value?.trim() || '';
+        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+        const tmpl = templateSelect?.value || 'compact2';
+
+        if (previewImg) previewImg.src = generatePreviewQR(bCode, aNum, tmpl, aName);
+        if (gwBank) gwBank.textContent = bName;
+        if (gwAcc) gwAcc.textContent = aNum || '---';
+        if (gwName) gwName.textContent = aName || '---';
+        if (badgeBank) badgeBank.textContent = bCode;
+      };
+
+      bankSelect?.addEventListener('change', updateLivePreview);
+      accNumInput?.addEventListener('input', updateLivePreview);
+      accNameInput?.addEventListener('input', updateLivePreview);
+      templateSelect?.addEventListener('change', updateLivePreview);
+
+      // Submit Form
+      document.getElementById('form-admin-bank-gateway-module')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('btn-save-bank-gateway-module');
+        const bCode = bankSelect?.value || 'MB';
+        const selOption = bankSelect?.options[bankSelect.selectedIndex];
+        const bName = selOption?.getAttribute('data-name') || `Ngân Hàng ${bCode}`;
+        const aNum = accNumInput?.value?.trim() || '';
+        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+        const branchVal = document.getElementById('gateway-branch')?.value?.trim() || 'Hội Sở Chính';
+        const tmpl = templateSelect?.value || 'compact2';
+        const isActiveVal = document.getElementById('gateway-is-active')?.checked ?? true;
+
+        if (!aNum || !aName) {
+          this.app.showToast('Vui lòng điền đầy đủ số tài khoản và tên chủ tài khoản', 'error');
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang đồng bộ cổng ngân hàng...`;
+          submitBtn.disabled = true;
+        }
+
+        try {
+          const updateRes = await api.saveAdminBankGateway({
+            bank_code: bCode,
+            bank_name: bName,
+            account_number: aNum,
+            account_name: aName,
+            branch: branchVal,
+            qr_template: tmpl,
+            memo_prefix: 'NAP VIP',
+            is_active: isActiveVal
+          });
+
+          if (window.confetti) {
+            window.confetti({ particleCount: 150, spread: 85, origin: { y: 0.6 } });
+          }
+
+          this.app.showToast(updateRes.message || 'Đã đồng bộ cổng ngân hàng toàn sàn thành công!', 'success');
+          await this.renderBankConfigModule(wrapper);
+        } catch (saveErr) {
+          this.app.showToast(saveErr.message || 'Lỗi khi lưu cấu hình cổng ngân hàng', 'error');
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate text-sm"></i> Lưu & Thử Lại`;
+            submitBtn.disabled = false;
+          }
+        }
+      });
+
+    } catch (err) {
+      wrapper.innerHTML = `
+        <div class="p-8 text-center text-rose-400 text-xs rounded-3xl bg-slate-900 border border-rose-500/30">
+          <i class="fa-solid fa-triangle-exclamation text-xl mb-2 block"></i>
+          Không thể tải cấu hình cổng ngân hàng: ${err.message || 'Lỗi kết nối'}.
+        </div>
+      `;
+    }
+  }
+
+  // --- MODULE 2: LỊCH SỬ GIAO DỊCH NGÂN HÀNG & BIẾN ĐỘNG SỐ DƯ ---
+  async renderBankTransactionsModule(wrapper) {
+    wrapper.innerHTML = `
+      <div class="space-y-6">
+        
+        <!-- Header Controls & Statistics -->
+        <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div>
+              <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
+                <span>Lịch Sử Biến Động Số Dư & Giao Dịch Ngân Hàng</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Theo dõi lịch sử tiền về tài khoản ngân hàng thụ hưởng và đối soát giao dịch.</p>
+            </div>
+            <button id="btn-refresh-bank-txs" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Làm mới</span>
+            </button>
+          </div>
+
+          <!-- 3 Stats Badges -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="bank-txs-stats-container">
+            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-mono block">Tổng Tiền Nhận Được</span>
+              <span class="text-lg font-black text-emerald-400 font-mono" id="stat-total-received">0 ₫</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-mono block">Đã Khớp Tự Động</span>
+              <span class="text-lg font-black text-cyan-400 font-mono" id="stat-matched-count">0 giao dịch</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+              <span class="text-[10px] text-slate-400 uppercase font-mono block">Chưa Khớp (Cần xử lý)</span>
+              <span class="text-lg font-black text-rose-400 font-mono" id="stat-unmatched-count">0 giao dịch</span>
+            </div>
+          </div>
+
+          <!-- Search and Filter bar -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
+            <div class="relative flex-1 w-full">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input type="text" id="input-search-bank-txs" placeholder="Tìm theo nội dung chuyển khoản, mã GD, tên người chuyển..." 
+                class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-cyan-500">
+            </div>
+
+            <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+              <button class="bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition active bg-cyan-500/20 text-cyan-300 border border-cyan-500/40" data-filter="ALL">Tất Cả</button>
+              <button class="bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800" data-filter="MATCHED">🟢 Đã Khớp</button>
+              <button class="bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800" data-filter="UNMATCHED">🔴 Chưa Khớp</button>
+              <button class="bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800" data-filter="MANUALLY_MATCHED">🟡 Khớp Thủ Công</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Table Container -->
+        <div id="bank-txs-table-container" class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl overflow-x-auto">
+          <div class="py-12 text-center text-slate-500 text-xs animate-pulse">Đang tải lịch sử giao dịch ngân hàng...</div>
+        </div>
+
+      </div>
+    `;
+
+    let activeFilter = 'ALL';
+    let currentSearch = '';
+
+    const loadTableData = async () => {
+      const tableContainer = document.getElementById('bank-txs-table-container');
+      if (!tableContainer) return;
+
+      try {
+        const res = await api.getAdminBankTransactions(activeFilter, currentSearch, 50);
+        const txs = res?.transactions || [];
+
+        // Update stats
+        const statTotal = document.getElementById('stat-total-received');
+        const statMatched = document.getElementById('stat-matched-count');
+        const statUnmatched = document.getElementById('stat-unmatched-count');
+        if (statTotal) statTotal.textContent = (res?.total_received_amount || 0).toLocaleString() + ' ₫';
+        if (statMatched) statMatched.textContent = `${res?.matched_count || 0} giao dịch`;
+        if (statUnmatched) statUnmatched.textContent = `${res?.unmatched_count || 0} giao dịch`;
+
+        if (txs.length === 0) {
+          tableContainer.innerHTML = `
+            <div class="py-12 text-center text-slate-500 text-xs space-y-2">
+              <i class="fa-solid fa-inbox text-2xl block text-slate-600"></i>
+              <p>Chưa có giao dịch biến động số dư nào phù hợp với bộ lọc.</p>
+            </div>
+          `;
+          return;
+        }
+
+        tableContainer.innerHTML = `
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                <th class="py-3 px-2">Thời Gian</th>
+                <th class="py-3 px-2">Mã Tham Chiếu</th>
+                <th class="py-3 px-2">Người Chuyển</th>
+                <th class="py-3 px-2">Số Tiền (VNĐ)</th>
+                <th class="py-3 px-2">Nội Dung Chuyển Khoản (Memo)</th>
+                <th class="py-3 px-2">Trạng Thái</th>
+                <th class="py-3 px-2 text-right">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-sans">
+              ${txs.map(t => {
+                const isMatched = t.status === 'MATCHED';
+                const isManual = t.status === 'MANUALLY_MATCHED';
+                const isUnmatched = t.status === 'UNMATCHED';
+
+                return `
+                  <tr class="hover:bg-slate-800/40 transition group">
+                    <td class="py-3.5 px-2 font-mono text-slate-400 text-[11px] whitespace-nowrap">
+                      ${t.transaction_date}
+                    </td>
+                    <td class="py-3.5 px-2 font-mono font-bold text-slate-200 text-xs whitespace-nowrap">
+                      ${t.reference_code || '---'}
+                    </td>
+                    <td class="py-3.5 px-2">
+                      <div class="font-bold text-slate-200">${t.sender_name}</div>
+                      ${t.sender_account && t.sender_account !== '---' ? `<div class="text-[10px] text-slate-500 font-mono">${t.sender_account}</div>` : ''}
+                    </td>
+                    <td class="py-3.5 px-2 font-mono font-black text-emerald-400 text-sm whitespace-nowrap">
+                      +${(t.amount || 0).toLocaleString()} ₫
+                    </td>
+                    <td class="py-3.5 px-2">
+                      <div class="font-mono text-amber-300 font-bold bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 max-w-xs break-all text-[11px]">
+                        ${t.description}
+                      </div>
+                      ${t.matched_user_name ? `
+                        <div class="text-[10px] text-slate-400 mt-1">
+                          Khớp: <b class="text-cyan-400">${t.matched_user_name}</b> ${t.matched_order_code ? `(#${t.matched_order_code})` : ''}
+                        </div>
+                      ` : ''}
+                    </td>
+                    <td class="py-3.5 px-2">
+                      ${isMatched ? `
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap flex items-center gap-1 w-max">
+                          <i class="fa-solid fa-circle-check text-[9px]"></i> Đã khớp tự động
+                        </span>
+                      ` : isManual ? `
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap flex items-center gap-1 w-max">
+                          <i class="fa-solid fa-user-check text-[9px]"></i> Khớp thủ công
+                        </span>
+                      ` : `
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse whitespace-nowrap flex items-center gap-1 w-max">
+                          <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Chưa khớp đơn
+                        </span>
+                      `}
+                    </td>
+                    <td class="py-3.5 px-2 text-right">
+                      ${isUnmatched ? `
+                        <button type="button" class="btn-manual-match px-3 py-1.5 rounded-xl gradient-amber text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition inline-flex items-center gap-1.5"
+                          data-id="${t.id}" data-ref="${t.reference_code}" data-amount="${t.amount}" data-desc="${encodeURIComponent(t.description)}">
+                          <i class="fa-solid fa-bolt"></i>
+                          <span>Khớp Thủ Công</span>
+                        </button>
+                      ` : `
+                        <span class="text-[11px] text-slate-500 font-mono italic">Hoàn tất</span>
+                      `}
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+
+        // Bind manual match button
+        tableContainer.querySelectorAll('.btn-manual-match').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            const ref = btn.getAttribute('data-ref');
+            const amt = parseFloat(btn.getAttribute('data-amount')) || 0;
+            const descText = decodeURIComponent(btn.getAttribute('data-desc'));
+            this.openManualMatchModal(id, ref, amt, descText, loadTableData);
+          });
+        });
+
+      } catch (err) {
+        tableContainer.innerHTML = `
+          <div class="py-8 text-center text-rose-400 text-xs">
+            Lỗi khi tải dữ liệu giao dịch: ${err.message || 'Lỗi kết nối'}
+          </div>
+        `;
+      }
+    };
+
+    // Filter clicks
+    wrapper.querySelectorAll('.bank-tx-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        wrapper.querySelectorAll('.bank-tx-filter-btn').forEach(b => {
+          b.className = 'bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800';
+        });
+        btn.className = 'bank-tx-filter-btn px-3 py-2 rounded-xl text-xs font-bold transition active bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+        activeFilter = btn.getAttribute('data-filter');
+        loadTableData();
+      });
+    });
+
+    // Search input
+    let searchDebounce;
+    document.getElementById('input-search-bank-txs')?.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        currentSearch = e.target.value.trim();
+        loadTableData();
+      }, 300);
+    });
+
+    document.getElementById('btn-refresh-bank-txs')?.addEventListener('click', loadTableData);
+
+    await loadTableData();
+  }
+
+  // --- MODAL KHỚP THỦ CÔNG KHI USER NHẬP SAI CÚ PHÁP ---
+  openManualMatchModal(txId, refCode, amount, descText, onSuccess) {
+    const modalEl = document.getElementById('generic-modal');
+    if (!modalEl) return;
+
+    modalEl.innerHTML = `
+      <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-amber-500/50 animate-in fade-in zoom-in duration-200 space-y-4">
+          <button id="manual-match-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+
+          <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/40 font-black shadow-md">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-slate-100">Khớp Lệnh Thủ Công Giao Dịch #${refCode}</h3>
+              <p class="text-[11px] text-slate-400">Số tiền: <b class="text-emerald-400 font-mono">+${amount.toLocaleString()} ₫</b></p>
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-slate-900 rounded-2xl border border-slate-800 text-xs space-y-1.5 font-mono">
+            <span class="text-slate-500 font-sans block text-[11px]">Nội dung User đã chuyển khoản:</span>
+            <div class="font-bold text-amber-300 break-all">${descText}</div>
+          </div>
+
+          <form id="form-manual-match" class="space-y-3.5">
+            <div>
+              <label class="block font-bold text-slate-300 text-xs mb-1">1. Nhập User ID nhận tiền (Hoặc tìm kiếm) *</label>
+              <input type="number" id="manual-match-user-id" required placeholder="Ví dụ: 1 hoặc 2..."
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 text-xs mb-1">2. Mã đơn hàng Subscription PENDING (Nếu nạp gói VIP)</label>
+              <input type="text" id="manual-match-order-code" placeholder="Ví dụ: ORD-123456 (để trống nếu nạp ví thật)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-mono focus:ring-2 focus:ring-amber-500" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 text-xs mb-1">3. Ghi chú đối soát</label>
+              <textarea id="manual-match-note" rows="2" placeholder="Ghi chú lý do khớp thủ công..." 
+                class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-amber-500">Khách chuyển thiếu cú pháp, Admin đối soát xác nhận.</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+              <button type="button" id="manual-match-cancel" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+                Hủy
+              </button>
+              <button type="submit" id="btn-submit-manual-match" class="px-5 py-2.5 rounded-xl gradient-amber text-slate-950 text-xs font-black shadow-md shadow-amber-500/25 active:scale-95 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-check"></i>
+                <span>Xác Nhận Khớp & Cộng Tiền Ngay</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    const closeModal = () => { modalEl.innerHTML = ''; };
+    document.getElementById('manual-match-modal-close')?.addEventListener('click', closeModal);
+    document.getElementById('manual-match-cancel')?.addEventListener('click', closeModal);
+
+    document.getElementById('form-manual-match')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uId = parseInt(document.getElementById('manual-match-user-id')?.value);
+      const ordCode = document.getElementById('manual-match-order-code')?.value?.trim();
+      const note = document.getElementById('manual-match-note')?.value?.trim();
+
+      if (!uId) {
+        this.app.showToast('Vui lòng nhập User ID hợp lệ', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-submit-manual-match');
+      if (submitBtn) {
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang khớp lệnh...`;
+        submitBtn.disabled = true;
+      }
+
+      try {
+        const res = await api.manualMatchBankTransaction(txId, {
+          user_id: uId,
+          order_code: ordCode || null,
+          note: note
+        });
+
+        if (window.confetti) {
+          window.confetti({ particleCount: 130, spread: 75, origin: { y: 0.6 } });
+        }
+
+        this.app.showToast(res.message || 'Đã khớp thủ công giao dịch thành công!', 'success');
+        closeModal();
+        if (onSuccess) onSuccess();
+      } catch (err) {
+        this.app.showToast(err.message || 'Lỗi khi khớp thủ công', 'error');
+        if (submitBtn) {
+          submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Xác Nhận Lại`;
+          submitBtn.disabled = false;
+        }
+      }
+    });
+  }
+
+  // --- MODULE 3: CẤU HÌNH CÚ PHÁP & TỰ ĐỘNG DUYỆT (AUTOMATION SETTINGS & DEMO TESTER) ---
+  async renderBankAutomationModule(wrapper) {
+    wrapper.innerHTML = `
+      <div class="space-y-6">
+        
+        <!-- Banner -->
+        <div class="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-teal-950/30 border border-emerald-500/40 flex items-center justify-between shadow-xl">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                <span>Cấu Hình Cú Pháp & Tự Động Duyệt (Automation Engine)</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">100% Tự Động</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">Xử lý webhook đối soát thời gian thực, bóc tách Regex nhận diện User & Mã đơn hàng tức thời.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left 6 cols: Cú Pháp Cấu Hình -->
+          <div class="lg:col-span-6 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+            <h4 class="text-sm font-black text-slate-100 flex items-center gap-2 pb-2 border-b border-slate-800">
+              <i class="fa-solid fa-code text-emerald-400"></i>
+              <span>Quy Chuẩn Cú Pháp Chuyển Khoản Tự Động</span>
+            </h4>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <span class="text-emerald-400 font-bold font-mono">1. Nạp gói VIP trực tiếp:</span>
+                <p class="text-slate-300 font-mono text-[11px] bg-slate-900 p-2 rounded-xl border border-slate-800">
+                  Cú pháp: <b class="text-amber-300">FT{PLAN} {USER_ID} {MÃ_ĐƠN}</b> (vd: <span class="text-emerald-300">FTPLATINUM 1 888999</span>)
+                </p>
+                <p class="text-[10px] text-slate-500 font-sans">Tự động kích hoạt gói VIP và kéo dài hạn dùng cho tài khoản tương ứng.</p>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <span class="text-emerald-400 font-bold font-mono">2. Nạp tiền vào Ví Tiền Thật:</span>
+                <p class="text-slate-300 font-mono text-[11px] bg-slate-900 p-2 rounded-xl border border-slate-800">
+                  Cú pháp: <b class="text-amber-300">NAP VIP {USER_ID} {MÃ_ĐƠN}</b> (vd: <span class="text-emerald-300">NAP VIP 1 654321</span>)
+                </p>
+                <p class="text-[10px] text-slate-500 font-sans">Tự động cộng số dư vào Ví Dịch Vụ & VIP để người dùng chi tiêu.</p>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <span class="text-cyan-400 font-bold font-mono">3. Endpoint Webhook Nhận Tiền Ngân Hàng:</span>
+                <p class="text-slate-300 font-mono text-[11px] bg-slate-900 p-2 rounded-xl border border-slate-800 select-all">
+                  POST /api/payments/webhook/bank-transfer
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right 6 cols: Live Mock Tester (Demo Trước Giảng Viên) -->
+          <div class="lg:col-span-6 p-6 rounded-3xl bg-slate-900/90 border border-cyan-500/40 shadow-xl space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-flask-vial text-cyan-400"></i>
+                <span>Trình Giả Lập Webhook Ngân Hàng (Demo Tester)</span>
+              </h4>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">Live Demo</span>
+            </div>
+
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Mô phỏng máy chủ MB Bank bắn biến động số dư về hệ thống tức thì để kiểm thử toàn bộ luồng tự động hóa 100%.
+            </p>
+
+            <form id="form-mock-bank-tester" class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">User ID nhận tiền *</label>
+                <input type="number" id="mock-user-id" value="${this.app?.currentUser?.id || 1}" required
+                  class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-xs focus:ring-2 focus:ring-cyan-500" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Số tiền chuyển (VNĐ) *</label>
+                <input type="number" id="mock-amount" value="200000" step="10000" required
+                  class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-emerald-400 font-mono font-black text-sm focus:ring-2 focus:ring-cyan-500" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Nội dung chuyển khoản (Memo) *</label>
+                <input type="text" id="mock-memo" value="NAP VIP ${this.app?.currentUser?.id || 1} DEMO_LIVE_HOOK" required
+                  class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs focus:ring-2 focus:ring-cyan-500" />
+              </div>
+
+              <div class="pt-1">
+                <button type="submit" id="btn-trigger-mock-hook"
+                  class="w-full py-3 rounded-xl gradient-cyan text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-bolt"></i>
+                  <span>⚡ Bắn Giả Lập Biến Động Số Dư Ngay</span>
+                </button>
+              </div>
+            </form>
+
+            <div id="mock-result-box" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono"></div>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    document.getElementById('form-mock-bank-tester')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uId = parseInt(document.getElementById('mock-user-id')?.value || '1');
+      const amt = parseFloat(document.getElementById('mock-amount')?.value || '200000');
+      const memo = document.getElementById('mock-memo')?.value?.trim();
+      const resultBox = document.getElementById('mock-result-box');
+      const submitBtn = document.getElementById('btn-trigger-mock-hook');
+
+      if (submitBtn) {
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang bắn webhook...`;
+        submitBtn.disabled = true;
+      }
+
+      try {
+        const res = await api.mockReceiveMoney(null, amt, memo, uId);
+        if (resultBox) {
+          resultBox.classList.remove('hidden');
+          resultBox.className = 'p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs font-mono space-y-1';
+          resultBox.innerHTML = `
+            <div class="text-emerald-300 font-bold">✅ Webhook xử lý thành công (Action: ${res.action})!</div>
+            <div class="text-slate-300 text-[11px]">${res.message}</div>
+          `;
+        }
+
+        if (window.confetti) {
+          window.confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+        }
+        this.app.showToast(res.message || 'Đã mô phỏng tiền về thành công!', 'success');
+      } catch (err) {
+        if (resultBox) {
+          resultBox.classList.remove('hidden');
+          resultBox.className = 'p-3 rounded-xl bg-rose-950/40 border border-rose-500/40 text-xs font-mono';
+          resultBox.textContent = `❌ Lỗi: ${err.message}`;
+        }
+        this.app.showToast(err.message || 'Lỗi khi bắn webhook', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>⚡ Bắn Giả Lập Biến Động Số Dư Ngay</span>`;
+          submitBtn.disabled = false;
+        }
+      }
+    });
+  }
 }
+
+
 
 

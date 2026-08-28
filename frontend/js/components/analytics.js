@@ -14,7 +14,7 @@ export class AnalyticsComponent {
     this.destroyCharts();
 
     container.innerHTML = `
-      <div class="space-y-6 animate-in fade-in duration-300">
+      <div id="tab-analytics" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header & Action Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -324,11 +324,12 @@ export class AnalyticsComponent {
     `;
   }
 
-  renderCategoryBreakdown(categories) {
+  renderCategoryBreakdown(rawCategories) {
     const totalBadge = document.getElementById('analytics-total-exp-badge');
     const listContainer = document.getElementById('analytics-top-categories-list');
     const canvas = document.getElementById('analytics-cat-donut');
 
+    const categories = Array.isArray(rawCategories) ? rawCategories : (rawCategories?.items || []);
     const totalExpense = categories.reduce((sum, c) => sum + (c.total_amount || 0), 0);
     if (totalBadge) totalBadge.textContent = formatVND(totalExpense);
 

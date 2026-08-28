@@ -1,19 +1,19 @@
-import { api } from './api.js?v=4.9';
-import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=4.9';
-import { AuthComponent } from './components/auth.js?v=4.9';
-import { DashboardComponent } from './components/dashboard.js?v=4.9';
-import { TransactionsComponent } from './components/transactions.js?v=4.9';
-import { WalletsComponent } from './components/wallets.js?v=4.9';
-import { CategoriesComponent } from './components/categories.js?v=4.9';
-import { BudgetsComponent } from './components/budgets.js?v=4.9';
-import { SavingsComponent } from './components/savings.js?v=4.9';
-import { AnalyticsComponent } from './components/analytics.js?v=4.9';
-import { AIAssistantComponent } from './components/ai_assistant.js?v=4.9';
-import { BadgesComponent } from './components/badges.js?v=4.9';
-import { AdminComponent } from './components/admin.js?v=4.9';
-import { SubscriptionComponent } from './components/subscription.js?v=4.9';
-import { NotificationsComponent } from './components/notifications.js?v=4.9';
-import { SupportComponent } from './components/support.js?v=4.9';
+import { api } from './api.js?v=5.5';
+import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=5.5';
+import { AuthComponent } from './components/auth.js?v=5.5';
+import { DashboardComponent } from './components/dashboard.js?v=5.5';
+import { TransactionsComponent } from './components/transactions.js?v=5.5';
+import { WalletsComponent } from './components/wallets.js?v=5.5';
+import { CategoriesComponent } from './components/categories.js?v=5.5';
+import { BudgetsComponent } from './components/budgets.js?v=5.5';
+import { SavingsComponent } from './components/savings.js?v=5.5';
+import { AnalyticsComponent } from './components/analytics.js?v=5.5';
+import { AIAssistantComponent } from './components/ai_assistant.js?v=5.5';
+import { BadgesComponent } from './components/badges.js?v=5.5';
+import { AdminComponent } from './components/admin.js?v=5.5';
+import { SubscriptionComponent } from './components/subscription.js?v=5.5';
+import { NotificationsComponent } from './components/notifications.js?v=5.5';
+import { SupportComponent } from './components/support.js?v=5.5';
 
 class App {
   constructor() {
@@ -857,15 +857,68 @@ class App {
   }
 
   switchTab(tabName) {
-    return this.navigate(tabName);
+    const cleanTab = (tabName || 'dashboard').replace(/^tab-/, '').replace(/^#/, '');
+    if (cleanTab.startsWith('admin_') || cleanTab === 'admin') {
+      return this.switchAdminTab(cleanTab);
+    }
+    return this.switchUserTab(cleanTab);
+  }
+
+  switchUserTab(targetTabId) {
+    const cleanTab = (targetTabId || 'dashboard').replace(/^tab-/, '').replace(/^#/, '');
+
+    // 1. Chỉ ẩn các tab của User nếu tồn tại trong DOM
+    document.querySelectorAll('.user-tab-pane').forEach(pane => {
+      pane.classList.add('hidden');
+    });
+
+    // 2. Bỏ active menu User
+    document.querySelectorAll('.user-nav-item').forEach(item => {
+      item.classList.remove('active', 'text-emerald-400', 'bg-emerald-950/30');
+    });
+
+    // 3. Hiện đúng tab được chọn nếu có element tĩnh
+    const activePane = document.getElementById(cleanTab.startsWith('tab-') ? cleanTab : `tab-${cleanTab}`);
+    if (activePane) {
+      activePane.classList.remove('hidden');
+    }
+
+    // 4. Highlight menu tương ứng
+    const activeNav = document.querySelector(`.user-nav-item[data-tab="${cleanTab}"], [data-tab="${cleanTab}"]`);
+    if (activeNav) {
+      activeNav.classList.add('active');
+    }
+
+    return this.navigate(cleanTab);
+  }
+
+  switchAdminTab(targetTabId) {
+    const cleanTab = (targetTabId || 'admin_dashboard').replace(/^tab-/, '').replace(/^#/, '');
+    const finalTab = cleanTab.startsWith('admin_') || cleanTab === 'admin' ? cleanTab : `admin_${cleanTab}`;
+
+    // Ẩn các admin pane nếu có
+    document.querySelectorAll('.admin-tab-pane').forEach(pane => {
+      pane.classList.add('hidden');
+    });
+
+    // Highlight admin menu
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    const activeNav = document.querySelector(`.admin-nav-item[data-tab="${finalTab}"], [data-tab="${finalTab}"]`);
+    if (activeNav) {
+      activeNav.classList.add('active');
+    }
+
+    return this.navigate(finalTab);
   }
 
   navigateView(tabName) {
-    return this.navigate(tabName);
+    return this.switchTab(tabName);
   }
 
   showSection(tabName) {
-    return this.navigate(tabName);
+    return this.switchTab(tabName);
   }
 
   navigate(tabName) {
@@ -1038,7 +1091,7 @@ class App {
 
   renderSettings(container) {
     container.innerHTML = `
-      <div class="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
+      <div id="tab-settings" class="user-tab-pane max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
         <div>
           <h1 class="text-2xl font-black text-slate-100 tracking-tight">Cài Đặt Tài Khoản & Bảo Mật</h1>
           <p class="text-slate-400 text-xs mt-0.5">Quản lý thông tin cá nhân và mật khẩu bảo vệ dữ liệu tài chính</p>
@@ -1328,9 +1381,11 @@ class App {
 try {
   window.fintrackApp = new App();
   window.navigate = (tab) => window.fintrackApp?.navigate(tab);
-  window.switchTab = (tab) => window.fintrackApp?.navigate(tab);
-  window.navigateView = (tab) => window.fintrackApp?.navigate(tab);
-  window.showSection = (tab) => window.fintrackApp?.navigate(tab);
+  window.switchTab = (tab) => window.fintrackApp?.switchTab(tab);
+  window.switchUserTab = (tab) => window.fintrackApp?.switchUserTab(tab);
+  window.switchAdminTab = (tab) => window.fintrackApp?.switchAdminTab(tab);
+  window.navigateView = (tab) => window.fintrackApp?.navigateView(tab);
+  window.showSection = (tab) => window.fintrackApp?.showSection(tab);
 } catch (appInitErr) {
   console.error('[FinTrack] Lỗi nghiêm trọng khi khởi tạo App instance:', appInitErr);
 }

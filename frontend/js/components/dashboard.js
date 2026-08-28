@@ -13,7 +13,7 @@ export class DashboardComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div class="space-y-6 animate-in fade-in duration-300">
+      <div id="tab-dashboard" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header & Quick Actions -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -99,19 +99,23 @@ export class DashboardComponent {
             </div>
           </div>
 
-          <!-- Category Breakdown Donut with Center Stat -->
-          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+          <!-- Category Breakdown Donut with Center Stat & Cyberpunk Custom Legend -->
+          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between" id="category-donut-card">
             <div class="flex items-center justify-between mb-2">
               <div>
                 <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-                  <i class="fa-solid fa-chart-pie text-indigo-400"></i>
+                  <i class="fa-solid fa-chart-pie text-[#00FFAA]"></i>
                   Cơ Cấu Chi Tiêu
                 </h3>
                 <p class="text-xs text-slate-400">Tỷ trọng chi theo danh mục kỳ này</p>
               </div>
+              <span id="category-donut-total-badge" class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 text-[11px] font-mono font-bold text-[#00FFAA] border border-[#00FFAA]/30 shadow-sm shadow-[#00FFAA]/10">0 ₫</span>
             </div>
-            <div class="h-64 w-full relative flex items-center justify-center">
+            <div class="h-48 w-full relative flex items-center justify-center my-1">
               <canvas id="category-donut-chart"></canvas>
+            </div>
+            <div id="category-custom-legend" class="mt-2 space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Rendered dynamically by JS -->
             </div>
           </div>
         </div>
@@ -375,12 +379,12 @@ export class DashboardComponent {
 
     // Create high-DPI gradients
     const incomeGrad = ctx.createLinearGradient(0, 0, 0, 240);
-    incomeGrad.addColorStop(0, 'rgba(16, 185, 129, 0.95)');
-    incomeGrad.addColorStop(1, 'rgba(5, 150, 105, 0.45)');
+    incomeGrad.addColorStop(0, 'rgba(0, 255, 170, 0.95)');
+    incomeGrad.addColorStop(1, 'rgba(0, 255, 170, 0.2)');
 
     const expenseGrad = ctx.createLinearGradient(0, 0, 0, 240);
-    expenseGrad.addColorStop(0, 'rgba(244, 63, 94, 0.95)');
-    expenseGrad.addColorStop(1, 'rgba(190, 18, 60, 0.45)');
+    expenseGrad.addColorStop(0, 'rgba(176, 38, 255, 0.95)');
+    expenseGrad.addColorStop(1, 'rgba(176, 38, 255, 0.2)');
 
     const lineFillGrad = ctx.createLinearGradient(0, 0, 0, 240);
     lineFillGrad.addColorStop(0, 'rgba(129, 140, 248, 0.25)');
@@ -395,7 +399,7 @@ export class DashboardComponent {
             label: 'Thu Nhập',
             data: incomeData,
             backgroundColor: incomeGrad,
-            hoverBackgroundColor: '#34d399',
+            hoverBackgroundColor: '#00FFAA',
             borderRadius: 8,
             barPercentage: 0.65,
             categoryPercentage: 0.8
@@ -404,7 +408,7 @@ export class DashboardComponent {
             label: 'Chi Tiêu',
             data: expenseData,
             backgroundColor: expenseGrad,
-            hoverBackgroundColor: '#fb7185',
+            hoverBackgroundColor: '#B026FF',
             borderRadius: 8,
             barPercentage: 0.65,
             categoryPercentage: 0.8
@@ -494,42 +498,98 @@ export class DashboardComponent {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const items = breakdown.items || [];
+    const items = Array.isArray(breakdown) ? breakdown : (breakdown.items || []);
     const totalExpense = items.reduce((sum, i) => sum + (i.total_amount || 0), 0);
 
+    const legendContainer = document.getElementById('category-custom-legend');
+    const totalBadge = document.getElementById('category-donut-total-badge');
+
     if (!items || items.length === 0) {
-      ctx.font = '12px Plus Jakarta Sans';
-      ctx.fillStyle = '#64748b';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = '13px Plus Jakarta Sans, sans-serif';
+      ctx.fillStyle = '#64748B';
       ctx.textAlign = 'center';
-      ctx.fillText('Chưa có chi tiêu trong kỳ', 130, 100);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Chưa có chi tiêu trong kỳ', canvas.width / 2 || 130, canvas.height / 2 || 90);
+      if (legendContainer) legendContainer.innerHTML = '<div class="text-center py-4 text-slate-500 text-xs">Chưa có giao dịch chi tiêu</div>';
+      if (totalBadge) totalBadge.textContent = '0 ₫';
       return;
+    }
+
+    if (totalBadge) {
+      totalBadge.textContent = formatVND(totalExpense);
+    }
+
+    // Mapping Neon Color Palette theo yêu cầu:
+    // Tiền nhà & Cố định: #B026FF (Quantum Violet)
+    // Ăn uống & Thực phẩm: #00FFAA (Aura Green)
+    // Mua sắm & Đồ công nghệ: #00E5FF (Nebula Cyan)
+    // Cà phê & Tiếp khách: #FF007A (Neon Rose)
+    // Đi lại & Xăng xe: #FFAA00 (Amber Glow)
+    // Sức khỏe & Thể thao: #3B82F6 (Electric Blue)
+    function getCategoryNeonColor(catName, index) {
+      const defaultPalette = ['#B026FF', '#00FFAA', '#00E5FF', '#FF007A', '#FFAA00', '#3B82F6', '#EC4899', '#10B981'];
+      if (!catName) return defaultPalette[index % defaultPalette.length];
+      const lower = catName.toLowerCase();
+      if (lower.includes('nhà') || lower.includes('thuê') || lower.includes('cố định')) return '#B026FF';
+      if (lower.includes('ăn') || lower.includes('thực phẩm') || lower.includes('uống')) return '#00FFAA';
+      if (lower.includes('mua sắm') || lower.includes('công nghệ') || lower.includes('sắm')) return '#00E5FF';
+      if (lower.includes('cà phê') || lower.includes('cafe') || lower.includes('tiếp khách') || lower.includes('đối tác') || lower.includes('giải trí')) return '#FF007A';
+      if (lower.includes('đi lại') || lower.includes('xăng') || lower.includes('di chuyển') || lower.includes('xe')) return '#FFAA00';
+      if (lower.includes('sức khỏe') || lower.includes('thể thao') || lower.includes('gym') || lower.includes('y tế')) return '#3B82F6';
+      return defaultPalette[index % defaultPalette.length];
     }
 
     const labels = items.map(i => i.category_name);
     const dataVals = items.map(i => i.total_amount);
-    const colors = items.map(i => i.color || '#6366F1');
+    const colors = items.map((i, idx) => i.color || getCategoryNeonColor(i.category_name, idx));
 
-    // Center text plugin to display Total Expense right in donut center
+    // Custom Cyberpunk HTML Legend
+    if (legendContainer) {
+      legendContainer.innerHTML = items.map((item, idx) => {
+        const color = colors[idx];
+        const pct = item.percentage !== undefined ? item.percentage : (totalExpense > 0 ? ((item.total_amount / totalExpense) * 100).toFixed(1) : 0);
+        return `
+          <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition group">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color}; box-shadow: 0 0 8px ${color}80;"></span>
+              <span class="text-xs font-semibold text-slate-200 truncate group-hover:text-white transition">${item.category_name}</span>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono" style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}40;">${pct}%</span>
+              <span class="text-xs font-mono font-bold text-slate-100">${formatVND(item.total_amount)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Center text plugin to display Total Expense in donut center
     const centerTextPlugin = {
-      id: 'centerText',
+      id: 'cyberpunkCenterText',
       beforeDraw(chart) {
         const { width, height, ctx } = chart;
         ctx.save();
         const centerX = width / 2;
-        const centerY = (height / 2) - 16;
+        const centerY = height / 2;
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Subtitle "TỔNG CHI"
-        ctx.font = '700 10px Plus Jakarta Sans';
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText('TỔNG CHI', centerX, centerY - 9);
+        // Subtitle "Tổng chi"
+        ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillText('Tổng chi', centerX, centerY - 10);
 
-        // Bold Amount
-        ctx.font = '800 14px Plus Jakarta Sans';
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillText(formatVND(totalExpense), centerX, centerY + 11);
+        // Formatted Amount: 18.45M or 18.450.000 ₫
+        let displayAmount = formatVND(totalExpense);
+        if (totalExpense >= 1000000) {
+          const inM = (totalExpense / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+          displayAmount = `${inM}M ₫`;
+        }
+        ctx.font = '800 15px Plus Jakarta Sans, sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(displayAmount, centerX, centerY + 10);
 
         ctx.restore();
       }
@@ -543,35 +603,41 @@ export class DashboardComponent {
           data: dataVals,
           backgroundColor: colors,
           borderWidth: 2,
-          borderColor: '#111827',
-          hoverOffset: 6
+          borderColor: '#0B0F19',
+          hoverOffset: 6,
+          hoverBorderColor: '#FFFFFF'
         }]
       },
       plugins: [centerTextPlugin],
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '72%',
+        cutout: '74%',
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+          duration: 1200,
+          easing: 'easeOutQuart'
+        },
         plugins: {
           legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 8,
-              boxHeight: 8,
-              color: '#94a3b8',
-              font: { size: 10, family: 'Plus Jakarta Sans' },
-              padding: 10
-            }
+            display: false
           },
           tooltip: {
-            backgroundColor: '#111827',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: '#334155',
+            backgroundColor: 'rgba(11, 15, 25, 0.95)',
+            titleColor: '#FFFFFF',
+            bodyColor: '#00FFAA',
+            borderColor: 'rgba(0, 255, 170, 0.3)',
             borderWidth: 1,
             padding: 10,
+            boxPadding: 6,
+            usePointStyle: true,
             callbacks: {
-              label: (item) => ` ${item.label}: ${formatVND(item.raw)} (${items[item.dataIndex].percentage}%)`
+              label: (item) => {
+                const val = item.raw || 0;
+                const pct = totalExpense > 0 ? ((val / totalExpense) * 100).toFixed(1) : 0;
+                return ` ${item.label}: ${formatVND(val)} (${pct}%)`;
+              }
             }
           }
         }

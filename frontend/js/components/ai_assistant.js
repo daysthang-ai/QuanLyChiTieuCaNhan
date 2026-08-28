@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=4.9';
-import { formatVND, formatDateVN } from '../utils/formatters.js?v=4.9';
+import { api } from '../api.js?v=5.5';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=5.5';
 
 export class AIAssistantComponent {
   constructor(app) {
@@ -207,7 +207,7 @@ export class AIAssistantComponent {
   // =========================================================================
   async render(container) {
     container.innerHTML = `
-      <div class="h-[calc(100vh-140px)] flex flex-col glass-card rounded-3xl overflow-hidden shadow-sm animate-in fade-in duration-300 border border-slate-800">
+      <div id="tab-ai_assistant" class="user-tab-pane h-[calc(100vh-140px)] flex flex-col glass-card rounded-3xl overflow-hidden shadow-sm animate-in fade-in duration-300 border border-slate-800">
         
         <!-- Chat Header -->
         <div class="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">

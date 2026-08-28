@@ -1,5 +1,5 @@
-﻿import { api } from '../api.js';
-import { formatDateVN, formatDateTimeVN } from '../utils/formatters.js';
+import { api } from '../api.js?v=5.5';
+import { formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=5.5';
 
 export class SupportComponent {
   constructor(app) {
@@ -35,7 +35,7 @@ export class SupportComponent {
     const resolvedTickets = this.tickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length;
 
     container.innerHTML = `
-      <div class="max-w-6xl mx-auto space-y-7 animate-in fade-in duration-300">
+      <div id="tab-support" class="user-tab-pane max-w-6xl mx-auto space-y-7 animate-in fade-in duration-300">
         
         <!-- Header Banner -->
         <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-teal-950/60 via-slate-900/90 to-cyan-950/50 border border-teal-500/30 shadow-2xl">
@@ -73,7 +73,7 @@ export class SupportComponent {
         <!-- Main 2-Column Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <!-- KHU VỰC 1: FORM GỬI YÊU CẦU / KHIẾU NẠI MỚI (4.5 / 12) -->
+          <!-- KHU VỰC 1: FORM GỬI YÊU CẦU / KHIẾU NẠI MỚI (5 / 12) -->
           <div class="lg:col-span-5 glass-card p-6 rounded-3xl space-y-4 border border-teal-500/30 shadow-xl bg-slate-950/80 sticky top-4">
             <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
               <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg border border-teal-500/30 flex-shrink-0">
@@ -104,7 +104,7 @@ export class SupportComponent {
                     <option value="BILLING">💳 Giao dịch & Nạp VIP</option>
                     <option value="AI_PARSER">🤖 Lỗi AI bóc tách chi tiêu</option>
                     <option value="TECHNICAL">⚙️ Lỗi kỹ thuật / Open Banking</option>
-                    <option value="ACCOUNT">🛡️ Bảo mật & Tài khoản</option>
+                    <option value="ACCOUNT">🔒 Bảo mật & Tài khoản</option>
                     <option value="FEATURE_REQUEST">💡 Góp ý tính năng mới</option>
                     <option value="OTHER">❓ Vấn đề khác</option>
                   </select>
@@ -140,12 +140,12 @@ export class SupportComponent {
               <button type="submit" id="btn-submit-user-ticket" 
                 class="w-full py-3 rounded-xl gradient-emerald text-white font-black text-xs shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-paper-plane"></i>
-                <span>🚀 Gửi Yêu Cầu Tới Ban Quản Trị</span>
+                <span>Gửi Yêu Cầu Tới Ban Quản Trị</span>
               </button>
             </form>
           </div>
 
-          <!-- KHU VỰC 2: LỊCH SỬ YÊU CẦU CỦA TÔI (7.5 / 12) -->
+          <!-- KHU VỰC 2: LỊCH SỬ YÊU CẦU CỦA TÔI (7 / 12) -->
           <div class="lg:col-span-7 space-y-4">
             
             <div class="glass-card p-4 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
@@ -210,7 +210,7 @@ export class SupportComponent {
         this.app.showToast(err.message || 'Lỗi khi gửi yêu cầu hỗ trợ', 'error');
       } finally {
         if (submitBtn) {
-          submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>🚀 Gửi Yêu Cầu Tới Ban Quản Trị</span>`;
+          submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>Gửi Yêu Cầu Tới Ban Quản Trị</span>`;
           submitBtn.disabled = false;
         }
       }
@@ -259,7 +259,7 @@ export class SupportComponent {
       'BILLING': '💳 Giao dịch & VIP',
       'AI_PARSER': '🤖 Lỗi AI bóc tách',
       'TECHNICAL': '⚙️ Kỹ thuật',
-      'ACCOUNT': '🛡️ Bảo mật & Tài khoản',
+      'ACCOUNT': '🔒 Bảo mật & Tài khoản',
       'FEATURE_REQUEST': '💡 Góp ý tính năng',
       'OTHER': '❓ Khác'
     };
