@@ -1,19 +1,19 @@
-import { api } from './api.js?v=5.5';
-import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=5.5';
-import { AuthComponent } from './components/auth.js?v=5.5';
-import { DashboardComponent } from './components/dashboard.js?v=5.5';
-import { TransactionsComponent } from './components/transactions.js?v=5.5';
-import { WalletsComponent } from './components/wallets.js?v=5.5';
-import { CategoriesComponent } from './components/categories.js?v=5.5';
-import { BudgetsComponent } from './components/budgets.js?v=5.5';
-import { SavingsComponent } from './components/savings.js?v=5.5';
-import { AnalyticsComponent } from './components/analytics.js?v=5.5';
-import { AIAssistantComponent } from './components/ai_assistant.js?v=5.5';
-import { BadgesComponent } from './components/badges.js?v=5.5';
-import { AdminComponent } from './components/admin.js?v=5.5';
-import { SubscriptionComponent } from './components/subscription.js?v=5.5';
-import { NotificationsComponent } from './components/notifications.js?v=5.5';
-import { SupportComponent } from './components/support.js?v=5.5';
+import { api } from './api.js?v=7.0';
+import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=7.0';
+import { AuthComponent } from './components/auth.js?v=7.0';
+import { DashboardComponent } from './components/dashboard.js?v=7.0';
+import { TransactionsComponent } from './components/transactions.js?v=7.0';
+import { WalletsComponent } from './components/wallets.js?v=7.0';
+import { CategoriesComponent } from './components/categories.js?v=7.0';
+import { BudgetsComponent } from './components/budgets.js?v=7.0';
+import { SavingsComponent } from './components/savings.js?v=7.0';
+import { AnalyticsComponent } from './components/analytics.js?v=7.0';
+import { AIAssistantComponent } from './components/ai_assistant.js?v=7.0';
+import { BadgesComponent } from './components/badges.js?v=7.0';
+import { AdminComponent } from './components/admin.js?v=7.0';
+import { SubscriptionComponent } from './components/subscription.js?v=7.0';
+import { NotificationsComponent } from './components/notifications.js?v=7.0';
+import { SupportComponent } from './components/support.js?v=7.0';
 
 class App {
   constructor() {

@@ -640,25 +640,39 @@ export class SubscriptionComponent {
     `;
   }
 
-  // Open Upgrade / Payment Confirmation Modal with Duration Selection & Live Wallet Deduction
+  // =========================================================================
+  // MODAL GIA HẠN GÓI CƯỚC VIP (2 TAB TOGGLE: VIETQR CK TỰ ĐỘNG & VÍ TIỀN THẬT)
+  // =========================================================================
   async openUpgradeModal(planId) {
-    const modalEl = document.getElementById('generic-modal');
+    const modalEl = document.getElementById('upgradeModal') || document.getElementById('vipModal') || document.getElementById('generic-modal');
     if (!modalEl) return;
+
+    modalEl.classList.remove('hidden');
 
     const plan = this.plans.find(p => p.id === planId) || {
       id: planId,
       name: planId === 'PLATINUM' ? 'FinTrack Platinum VIP' : planId === 'PREMIUM' ? 'FinTrack Premium' : planId === 'PRO' ? 'FinTrack Pro' : 'FinTrack Free',
       price: planId === 'PLATINUM' ? 199000 : planId === 'PREMIUM' ? 99000 : planId === 'PRO' ? 49000 : 0,
-      ai_limits_text: planId === 'PLATINUM' ? 'Không giới hạn (VIP Unlimited AI)' : planId === 'PREMIUM' ? '1.000 Token AI / tháng' : planId === 'PRO' ? '100 lượt gọi AI / ngày' : '10 lượt gọi AI / ngày'
+      ai_limits_text: planId === 'PLATINUM' ? 'VIP Unlimited (Không giới hạn Token / Lượt gọi AI)' : planId === 'PREMIUM' ? '1.000 Token AI / tháng (300 lượt gọi AI cao cấp)' : planId === 'PRO' ? '100 lượt gọi AI / ngày (3.000 lượt/tháng)' : '10 lượt gọi AI / ngày'
     };
 
     const isFree = plan.id === 'FREE';
     const isPlatinum = plan.id === 'PLATINUM';
     const isPremium = plan.id === 'PREMIUM';
     const isPro = plan.id === 'PRO';
-    let selectedMonths = 1;
 
-    // Pricing mapping based on duration
+    let selectedMonths = 1;
+    let activeTab = 'vietqr'; // 'vietqr' or 'wallet'
+    let currentOrder = null;
+    let isProcessed = false;
+
+    // Helper tạo link VietQR QuickLink chuẩn
+    const buildVietQRUrl = (amt, memo) => {
+      const cleanMemo = memo || `FTP ${this.app.currentUser?.id || 1} ORD123`;
+      return `https://api.vietqr.io/image/970422-0374617569-compact2.jpg?amount=${amt}&addInfo=${encodeURIComponent(cleanMemo)}&accountName=${encodeURIComponent("DANG QUYET THANG")}`;
+    };
+
+    // Bảng tính giá theo thời hạn
     const getDurationPricing = (months) => {
       if (isFree) return { price: 0, days: 0, note: 'Vĩnh viễn' };
       if (planId === 'PLATINUM') {
@@ -680,602 +694,531 @@ export class SubscriptionComponent {
       }
     };
 
-    const initialPricing = getDurationPricing(1);
-
+    // Lấy thông tin ví tiền thật (Real Wallet)
     let wallets = [];
     try {
       wallets = await api.getWallets();
-    } catch (e) {
+    } catch (_) {
       wallets = [];
     }
 
+    let realWallet = wallets.find(w => w.wallet_scope === 'real') || {
+      id: null,
+      name: 'Ví Thanh Toán Dịch Vụ & VIP FinTrack',
+      wallet_scope: 'real',
+      balance: 0,
+      currency: 'VND'
+    };
+
+    // Lấy thông tin cổng ngân hàng thụ hưởng
     let gateway = {
       bank_code: 'MB',
       bank_id: 'MB',
-      bank_name: 'MB Bank (Ngân Hàng Quân Đội)',
+      bank_name: 'MB Bank',
       account_number: '0374617569',
       account_name: 'DANG QUYET THANG',
-      qr_template: 'compact2',
-      memo_prefix: 'NAP VIP'
+      qr_template: 'compact2'
     };
     try {
       const gwRes = await api.getActiveBankGateway();
-      if (gwRes && gwRes.account_number) {
-        gateway = gwRes;
-      }
+      if (gwRes && gwRes.account_number) gateway = gwRes;
     } catch (_) {}
 
-    const realWallets = wallets.filter(w => w.wallet_scope === 'real');
-    const paymentWallets = realWallets.length > 0 ? realWallets : wallets;
-    const userId = this.app.currentUser?.id || 1;
-    const memoDigits = Math.floor(100000 + Math.random() * 900000);
-    const transferMemo = `FT${planId} ${userId} ${memoDigits}`;
     const isCurrentPlanSelected = (this.app.currentUser?.plan || '').toUpperCase() === planId;
-    const modalTitle = isFree ? 'Chuyển Sang Gói Free' : isCurrentPlanSelected ? `Gia Hạn ${plan.name}` : `Nâng Cấp Lên ${plan.name}`;
+    const modalTitle = isFree 
+      ? 'Chuyển Về Gói Miễn Phí (Free)' 
+      : isCurrentPlanSelected 
+      ? `Gia Hạn Gói Cước FinTrack VIP` 
+      : `Nâng Cấp Gói Cước FinTrack VIP`;
 
-    let selectedPaymentMethod = 'VIETQR'; // 'VIETQR', 'WALLET', or 'DIRECT_DEBIT'
+    // Khởi tạo mã đơn hàng sơ khởi để render ngay lập tức không bị delay/trống
+    const initialOrderNum = Math.floor(100000 + Math.random() * 900000);
+    const initialOrderCode = `ORD-${initialOrderNum}`;
+    const initialAmount = getDurationPricing(1).price;
+    const initialMemo = `FTP ${this.app.currentUser?.id || 1} ${initialOrderCode}`;
+    const initialQrUrl = buildVietQRUrl(initialAmount, initialMemo);
 
-    const activePillStyle = isPlatinum
-      ? 'border border-emerald-500 bg-emerald-500/20 text-emerald-300'
-      : isPremium
-      ? 'border border-amber-500 bg-amber-500/20 text-amber-300'
-      : isPro
-      ? 'border border-indigo-500 bg-indigo-500/20 text-indigo-300'
-      : 'border border-slate-500 bg-slate-500/20 text-slate-300';
+    // Xử lý sự kiện bàn phím ESC để đóng Modal
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape' || e.keyCode === 27) {
+        if (window.closeUpgradeModal) window.closeUpgradeModal();
+      }
+    };
+    document.addEventListener('keydown', handleEscKey);
 
+    // Hàm đóng Modal sạch sẽ
+    window.closeUpgradeModal = function() {
+      const modal = document.getElementById('upgradeModal') || document.getElementById('vipModal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.innerHTML = '';
+      }
+      const altModal = document.getElementById('generic-modal');
+      if (altModal && altModal !== modal) {
+        altModal.classList.add('hidden');
+        altModal.innerHTML = '';
+      }
+      // Dừng tiến trình polling ngầm nếu đang chạy
+      if (window.vipPollingInterval) {
+        clearInterval(window.vipPollingInterval);
+        window.vipPollingInterval = null;
+      }
+      document.removeEventListener('keydown', handleEscKey);
+    };
+    window.closeVIPModal = window.closeUpgradeModal;
+
+    // Render HTML Modal
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-2xl shadow-amber-500/20' : isPro ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/20' : 'border-slate-800'} animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div id="vip-modal-backdrop" onclick="if(event.target === this) closeUpgradeModal()" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border ${isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-2xl shadow-amber-500/20' : isPro ? 'border-indigo-500/50 shadow-2xl shadow-indigo-500/20' : 'border-slate-800'} animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
           
-          <button id="sub-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
-            <i class="fa-solid fa-xmark text-sm"></i>
+          <!-- Background Cyber Glow -->
+          <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full ${isPlatinum ? 'bg-emerald-500/15' : isPremium ? 'bg-amber-500/15' : isPro ? 'bg-indigo-500/15' : 'bg-slate-500/10'} blur-3xl pointer-events-none"></div>
+
+          <!-- Nút Đóng 'X' (Tối Ưu Touch Target, Z-Index 50) -->
+          <button id="vip-modal-close-btn" onclick="closeUpgradeModal()" class="absolute top-4 right-4 z-50 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer flex items-center justify-center w-10 h-10" title="Đóng">
+            <i class="fa-solid fa-xmark text-base pointer-events-none"></i>
           </button>
 
-          <div class="flex items-center gap-3.5 mb-5 pb-3 border-b border-slate-800">
+          <!-- 1. PHẦN ĐẦU MODAL (Giữ Nguyên) -->
+          <div class="flex items-center gap-3.5 mb-5 pb-3.5 border-b border-slate-800 relative z-10 pr-10">
             <div class="w-12 h-12 rounded-2xl ${isPlatinum ? 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-lg shadow-emerald-500/25' : isPremium ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/25' : isPro ? 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25' : 'bg-slate-800 text-slate-300'} flex items-center justify-center text-xl shadow-lg flex-shrink-0">
               <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : isPro ? 'fa-bolt' : 'fa-seedling'}"></i>
             </div>
             <div>
               <h3 class="text-base font-black text-slate-100">${modalTitle}</h3>
-              <p class="text-xs text-slate-400">Tự động tính ngày hết hạn & Phương thức thanh toán tức thời</p>
+              <p class="text-xs text-slate-400">Gói ${plan.name} &bull; Tự động kích hoạt hạn mức AI</p>
             </div>
           </div>
 
           ${!isFree ? `
-            <!-- Duration Selection Pills -->
-            <div class="mb-4">
+            <!-- Khung Chọn Thời Hạn Đăng Ký / Gia Hạn (3 Nút: 1 Tháng, 3 Tháng -5%, 1 Năm +2T) -->
+            <div class="mb-4 relative z-10">
               <label class="block font-bold text-slate-300 text-xs mb-2">Chọn Thời Hạn Đăng Ký / Gia Hạn:</label>
-              <div class="grid grid-cols-3 gap-2" id="duration-selector-group">
-                <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition ${activePillStyle}" data-months="1">
-                  <div>1 Tháng</div>
-                  <span class="text-[9px] font-mono opacity-80">${formatVND(getDurationPricing(1).price)}</span>
+              <div class="grid grid-cols-3 gap-2" id="vip-duration-group">
+                <button type="button" class="vip-duration-pill px-3 py-2.5 rounded-2xl text-xs font-bold transition border border-amber-500 bg-amber-500/20 text-amber-300 shadow-md" data-months="1">
+                  <div class="font-extrabold text-sm">1 Tháng</div>
+                  <span class="text-[10px] font-mono opacity-90">${formatVND(getDurationPricing(1).price)}</span>
                 </button>
-                <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="3">
-                  <div>3 Tháng</div>
-                  <span class="text-[9px] font-mono text-emerald-400">${formatVND(getDurationPricing(3).price)} (-5%)</span>
+                <button type="button" class="vip-duration-pill px-3 py-2.5 rounded-2xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="3">
+                  <div class="font-extrabold text-sm">3 Tháng</div>
+                  <span class="text-[10px] font-mono text-emerald-400 font-bold">${formatVND(getDurationPricing(3).price)} (-5%)</span>
                 </button>
-                <button type="button" class="duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="12">
-                  <div>1 Năm (12T)</div>
-                  <span class="text-[9px] font-mono text-amber-300">${formatVND(getDurationPricing(12).price)}</span>
+                <button type="button" class="vip-duration-pill px-3 py-2.5 rounded-2xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600" data-months="12">
+                  <div class="font-extrabold text-sm">1 Năm (12T)</div>
+                  <span class="text-[10px] font-mono text-amber-300 font-bold">${formatVND(getDurationPricing(12).price)} (+2T)</span>
                 </button>
               </div>
             </div>
 
-            <!-- Payment Method Tabs (3 Options) -->
-            <div class="mb-4">
-              <label class="block font-bold text-slate-300 text-xs mb-2">Chọn Phương Thức Thanh Toán:</label>
-              <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-2xl border border-slate-800 text-[11px]">
-                <button type="button" id="paymethod-tab-vietqr" class="paymethod-btn py-2 px-2 rounded-xl font-black transition gradient-amber text-slate-950 shadow-md flex items-center justify-center gap-1" data-method="VIETQR">
-                  <i class="fa-solid fa-qrcode"></i>
-                  <span>VietQR CK</span>
-                </button>
-                <button type="button" id="paymethod-tab-wallet" class="paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1" data-method="WALLET">
-                  <i class="fa-solid fa-wallet"></i>
-                  <span>Ví Tiền Thật</span>
-                </button>
-                <button type="button" id="paymethod-tab-debit" class="paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1" data-method="DIRECT_DEBIT">
-                  <i class="fa-solid fa-bolt text-cyan-400"></i>
-                  <span>Auto-Debit</span>
-                </button>
+            <!-- Khung Tóm Tắt Gói Cước -->
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs space-y-2 mb-4 font-sans relative z-10">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Gói Dịch Vụ:</span>
+                <span class="font-bold text-slate-100">${plan.name}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Hạn Mức AI Kích Hoạt:</span>
+                <span class="font-mono font-bold ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : 'text-indigo-300'}">${plan.ai_limits_text}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">Số Ngày Cộng Thêm:</span>
+                <span class="font-mono font-bold text-cyan-400" id="vip-summary-days">...</span>
+              </div>
+              <div class="flex justify-between items-baseline border-t border-slate-800/80 pt-2 text-sm">
+                <span class="font-bold text-slate-200">Số Tiền Cần Thanh Toán:</span>
+                <span class="font-mono font-black text-lg ${isPlatinum ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400' : isPremium ? 'text-amber-400' : 'text-indigo-400'}" id="vip-summary-total-price">
+                  ${formatVND(getDurationPricing(1).price)}
+                </span>
               </div>
             </div>
-          ` : ''}
 
-          <!-- Summary Box -->
-          <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs space-y-2.5 mb-4">
-            <div class="flex justify-between">
-              <span class="text-slate-400">Gói Dịch Vụ:</span>
-              <span class="font-bold text-slate-100">${plan.name}</span>
+            <!-- 2. CẤU TRÚC LẠI PHẦN CHỌN PHƯƠNG THỨC THANH TOÁN (Chỉ Giữ 2 Nút Toggle Rõ Ràng) -->
+            <!-- Toggle 2 nút -->
+            <div class="grid grid-cols-2 gap-3 mb-5 relative z-10">
+              <button id="btnTabVietQR" onclick="switchVIPPaymentTab('vietqr')" class="py-2.5 px-4 rounded-xl font-medium border border-amber-500/40 bg-amber-500/20 text-amber-300 flex items-center justify-center gap-2 transition-all">
+                ⚡ VietQR CK Tự Động
+              </button>
+              <button id="btnTabRealWallet" onclick="switchVIPPaymentTab('wallet')" class="py-2.5 px-4 rounded-xl font-medium border border-white/10 bg-slate-800/60 text-slate-400 hover:text-white flex items-center justify-center gap-2 transition-all">
+                💳 Ví Tiền Thật
+              </button>
             </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400">Hạn Mức AI Kích Hoạt:</span>
-              <span class="font-mono font-bold ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : isPro ? 'text-indigo-300' : 'text-slate-300'}">${plan.ai_limits_text}</span>
-            </div>
-            ${!isFree ? `
-              <div class="flex justify-between">
-                <span class="text-slate-400">Thời hạn dự kiến sau kích hoạt:</span>
-                <span class="font-mono font-bold text-emerald-400" id="sub-projected-expiry">...</span>
+
+            <!-- 3A. Container 1: VietQR Form (Giống Modal Nạp Tiền Thật) -->
+            <div id="vipTabVietQRContainer" class="block relative z-10 animate-in fade-in duration-150">
+              <div class="flex items-center justify-between text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg mb-3">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span> 🟢 Lắng nghe Webhook Ngân Hàng (Polling 3s)...</span>
+                <span class="font-mono">Tự động 100%</span>
               </div>
-            ` : ''}
-            <div class="flex justify-between border-t border-slate-800 pt-2 text-sm">
-              <span class="font-bold text-slate-200">Số Tiền Cần Thanh Toán:</span>
-              <span class="font-mono font-black ${isPlatinum ? 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400' : isPremium ? 'text-amber-400' : isPro ? 'text-indigo-400' : 'text-emerald-400'}" id="sub-total-price">
-                ${isFree ? '0 ₫ (Miễn Phí)' : formatVND(initialPricing.price)}
-              </span>
-            </div>
-          </div>
-
-          ${!isFree ? `
-            <!-- Option 1: Dynamic VietQR Payment Container -->
-            <div id="container-pay-vietqr" class="p-4 rounded-2xl ${isPlatinum ? 'bg-gradient-to-br from-emerald-950/20 via-slate-900/90 to-teal-950/30 border border-emerald-500/30' : isPremium ? 'bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-yellow-950/30 border border-amber-500/30' : isPro ? 'bg-gradient-to-br from-indigo-950/20 via-slate-900/90 to-purple-950/30 border border-indigo-500/30' : 'bg-slate-900/90 border border-slate-800'} text-xs mb-5 space-y-3">
-              <div class="flex flex-col sm:flex-row items-center gap-4">
-                <div class="p-2 bg-white rounded-2xl shadow-xl flex-shrink-0">
-                  <img id="sub-vietqr-img" src="https://img.vietqr.io/image/${gateway.bank_id}-${gateway.account_number}-${gateway.qr_template || 'compact2'}.png?amount=${initialPricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=${encodeURIComponent(gateway.account_name)}" 
-                       alt="VietQR Chuyển Khoản" 
-                       class="w-32 h-32 object-contain rounded-lg"
-                       onerror="this.src='/TKnganhangMB.jpg'" />
+              <div class="bg-slate-900/80 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center mb-3 relative">
+                
+                <!-- Khung Nền Trắng Bo Góc Nổi Bật Cho Ảnh QR -->
+                <div class="bg-white p-2 rounded-xl shrink-0 flex items-center justify-center w-36 h-36 shadow-lg">
+                  <img id="vipQRImage" src="${initialQrUrl}" alt="VietQR MB Bank" class="w-32 h-32 object-contain" 
+                    onerror="this.onerror=null; this.src='https://img.vietqr.io/image/970422-0374617569-compact2.png?amount=' + encodeURIComponent(this.getAttribute('data-amount') || '199000') + '&addInfo=' + encodeURIComponent(this.getAttribute('data-memo') || 'FTP') + '&accountName=DANG%20QUYET%20THANG';" 
+                    data-amount="${initialAmount}" data-memo="${initialMemo}" />
                 </div>
-                <div class="space-y-1.5 flex-1 font-mono text-[11px] w-full">
-                  <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                    <span class="text-slate-400 font-sans">Ngân hàng:</span>
-                    <span class="font-bold text-slate-100">${gateway.bank_name}</span>
-                  </div>
-                  <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                    <span class="text-slate-400 font-sans">Số tài khoản:</span>
-                    <span class="font-bold text-emerald-400 select-all">${gateway.account_number}</span>
-                  </div>
-                  <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                    <span class="text-slate-400 font-sans">Chủ tài khoản:</span>
-                    <span class="font-bold text-slate-100">${gateway.account_name}</span>
-                  </div>
-                  <div class="flex justify-between pt-0.5">
-                    <span class="text-slate-400 font-sans">Nội dung CK:</span>
-                    <span class="font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-500/30 select-all" id="sub-vietqr-memo">${transferMemo}</span>
-                  </div>
+
+                <!-- Bảng Chi Tiết Thông Tin Chuyển Khoản -->
+                <div class="w-full space-y-1.5 text-xs">
+                  <div class="flex justify-between"><span class="text-slate-400">Mã đơn:</span><span id="vipOrderCode" class="font-mono text-emerald-400 font-bold">#${initialOrderCode}</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Ngân hàng:</span><span class="text-white font-medium" id="vipBankName">MB Bank</span></div>
+                  <div class="flex justify-between items-center"><span class="text-slate-400">Số tài khoản:</span><span id="vipSTK" class="text-emerald-400 font-mono font-bold flex items-center gap-1 cursor-pointer hover:underline" title="Click để sao chép STK">0374617569 <i class="fa-regular fa-copy text-[10px]"></i></span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Chủ tài khoản:</span><span class="text-white font-medium" id="vipAccountName">DANG QUYET THANG</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Số tiền:</span><span id="vipAmountText" class="text-amber-400 font-bold">${formatVND(initialAmount)}</span></div>
+                  <div class="flex justify-between items-center"><span class="text-slate-400">Nội dung CK:</span><span id="vipTransferContent" class="font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer hover:underline" title="Click để sao chép nội dung">${initialMemo} <i class="fa-regular fa-copy text-[10px]"></i></span></div>
                 </div>
               </div>
-              <p class="text-[10px] text-slate-400 text-center font-sans">
-                💡 Sau khi chuyển khoản thành công, nhấn <b>"${isCurrentPlanSelected ? 'Tôi Đã Chuyển Khoản Gia Hạn' : 'Tôi Đã Chuyển Khoản'}"</b> để hệ thống ghi nhận đơn và kích hoạt tự động.
+              <button id="btnVIPDemoPay" onclick="triggerVIPDemoPay()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-sm hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 mb-2 cursor-pointer">
+                ⚡ Demo Chuyển Tiền (Giả Lập Nhận Tiền Tức Thì)
+              </button>
+            </div>
+
+            <!-- 3B. Container 2: Ví Tiền Thật Form -->
+            <div id="vipTabWalletContainer" class="hidden space-y-4 relative z-10 animate-in fade-in duration-150">
+              <div class="bg-slate-900/80 border border-white/10 rounded-2xl p-4 space-y-2.5 text-sm">
+                <div class="flex justify-between"><span class="text-slate-400">Số dư Ví Tiền Thật:</span><span id="vipWalletBalanceText" class="text-emerald-400 font-bold font-mono">${formatVND(realWallet.balance)}</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Số tiền cần thanh toán:</span><span id="vipWalletPayAmountText" class="text-white font-bold font-mono">${formatVND(getDurationPricing(1).price)}</span></div>
+                <div class="h-px bg-white/10 my-1"></div>
+                <div class="flex justify-between"><span class="text-slate-400">Số dư còn lại:</span><span id="vipWalletRemainText" class="text-cyan-400 font-bold font-mono">...</span></div>
+              </div>
+              <div id="vipWalletActionArea">
+                <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                  ✅ Xác Nhận Trừ Ví & Gia Hạn Ngay
+                </button>
+              </div>
+            </div>
+          ` : `
+            <!-- Free Plan Confirmation Shell -->
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs space-y-4 relative z-10">
+              <p class="text-slate-300 leading-relaxed">
+                Bạn đang chọn chuyển sang <b>Gói Miễn Phí (FinTrack Free)</b>. Hạn mức sẽ quay về 10 lượt gọi AI/ngày và tối đa 2 ví tài chính cơ bản.
               </p>
+              <button type="button" id="btn-confirm-free-plan" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition">
+                Xác Nhận Chuyển Sang Gói Free
+              </button>
             </div>
-
-            <!-- Option 2: FinTrack Real Payment Wallet Container -->
-            <div id="container-pay-wallet" class="hidden p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs mb-5 space-y-3">
-              <div>
-                <label class="block font-bold text-slate-300 mb-1.5">Ví Tiền Thật Thanh Toán Gói:</label>
-                ${paymentWallets.length > 0 ? `
-                  <select id="sub-wallet-select" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-amber-500/50 text-amber-300 font-bold focus:ring-2 focus:ring-amber-500">
-                    ${paymentWallets.map(w => `
-                      <option value="${w.id}" data-balance="${w.balance}">
-                        ${w.name} &bull; Số dư tiền thật: ${formatVND(w.balance)}
-                      </option>
-                    `).join('')}
-                  </select>
-                ` : `
-                  <div class="p-3 rounded-xl bg-rose-950/40 border border-rose-800/40 text-rose-300 text-xs">
-                    ⚠️ Bạn chưa có ví tiền thật trong hệ thống. Vui lòng nạp tiền vào Ví Tiền Thật trước khi đăng ký gói!
-                  </div>
-                `}
-              </div>
-
-              <div id="sub-wallet-calc" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 text-[11px] flex items-center justify-between font-mono">
-                <span class="text-slate-400">Số dư tiền thật còn lại sau thanh toán:</span>
-                <span id="sub-wallet-rem-balance" class="font-bold text-emerald-400">...</span>
-              </div>
-            </div>
-
-            <!-- Option 3: 1-Click Direct Debit via Open Banking Container -->
-            <div id="container-pay-debit" class="hidden p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 to-slate-900/80 border border-cyan-500/40 text-xs mb-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-lg gradient-cyan text-slate-950 flex items-center justify-center text-xs font-bold">
-                    <i class="fa-solid fa-bolt"></i>
-                  </span>
-                  <div>
-                    <span class="font-bold text-slate-100 block">Thanh Toán 1-Click Direct Debit</span>
-                    <span class="text-[10px] text-cyan-300">Không cần quét QR hay mở app ngân hàng</span>
-                  </div>
-                </div>
-                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] font-black uppercase">Open Banking</span>
-              </div>
-
-              ${wallets.some(w => w.is_linked) ? `
-                <div>
-                  <label class="block font-bold text-slate-300 mb-1">Tài Khoản Ngân Hàng Đã Cấp Quyền:</label>
-                  <select id="sub-debit-bank-select" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-cyan-500/50 text-cyan-300 font-bold font-mono focus:ring-2 focus:ring-cyan-400">
-                    ${wallets.filter(w => w.is_linked).map(w => `
-                      <option value="${w.id}">
-                        ${w.name} &bull; ${w.account_number_masked || 'Đã liên kết'} (Auto-Debit Ready)
-                      </option>
-                    `).join('')}
-                  </select>
-                </div>
-              ` : `
-                <div class="p-3 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-xs space-y-2">
-                  <p class="text-slate-300 text-[11px] leading-relaxed">
-                    <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i>
-                    Bạn có thể thanh toán trực tiếp qua cổng Open Banking tức thời hoặc liên kết tài khoản ngân hàng để kích hoạt 1-Click Auto Debit.
-                  </p>
-                  <div class="flex items-center gap-2 text-[10px] text-emerald-400 font-mono">
-                    <i class="fa-solid fa-shield-check"></i> Xác thực sinh trắc học an toàn & Bảo mật 256-bit
-                  </div>
-                </div>
-              `}
-            </div>
-          ` : ''}
-
-          <div class="flex items-center gap-3">
-            <button type="button" id="sub-modal-cancel" class="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
-              Hủy Bỏ
-            </button>
-            <button type="button" id="sub-modal-confirm" class="w-2/3 py-2.5 rounded-xl text-xs font-bold shadow-lg transition active:scale-95 flex items-center justify-center gap-2 ${isPlatinum ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/40 hover:scale-[1.02]' : isPremium ? 'bg-amber-600 hover:bg-amber-500 text-slate-950 font-black shadow-amber-950/40 hover:scale-[1.02]' : isPro ? 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-indigo-950/40 hover:scale-[1.02]' : 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold'}">
-              <i class="fa-solid fa-check"></i>
-              <span id="sub-confirm-btn-text">${isFree ? 'Xác Nhận Đổi Sang Free' : isCurrentPlanSelected ? `🚀 Gia Hạn ${formatVND(initialPricing.price)}` : `🚀 Tôi Đã Chuyển Khoản ${formatVND(initialPricing.price)}`}</span>
-            </button>
-          </div>
+          `}
 
         </div>
       </div>
     `;
 
-    const closeModal = () => { modalEl.innerHTML = ''; };
-    document.getElementById('sub-modal-close')?.addEventListener('click', closeModal);
-    document.getElementById('sub-modal-cancel')?.addEventListener('click', closeModal);
+    // Free plan handler
+    if (isFree) {
+      document.getElementById('btn-confirm-free-plan')?.addEventListener('click', async () => {
+        try {
+          const updatedUser = await api.upgradePlan('FREE', null, 1, 'WALLET');
+          this.app.currentUser = updatedUser;
+          this.app.renderUserProfileHeader();
+          window.closeUpgradeModal();
+          this.app.showToast('Đã chuyển về gói Free thành công!', 'success');
+          const mainContainer = document.getElementById('main-content-view');
+          if (mainContainer) this.render(mainContainer);
+        } catch (err) {
+          this.app.showToast(err.message || 'Lỗi chuyển gói Free', 'error');
+        }
+      });
+      return;
+    }
 
-    const walletSelect = document.getElementById('sub-wallet-select');
-    const debitBankSelect = document.getElementById('sub-debit-bank-select');
-    const remBalanceEl = document.getElementById('sub-wallet-rem-balance');
-    const totalPriceEl = document.getElementById('sub-total-price');
-    const projectedExpiryEl = document.getElementById('sub-projected-expiry');
-    const confirmBtn = document.getElementById('sub-modal-confirm');
-    const confirmBtnText = document.getElementById('sub-confirm-btn-text');
+    // Elements
+    const btnTabVietQR = document.getElementById('btnTabVietQR');
+    const btnTabRealWallet = document.getElementById('btnTabRealWallet');
+    const vipTabVietQRContainer = document.getElementById('vipTabVietQRContainer');
+    const vipTabWalletContainer = document.getElementById('vipTabWalletContainer');
 
-    const containerVietQR = document.getElementById('container-pay-vietqr');
-    const containerWallet = document.getElementById('container-pay-wallet');
-    const containerDebit = document.getElementById('container-pay-debit');
-    const tabVietQR = document.getElementById('paymethod-tab-vietqr');
-    const tabWallet = document.getElementById('paymethod-tab-wallet');
-    const tabDebit = document.getElementById('paymethod-tab-debit');
-    const qrImg = document.getElementById('sub-vietqr-img');
+    const summaryDaysEl = document.getElementById('vip-summary-days');
+    const summaryTotalEl = document.getElementById('vip-summary-total-price');
 
-    // Switch payment methods
-    tabVietQR?.addEventListener('click', () => {
-      selectedPaymentMethod = 'VIETQR';
-      tabVietQR.className = 'paymethod-btn py-2 px-2 rounded-xl font-black transition gradient-amber text-slate-950 shadow-md flex items-center justify-center gap-1';
-      tabWallet.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      tabDebit.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      containerVietQR?.classList.remove('hidden');
-      containerWallet?.classList.add('hidden');
-      containerDebit?.classList.add('hidden');
-      updateCalculations();
-    });
+    const vipQRImage = document.getElementById('vipQRImage');
+    const vipOrderCode = document.getElementById('vipOrderCode');
+    const vipBankName = document.getElementById('vipBankName');
+    const vipSTK = document.getElementById('vipSTK');
+    const vipAccountName = document.getElementById('vipAccountName');
+    const vipAmountText = document.getElementById('vipAmountText');
+    const vipTransferContent = document.getElementById('vipTransferContent');
+    const btnVIPDemoPay = document.getElementById('btnVIPDemoPay');
 
-    tabWallet?.addEventListener('click', () => {
-      selectedPaymentMethod = 'WALLET';
-      tabWallet.className = 'paymethod-btn py-2 px-2 rounded-xl font-black transition gradient-emerald text-white shadow-md flex items-center justify-center gap-1';
-      tabVietQR.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      tabDebit.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      containerWallet?.classList.remove('hidden');
-      containerVietQR?.classList.add('hidden');
-      containerDebit?.classList.add('hidden');
-      updateCalculations();
-    });
+    const vipWalletBalanceText = document.getElementById('vipWalletBalanceText');
+    const vipWalletPayAmountText = document.getElementById('vipWalletPayAmountText');
+    const vipWalletRemainText = document.getElementById('vipWalletRemainText');
+    const vipWalletActionArea = document.getElementById('vipWalletActionArea');
 
-    tabDebit?.addEventListener('click', () => {
-      selectedPaymentMethod = 'DIRECT_DEBIT';
-      tabDebit.className = 'paymethod-btn py-2 px-2 rounded-xl font-black transition gradient-cyan text-slate-950 shadow-md flex items-center justify-center gap-1';
-      tabVietQR.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      tabWallet.className = 'paymethod-btn py-2 px-2 rounded-xl font-bold transition text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1';
-      containerDebit?.classList.remove('hidden');
-      containerVietQR?.classList.add('hidden');
-      containerWallet?.classList.add('hidden');
-      updateCalculations();
-    });
+    // Success Handler (Called by Polling, Direct Wallet Pay, or Demo Button)
+    const handlePaymentSuccess = async (methodLabel = 'MB Bank') => {
+      if (isProcessed) return;
+      isProcessed = true;
+      if (window.vipPollingInterval) {
+        clearInterval(window.vipPollingInterval);
+        window.vipPollingInterval = null;
+      }
 
+      window.closeUpgradeModal();
+
+      // Confetti Fireworks Celebration
+      if (window.confetti) {
+        window.confetti({
+          particleCount: 160,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
+      }
+
+      // Success Toast
+      this.app.showToast(`🎉 Thanh toán thành công! Gói ${plan.name} đã được kích hoạt tự động qua ${methodLabel}!`, 'success');
+
+      // Refresh User and Header UI
+      try {
+        this.app.currentUser = await api.getMe();
+        this.app.renderUserProfileHeader();
+      } catch (_) {}
+
+      // Re-render subscription page & notifications
+      const mainContainer = document.getElementById('main-content-view');
+      if (mainContainer) {
+        this.render(mainContainer);
+      }
+      if (this.app.updateNotificationBadge) {
+        this.app.updateNotificationBadge(false);
+      }
+    };
+
+    // Generate VIP Order for Tab VietQR
+    const generateVIPOrder = async () => {
+      const pricing = getDurationPricing(selectedMonths);
+      const generatedCode = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+      const localMemo = `FTP ${this.app.currentUser?.id || 1} ${generatedCode}`;
+      const localQrUrl = buildVietQRUrl(pricing.price, localMemo);
+
+      // Cập nhật UI ngay lập tức với Direct QuickLink
+      if (vipQRImage) {
+        vipQRImage.src = localQrUrl;
+        vipQRImage.setAttribute('data-amount', pricing.price);
+        vipQRImage.setAttribute('data-memo', localMemo);
+      }
+      if (vipOrderCode) vipOrderCode.textContent = `#${generatedCode}`;
+      if (vipAmountText) vipAmountText.textContent = formatVND(pricing.price);
+      if (vipTransferContent) vipTransferContent.innerHTML = `${localMemo} <i class="fa-regular fa-copy text-[10px]"></i>`;
+
+      currentOrder = {
+        order_code: generatedCode,
+        amount: pricing.price,
+        transfer_memo: localMemo,
+        user_id: this.app.currentUser?.id || 1
+      };
+
+      try {
+        const orderRes = await api.createVIPOrder(planId, selectedMonths, pricing.price, pricing.days);
+        if (orderRes && orderRes.order_code) {
+          currentOrder = orderRes;
+          const qrUrl = orderRes.vietqr_url || buildVietQRUrl(orderRes.amount, orderRes.transfer_memo);
+
+          if (vipQRImage) {
+            vipQRImage.src = qrUrl;
+            vipQRImage.setAttribute('data-amount', orderRes.amount);
+            vipQRImage.setAttribute('data-memo', orderRes.transfer_memo);
+          }
+          if (vipOrderCode) vipOrderCode.textContent = `#${orderRes.order_code}`;
+          if (vipAmountText) vipAmountText.textContent = formatVND(orderRes.amount);
+          if (vipTransferContent) vipTransferContent.innerHTML = `${orderRes.transfer_memo} <i class="fa-regular fa-copy text-[10px]"></i>`;
+
+          if (orderRes.bank_info) {
+            if (vipBankName) vipBankName.textContent = orderRes.bank_info.bank_name || 'MB Bank';
+            if (vipSTK) vipSTK.innerHTML = `${orderRes.bank_info.account_number} <i class="fa-regular fa-copy text-[10px]"></i>`;
+            if (vipAccountName) vipAccountName.textContent = orderRes.bank_info.account_name || 'DANG QUYET THANG';
+          }
+
+          // Bắt đầu Polling 3s
+          startPolling(orderRes.order_code);
+        }
+      } catch (err) {
+        console.warn('Create VIP Order error, fallback to client generated:', err);
+        startPolling(generatedCode);
+      }
+    };
+
+    // Start 3-second Polling mechanism
+    const startPolling = (orderCode) => {
+      if (window.vipPollingInterval) clearInterval(window.vipPollingInterval);
+      if (!orderCode) return;
+
+      window.vipPollingInterval = setInterval(async () => {
+        if (isProcessed) return;
+        try {
+          const res = await api.checkOrderStatus(orderCode);
+          if (res && (res.is_approved || res.is_paid || res.status === 'APPROVED' || res.status === 'PAID')) {
+            handlePaymentSuccess('MB Bank Webhook');
+          }
+        } catch (_) {}
+      }, 3000);
+    };
+
+    // Update Calculations & Wallet Area
     const updateCalculations = () => {
       const pricing = getDurationPricing(selectedMonths);
-      if (totalPriceEl) totalPriceEl.textContent = formatVND(pricing.price);
-
-      // Update VietQR dynamic image URL with current calculated price and memo
-      if (qrImg) {
-        qrImg.src = `https://img.vietqr.io/image/${gateway.bank_id}-${gateway.account_number}-${gateway.qr_template || 'compact2'}.png?amount=${pricing.price}&addInfo=${encodeURIComponent(transferMemo)}&accountName=${encodeURIComponent(gateway.account_name)}`;
-      }
       
-      if (confirmBtnText) {
-        if (isFree) {
-          confirmBtnText.textContent = 'Xác Nhận Đổi Sang Free';
-        } else if (isCurrentPlanSelected) {
-          if (selectedPaymentMethod === 'VIETQR') {
-            confirmBtnText.textContent = `🚀 Tôi Đã Chuyển Khoản ${formatVND(pricing.price)}`;
-          } else if (selectedPaymentMethod === 'DIRECT_DEBIT') {
-            confirmBtnText.textContent = `Gia Hạn ${formatVND(pricing.price)} qua Direct Debit`;
-          } else {
-            confirmBtnText.textContent = `Gia Hạn ${formatVND(pricing.price)} qua Ví`;
-          }
-        } else if (selectedPaymentMethod === 'VIETQR') {
-          confirmBtnText.textContent = `🚀 Tôi Đã Chuyển Khoản ${formatVND(pricing.price)}`;
-        } else if (selectedPaymentMethod === 'DIRECT_DEBIT') {
-          confirmBtnText.textContent = `Thanh Toán ${formatVND(pricing.price)} qua Direct Debit`;
-        } else {
-          confirmBtnText.textContent = `Thanh Toán ${formatVND(pricing.price)} qua Ví`;
-        }
-      }
-
-      // Projected Expiry Date
-      if (projectedExpiryEl && !isFree) {
+      // Update Summary box
+      if (summaryTotalEl) summaryTotalEl.textContent = formatVND(pricing.price);
+      if (summaryDaysEl) {
         const user = this.app.currentUser || {};
         const now = new Date();
         let baseDate = now;
         if (user.plan_expires_at && (user.plan || '').toUpperCase() === planId) {
-          const currentExp = new Date(user.plan_expires_at);
-          if (currentExp > now) baseDate = currentExp;
+          const curExp = new Date(user.plan_expires_at);
+          if (curExp > now) baseDate = curExp;
         }
-        const newExpiry = new Date(baseDate.getTime() + pricing.days * 24 * 60 * 60 * 1000);
-        projectedExpiryEl.textContent = `+${pricing.days} ngày (đến ${formatDateVN(newExpiry)})`;
+        const newExp = new Date(baseDate.getTime() + pricing.days * 24 * 60 * 60 * 1000);
+        summaryDaysEl.textContent = `+${pricing.days} ngày (đến ${formatDateVN(newExp)})`;
       }
 
-      if (isFree) return;
+      // Update Wallet Form
+      const curBal = realWallet.balance || 0;
+      if (vipWalletBalanceText) vipWalletBalanceText.textContent = formatVND(curBal);
+      if (vipWalletPayAmountText) vipWalletPayAmountText.textContent = formatVND(pricing.price);
 
-      if (selectedPaymentMethod === 'VIETQR' || selectedPaymentMethod === 'DIRECT_DEBIT') {
-        if (confirmBtn) {
-          confirmBtn.disabled = false;
-          confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-        return;
-      }
-
-      // Wallet method calculation
-      if (!walletSelect || !remBalanceEl) return;
-      const selectedOption = walletSelect.options[walletSelect.selectedIndex];
-      if (!selectedOption) return;
-
-      const balance = parseFloat(selectedOption.getAttribute('data-balance') || '0');
-      const rem = balance - pricing.price;
-
+      const rem = curBal - pricing.price;
       if (rem >= 0) {
-        remBalanceEl.innerHTML = `<span class="text-emerald-400 font-black">${formatVND(rem)}</span>`;
-        if (confirmBtn) {
-          confirmBtn.disabled = false;
-          confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        if (vipWalletRemainText) vipWalletRemainText.innerHTML = `<span class="text-cyan-400 font-bold font-mono">${formatVND(rem)}</span>`;
+        if (vipWalletActionArea) {
+          vipWalletActionArea.innerHTML = `
+            <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+              ✅ Xác Nhận Trừ Ví & Gia Hạn Ngay (${formatVND(pricing.price)})
+            </button>
+          `;
         }
       } else {
-        remBalanceEl.innerHTML = `<span class="text-rose-400 font-black">⚠️ Thiếu ${formatVND(Math.abs(rem))} (Không đủ tiền ví)</span>`;
-        if (confirmBtn) {
-          confirmBtn.disabled = true;
-          confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        const shortage = Math.abs(rem);
+        if (vipWalletRemainText) vipWalletRemainText.innerHTML = `<span class="text-rose-400 font-bold font-mono">${formatVND(rem)} (Thiếu ${formatVND(shortage)})</span>`;
+        if (vipWalletActionArea) {
+          vipWalletActionArea.innerHTML = `
+            <div class="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-xs space-y-2.5">
+              <div class="text-rose-300 font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                Số dư Ví Tiền Thật không đủ!
+              </div>
+              <p class="text-[11px] text-rose-200/80">Bạn đang thiếu <b>${formatVND(shortage)}</b> để thực hiện gia hạn gói VIP.</p>
+              <button type="button" onclick="switchVIPPaymentTab('vietqr')" class="w-full py-2.5 rounded-xl gradient-amber text-slate-950 font-black text-xs shadow-md hover:shadow-amber-500/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-qrcode text-sm"></i>
+                <span>Nạp Tiền Thật / Chuyển Khoản VietQR Ngay</span>
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      // If on Tab VietQR: Regenerate QR for new duration
+      if (activeTab === 'vietqr') {
+        generateVIPOrder();
+      }
+    };
+
+    // Global Tab Switching function: switchVIPPaymentTab(tabName)
+    window.switchVIPPaymentTab = (tabName) => {
+      activeTab = tabName;
+      if (tabName === 'vietqr') {
+        btnTabVietQR.className = 'py-2.5 px-4 rounded-xl font-medium border border-amber-500/40 bg-amber-500/20 text-amber-300 flex items-center justify-center gap-2 transition-all shadow-md shadow-amber-500/10 font-bold';
+        btnTabRealWallet.className = 'py-2.5 px-4 rounded-xl font-medium border border-white/10 bg-slate-800/60 text-slate-400 hover:text-white flex items-center justify-center gap-2 transition-all';
+        vipTabVietQRContainer.classList.remove('hidden');
+        vipTabVietQRContainer.classList.add('block');
+        vipTabWalletContainer.classList.add('hidden');
+        generateVIPOrder();
+      } else {
+        if (window.vipPollingInterval) {
+          clearInterval(window.vipPollingInterval);
+          window.vipPollingInterval = null;
+        }
+        btnTabRealWallet.className = 'py-2.5 px-4 rounded-xl font-medium border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/10 font-bold';
+        btnTabVietQR.className = 'py-2.5 px-4 rounded-xl font-medium border border-white/10 bg-slate-800/60 text-slate-400 hover:text-white flex items-center justify-center gap-2 transition-all';
+        vipTabWalletContainer.classList.remove('hidden');
+        vipTabVietQRContainer.classList.add('hidden');
+        vipTabVietQRContainer.classList.remove('block');
+      }
+    };
+
+    // Global Demo Trigger: triggerVIPDemoPay()
+    window.triggerVIPDemoPay = async () => {
+      if (!currentOrder?.order_code) return;
+      const btn = document.getElementById('btnVIPDemoPay');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang giả lập MB Bank chuyển tiền...`;
+        btn.disabled = true;
+      }
+
+      try {
+        await api.mockReceiveMoney(currentOrder.order_code, currentOrder.amount, currentOrder.transfer_memo, currentOrder.user_id);
+        this.app.showToast('✅ MB Bank đã báo tiền về thành công!', 'success');
+        handlePaymentSuccess('Demo MB Bank Webhook');
+      } catch (mockErr) {
+        this.app.showToast(mockErr.message || 'Lỗi gửi tín hiệu giả lập', 'error');
+        if (btn) {
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
         }
       }
     };
 
-    // Duration selector pills click
-    modalEl.querySelectorAll('.duration-pill').forEach(btn => {
+    // Global Pay with Wallet: handlePayVIPWithWallet()
+    window.handlePayVIPWithWallet = async () => {
+      const pricing = getDurationPricing(selectedMonths);
+      const btn = document.getElementById('btnConfirmPayWallet');
+      if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang trừ ví & gia hạn VIP...`;
+        btn.disabled = true;
+      }
+
+      try {
+        const res = await api.payVIPWithWallet(planId, selectedMonths);
+        if (res && res.user) {
+          this.app.currentUser = res.user;
+        }
+        handlePaymentSuccess('Ví Tiền Thật FinTrack');
+      } catch (err) {
+        this.app.showToast(err.message || 'Lỗi thanh toán qua Ví Tiền Thật', 'error');
+        if (btn) {
+          btn.innerHTML = `✅ Xác Nhận Trừ Ví & Gia Hạn Ngay (${formatVND(pricing.price)})`;
+          btn.disabled = false;
+        }
+      }
+    };
+
+    // Duration pills click event
+    modalEl.querySelectorAll('.vip-duration-pill').forEach(btn => {
       btn.addEventListener('click', () => {
         selectedMonths = parseInt(btn.getAttribute('data-months') || '1');
-        modalEl.querySelectorAll('.duration-pill').forEach(b => {
+        modalEl.querySelectorAll('.vip-duration-pill').forEach(b => {
           if (parseInt(b.getAttribute('data-months')) === selectedMonths) {
-            b.className = `duration-pill px-3 py-2 rounded-xl text-xs font-bold transition ${activePillStyle}`;
+            b.className = 'vip-duration-pill px-3 py-2.5 rounded-2xl text-xs font-bold transition border border-amber-500 bg-amber-500/20 text-amber-300 shadow-md';
           } else {
-            b.className = 'duration-pill px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600';
+            b.className = 'vip-duration-pill px-3 py-2.5 rounded-2xl text-xs font-bold transition border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600';
           }
         });
         updateCalculations();
       });
     });
 
-    walletSelect?.addEventListener('change', updateCalculations);
-    updateCalculations();
-
-    confirmBtn?.addEventListener('click', async () => {
-      try {
-        const pricing = getDurationPricing(selectedMonths);
-
-        if (selectedPaymentMethod === 'VIETQR') {
-          confirmBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo đơn thanh toán...`;
-          confirmBtn.disabled = true;
-
-          const res = await api.createSubscriptionOrder({
-            plan_code: planId,
-            amount: pricing.price,
-            plan_duration_days: pricing.days,
-            payment_method: 'MB_VIETQR',
-            transfer_memo: transferMemo
-          });
-
-          closeModal();
-          this.showOrderSubmittedModal(res.order || { 
-            order_code: `ORD-${memoDigits}`, 
-            amount: pricing.price, 
-            plan_code: planId, 
-            transfer_memo: transferMemo 
-          });
-          this.loadUserSubscriptionOrders();
-          return;
-        }
-
-        let targetWalletId = null;
-        if (selectedPaymentMethod === 'DIRECT_DEBIT') {
-          targetWalletId = debitBankSelect ? debitBankSelect.value : (wallets.find(w => w.is_linked)?.id || null);
-        } else {
-          targetWalletId = walletSelect ? walletSelect.value : null;
-        }
-
-        confirmBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý thanh toán & kích hoạt...`;
-        confirmBtn.disabled = true;
-
-        const updatedUser = await api.upgradePlan(planId, targetWalletId, selectedMonths, selectedPaymentMethod);
-        this.app.currentUser = updatedUser;
-        this.app.renderUserProfileHeader();
-
-        closeModal();
-
-        // Celebration Confetti
-        if (window.confetti && planId !== 'FREE') {
-          window.confetti({
-            particleCount: 150,
-            spread: 85,
-            origin: { y: 0.6 }
-          });
-        }
-
-        const methodText = selectedPaymentMethod === 'DIRECT_DEBIT' ? 'qua 1-Click Direct Debit (Open Banking)' : 'qua Ví FinTrack';
-        const successMsg = isFree
-          ? 'Đã chuyển về gói Free thành công!'
-          : `Thanh toán thành công ${formatVND(pricing.price)} ${methodText}! Đã kích hoạt gói ${plan.name} (${selectedMonths} tháng) thành công!`;
-
-        this.app.showToast(successMsg, 'success');
-        
-        // Re-render subscription page & refresh wallet list
-        const mainContainer = document.getElementById('main-content-view');
-        if (mainContainer) {
-          this.render(mainContainer);
-        }
-      } catch (err) {
-        this.app.showToast(err.message || 'Lỗi khi thanh toán gói cước', 'error');
-        if (confirmBtn) {
-          confirmBtn.innerHTML = `<i class="fa-solid fa-check"></i> Xác Nhận Lại`;
-          confirmBtn.disabled = false;
-        }
-      }
+    // Copy STK
+    vipSTK?.addEventListener('click', () => {
+      const acc = gateway.account_number || '0374617569';
+      navigator.clipboard?.writeText(acc);
+      this.app.showToast(`Đã sao chép STK MB Bank (${acc})!`, 'success');
     });
+
+    // Copy Memo
+    vipTransferContent?.addEventListener('click', () => {
+      const memo = currentOrder?.transfer_memo || initialMemo;
+      navigator.clipboard?.writeText(memo);
+      this.app.showToast(`Đã sao chép cú pháp CK: ${memo}`, 'success');
+    });
+
+    // Initial calculations and QR loading for default Tab 1 (VietQR)
+    updateCalculations();
   }
 
-  // Display status popup notification when order is created with auto-polling & mock trigger
-  showOrderSubmittedModal(order) {
-    const modalEl = document.getElementById('generic-modal');
-    if (!modalEl) return;
-
-    let pollInterval = null;
-    let isFinished = false;
-
-    const cleanup = () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
-      }
-      modalEl.innerHTML = '';
-    };
-
-    modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-amber-500/50 animate-in fade-in zoom-in duration-200 text-center space-y-4">
-          
-          <div class="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto shadow-lg shadow-amber-500/10">
-            <i class="fa-solid fa-satellite-dish animate-pulse text-amber-300"></i>
-          </div>
-
-          <div>
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black uppercase tracking-wider">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-              <span>Đang Lắng Nghe Webhook MB Bank (Tự Động 100%)</span>
-            </div>
-            <h3 class="text-lg font-black text-slate-100 mt-2.5">Đơn Hàng #${order.order_code || '---'} Đã Khởi Tạo!</h3>
-            <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-              Hệ thống đang tự động lắng nghe giao dịch chuyển khoản từ MB Bank. Ngay khi tiền vào STK <b>0374617569</b>, gói VIP sẽ được kích hoạt tức thì!
-            </p>
-          </div>
-
-          <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-mono text-left space-y-1.5">
-            <div class="flex justify-between">
-              <span class="text-slate-400 font-sans">Gói đăng ký:</span>
-              <span class="font-bold text-slate-100">${order.plan_code} VIP</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400 font-sans">Số tiền:</span>
-              <span class="font-bold text-amber-300">${formatVND(order.amount || 0)}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400 font-sans">Nội dung CK:</span>
-              <span class="font-bold text-amber-400 select-all">${order.transfer_memo || '---'}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400 font-sans">Trạng thái đối soát:</span>
-              <span class="font-bold text-amber-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-spinner fa-spin text-xs"></i>
-                <span id="sub-modal-status-text">Chờ MB Bank Báo Tiền Về...</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- Mock Bank Button for Live Demo / Defense -->
-          <div class="p-3 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-left space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-cyan-300 flex items-center gap-1">
-                <i class="fa-solid fa-flask-vial"></i> Mô Phỏng Webhook (Dành Cho Demo)
-              </span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">Test Mode</span>
-            </div>
-            <button type="button" id="btn-trigger-mock-bank-sub" class="w-full py-2.5 rounded-xl gradient-cyan text-slate-950 font-black text-xs shadow-md hover:shadow-cyan-500/30 active:scale-95 transition flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-bolt"></i>
-              <span>⚡ Giả Lập MB Bank Báo Tiền Về Ngay</span>
-            </button>
-          </div>
-
-          <button type="button" id="btn-close-submitted-modal" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
-            Đóng Cửa Sổ (Hệ thống vẫn tự duyệt ngầm)
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('btn-close-submitted-modal')?.addEventListener('click', cleanup);
-
-    // Mock Bank Button Event Handler
-    document.getElementById('btn-trigger-mock-bank-sub')?.addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi Webhook MB Bank...`;
-      btn.disabled = true;
-
-      try {
-        const mockRes = await api.mockReceiveMoney(order.order_code, order.amount, order.transfer_memo, order.user_id);
-        this.app.showToast('✅ MB Bank đã gửi biến động số dư thành công! Hệ thống đang kích hoạt...', 'info');
-      } catch (mockErr) {
-        this.app.showToast(mockErr.message || 'Lỗi gửi tín hiệu giả lập', 'error');
-        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Thử Lại`;
-        btn.disabled = false;
-      }
-    });
-
-    // Start 3-second Polling mechanism
-    pollInterval = setInterval(async () => {
-      if (isFinished) return;
-      try {
-        const statusRes = await api.getOrderStatus(order.order_code);
-        const orderData = statusRes.order || statusRes;
-        if (statusRes.status === 'APPROVED' || statusRes.is_approved || orderData.status === 'APPROVED') {
-          isFinished = true;
-          cleanup();
-
-          // Trigger Confetti Celebration
-          if (window.confetti) {
-            window.confetti({
-              particleCount: 160,
-              spread: 90,
-              origin: { y: 0.6 }
-            });
-          }
-
-          // Show Toast
-          this.app.showToast(`🎉 Thanh toán thành công! Gói ${order.plan_code} VIP đã được hệ thống kích hoạt tự động 100% qua MB Bank!`, 'success');
-
-          // Refresh User Data & Header UI immediately
-          try {
-            this.app.currentUser = await api.getMe();
-            this.app.renderUserProfileHeader();
-          } catch (_) {}
-
-          // Refresh view & notifications
-          const mainContainer = document.getElementById('main-content-view');
-          if (mainContainer) {
-            this.render(mainContainer);
-          }
-          if (this.app.updateNotificationBadge) {
-            this.app.updateNotificationBadge(false);
-          }
-        }
-      } catch (err) {
-        // Silent catch for background poll
-      }
-    }, 3000);
+  // Alias for showUpgradeModal
+  showUpgradeModal(planId) {
+    return this.openUpgradeModal(planId);
   }
 
   // Load personal VIP orders history list

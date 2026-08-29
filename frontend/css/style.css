@@ -298,17 +298,100 @@ html, body {
   animation: darkShimmer 1.8s infinite linear !important;
 }
 
-/* 9. Interactive Buttons with Scale Bounce */
-button, .btn {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+/* ==========================================================================
+   INTERACTIVE BUTTONS, TABS & HARDWARE-ACCELERATED MICRO-INTERACTIONS
+   ========================================================================== */
+
+/* 1. Thiết lập hiệu ứng chuyển động cơ bản (Base Transition & Hardware Acceleration) */
+button,
+.btn,
+.nav-item,
+.tab-btn,
+.vip-duration-pill,
+.quick-chip,
+.chat-prompt-pill,
+.admin-subtab-pill,
+[role="button"],
+.interactive-pill,
+.clickable-item,
+.modal-close-btn,
+.modal-close-touch-btn {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.18s ease, 
+              border-color 0.18s ease,
+              filter 0.18s ease !important;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-button:active, .btn:active {
-  transform: scale(0.95) !important;
+/* 2. Hiệu ứng Hover (Di chuột vào nút thường, tab menu, pill) */
+button:hover:not(:disabled):not(.active),
+.btn:hover:not(:disabled),
+.tab-btn:hover:not(.active),
+.vip-duration-pill:hover,
+.quick-chip:hover,
+.chat-prompt-pill:hover,
+[role="button"]:hover {
+  transform: translateY(-1.5px) translateZ(0);
+}
+
+/* 3. Hiệu ứng Active / Click (Nhấn giữ & Nhả chuột - Tactile Press Effect) */
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+.tab-btn:active,
+.vip-duration-pill:active,
+.quick-chip:active,
+.chat-prompt-pill:active,
+.admin-subtab-pill:active,
+.nav-item:active,
+[role="button"]:active,
+.btn-neon-cta:active,
+.gradient-indigo:active,
+.gradient-amber:active,
+.gradient-emerald:active,
+.gradient-rose:active,
+.gradient-purple:active,
+.gradient-sunset:active,
+.gradient-gold:active,
+.gradient-diamond:active {
+  transform: translateY(1px) scale(0.97) translateZ(0) !important;
+  filter: brightness(0.95) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 4. Hiệu ứng Ripple Click nhẹ (Class .btn-ripple) */
+.btn-ripple {
+  position: relative;
+  overflow: hidden !important;
+  contain: paint;
+  isolation: isolate;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease-out;
+}
+
+.btn-ripple:active::after {
+  transform: translate(-50%, -50%) scale(1.6);
+  opacity: 1;
+  transition: 0s;
 }
 
 /* ==========================================================================
-   GRADIENT ACCENTS
+   GRADIENT ACCENTS & NEON CTA HOVER GLOW
    ========================================================================== */
 .gradient-emerald {
   background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
@@ -344,6 +427,45 @@ button:active, .btn:active {
 
 .gradient-silver {
   background: linear-gradient(135deg, #94a3b8 0%, #475569 100%) !important;
+}
+
+.gradient-rose {
+  background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
+}
+
+/* Hiệu ứng Hover tỏa sáng Neon cục bộ cho các nút CTA Gradient chính */
+.btn-neon-cta:hover,
+.gradient-diamond:hover {
+  transform: translateY(-2px) scale(1.015) translateZ(0) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 255, 170, 0.35), 0 0 10px rgba(0, 229, 255, 0.2) !important;
+}
+
+.gradient-amber:hover,
+.gradient-gold:hover,
+.gradient-sunset:hover {
+  transform: translateY(-2px) scale(1.015) translateZ(0) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 0 10px rgba(251, 146, 60, 0.25) !important;
+}
+
+.gradient-emerald:hover {
+  transform: translateY(-2px) scale(1.015) translateZ(0) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4), 0 0 10px rgba(20, 184, 166, 0.25) !important;
+}
+
+.gradient-rose:hover {
+  transform: translateY(-2px) scale(1.015) translateZ(0) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.4), 0 0 10px rgba(236, 72, 153, 0.25) !important;
+}
+
+.gradient-indigo:hover,
+.gradient-purple:hover {
+  transform: translateY(-2px) scale(1.015) translateZ(0) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 0 10px rgba(168, 85, 247, 0.25) !important;
 }
 
 /* ==========================================================================
@@ -1008,3 +1130,87 @@ html, body {
   color: #F43F5E !important;
   border: 1px solid rgba(244, 63, 94, 0.3) !important;
 }
+
+/* ==========================================================================
+   VIP MODAL & TOUCH TARGET ENHANCEMENTS (X BUTTON & ACTION ICONS)
+   ========================================================================== */
+.modal-close-touch-btn,
+#vip-modal-close-btn,
+.modal-close-btn,
+.btn-icon-close,
+.btn-close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 0.75rem !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  transition: transform 0.25s ease, background-color 0.2s ease, color 0.2s ease !important;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.modal-close-touch-btn:hover,
+#vip-modal-close-btn:hover,
+.modal-close-btn:hover,
+.btn-icon-close:hover,
+.btn-close-modal:hover {
+  transform: scale(1.1) rotate(90deg) translateZ(0) !important;
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.modal-close-touch-btn:active,
+#vip-modal-close-btn:active,
+.modal-close-btn:active,
+.btn-icon-close:active,
+.btn-close-modal:active {
+  transform: scale(0.92) rotate(90deg) translateZ(0) !important;
+}
+
+.vietqr-white-card {
+  background: #ffffff !important;
+  padding: 0.5rem !important;
+  border-radius: 0.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 9rem !important;
+  height: 9rem !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.vietqr-white-card img {
+  width: 8rem !important;
+  height: 8rem !important;
+  object-fit: contain !important;
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .btn,
+  .nav-item,
+  .tab-btn,
+  .vip-duration-pill,
+  .glass-card,
+  .wallet-card,
+  .notif-card,
+  .btn-neon-cta,
+  .modal-close-touch-btn,
+  #vip-modal-close-btn,
+  .btn-ripple::after {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+

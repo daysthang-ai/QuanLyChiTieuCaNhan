@@ -299,5 +299,63 @@ def test_sepay_webhook_integration_and_small_amount(client: TestClient, auth_hea
     assert status_res.json()["is_approved"] is True
 
 
+def test_vip_modal_2_tab_payments_and_sepay_webhook_flow(client: TestClient, auth_headers):
+    # 1. TAB 2: Test Create VIP Order for VietQR
+    vip_payload = {
+        "plan_code": "PLATINUM",
+        "duration_months": 1
+    }
+    create_vip_res = client.post("/api/v1/payments/create-vip-order", json=vip_payload, headers=auth_headers)
+    assert create_vip_res.status_code == 200
+    vip_order = create_vip_res.json()
+    order_code = vip_order["order_code"]
+    transfer_memo = vip_order["transfer_memo"]
+    assert order_code.startswith("ORD-")
+    assert vip_order["amount"] == 199000
+    assert "FTP" in transfer_memo
+    assert "img.vietqr.io" in vip_order["vietqr_url"]
+
+    # 2. Check Polling endpoint (Pending status)
+    check_res = client.get(f"/api/v1/payments/check-status/{order_code}")
+    assert check_res.status_code == 200
+    assert check_res.json()["status"] == "PENDING"
+    assert check_res.json()["is_approved"] is False
+
+    # 3. Simulate SePay / Bank Webhook arriving for VIP Order
+    sepay_payload = {
+        "id": 8881234,
+        "gateway": "MBBank",
+        "transferAmount": 199000,
+        "content": f"SEPAY {transfer_memo} GIA HAN VIP",
+        "referenceCode": "MB_SEPAY_VIP_888"
+    }
+    webhook_res = client.post("/api/payments/bank-webhook", json=sepay_payload)
+    assert webhook_res.status_code == 200
+    hook_data = webhook_res.json()
+    assert hook_data["success"] is True
+    assert hook_data["status"] == "APPROVED"
+
+    # 4. Check Polling endpoint after Webhook (Approved & Paid)
+    check_after = client.get(f"/api/v1/payments/check-status/{order_code}")
+    assert check_after.status_code == 200
+    assert check_after.json()["status"] == "APPROVED"
+    assert check_after.json()["is_approved"] is True
+    assert check_after.json()["is_paid"] is True
+
+    # 5. TAB 1: Test Direct Real Wallet VIP Payment & Activation
+    wallet_pay_payload = {
+        "plan_code": "PREMIUM",
+        "duration_months": 3
+    }
+    pay_res = client.post("/api/v1/payments/pay-vip-wallet", json=wallet_pay_payload, headers=auth_headers)
+    assert pay_res.status_code == 200
+    pay_data = pay_res.json()
+    assert pay_data["success"] is True
+    assert pay_data["user"]["plan"] == "PREMIUM"
+    assert pay_data["user"]["plan_tier"] == "FinTrack Premium"
+    assert pay_data["wallet"]["balance"] >= 0
+
+
+
 
 

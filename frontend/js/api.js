@@ -579,6 +579,28 @@ class APIClient {
     });
   }
 
+  createVIPOrder(planCode, durationMonths = 1, amount = null, durationDays = null) {
+    return this.request('/payments/create-vip-order', {
+      method: 'POST',
+      body: JSON.stringify({
+        plan_code: planCode,
+        duration_months: parseInt(durationMonths) || 1,
+        amount: amount ? parseFloat(amount) : null,
+        plan_duration_days: durationDays ? parseInt(durationDays) : null
+      })
+    });
+  }
+
+  payVIPWithWallet(planCode, durationMonths = 1) {
+    return this.request('/payments/pay-vip-wallet', {
+      method: 'POST',
+      body: JSON.stringify({
+        plan_code: planCode,
+        duration_months: parseInt(durationMonths) || 1
+      })
+    });
+  }
+
   createDepositOrder(amount) {
     return this.request('/payments/create-deposit-order', {
       method: 'POST',
@@ -591,11 +613,19 @@ class APIClient {
   }
 
   getOrderStatus(orderCode) {
-    return this.request(`/payments/order-status/${encodeURIComponent(orderCode)}`);
+    return this.request(`/payments/check-status/${encodeURIComponent(orderCode)}`);
+  }
+
+  checkOrderStatus(orderCode) {
+    return this.request(`/payments/check-status/${encodeURIComponent(orderCode)}`);
+  }
+
+  checkPaymentStatus(orderCode) {
+    return this.request(`/payments/check-status/${encodeURIComponent(orderCode)}`);
   }
 
   getDepositOrderStatus(orderCode) {
-    return this.request(`/payments/order-status/${encodeURIComponent(orderCode)}`);
+    return this.request(`/payments/check-status/${encodeURIComponent(orderCode)}`);
   }
 
   mockReceiveMoney(orderCode = null, amount = null, description = null, userId = null) {
