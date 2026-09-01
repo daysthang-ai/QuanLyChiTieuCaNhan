@@ -11,7 +11,7 @@ import { AnalyticsComponent } from './components/analytics.js?v=7.0';
 import { AIAssistantComponent } from './components/ai_assistant.js?v=7.0';
 import { BadgesComponent } from './components/badges.js?v=7.0';
 import { AdminComponent } from './components/admin.js?v=7.0';
-import { SubscriptionComponent } from './components/subscription.js?v=7.0';
+import { SubscriptionComponent } from './components/subscription.js?v=7.5';
 import { NotificationsComponent } from './components/notifications.js?v=7.0';
 import { SupportComponent } from './components/support.js?v=7.0';
 
@@ -1377,9 +1377,135 @@ class App {
   }
 }
 
+// =========================================================================
+// YOUTUBE SUBSCRIBE SPARKLE BURST & ELASTIC PILL BOUNCE ANIMATION UTILITY
+// =========================================================================
+
+/**
+ * Kích hoạt hiệu ứng Co Giãn Đàn Hồi (Elastic Pill Bounce) và
+ * Bắn Hạt Lấp Lánh Neon 360 độ (YouTube Subscribe Sparkle Burst).
+ * 
+ * @param {HTMLElement|Event|string} target - Phần tử button, click event hoặc selector
+ * @param {Object} [options] - Tùy chỉnh (count, minRadius, maxRadius, colors)
+ */
+export function triggerSparkleBurst(target, options = {}) {
+  let element = null;
+  let clickX = null;
+  let clickY = null;
+
+  if (!target) return;
+
+  if (target instanceof Event) {
+    element = target.currentTarget || target.target?.closest?.('button, a, .btn-sparkle-burst, [data-sparkle-burst]');
+    if (typeof target.clientX === 'number' && typeof target.clientY === 'number' && (target.clientX !== 0 || target.clientY !== 0)) {
+      clickX = target.clientX;
+      clickY = target.clientY;
+    }
+  } else if (typeof target === 'string') {
+    element = document.querySelector(target);
+  } else if (target instanceof HTMLElement) {
+    element = target;
+  }
+
+  if (!element) return;
+
+  // 1. Hiệu ứng Co giãn đàn hồi (Elastic Pill Bounce: 0.92 -> 1.04 -> 1.0)
+  element.classList.remove('is-bouncing');
+  void element.offsetWidth; // Trigger synchronous reflow để restart keyframes mượt mà
+  element.classList.add('is-bouncing');
+
+  const onAnimEnd = () => {
+    element.classList.remove('is-bouncing');
+    element.removeEventListener('animationend', onAnimEnd);
+  };
+  element.addEventListener('animationend', onAnimEnd, { once: true });
+
+  // 2. Tôn trọng tùy chọn giảm chuyển động của hệ điều hành
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  // 3. Tính toán tâm bắn tia lấp lánh (vị trí click chuột/chạm hoặc tâm button)
+  const rect = element.getBoundingClientRect();
+  const originX = (clickX !== null && clickX >= rect.left && clickX <= rect.right)
+    ? clickX
+    : rect.left + rect.width / 2;
+  const originY = (clickY !== null && clickY >= rect.top && clickY <= rect.bottom)
+    ? clickY
+    : rect.top + rect.height / 2;
+
+  // 4. Tạo container hạt lấp lánh (Fixed GPU Composited Layer)
+  const container = document.createElement('div');
+  container.className = 'sparkle-burst-container';
+  container.style.left = `${originX}px`;
+  container.style.top = `${originY}px`;
+  document.body.appendChild(container);
+
+  // 5. Sinh 8 - 12 hạt particle neon bắn tỏa tròn 360 độ
+  const count = options.count || (Math.floor(Math.random() * 5) + 8); // 8 - 12 hạt
+  const minRadius = options.minRadius || 30; // Bán kính từ 30px
+  const maxRadius = options.maxRadius || 42; // đến ~40px
+
+  // Bảng màu Neon đồng bộ FinTrack: Cyan, Emerald, Amber, Magenta
+  const neonPalette = [
+    { bg: '#00f2fe', glow: 'rgba(0, 242, 254, 0.9)' },   // Cyan Neon (#00f2fe / #06b6d4)
+    { bg: '#00ffaa', glow: 'rgba(0, 255, 170, 0.9)' },   // Emerald Neon (#10b981 / #00ffaa)
+    { bg: '#fbbf24', glow: 'rgba(251, 191, 36, 0.9)' },   // Amber Neon (#fbbf24 / #f59e0b)
+    { bg: '#ec4899', glow: 'rgba(236, 72, 153, 0.9)' },  // Magenta Neon (#ec4899 / #f43f5e)
+    { bg: '#06b6d4', glow: 'rgba(6, 182, 212, 0.9)' },   // Cyan Bright
+    { bg: '#10b981', glow: 'rgba(16, 185, 129, 0.9)' }   // Emerald Bright
+  ];
+
+  const shapes = ['shape-circle', 'shape-diamond', 'shape-star'];
+  const angleStep = (2 * Math.PI) / count;
+
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+
+    // Phân bố đều góc 360 độ kèm jitter ngẫu nhiên tự nhiên
+    const baseAngle = i * angleStep;
+    const jitter = (Math.random() - 0.5) * (angleStep * 0.45);
+    const angle = baseAngle + jitter;
+
+    // Bán kính di chuyển từ 30px - 40px
+    const distance = minRadius + Math.random() * (maxRadius - minRadius);
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+
+    // Kích thước hạt từ 3px - 5px
+    const size = Math.floor(Math.random() * 3) + 3; // 3px, 4px hoặc 5px
+    const color = neonPalette[i % neonPalette.length];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    const rot = Math.floor((Math.random() - 0.5) * 360);
+
+    particle.className = `sparkle-particle ${shape}`;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.backgroundColor = color.bg;
+    particle.style.boxShadow = `0 0 6px ${color.bg}, 0 0 10px ${color.glow}`;
+    particle.style.setProperty('--tx', `${tx.toFixed(1)}px`);
+    particle.style.setProperty('--ty', `${ty.toFixed(1)}px`);
+    particle.style.setProperty('--rot', `${rot}deg`);
+
+    // Thời gian bay nhanh trong vòng ~0.45s - 0.52s
+    const duration = 0.45 + Math.random() * 0.08;
+    particle.style.animationDuration = `${duration.toFixed(2)}s`;
+
+    container.appendChild(particle);
+  }
+
+  // 6. Tự hủy (clean up) DOM container sau khi hiệu ứng kết thúc (~0.58s)
+  setTimeout(() => {
+    if (container && container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+  }, 580);
+}
+
 // Instantiate and start app
 try {
   window.fintrackApp = new App();
+  window.triggerSparkleBurst = triggerSparkleBurst;
   window.navigate = (tab) => window.fintrackApp?.navigate(tab);
   window.switchTab = (tab) => window.fintrackApp?.switchTab(tab);
   window.switchUserTab = (tab) => window.fintrackApp?.switchUserTab(tab);
@@ -1389,6 +1515,14 @@ try {
 } catch (appInitErr) {
   console.error('[FinTrack] Lỗi nghiêm trọng khi khởi tạo App instance:', appInitErr);
 }
+
+// Lắng nghe sự kiện click toàn cục để kích hoạt hiệu ứng cho mọi phần tử có class .btn-sparkle-burst
+document.addEventListener('click', (e) => {
+  const sparkleBtn = e.target.closest('.btn-sparkle-burst, [data-sparkle-burst]');
+  if (sparkleBtn) {
+    triggerSparkleBurst(e);
+  }
+}, true);
 
 const startApp = () => {
   try {
@@ -1408,3 +1542,4 @@ if (document.readyState === 'loading') {
   // DOM is already ready (standard for ES modules)
   startApp();
 }
+

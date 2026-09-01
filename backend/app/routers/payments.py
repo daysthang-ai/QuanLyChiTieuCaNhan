@@ -1,6 +1,7 @@
 import re
 import random
 import datetime
+import traceback
 import urllib.parse
 from typing import Optional, Union, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
@@ -203,7 +204,7 @@ def process_bank_transfer_payment(
     approved_by: str = "AUTO_WEBHOOK_BANK"
 ) -> dict:
     """
-    Xử lý tự động 100% khi nhận webhook chuyển khoản từ Ngân Hàng:
+    Xử lý tự động 100% khi nhận webhook chuyển khoản từ Ngân Hàng hoặc Demo:
     1. Ghi nhận giao dịch vào bảng bank_transactions (biến động số dư).
     2. Trích xuất mã đơn hàng, User ID, mã gói từ description.
     3. Tìm đơn hàng PENDING khớp mã hoặc khớp User ID + số tiền.
@@ -212,304 +213,145 @@ def process_bank_transfer_payment(
     6. Tạo thông báo tự động gửi vào Notification của User.
     7. Cập nhật trạng thái bank_transactions thành MATCHED hoặc UNMATCHED.
     """
-    now = datetime.datetime.now(datetime.timezone.utc)
-    desc_clean = (description or "").strip()
-    desc_upper = desc_clean.upper()
+    try:
+        now = datetime.datetime.utcnow()
+        desc_clean = (description or "").strip()
+        desc_upper = desc_clean.upper()
 
-    active_bank = get_or_create_active_bank_account(db)
-    bank_disp = active_bank.bank_name or active_bank.bank_code or "Ngân Hàng"
+        active_bank = get_or_create_active_bank_account(db)
+        bank_disp = active_bank.bank_name or active_bank.bank_code or "Ngân Hàng"
 
-    # Step 1: Regex Extraction (Khớp linh hoạt ORD-9285, FTP 1 928574, FT NAP 9285, FTPLATINUM 1 928574, NAP VIP 9285,...)
-    match_ord = re.search(r"ORD-?(\d+)", desc_upper)
-    match_ftp = re.search(r"FTP\s*(\d+)\s*(\d+)", desc_upper)
-    match_ft_memo = re.search(r"FT\s*(PLATINUM|PREMIUM|PRO|VIP)\s*(\d+)\s*(\d+)", desc_upper)
-    match_ft_memo_no_space = re.search(r"FT(PLATINUM|PREMIUM|PRO|VIP)(\d+)\s*(\d+)", desc_upper)
-    match_ft_nap = re.search(r"FT\s*NAP\s*(\d+)", desc_upper)
-    match_nap = re.search(r"NAP\s*(?:VIP|TIEN)?\s*(\d+)", desc_upper)
-    number_tokens = re.findall(r"\b(\d{4,6})\b", desc_upper)
-    match_user = re.search(r"\b(?:USER|ID|UID|U)\s*[:#-]?\s*(\d+)\b", desc_upper)
+        # Step 1: Regex Extraction (Khớp linh hoạt ORD-9285, FTP 1 928574, FTP 1 ORD-928574, FT NAP 9285, FTPLATINUM 1 928574, NAP VIP 9285,...)
+        match_ord = re.search(r"ORD-?(\d+)", desc_upper)
+        match_ftp = re.search(r"FTP\s*(\d+)\s*(?:ORD-?)?(\d+)", desc_upper)
+        match_ft_memo = re.search(r"FT\s*(PLATINUM|PREMIUM|PRO|VIP)\s*(\d+)\s*(?:ORD-?)?(\d+)", desc_upper)
+        match_ft_memo_no_space = re.search(r"FT(PLATINUM|PREMIUM|PRO|VIP)\s*(\d+)\s*(?:ORD-?)?(\d+)", desc_upper)
+        match_ft_nap = re.search(r"FT\s*NAP\s*(\d+)", desc_upper)
+        match_nap = re.search(r"NAP\s*(?:VIP|TIEN)?\s*(\d+)", desc_upper)
+        number_tokens = re.findall(r"\b(\d{4,6})\b", desc_upper)
+        match_user = re.search(r"\b(?:USER|ID|UID|U)\s*[:#-]?\s*(\d+)\b", desc_upper)
 
-    candidate_order_codes = []
-    if match_ord:
-        raw_num = match_ord.group(1)
-        candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    if match_ftp:
-        raw_num = match_ftp.group(2)
-        candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    if match_ft_nap:
-        raw_num = match_ft_nap.group(1)
-        candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    if match_ft_memo:
-        raw_num = match_ft_memo.group(3)
-        candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    if match_ft_memo_no_space:
-        raw_num = match_ft_memo_no_space.group(3)
-        candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    if match_nap:
-        raw_num = match_nap.group(1)
-        if len(raw_num) >= 4:
+        candidate_order_codes = []
+        if match_ord:
+            raw_num = match_ord.group(1)
             candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
-    for num in number_tokens:
-        candidate_order_codes.extend([f"ORD-{num}", f"ORD{num}", num])
+        if match_ftp:
+            raw_num = match_ftp.group(2)
+            candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
+        if match_ft_nap:
+            raw_num = match_ft_nap.group(1)
+            candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
+        if match_ft_memo:
+            raw_num = match_ft_memo.group(3)
+            candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
+        if match_ft_memo_no_space:
+            raw_num = match_ft_memo_no_space.group(3)
+            candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
+        if match_nap:
+            raw_num = match_nap.group(1)
+            if len(raw_num) >= 4:
+                candidate_order_codes.extend([f"ORD-{raw_num}", f"ORD{raw_num}", raw_num])
+        for num in number_tokens:
+            candidate_order_codes.extend([f"ORD-{num}", f"ORD{num}", num])
 
-    extracted_user_id = None
-    if match_ftp:
-        extracted_user_id = int(match_ftp.group(1))
-    elif match_ft_memo:
-        extracted_user_id = int(match_ft_memo.group(2))
-    elif match_ft_memo_no_space:
-        extracted_user_id = int(match_ft_memo_no_space.group(2))
-    elif match_nap:
-        extracted_user_id = int(match_nap.group(1))
-    elif match_user:
-        extracted_user_id = int(match_user.group(1))
+        extracted_user_id = None
+        if match_ftp:
+            extracted_user_id = int(match_ftp.group(1))
+        elif match_ft_memo:
+            extracted_user_id = int(match_ft_memo.group(2))
+        elif match_ft_memo_no_space:
+            extracted_user_id = int(match_ft_memo_no_space.group(2))
+        elif match_nap:
+            extracted_user_id = int(match_nap.group(1))
+        elif match_user:
+            extracted_user_id = int(match_user.group(1))
 
-    # Step 2: Look for pending order
-    order: Optional[SubscriptionOrder] = None
+        # Step 2: Look for pending order
+        order: Optional[SubscriptionOrder] = None
 
-    # 2.1 By Candidate Order Codes
-    if candidate_order_codes:
-        order = db.query(SubscriptionOrder).filter(
-            SubscriptionOrder.order_code.in_(candidate_order_codes),
-            SubscriptionOrder.status == "PENDING"
-        ).first()
-
-    # 2.2 By Transfer Memo partial match
-    if not order:
-        pending_orders = db.query(SubscriptionOrder).filter(SubscriptionOrder.status == "PENDING").all()
-        for po in pending_orders:
-            if po.transfer_memo and (po.transfer_memo.upper() in desc_upper or desc_upper in po.transfer_memo.upper()):
-                order = po
-                break
-
-    # 2.3 By User ID + Matching Amount
-    if not order and extracted_user_id:
-        order = db.query(SubscriptionOrder).filter(
-            SubscriptionOrder.user_id == extracted_user_id,
-            SubscriptionOrder.status == "PENDING"
-        ).order_by(desc(SubscriptionOrder.created_at)).first()
-
-    # 2.4 By Matching Amount recent pending order (fallback)
-    if not order and amount > 0:
-        order = db.query(SubscriptionOrder).filter(
-            SubscriptionOrder.status == "PENDING",
-            SubscriptionOrder.amount == amount
-        ).order_by(desc(SubscriptionOrder.created_at)).first()
-
-    # Record Bank Transaction
-    generated_ref = reference_code or (f"TX-{number_tokens[0]}" if number_tokens else f"TX-{int(now.timestamp())}")
-    bank_tx = BankTransaction(
-        bank_account_id=active_bank.id,
-        bank_code=active_bank.bank_code,
-        account_number=active_bank.account_number,
-        reference_code=generated_ref,
-        sender_name=sender_name or "Khách Hàng Chuyển Khoản",
-        sender_account=sender_account or "---",
-        amount=float(amount),
-        description=desc_clean,
-        transaction_date=now,
-        status="MATCHED" if (order or extracted_user_id) else "UNMATCHED",
-        matched_order_code=order.order_code if order else None,
-        matched_user_id=order.user_id if order else extracted_user_id,
-        created_at=now
-    )
-    db.add(bank_tx)
-
-    # Step 3: Handle Execution
-    if order:
-        target_user = db.query(User).filter(User.id == order.user_id).first()
-        if not target_user:
-            raise HTTPException(status_code=404, detail=f"Không tìm thấy người dùng #{order.user_id} của đơn hàng")
-
-        bank_tx.matched_user_id = target_user.id
-        bank_tx.matched_user_name = target_user.full_name
-        bank_tx.matched_order_code = order.order_code
-        bank_tx.status = "MATCHED"
-
-        # 3.1 Update Order Status
-        order.status = "APPROVED"
-        order.approved_by = approved_by
-        order.updated_at = now
-
-        plan_code = (order.plan_code or "PRO").upper()
-
-        if plan_code in ["PRO", "PREMIUM", "PLATINUM"]:
-            duration_days = order.plan_duration_days or 30
-
-            if target_user.plan_expires_at and target_user.plan_expires_at > now and (target_user.plan or "").upper() == plan_code:
-                target_user.plan_expires_at = target_user.plan_expires_at + datetime.timedelta(days=duration_days)
-            else:
-                target_user.plan_activated_at = now
-                target_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
-
-            target_user.plan = plan_code
-            if plan_code == "PLATINUM":
-                target_user.plan_tier = "FinTrack Platinum VIP"
-            elif plan_code == "PREMIUM":
-                target_user.plan_tier = "FinTrack Premium"
-            elif plan_code == "PRO":
-                target_user.plan_tier = "FinTrack Pro"
-            else:
-                target_user.plan_tier = "Free"
-
-            target_user.is_plan_active = True
-            target_user.updated_at = now
-
-            notif = Notification(
-                user_id=target_user.id,
-                target_type="USER",
-                title="🎉 Kích Hoạt Tự Động Gói VIP Thành Công!",
-                message=f"Đơn nạp #{order.order_code} đã được hệ thống kích hoạt tự động thành công qua {bank_disp}! Gói {target_user.plan_tier} có hạn dùng đến {target_user.plan_expires_at.strftime('%d/%m/%Y')}.",
-                type="SUCCESS",
-                icon="crown",
-                link_tab="subscription",
-                is_read=False,
-                created_by_role=approved_by,
-                created_at=now
-            )
-            db.add(notif)
-            db.commit()
-            db.refresh(order)
-            db.refresh(target_user)
-
-            return {
-                "success": True,
-                "action": "PLAN_ACTIVATED_AUTO",
-                "message": f"Đơn hàng #{order.order_code} đã được hệ thống kích hoạt tự động thành công!",
-                "order_code": order.order_code,
-                "status": "APPROVED",
-                "approved_by": approved_by,
-                "transaction_id": bank_tx.id,
-                "user": {
-                    "id": target_user.id,
-                    "full_name": target_user.full_name,
-                    "plan": target_user.plan,
-                    "plan_tier": target_user.plan_tier,
-                    "plan_expires_at": target_user.plan_expires_at.strftime("%d/%m/%Y %H:%M")
-                }
-            }
-
-        else:
-            # REAL_WALLET / WALLET_TOPUP
-            real_wallet = db.query(Wallet).filter(
-                Wallet.user_id == target_user.id,
-                Wallet.wallet_scope == "real"
+        # 2.1 By Candidate Order Codes
+        if candidate_order_codes:
+            order = db.query(SubscriptionOrder).filter(
+                SubscriptionOrder.order_code.in_(candidate_order_codes),
+                SubscriptionOrder.status == "PENDING"
             ).first()
 
-            if not real_wallet:
-                real_wallet = Wallet(
-                    user_id=target_user.id,
-                    name="Ví Dịch Vụ & VIP FinTrack",
-                    wallet_type="EWALLET",
-                    balance=0.0,
-                    currency="VND",
-                    icon="wallet",
-                    color="#F59E0B",
-                    wallet_scope="real",
-                    is_active=True,
-                    created_at=now,
-                    updated_at=now
-                )
-                db.add(real_wallet)
-                db.flush()
+        # 2.2 By Transfer Memo partial match
+        if not order:
+            pending_orders = db.query(SubscriptionOrder).filter(SubscriptionOrder.status == "PENDING").all()
+            for po in pending_orders:
+                if po.transfer_memo and (po.transfer_memo.upper() in desc_upper or desc_upper in po.transfer_memo.upper()):
+                    order = po
+                    break
 
-            real_wallet.balance += float(amount)
-            real_wallet.updated_at = now
+        # 2.3 By User ID + Matching Amount
+        if not order and extracted_user_id:
+            order = db.query(SubscriptionOrder).filter(
+                SubscriptionOrder.user_id == extracted_user_id,
+                SubscriptionOrder.status == "PENDING"
+            ).order_by(desc(SubscriptionOrder.created_at)).first()
 
-            cat = db.query(Category).filter(
-                Category.user_id == target_user.id,
-                Category.name == "Nạp Tiền Thật"
-            ).first()
-            if not cat:
-                cat = Category(
-                    user_id=target_user.id,
-                    name="Nạp Tiền Thật",
-                    type="INCOME",
-                    group="INCOME",
-                    icon="circle-plus",
-                    color="#F59E0B",
-                    is_default=False
-                )
-                db.add(cat)
-                db.flush()
+        # 2.4 By Matching Amount recent pending order (fallback)
+        if not order and amount > 0:
+            order = db.query(SubscriptionOrder).filter(
+                SubscriptionOrder.status == "PENDING",
+                SubscriptionOrder.amount == amount
+            ).order_by(desc(SubscriptionOrder.created_at)).first()
 
-            tx = Transaction(
-                user_id=target_user.id,
-                wallet_id=real_wallet.id,
-                category_id=cat.id,
-                type="INCOME",
-                amount=float(amount),
-                transaction_date=now,
-                note=f"Nạp tiền thật tự động qua {bank_disp}: {order.order_code}",
-                created_by_ai="AUTO_WEBHOOK_BANK"
-            )
-            db.add(tx)
+        # Record Bank Transaction
+        generated_ref = reference_code or (f"TX-{number_tokens[0]}" if number_tokens else f"TX-{int(now.timestamp())}")
+        bank_tx = BankTransaction(
+            bank_account_id=active_bank.id,
+            bank_code=active_bank.bank_code,
+            account_number=active_bank.account_number,
+            reference_code=generated_ref,
+            sender_name=sender_name or "Khách Hàng Chuyển Khoản",
+            sender_account=sender_account or "---",
+            amount=float(amount),
+            description=desc_clean,
+            transaction_date=now,
+            status="MATCHED" if (order or extracted_user_id) else "UNMATCHED",
+            matched_order_code=order.order_code if order else None,
+            matched_user_id=order.user_id if order else extracted_user_id,
+            created_at=now
+        )
+        db.add(bank_tx)
 
-            notif = Notification(
-                user_id=target_user.id,
-                target_type="USER",
-                title="💰 Nạp Tiền Thật Thành Công (Tự Động)!",
-                message=f"Đơn nạp #{order.order_code} đã được hệ thống kích hoạt tự động thành công! Đã cộng +{amount:,.0f} ₫ vào Ví Dịch Vụ & VIP.",
-                type="SUCCESS",
-                icon="wallet",
-                link_tab="wallets",
-                is_read=False,
-                created_by_role=approved_by,
-                created_at=now
-            )
-            db.add(notif)
-            db.commit()
-            db.refresh(order)
-            db.refresh(real_wallet)
+        # Step 3: Handle Execution
+        if order:
+            target_user = db.query(User).filter(User.id == order.user_id).first()
+            if not target_user:
+                raise HTTPException(status_code=404, detail=f"Không tìm thấy người dùng #{order.user_id} của đơn hàng")
 
-            return {
-                "success": True,
-                "action": "WALLET_TOPUP_AUTO",
-                "message": f"Đã tự động cộng +{amount:,.0f} ₫ vào ví tiền thật của người dùng #{target_user.id}!",
-                "order_code": order.order_code,
-                "status": "APPROVED",
-                "approved_by": approved_by,
-                "transaction_id": bank_tx.id,
-                "wallet": {
-                    "id": real_wallet.id,
-                    "name": real_wallet.name,
-                    "new_balance": real_wallet.balance
-                }
-            }
-
-    # Step 4: No pre-existing order, but User ID was detected
-    if extracted_user_id:
-        target_user = db.query(User).filter(User.id == extracted_user_id).first()
-        if target_user:
             bank_tx.matched_user_id = target_user.id
             bank_tx.matched_user_name = target_user.full_name
+            bank_tx.matched_order_code = order.order_code
             bank_tx.status = "MATCHED"
 
-            if match_ft_memo:
-                plan_code = match_ft_memo.group(1).upper()
-                duration_days = 30
+            # 3.1 Update Order Status
+            order.status = "APPROVED"
+            order.approved_by = approved_by
+            order.updated_at = now
 
-                random_digits = six_digit_matches[0] if six_digit_matches else f"{int(now.timestamp()) % 1000000:06d}"
-                order_code = f"ORD-{random_digits}"
-                bank_tx.matched_order_code = order_code
+            plan_code = (order.plan_code or "PRO").upper()
+            if plan_code == "VIP":
+                plan_code = "PREMIUM"
 
-                new_order = SubscriptionOrder(
-                    order_code=order_code,
-                    user_id=target_user.id,
-                    plan_code=plan_code,
-                    plan_duration_days=duration_days,
-                    amount=amount,
-                    payment_method=f"{active_bank.bank_code}_VIETQR",
-                    transfer_memo=desc_clean,
-                    status="APPROVED",
-                    approved_by=approved_by,
-                    created_at=now,
-                    updated_at=now
-                )
-                db.add(new_order)
+            if plan_code in ["PRO", "PREMIUM", "PLATINUM"]:
+                try:
+                    duration_days = int(order.plan_duration_days) if order.plan_duration_days else 30
+                except (ValueError, TypeError):
+                    duration_days = 30
+                if duration_days <= 0:
+                    duration_days = 30
 
-                if target_user.plan_expires_at and target_user.plan_expires_at > now and (target_user.plan or "").upper() == plan_code:
-                    target_user.plan_expires_at = target_user.plan_expires_at + datetime.timedelta(days=duration_days)
+                # Xử lý cộng ngày hết hạn plan_expires_at (chuẩn hóa naive datetime cho SQLite)
+                user_exp = target_user.plan_expires_at
+                if user_exp and hasattr(user_exp, "tzinfo") and user_exp.tzinfo is not None:
+                    user_exp = user_exp.replace(tzinfo=None)
+
+                if user_exp and user_exp > now and (target_user.plan or "").upper() == plan_code:
+                    target_user.plan_expires_at = user_exp + datetime.timedelta(days=duration_days)
                 else:
                     target_user.plan_activated_at = now
                     target_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
@@ -517,19 +359,22 @@ def process_bank_transfer_payment(
                 target_user.plan = plan_code
                 if plan_code == "PLATINUM":
                     target_user.plan_tier = "FinTrack Platinum VIP"
-                elif plan_code == "PREMIUM":
+                elif plan_code in ["PREMIUM", "VIP"]:
                     target_user.plan_tier = "FinTrack Premium"
                 elif plan_code == "PRO":
                     target_user.plan_tier = "FinTrack Pro"
+                else:
+                    target_user.plan_tier = "Free"
 
                 target_user.is_plan_active = True
+                target_user.status = "ACTIVE"
                 target_user.updated_at = now
 
                 notif = Notification(
                     user_id=target_user.id,
                     target_type="USER",
                     title="🎉 Kích Hoạt Tự Động Gói VIP Thành Công!",
-                    message=f"Hệ thống đã tự động kích hoạt gói {target_user.plan_tier} cho bạn từ giao dịch {bank_disp}! Hạn sử dụng đến {target_user.plan_expires_at.strftime('%d/%m/%Y')}.",
+                    message=f"Đơn nạp #{order.order_code} đã được hệ thống kích hoạt tự động thành công qua {bank_disp}! Gói {target_user.plan_tier} có hạn dùng đến {target_user.plan_expires_at.strftime('%d/%m/%Y')}.",
                     type="SUCCESS",
                     icon="crown",
                     link_tab="subscription",
@@ -539,116 +384,315 @@ def process_bank_transfer_payment(
                 )
                 db.add(notif)
                 db.commit()
+                db.refresh(order)
+                db.refresh(target_user)
 
                 return {
                     "success": True,
-                    "action": "PLAN_ACTIVATED_AUTO_ON_THE_FLY",
-                    "message": f"Đã tự động tạo và kích hoạt gói {plan_code} VIP cho người dùng #{target_user.id}!",
-                    "order_code": order_code,
+                    "action": "PLAN_ACTIVATED_AUTO",
+                    "message": f"Đơn hàng #{order.order_code} đã được hệ thống kích hoạt tự động thành công!",
+                    "order_code": order.order_code,
                     "status": "APPROVED",
                     "approved_by": approved_by,
                     "transaction_id": bank_tx.id,
                     "user": {
                         "id": target_user.id,
+                        "full_name": target_user.full_name,
                         "plan": target_user.plan,
-                        "plan_tier": target_user.plan_tier
+                        "plan_tier": target_user.plan_tier,
+                        "plan_expires_at": target_user.plan_expires_at.strftime("%d/%m/%Y %H:%M") if target_user.plan_expires_at else None
                     }
                 }
 
-            # Direct deposit to user real wallet
-            real_wallet = db.query(Wallet).filter(
-                Wallet.user_id == target_user.id,
-                Wallet.wallet_scope == "real"
-            ).first()
+            else:
+                # REAL_WALLET / WALLET_TOPUP / REAL_DEPOSIT
+                real_wallet = db.query(Wallet).filter(
+                    Wallet.user_id == target_user.id,
+                    Wallet.wallet_scope == "real"
+                ).first()
 
-            if not real_wallet:
-                real_wallet = Wallet(
+                if not real_wallet:
+                    real_wallet = Wallet(
+                        user_id=target_user.id,
+                        name="Ví Dịch Vụ & VIP FinTrack",
+                        wallet_type="EWALLET",
+                        balance=0.0,
+                        currency="VND",
+                        icon="wallet",
+                        color="#F59E0B",
+                        wallet_scope="real",
+                        is_active=True,
+                        created_at=now,
+                        updated_at=now
+                    )
+                    db.add(real_wallet)
+                    db.flush()
+
+                real_wallet.balance += float(amount)
+                real_wallet.updated_at = now
+
+                cat = db.query(Category).filter(
+                    Category.user_id == target_user.id,
+                    Category.name == "Nạp Tiền Thật"
+                ).first()
+                if not cat:
+                    cat = Category(
+                        user_id=target_user.id,
+                        name="Nạp Tiền Thật",
+                        type="INCOME",
+                        group="INCOME",
+                        icon="circle-plus",
+                        color="#F59E0B",
+                        is_default=False
+                    )
+                    db.add(cat)
+                    db.flush()
+
+                tx = Transaction(
                     user_id=target_user.id,
-                    name="Ví Dịch Vụ & VIP FinTrack",
-                    wallet_type="EWALLET",
-                    balance=0.0,
-                    currency="VND",
-                    icon="wallet",
-                    color="#F59E0B",
-                    wallet_scope="real",
-                    is_active=True,
-                    created_at=now,
-                    updated_at=now
-                )
-                db.add(real_wallet)
-                db.flush()
-
-            real_wallet.balance += float(amount)
-            real_wallet.updated_at = now
-
-            cat = db.query(Category).filter(
-                Category.user_id == target_user.id,
-                Category.name == "Nạp Tiền Thật"
-            ).first()
-            if not cat:
-                cat = Category(
-                    user_id=target_user.id,
-                    name="Nạp Tiền Thật",
+                    wallet_id=real_wallet.id,
+                    category_id=cat.id,
                     type="INCOME",
-                    group="INCOME",
-                    icon="circle-plus",
-                    color="#F59E0B",
-                    is_default=False
+                    amount=float(amount),
+                    transaction_date=now,
+                    note=f"Nạp tiền thật tự động qua {bank_disp}: {order.order_code}",
+                    created_by_ai="AUTO_WEBHOOK_BANK"
                 )
-                db.add(cat)
-                db.flush()
+                db.add(tx)
 
-            tx = Transaction(
-                user_id=target_user.id,
-                wallet_id=real_wallet.id,
-                category_id=cat.id,
-                type="INCOME",
-                amount=float(amount),
-                transaction_date=now,
-                note=f"Nạp tiền thật tự động qua {bank_disp}: {desc_clean}",
-                created_by_ai="AUTO_WEBHOOK_BANK"
-            )
-            db.add(tx)
+                notif = Notification(
+                    user_id=target_user.id,
+                    target_type="USER",
+                    title="💰 Nạp Tiền Thật Thành Công (Tự Động)!",
+                    message=f"Đơn nạp #{order.order_code} đã được hệ thống kích hoạt tự động thành công! Đã cộng +{amount:,.0f} ₫ vào Ví Dịch Vụ & VIP.",
+                    type="SUCCESS",
+                    icon="wallet",
+                    link_tab="wallets",
+                    is_read=False,
+                    created_by_role=approved_by,
+                    created_at=now
+                )
+                db.add(notif)
+                db.commit()
+                db.refresh(order)
+                db.refresh(real_wallet)
 
-            notif = Notification(
-                user_id=target_user.id,
-                target_type="USER",
-                title="💰 Nạp Tiền Thật Thành Công (Tự Động)!",
-                message=f"Hệ thống FinTrack AI đã tự động ghi nhận giao dịch +{amount:,.0f} ₫ từ {bank_disp} và cộng vào Ví Tiền Thật của bạn!",
-                type="SUCCESS",
-                icon="wallet",
-                link_tab="wallets",
-                is_read=False,
-                created_by_role=approved_by,
-                created_at=now
-            )
-            db.add(notif)
-            db.commit()
-
-            return {
-                "success": True,
-                "action": "WALLET_DEPOSIT_DIRECT_AUTO",
-                "message": f"Hệ thống đã tự động cộng +{amount:,.0f} ₫ vào ví tiền thật của User #{target_user.id}!",
-                "status": "APPROVED",
-                "approved_by": approved_by,
-                "transaction_id": bank_tx.id,
-                "wallet": {
-                    "id": real_wallet.id,
-                    "name": real_wallet.name,
-                    "new_balance": real_wallet.balance
+                return {
+                    "success": True,
+                    "action": "WALLET_TOPUP_AUTO",
+                    "message": f"Đã tự động cộng +{amount:,.0f} ₫ vào ví tiền thật của người dùng #{target_user.id}!",
+                    "order_code": order.order_code,
+                    "status": "APPROVED",
+                    "approved_by": approved_by,
+                    "transaction_id": bank_tx.id,
+                    "wallet": {
+                        "id": real_wallet.id,
+                        "name": real_wallet.name,
+                        "new_balance": real_wallet.balance
+                    }
                 }
-            }
 
-    # Step 5: Unmatched transfer
-    db.commit()
-    return {
-        "success": False,
-        "action": "UNMATCHED_LOGGED",
-        "message": "Không tìm thấy đơn hàng hoặc User ID phù hợp trong nội dung chuyển khoản. Đã ghi nhận vào lịch sử giao dịch để đối soát thủ công.",
-        "description": desc_clean,
-        "amount": amount,
-        "transaction_id": bank_tx.id
-    }
+        # Step 4: No pre-existing order, but User ID was detected
+        if extracted_user_id:
+            target_user = db.query(User).filter(User.id == extracted_user_id).first()
+            if target_user:
+                bank_tx.matched_user_id = target_user.id
+                bank_tx.matched_user_name = target_user.full_name
+                bank_tx.status = "MATCHED"
+
+                if match_ft_memo or match_ft_memo_no_space or "PLATINUM" in desc_upper or "PREMIUM" in desc_upper or "PRO" in desc_upper:
+                    if match_ft_memo:
+                        plan_code = match_ft_memo.group(1).upper()
+                    elif match_ft_memo_no_space:
+                        plan_code = match_ft_memo_no_space.group(1).upper()
+                    elif "PLATINUM" in desc_upper:
+                        plan_code = "PLATINUM"
+                    elif "PREMIUM" in desc_upper or "VIP" in desc_upper:
+                        plan_code = "PREMIUM"
+                    else:
+                        plan_code = "PRO"
+
+                    if plan_code == "VIP":
+                        plan_code = "PREMIUM"
+
+                    duration_days = 30
+                    random_digits = number_tokens[0] if number_tokens else f"{int(now.timestamp()) % 1000000:06d}"
+                    order_code = f"ORD-{random_digits}"
+                    bank_tx.matched_order_code = order_code
+
+                    new_order = SubscriptionOrder(
+                        order_code=order_code,
+                        user_id=target_user.id,
+                        plan_code=plan_code,
+                        plan_duration_days=duration_days,
+                        amount=float(amount),
+                        payment_method=f"{active_bank.bank_code}_VIETQR",
+                        transfer_memo=desc_clean,
+                        status="APPROVED",
+                        approved_by=approved_by,
+                        created_at=now,
+                        updated_at=now
+                    )
+                    db.add(new_order)
+
+                    user_exp = target_user.plan_expires_at
+                    if user_exp and hasattr(user_exp, "tzinfo") and user_exp.tzinfo is not None:
+                        user_exp = user_exp.replace(tzinfo=None)
+
+                    if user_exp and user_exp > now and (target_user.plan or "").upper() == plan_code:
+                        target_user.plan_expires_at = user_exp + datetime.timedelta(days=duration_days)
+                    else:
+                        target_user.plan_activated_at = now
+                        target_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
+
+                    target_user.plan = plan_code
+                    if plan_code == "PLATINUM":
+                        target_user.plan_tier = "FinTrack Platinum VIP"
+                    elif plan_code in ["PREMIUM", "VIP"]:
+                        target_user.plan_tier = "FinTrack Premium"
+                    elif plan_code == "PRO":
+                        target_user.plan_tier = "FinTrack Pro"
+
+                    target_user.is_plan_active = True
+                    target_user.status = "ACTIVE"
+                    target_user.updated_at = now
+
+                    notif = Notification(
+                        user_id=target_user.id,
+                        target_type="USER",
+                        title="🎉 Kích Hoạt Tự Động Gói VIP Thành Công!",
+                        message=f"Hệ thống đã tự động kích hoạt gói {target_user.plan_tier} cho bạn từ giao dịch {bank_disp}! Hạn sử dụng đến {target_user.plan_expires_at.strftime('%d/%m/%Y')}.",
+                        type="SUCCESS",
+                        icon="crown",
+                        link_tab="subscription",
+                        is_read=False,
+                        created_by_role=approved_by,
+                        created_at=now
+                    )
+                    db.add(notif)
+                    db.commit()
+                    db.refresh(new_order)
+                    db.refresh(target_user)
+
+                    return {
+                        "success": True,
+                        "action": "PLAN_ACTIVATED_AUTO_ON_THE_FLY",
+                        "message": f"Đã tự động tạo và kích hoạt gói {plan_code} VIP cho người dùng #{target_user.id}!",
+                        "order_code": order_code,
+                        "status": "APPROVED",
+                        "approved_by": approved_by,
+                        "transaction_id": bank_tx.id,
+                        "user": {
+                            "id": target_user.id,
+                            "plan": target_user.plan,
+                            "plan_tier": target_user.plan_tier,
+                            "plan_expires_at": target_user.plan_expires_at.strftime("%d/%m/%Y %H:%M") if target_user.plan_expires_at else None
+                        }
+                    }
+
+                # Direct deposit to user real wallet
+                real_wallet = db.query(Wallet).filter(
+                    Wallet.user_id == target_user.id,
+                    Wallet.wallet_scope == "real"
+                ).first()
+
+                if not real_wallet:
+                    real_wallet = Wallet(
+                        user_id=target_user.id,
+                        name="Ví Dịch Vụ & VIP FinTrack",
+                        wallet_type="EWALLET",
+                        balance=0.0,
+                        currency="VND",
+                        icon="wallet",
+                        color="#F59E0B",
+                        wallet_scope="real",
+                        is_active=True,
+                        created_at=now,
+                        updated_at=now
+                    )
+                    db.add(real_wallet)
+                    db.flush()
+
+                real_wallet.balance += float(amount)
+                real_wallet.updated_at = now
+
+                cat = db.query(Category).filter(
+                    Category.user_id == target_user.id,
+                    Category.name == "Nạp Tiền Thật"
+                ).first()
+                if not cat:
+                    cat = Category(
+                        user_id=target_user.id,
+                        name="Nạp Tiền Thật",
+                        type="INCOME",
+                        group="INCOME",
+                        icon="circle-plus",
+                        color="#F59E0B",
+                        is_default=False
+                    )
+                    db.add(cat)
+                    db.flush()
+
+                tx = Transaction(
+                    user_id=target_user.id,
+                    wallet_id=real_wallet.id,
+                    category_id=cat.id,
+                    type="INCOME",
+                    amount=float(amount),
+                    transaction_date=now,
+                    note=f"Nạp tiền thật tự động qua {bank_disp}: {desc_clean}",
+                    created_by_ai="AUTO_WEBHOOK_BANK"
+                )
+                db.add(tx)
+
+                notif = Notification(
+                    user_id=target_user.id,
+                    target_type="USER",
+                    title="💰 Nạp Tiền Thật Thành Công (Tự Động)!",
+                    message=f"Hệ thống FinTrack AI đã tự động ghi nhận giao dịch +{amount:,.0f} ₫ từ {bank_disp} và cộng vào Ví Tiền Thật của bạn!",
+                    type="SUCCESS",
+                    icon="wallet",
+                    link_tab="wallets",
+                    is_read=False,
+                    created_by_role=approved_by,
+                    created_at=now
+                )
+                db.add(notif)
+                db.commit()
+                db.refresh(real_wallet)
+
+                return {
+                    "success": True,
+                    "action": "WALLET_DEPOSIT_DIRECT_AUTO",
+                    "message": f"Hệ thống đã tự động cộng +{amount:,.0f} ₫ vào ví tiền thật của User #{target_user.id}!",
+                    "status": "APPROVED",
+                    "approved_by": approved_by,
+                    "transaction_id": bank_tx.id,
+                    "wallet": {
+                        "id": real_wallet.id,
+                        "name": real_wallet.name,
+                        "new_balance": real_wallet.balance
+                    }
+                }
+
+        # Step 5: Unmatched transfer
+        db.commit()
+        return {
+            "success": False,
+            "action": "UNMATCHED_LOGGED",
+            "message": "Không tìm thấy đơn hàng hoặc User ID phù hợp trong nội dung chuyển khoản. Đã ghi nhận vào lịch sử giao dịch để đối soát thủ công.",
+            "description": desc_clean,
+            "amount": amount,
+            "transaction_id": bank_tx.id
+        }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        print("LỖI THANH TOÁN VIP DEMO / BANK PROCESS:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý giao dịch thanh toán: {str(e)}")
 
 
 # =========================================================================
@@ -1102,96 +1146,109 @@ def create_vip_order(
 ):
     """
     Khởi tạo đơn gia hạn / đăng ký gói VIP qua mã VietQR tự động:
-    - Nhận vào plan_code (PRO, PREMIUM, PLATINUM) và duration_months (1, 3, 12)
+    - Nhận vào plan_code (PRO, PREMIUM, PLATINUM) và duration_months (1, 3, 6, 12)
     - Tự động tính số tiền và số ngày tương ứng chu kỳ
     - Sinh mã đơn 6 số ngẫu nhiên: ORD-xxxxxx
     - Cú pháp chuyển khoản định danh chuẩn: FTP <USER_ID> <MÃ_ĐƠN>
     - Trạng thái PENDING, sẵn sàng cho Webhook SePay/Ngân hàng tự động khớp
     """
-    plan_code = payload.plan_code.upper()
-    if plan_code not in ["PRO", "PREMIUM", "PLATINUM", "VIP"]:
-        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận: PRO, PREMIUM, PLATINUM.")
+    try:
+        plan_code = payload.plan_code.upper()
+        if plan_code not in ["PRO", "PREMIUM", "PLATINUM", "VIP"]:
+            raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận: PRO, PREMIUM, PLATINUM.")
 
-    if plan_code == "VIP":
-        plan_code = "PREMIUM"
+        if plan_code == "VIP":
+            plan_code = "PREMIUM"
 
-    months = payload.duration_months or 1
-    if months not in [1, 3, 6, 12]:
-        months = 1
+        try:
+            months = int(payload.duration_months) if payload.duration_months else 1
+        except (ValueError, TypeError):
+            months = 1
+        if months not in [1, 3, 6, 12]:
+            months = 1
 
-    # Bảng giá chuẩn theo chu kỳ
-    if months == 12:
-        price_map = {"PRO": 490000.0, "PREMIUM": 990000.0, "PLATINUM": 1990000.0}
-        days_map = {"PRO": 365, "PREMIUM": 365, "PLATINUM": 365}
-    elif months == 6:
-        price_map = {"PRO": 264000.0, "PREMIUM": 534000.0, "PLATINUM": 1069000.0}
-        days_map = {"PRO": 180, "PREMIUM": 180, "PLATINUM": 180}
-    elif months == 3:
-        price_map = {"PRO": 139000.0, "PREMIUM": 279000.0, "PLATINUM": 567000.0}
-        days_map = {"PRO": 90, "PREMIUM": 90, "PLATINUM": 90}
-    else:
-        price_map = {"PRO": 49000.0, "PREMIUM": 99000.0, "PLATINUM": 199000.0}
-        days_map = {"PRO": 30, "PREMIUM": 30, "PLATINUM": 30}
+        # Bảng giá chuẩn theo chu kỳ
+        if months == 12:
+            price_map = {"PRO": 490000.0, "PREMIUM": 990000.0, "PLATINUM": 1990000.0}
+            days_map = {"PRO": 365, "PREMIUM": 365, "PLATINUM": 365}
+        elif months == 6:
+            price_map = {"PRO": 264000.0, "PREMIUM": 534000.0, "PLATINUM": 1069000.0}
+            days_map = {"PRO": 180, "PREMIUM": 180, "PLATINUM": 180}
+        elif months == 3:
+            price_map = {"PRO": 139000.0, "PREMIUM": 279000.0, "PLATINUM": 567000.0}
+            days_map = {"PRO": 90, "PREMIUM": 90, "PLATINUM": 90}
+        else:
+            price_map = {"PRO": 49000.0, "PREMIUM": 99000.0, "PLATINUM": 199000.0}
+            days_map = {"PRO": 30, "PREMIUM": 30, "PLATINUM": 30}
 
-    final_amount = payload.amount or price_map.get(plan_code, 199000.0)
-    duration_days = payload.plan_duration_days or days_map.get(plan_code, 30)
+        final_amount = float(payload.amount) if payload.amount is not None else price_map.get(plan_code, 199000.0)
+        try:
+            duration_days = int(payload.plan_duration_days) if payload.plan_duration_days else days_map.get(plan_code, 30)
+        except (ValueError, TypeError):
+            duration_days = days_map.get(plan_code, 30)
 
-    now = datetime.datetime.now(datetime.timezone.utc)
-    active_acc = get_or_create_active_bank_account(db)
+        now = datetime.datetime.utcnow()
+        active_acc = get_or_create_active_bank_account(db)
 
-    # Sinh mã 6 chữ số ngẫu nhiên không trùng lặp
-    order_num = f"{random.randint(100000, 999999)}"
-    order_code = f"ORD-{order_num}"
-    while db.query(SubscriptionOrder).filter(SubscriptionOrder.order_code == order_code).first():
+        # Sinh mã 6 chữ số ngẫu nhiên không trùng lặp
         order_num = f"{random.randint(100000, 999999)}"
         order_code = f"ORD-{order_num}"
+        while db.query(SubscriptionOrder).filter(SubscriptionOrder.order_code == order_code).first():
+            order_num = f"{random.randint(100000, 999999)}"
+            order_code = f"ORD-{order_num}"
 
-    transfer_memo = f"FTP {current_user.id} {order_num}"
+        transfer_memo = f"FTP {current_user.id} {order_num}"
 
-    new_order = SubscriptionOrder(
-        order_code=order_code,
-        user_id=current_user.id,
-        plan_code=plan_code,
-        plan_duration_days=duration_days,
-        amount=float(final_amount),
-        payment_method=f"{active_acc.bank_code}_VIETQR",
-        transfer_memo=transfer_memo,
-        status="PENDING",
-        created_at=now,
-        updated_at=now
-    )
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
+        new_order = SubscriptionOrder(
+            order_code=order_code,
+            user_id=current_user.id,
+            plan_code=plan_code,
+            plan_duration_days=duration_days,
+            amount=float(final_amount),
+            payment_method=f"{active_acc.bank_code}_VIETQR",
+            transfer_memo=transfer_memo,
+            status="PENDING",
+            created_at=now,
+            updated_at=now
+        )
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
 
-    b_code = active_acc.bank_code or "MB"
-    a_num = (active_acc.account_number or "0374617569").strip().replace(" ", "")
-    tmpl = active_acc.qr_template or "compact2"
-    a_name = active_acc.account_name or "DANG QUYET THANG"
-    encoded_memo = urllib.parse.quote(transfer_memo)
-    encoded_name = urllib.parse.quote(a_name.upper())
+        b_code = active_acc.bank_code or "MB"
+        a_num = (active_acc.account_number or "0374617569").strip().replace(" ", "")
+        tmpl = active_acc.qr_template or "compact2"
+        a_name = active_acc.account_name or "DANG QUYET THANG"
+        encoded_memo = urllib.parse.quote(transfer_memo)
+        encoded_name = urllib.parse.quote(a_name.upper())
 
-    vietqr_url = f"https://img.vietqr.io/image/{b_code}-{a_num}-{tmpl}.png?amount={int(final_amount)}&addInfo={encoded_memo}&accountName={encoded_name}"
+        vietqr_url = f"https://img.vietqr.io/image/{b_code}-{a_num}-{tmpl}.png?amount={int(final_amount)}&addInfo={encoded_memo}&accountName={encoded_name}"
 
-    return {
-        "success": True,
-        "order_code": order_code,
-        "order_num": order_num,
-        "plan_code": plan_code,
-        "duration_months": months,
-        "plan_duration_days": duration_days,
-        "amount": float(final_amount),
-        "transfer_memo": transfer_memo,
-        "vietqr_url": vietqr_url,
-        "status": "PENDING",
-        "bank_info": {
-            "bank_code": b_code,
-            "bank_name": active_acc.bank_name,
-            "account_number": a_num,
-            "account_name": a_name,
-            "qr_template": tmpl
+        return {
+            "success": True,
+            "order_code": order_code,
+            "order_num": order_num,
+            "plan_code": plan_code,
+            "duration_months": months,
+            "plan_duration_days": duration_days,
+            "amount": float(final_amount),
+            "transfer_memo": transfer_memo,
+            "vietqr_url": vietqr_url,
+            "status": "PENDING",
+            "bank_info": {
+                "bank_code": b_code,
+                "bank_name": active_acc.bank_name,
+                "account_number": a_num,
+                "account_name": a_name,
+                "qr_template": tmpl
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("LỖI TẠO ĐƠN VIP:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi tạo đơn VIP: {str(e)}")
 
 
 @router.post("/payments/pay-vip-wallet")
@@ -1208,172 +1265,257 @@ def pay_vip_with_wallet(
     - Kích hoạt và cộng dồn hạn dùng VIP tức thì mà không cần quét QR
     - Ghi nhận giao dịch tài chính & tạo thông báo
     """
-    plan_code = payload.plan_code.upper()
-    if plan_code not in ["PRO", "PREMIUM", "PLATINUM", "VIP"]:
-        raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận: PRO, PREMIUM, PLATINUM.")
-    if plan_code == "VIP":
-        plan_code = "PREMIUM"
+    try:
+        plan_code = payload.plan_code.upper()
+        if plan_code not in ["PRO", "PREMIUM", "PLATINUM", "VIP"]:
+            raise HTTPException(status_code=400, detail="Mã gói không hợp lệ. Chỉ chấp nhận: PRO, PREMIUM, PLATINUM.")
+        if plan_code == "VIP":
+            plan_code = "PREMIUM"
 
-    months = payload.duration_months or 1
-    if months not in [1, 3, 6, 12]:
-        months = 1
+        try:
+            months = int(payload.duration_months) if payload.duration_months else 1
+        except (ValueError, TypeError):
+            months = 1
+        if months not in [1, 3, 6, 12]:
+            months = 1
 
-    if months == 12:
-        price_map = {"PRO": 490000.0, "PREMIUM": 990000.0, "PLATINUM": 1990000.0}
-        days_map = {"PRO": 365, "PREMIUM": 365, "PLATINUM": 365}
-    elif months == 6:
-        price_map = {"PRO": 264000.0, "PREMIUM": 534000.0, "PLATINUM": 1069000.0}
-        days_map = {"PRO": 180, "PREMIUM": 180, "PLATINUM": 180}
-    elif months == 3:
-        price_map = {"PRO": 139000.0, "PREMIUM": 279000.0, "PLATINUM": 567000.0}
-        days_map = {"PRO": 90, "PREMIUM": 90, "PLATINUM": 90}
-    else:
-        price_map = {"PRO": 49000.0, "PREMIUM": 99000.0, "PLATINUM": 199000.0}
-        days_map = {"PRO": 30, "PREMIUM": 30, "PLATINUM": 30}
+        if months == 12:
+            price_map = {"PRO": 490000.0, "PREMIUM": 990000.0, "PLATINUM": 1990000.0}
+            days_map = {"PRO": 365, "PREMIUM": 365, "PLATINUM": 365}
+        elif months == 6:
+            price_map = {"PRO": 264000.0, "PREMIUM": 534000.0, "PLATINUM": 1069000.0}
+            days_map = {"PRO": 180, "PREMIUM": 180, "PLATINUM": 180}
+        elif months == 3:
+            price_map = {"PRO": 139000.0, "PREMIUM": 279000.0, "PLATINUM": 567000.0}
+            days_map = {"PRO": 90, "PREMIUM": 90, "PLATINUM": 90}
+        else:
+            price_map = {"PRO": 49000.0, "PREMIUM": 99000.0, "PLATINUM": 199000.0}
+            days_map = {"PRO": 30, "PREMIUM": 30, "PLATINUM": 30}
 
-    price = price_map.get(plan_code, 199000.0)
-    duration_days = days_map.get(plan_code, 30)
+        price = price_map.get(plan_code, 199000.0)
+        duration_days = days_map.get(plan_code, 30)
 
-    now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.utcnow()
 
-    # Tìm hoặc tạo ví tiền thật (Real Payment Wallet)
-    real_wallet = db.query(Wallet).filter(
-        Wallet.user_id == current_user.id,
-        Wallet.wallet_scope == "real"
-    ).first()
+        # Tìm hoặc tạo ví tiền thật (Real Payment Wallet)
+        real_wallet = db.query(Wallet).filter(
+            Wallet.user_id == current_user.id,
+            Wallet.wallet_scope == "real"
+        ).first()
 
-    if not real_wallet:
-        real_wallet = Wallet(
+        if not real_wallet:
+            real_wallet = Wallet(
+                user_id=current_user.id,
+                name="Ví Thanh Toán Dịch Vụ & VIP FinTrack",
+                wallet_type="BANK",
+                wallet_scope="real",
+                balance=500000.0 if current_user.email == "user@fintrack.ai" else 0.0,
+                currency=current_user.currency or "VND",
+                account_number_masked="MB-0374617569",
+                icon="credit-card",
+                color="#F59E0B",
+                is_active=True,
+                created_at=now,
+                updated_at=now
+            )
+            db.add(real_wallet)
+            db.flush()
+
+        if real_wallet.balance < price:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Số dư Ví Tiền Thật ({real_wallet.balance:,.0f} ₫) không đủ để thanh toán {price:,.0f} ₫. Vui lòng nạp thêm tiền thật!"
+            )
+
+        # Trừ trực tiếp số dư ví thật
+        real_wallet.balance -= price
+        real_wallet.updated_at = now
+
+        # Danh mục giao dịch
+        cat = db.query(Category).filter(
+            Category.user_id == current_user.id,
+            Category.name == "Dịch Vụ & Đăng Ký VIP"
+        ).first()
+        if not cat:
+            cat = Category(
+                user_id=current_user.id,
+                name="Dịch Vụ & Đăng Ký VIP",
+                type="EXPENSE",
+                group="WANTS",
+                icon="crown",
+                color="#F59E0B",
+                is_default=False
+            )
+            db.add(cat)
+            db.flush()
+
+        tx = Transaction(
             user_id=current_user.id,
-            name="Ví Thanh Toán Dịch Vụ & VIP FinTrack",
-            wallet_type="BANK",
-            wallet_scope="real",
-            balance=500000.0 if current_user.email == "user@fintrack.ai" else 0.0,
-            currency=current_user.currency or "VND",
-            account_number_masked="MB-0374617569",
-            icon="credit-card",
-            color="#F59E0B",
-            is_active=True,
+            wallet_id=real_wallet.id,
+            category_id=cat.id,
+            type="EXPENSE",
+            amount=price,
+            transaction_date=now,
+            note=f"Trừ ví thanh toán gói {plan_code} VIP ({months} tháng - {duration_days} ngày)",
+            created_by_ai="WALLET_PAYMENT"
+        )
+        db.add(tx)
+
+        # Tạo đơn hàng đã APPROVED
+        order_num = f"{random.randint(100000, 999999)}"
+        order_code = f"ORD-{order_num}"
+        new_order = SubscriptionOrder(
+            order_code=order_code,
+            user_id=current_user.id,
+            plan_code=plan_code,
+            plan_duration_days=duration_days,
+            amount=price,
+            payment_method="REAL_WALLET",
+            transfer_memo=f"Trừ Ví Tiền Thật: {price:,.0f} ₫",
+            status="APPROVED",
+            approved_by="REAL_WALLET_DIRECT",
             created_at=now,
             updated_at=now
         )
-        db.add(real_wallet)
-        db.flush()
+        db.add(new_order)
 
-    if real_wallet.balance < price:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Số dư Ví Tiền Thật ({real_wallet.balance:,.0f} ₫) không đủ để thanh toán {price:,.0f} ₫. Vui lòng nạp thêm tiền thật!"
-        )
+        # Cập nhật thời hạn gói VIP (cộng dồn nếu còn hạn)
+        user_exp = current_user.plan_expires_at
+        if user_exp and hasattr(user_exp, "tzinfo") and user_exp.tzinfo is not None:
+            user_exp = user_exp.replace(tzinfo=None)
 
-    # Trừ trực tiếp số dư ví thật
-    real_wallet.balance -= price
-    real_wallet.updated_at = now
+        if (current_user.plan or "").upper() == plan_code and user_exp and user_exp > now:
+            current_user.plan_expires_at = user_exp + datetime.timedelta(days=duration_days)
+        else:
+            current_user.plan_activated_at = now
+            current_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
 
-    # Danh mục giao dịch
-    cat = db.query(Category).filter(
-        Category.user_id == current_user.id,
-        Category.name == "Dịch Vụ & Đăng Ký VIP"
-    ).first()
-    if not cat:
-        cat = Category(
+        current_user.plan = plan_code
+        if plan_code == "PLATINUM":
+            current_user.plan_tier = "FinTrack Platinum VIP"
+        elif plan_code in ["PREMIUM", "VIP"]:
+            current_user.plan_tier = "FinTrack Premium"
+        elif plan_code == "PRO":
+            current_user.plan_tier = "FinTrack Pro"
+        else:
+            current_user.plan_tier = "Free"
+
+        current_user.is_plan_active = True
+        current_user.status = "ACTIVE"
+        current_user.updated_at = now
+
+        # Thông báo hệ thống
+        notif = Notification(
             user_id=current_user.id,
-            name="Dịch Vụ & Đăng Ký VIP",
-            type="EXPENSE",
-            group="WANTS",
+            target_type="USER",
+            title="👑 Kích Hoạt Gói VIP Thành Công (Trừ Ví)!",
+            message=f"Đã thanh toán {price:,.0f} ₫ từ Ví Tiền Thật và kích hoạt gói {current_user.plan_tier} ({duration_days} ngày) thành công! Hạn dùng đến {current_user.plan_expires_at.strftime('%d/%m/%Y %H:%M')}.",
+            type="SUCCESS",
             icon="crown",
-            color="#F59E0B",
-            is_default=False
+            link_tab="subscription",
+            is_read=False,
+            created_by_role="REAL_WALLET_DIRECT",
+            created_at=now
         )
-        db.add(cat)
-        db.flush()
+        db.add(notif)
+        db.commit()
+        db.refresh(current_user)
+        db.refresh(real_wallet)
 
-    tx = Transaction(
-        user_id=current_user.id,
-        wallet_id=real_wallet.id,
-        category_id=cat.id,
-        type="EXPENSE",
-        amount=price,
-        transaction_date=now,
-        note=f"Trừ ví thanh toán gói {plan_code} VIP ({months} tháng - {duration_days} ngày)",
-        created_by_ai="WALLET_PAYMENT"
-    )
-    db.add(tx)
-
-    # Tạo đơn hàng đã APPROVED
-    order_num = f"{random.randint(100000, 999999)}"
-    order_code = f"ORD-{order_num}"
-    new_order = SubscriptionOrder(
-        order_code=order_code,
-        user_id=current_user.id,
-        plan_code=plan_code,
-        plan_duration_days=duration_days,
-        amount=price,
-        payment_method="REAL_WALLET",
-        transfer_memo=f"Trừ Ví Tiền Thật: {price:,.0f} ₫",
-        status="APPROVED",
-        approved_by="REAL_WALLET_DIRECT",
-        created_at=now,
-        updated_at=now
-    )
-    db.add(new_order)
-
-    # Cập nhật thời hạn gói VIP (cộng dồn nếu còn hạn)
-    if (current_user.plan or "").upper() == plan_code and current_user.plan_expires_at and current_user.plan_expires_at > now:
-        current_user.plan_expires_at = current_user.plan_expires_at + datetime.timedelta(days=duration_days)
-    else:
-        current_user.plan_activated_at = now
-        current_user.plan_expires_at = now + datetime.timedelta(days=duration_days)
-
-    current_user.plan = plan_code
-    if plan_code == "PLATINUM":
-        current_user.plan_tier = "FinTrack Platinum VIP"
-    elif plan_code == "PREMIUM":
-        current_user.plan_tier = "FinTrack Premium"
-    elif plan_code == "PRO":
-        current_user.plan_tier = "FinTrack Pro"
-    else:
-        current_user.plan_tier = "Free"
-
-    current_user.is_plan_active = True
-    current_user.updated_at = now
-
-    # Thông báo hệ thống
-    notif = Notification(
-        user_id=current_user.id,
-        target_type="USER",
-        title="👑 Kích Hoạt Gói VIP Thành Công (Trừ Ví)!",
-        message=f"Đã thanh toán {price:,.0f} ₫ từ Ví Tiền Thật và kích hoạt gói {current_user.plan_tier} ({duration_days} ngày) thành công! Hạn dùng đến {current_user.plan_expires_at.strftime('%d/%m/%Y %H:%M')}.",
-        type="SUCCESS",
-        icon="crown",
-        link_tab="subscription",
-        is_read=False,
-        created_by_role="REAL_WALLET_DIRECT",
-        created_at=now
-    )
-    db.add(notif)
-    db.commit()
-    db.refresh(current_user)
-    db.refresh(real_wallet)
-
-    return {
-        "success": True,
-        "message": f"Thanh toán thành công {price:,.0f} ₫ từ Ví Tiền Thật! Đã kích hoạt gói {current_user.plan_tier}.",
-        "order_code": order_code,
-        "wallet": {
-            "id": real_wallet.id,
-            "name": real_wallet.name,
-            "balance": real_wallet.balance
-        },
-        "user": {
-            "id": current_user.id,
-            "full_name": current_user.full_name,
-            "plan": current_user.plan,
-            "plan_tier": current_user.plan_tier,
-            "plan_expires_at": current_user.plan_expires_at.strftime("%d/%m/%Y %H:%M") if current_user.plan_expires_at else None,
-            "days_remaining": current_user.days_remaining
+        return {
+            "success": True,
+            "message": f"Thanh toán thành công {price:,.0f} ₫ từ Ví Tiền Thật! Đã kích hoạt gói {current_user.plan_tier}.",
+            "order_code": order_code,
+            "wallet": {
+                "id": real_wallet.id,
+                "name": real_wallet.name,
+                "balance": real_wallet.balance
+            },
+            "user": {
+                "id": current_user.id,
+                "full_name": current_user.full_name,
+                "plan": current_user.plan,
+                "plan_tier": current_user.plan_tier,
+                "plan_expires_at": current_user.plan_expires_at.strftime("%d/%m/%Y %H:%M") if current_user.plan_expires_at else None,
+                "days_remaining": current_user.days_remaining
+            }
         }
-    }
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        print("LỖI THANH TOÁN VÍ THẬT:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi thanh toán ví thật: {str(e)}")
+
+
+@router.post("/payments/demo-simulate")
+@router.post("/payments/simulate")
+@router.post("/payments/webhook-mock")
+@router.post("/payments/mock-mb-receive")
+@router.post("/payments/mock-receive-money")
+@router.post("/mock-mb-receive")
+@router.post("/mock-receive-money")
+@router.post("/demo-simulate")
+@router.post("/webhook-mock")
+def mock_receive_money(
+    payload: MockReceiveMoneyRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Mô phỏng ngân hàng báo biến động số dư tiền về thành công (Dành cho Demo trước Hội Đồng).
+    Hỗ trợ kích hoạt tự động tức thì cho đơn hàng hiển thị trên giao diện hoặc User ID.
+    """
+    try:
+        raw_code = str(payload.order_code or "").strip().lstrip("#")
+        clean_num = re.sub(r"[^\d]", "", raw_code)
+
+        order = None
+        if raw_code:
+            order = db.query(SubscriptionOrder).filter(
+                or_(
+                    SubscriptionOrder.order_code == raw_code,
+                    SubscriptionOrder.order_code == f"ORD-{raw_code}",
+                    SubscriptionOrder.order_code == f"ORD-{clean_num}" if clean_num else False,
+                    SubscriptionOrder.order_code.like(f"%{raw_code}%"),
+                    SubscriptionOrder.order_code.like(f"%{clean_num}%") if clean_num else False
+                )
+            ).order_by(desc(SubscriptionOrder.created_at)).first()
+
+        amount = payload.amount
+        if not amount or float(amount) <= 0:
+            if order and order.amount:
+                amount = float(order.amount)
+            else:
+                amount = 199000.0
+
+        description = payload.description
+        if not description:
+            if order and order.transfer_memo:
+                description = order.transfer_memo
+            elif order:
+                description = f"FTP {order.user_id} {order.order_code.replace('ORD-', '')}"
+            elif payload.user_id:
+                description = f"FTP {payload.user_id} {clean_num or '999999'}"
+            else:
+                description = f"FTP 1 {clean_num or '999999'}"
+
+        result = process_bank_transfer_payment(
+            db=db,
+            amount=float(amount),
+            description=description,
+            reference_code=f"MOCK-{int(datetime.datetime.utcnow().timestamp())}",
+            sender_name="MÔ PHỎNG MB BANK (DEMO)",
+            approved_by="AUTO_MOCK_BANK"
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("LỖI THANH TOÁN VIP DEMO:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi thanh toán VIP demo: {str(e)}")
 
 
 @router.post("/payments/bank-webhook")
@@ -1437,53 +1579,6 @@ def bank_transfer_webhook(
     return result
 
 
-@router.post("/payments/mock-mb-receive")
-@router.post("/payments/mock-receive-money")
-@router.post("/mock-mb-receive")
-@router.post("/mock-receive-money")
-def mock_receive_money(
-    payload: MockReceiveMoneyRequest,
-    db: Session = Depends(get_db)
-):
-    """
-    Mô phỏng ngân hàng báo biến động số dư tiền về thành công (Dành cho Demo trước Hội Đồng).
-    """
-    order = None
-    if payload.order_code:
-        code = payload.order_code.strip()
-        order = db.query(SubscriptionOrder).filter(
-            or_(
-                SubscriptionOrder.order_code == code,
-                SubscriptionOrder.order_code == f"ORD-{code}",
-                SubscriptionOrder.order_code.like(f"%{code}%")
-            )
-        ).first()
-
-    amount = payload.amount
-    if not amount:
-        if order:
-            amount = order.amount
-        else:
-            amount = 200000.0
-
-    description = payload.description
-    if not description:
-        if order:
-            description = order.transfer_memo or f"FT NAP {order.order_code.replace('ORD-', '')}"
-        elif payload.user_id:
-            description = f"FT NAP {payload.user_id} 9999"
-        else:
-            description = f"FT NAP 9999"
-
-    result = process_bank_transfer_payment(
-        db=db,
-        amount=float(amount),
-        description=description,
-        reference_code=f"MOCK-{int(datetime.datetime.now(datetime.timezone.utc).timestamp())}",
-        sender_name="MÔ PHỎNG MB BANK",
-        approved_by="AUTO_MOCK_BANK"
-    )
-    return result
 
 
 @router.get("/payments/check-status/{order_code}")

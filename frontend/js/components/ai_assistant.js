@@ -66,7 +66,7 @@ export class AIAssistantComponent {
               </div>
             </div>
 
-            <button id="btn-parse-ai" class="w-full py-2.5 rounded-xl gradient-indigo text-white font-bold text-xs shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+            <button id="btn-parse-ai" class="btn-sparkle-burst w-full py-2.5 rounded-xl gradient-indigo text-white font-bold text-xs shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition flex items-center justify-center gap-2">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
               <span>Bóc Tách Thông Tin Bằng AI</span>
             </button>
@@ -168,7 +168,7 @@ export class AIAssistantComponent {
         </div>
       </div>
 
-      <button id="btn-confirm-save-ai-tx" class="w-full py-2.5 rounded-xl gradient-emerald text-white font-bold text-xs shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center justify-center gap-2 mt-3">
+      <button id="btn-confirm-save-ai-tx" class="btn-sparkle-burst w-full py-2.5 rounded-xl gradient-emerald text-white font-bold text-xs shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center justify-center gap-2 mt-3">
         <i class="fa-solid fa-check"></i>
         <span>Xác Nhận & Lưu Vào Hệ Thống</span>
       </button>

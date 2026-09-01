@@ -56,30 +56,30 @@ export class BadgesComponent {
             </div>
 
             <!-- Right Stats: Streak & Badges Progress -->
-            <div class="flex items-center gap-4 flex-shrink-0">
+            <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
               
               <!-- Streak Pill -->
-              <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 text-center min-w-[130px] shadow-lg shadow-orange-500/5">
-                <div class="flex items-center justify-center gap-1.5 text-orange-400 text-sm font-black mb-1">
-                  <i class="fa-solid fa-fire text-orange-500 animate-pulse text-base"></i>
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-orange-500/5">
+                <div class="flex items-center justify-center gap-1.5 text-orange-400 text-xs sm:text-sm font-black mb-1">
+                  <i class="fa-solid fa-fire text-orange-500 animate-pulse text-sm sm:text-base"></i>
                   <span>CHUỖI KỶ LUẬT</span>
                 </div>
-                <div class="text-2xl font-black text-slate-100 font-mono tracking-tight" id="gamification-streak-days">
+                <div class="text-xl sm:text-2xl font-black text-slate-100 font-mono tracking-tight stat-value" id="gamification-streak-days">
                   0 Ngày
                 </div>
-                <div class="text-[10px] text-slate-400 mt-0.5">Ghi chép liên tiếp</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Ghi chép liên tiếp</div>
               </div>
 
               <!-- Unlocked Count Pill -->
-              <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 text-center min-w-[130px] shadow-lg shadow-emerald-500/5">
-                <div class="flex items-center justify-center gap-1.5 text-emerald-400 text-sm font-black mb-1">
-                  <i class="fa-solid fa-award text-emerald-400 text-base"></i>
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-emerald-500/5">
+                <div class="flex items-center justify-center gap-1.5 text-emerald-400 text-xs sm:text-sm font-black mb-1">
+                  <i class="fa-solid fa-award text-emerald-400 text-sm sm:text-base"></i>
                   <span>HUY HIỆU ĐẠT</span>
                 </div>
-                <div class="text-2xl font-black text-emerald-400 font-mono tracking-tight" id="gamification-badges-unlocked">
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono tracking-tight stat-value" id="gamification-badges-unlocked">
                   0 / 0
                 </div>
-                <div class="text-[10px] text-slate-400 mt-0.5" id="gamification-completion-pct">0% hoàn thành</div>
+                <div class="text-[11px] text-slate-400 mt-0.5" id="gamification-completion-pct">0% hoàn thành</div>
               </div>
 
             </div>
@@ -607,7 +607,7 @@ export class BadgesComponent {
       };
 
       return `
-        <div class="glass-card p-5 rounded-3xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${cardContainerClass} ${isUnlocked ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-75 hover:opacity-100 hover:scale-[1.01] cursor-pointer'}"
+        <div class="glass-card badge-card p-5 rounded-3xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${cardContainerClass} ${isUnlocked ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-75 hover:opacity-100 hover:scale-[1.01] cursor-pointer'}"
           onclick="window.openBadgeModal('${b.id}')">
           
           <!-- Top Row: Icon & Tier Badge & Status -->
@@ -621,7 +621,7 @@ export class BadgesComponent {
 
               <!-- Status Badge & Tier Pill -->
               <div class="flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${pillClass}">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${pillClass}">
                   ${b.tier_name || tier}
                 </span>
 
@@ -629,8 +629,8 @@ export class BadgesComponent {
                   ? `<span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30" title="Đã mở khóa">
                       <i class="fa-solid fa-check text-xs"></i>
                     </span>`
-                  : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center border border-slate-700" title="Chưa mở khóa - Click để xem cách đạt">
-                      <i class="fa-solid fa-lock text-[10px]"></i>
+                  : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center border border-slate-700" title="Chưa mở khóa - Click để xem cách đạt">
+                      <i class="fa-solid fa-lock text-[11px]"></i>
                     </span>`
                 }
               </div>
@@ -638,11 +638,11 @@ export class BadgesComponent {
             </div>
 
             <!-- Title & Description -->
-            <h3 class="text-sm font-black text-slate-100 mb-1 flex items-center gap-1.5">
+            <h4 class="badge-title text-sm font-black text-slate-100 mb-1 flex items-center gap-1.5">
               <span>${b.title}</span>
               ${isUnlocked && (tier === 'GOLD' || tier === 'MYTHIC' || tier === 'DIAMOND') ? '<span class="text-amber-400 text-xs">✨</span>' : ''}
-            </h3>
-            <p class="text-xs text-slate-400 leading-relaxed min-h-[36px]">
+            </h4>
+            <p class="gamification-desc text-xs text-slate-400 leading-relaxed min-h-[36px]">
               ${b.description}
             </p>
           </div>
@@ -652,15 +652,15 @@ export class BadgesComponent {
             ${isUnlocked 
               ? `
                 <div class="flex items-center justify-between text-[11px]">
-                  <span class="text-emerald-400 font-bold flex items-center gap-1">
+                  <span class="badge-status-text text-emerald-400 font-bold flex items-center gap-1">
                     <i class="fa-solid fa-circle-check"></i> Đã Mở Khóa
                   </span>
-                  <span class="text-slate-400 font-mono text-[10px]">${b.unlocked_at ? `Đạt: ${b.unlocked_at}` : 'Hoàn thành'}</span>
+                  <span class="badge-unlocked-date text-slate-300 font-mono text-[11px]">${b.unlocked_at ? `Đạt: ${b.unlocked_at}` : 'Hoàn thành'}</span>
                 </div>
               `
               : `
                 <div>
-                  <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1">
+                  <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1">
                     <span>Tiến độ: ${formatVal(b.current_val, b.unit)}</span>
                     <span class="font-mono text-slate-300">Mục tiêu: ${formatVal(b.target_val, b.unit)} (${b.progress_pct}%)</span>
                   </div>
@@ -789,7 +789,7 @@ export class BadgesComponent {
               Đóng
             </button>
             ${!isUnlocked && badge.target_tab ? `
-              <button type="button" id="badge-modal-action" class="flex-1 py-2.5 rounded-xl gradient-emerald text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-1.5">
+              <button type="button" id="badge-modal-action" class="btn-sparkle-burst flex-1 py-2.5 rounded-xl gradient-emerald text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center gap-1.5">
                 <span>Thực hiện ngay</span>
                 <i class="fa-solid fa-arrow-right text-xs"></i>
               </button>

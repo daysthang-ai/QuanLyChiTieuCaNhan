@@ -53,7 +53,7 @@ export class DashboardComponent {
             </div>
 
             <!-- Primary Add Transaction Action -->
-            <button id="btn-add-tx-top" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/35 active:scale-95 transition-all duration-200 flex items-center gap-1.5 transform-gpu">
+            <button id="btn-add-tx-top" class="btn-sparkle-burst px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/35 active:scale-95 transition-all duration-200 flex items-center gap-1.5 transform-gpu">
               <i class="fa-solid fa-plus text-xs"></i>
               <span>Ghi Thu - Chi</span>
             </button>

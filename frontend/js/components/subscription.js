@@ -122,6 +122,9 @@ export class SubscriptionComponent {
     this.plans = FALLBACK_PLANS;
     this.quota = null;
     window.fintrackSubscription = this;
+    window.renderCurrentPlanBanner = (user) => this.renderCurrentPlanBanner(user);
+    window.scrollToPricingCards = () => this.scrollToPricingCards();
+    window.openUpgradeModal = (planId) => this.openUpgradeModal(planId);
   }
 
   async render(container) {
@@ -235,142 +238,8 @@ export class SubscriptionComponent {
           </div>
         </div>
 
-        <!-- 1. DARK CYBER CARD: TRẠNG THÁI GÓI ĐANG SỬ DỤNG (Thời hạn & Tiến độ) -->
-        <div class="glass-card p-6 rounded-3xl border ${isExpiringSoon ? 'border-rose-500/60 shadow-xl shadow-rose-500/20' : isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20' : isPremium ? 'border-amber-400/50 shadow-xl shadow-amber-500/15' : isPro ? 'border-indigo-500/50 shadow-xl shadow-indigo-500/15' : 'border-slate-800'} relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900/90 to-slate-950">
-          
-          <!-- Background Cyber Glow -->
-          <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full ${isExpiringSoon ? 'bg-rose-500/10' : isPlatinum ? 'bg-emerald-500/15' : isPremium ? 'bg-amber-500/10' : isPro ? 'bg-indigo-500/10' : 'bg-emerald-500/5'} blur-3xl pointer-events-none"></div>
-
-          <div class="relative z-10 space-y-5">
-            
-            <!-- Top Row: Icon, Tier Title, and Status Badges -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-              <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl ${isPlatinum ? 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-xl shadow-emerald-500/30' : isPremium ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/30' : isPro ? 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-emerald-400 border border-slate-700'} flex items-center justify-center text-2xl flex-shrink-0">
-                  <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : isPro ? 'fa-bolt' : 'fa-seedling'}"></i>
-                </div>
-                <div>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <h3 class="text-base sm:text-lg font-black text-slate-100">
-                      ${isPlatinum ? '👑💎 FinTrack Platinum VIP Edition' : isPremium ? '👑 FinTrack Premium Edition' : isPro ? '⚡ FinTrack Pro Edition' : '🌱 Gói Miễn Phí (FinTrack Free)'}
-                    </h3>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' : isPlatinum ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : isPremium ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : isPro ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
-                      ${isExpiringSoon ? '⚠️ Sắp hết hạn' : isPaid ? 'Đang kích hoạt' : 'Vĩnh viễn'}
-                    </span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5">
-                    ${isPlatinum ? 'KHÔNG GIỚI HẠN Token / Lượt gọi AI, không giới hạn ví & Trợ lý phân tích đầu tư 24/7' : isPremium ? 'Hạn mức 1.000 Token AI/tháng, quản lý 10 ví tài chính & Bóc tách hóa đơn thông minh' : isPro ? '100 lượt gọi AI/ngày, quản lý 5 ví & Cố vấn tài chính 50/30/20 chuyên sâu' : 'Gói khởi đầu cơ bản &bull; Giới hạn 10 lượt gọi AI/ngày & 2 ví'}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Action Button -->
-              <div class="flex items-center gap-2.5 self-start sm:self-auto">
-                ${isPaid ? `
-                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('${currentPlan}')" class="px-4 py-2 rounded-xl ${isExpiringSoon ? 'gradient-rose text-white shadow-rose-500/30 animate-pulse' : isPlatinum ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white shadow-emerald-500/25' : isPremium ? 'gradient-amber text-slate-950 shadow-amber-500/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20'} text-xs font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>${isExpiringSoon ? 'Gia Hạn Ngay' : 'Gia Hạn Thêm'}</span>
-                  </button>
-                ` : `
-                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PLATINUM')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-crown"></i>
-                    <span>Nâng Cấp Lên Platinum</span>
-                  </button>
-                `}
-              </div>
-            </div>
-
-            <!-- Date Details & Progress Bar -->
-            ${isPaid ? `
-              <!-- Time Dates Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                
-                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30 flex-shrink-0">
-                    <i class="fa-solid fa-calendar-plus"></i>
-                  </div>
-                  <div>
-                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Ngày Kích Hoạt</span>
-                    <span class="text-xs font-mono font-bold text-slate-200">${planActivatedAt ? formatDateTimeVN(planActivatedAt) : '---'}</span>
-                  </div>
-                </div>
-
-                <div class="p-3.5 rounded-2xl bg-slate-900/80 border ${isExpiringSoon ? 'border-rose-500/40 bg-rose-950/20' : 'border-slate-800'} flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl ${isExpiringSoon ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'} flex items-center justify-center text-sm flex-shrink-0">
-                    <i class="fa-solid fa-calendar-check"></i>
-                  </div>
-                  <div>
-                    <span class="text-[10px] ${isExpiringSoon ? 'text-rose-400 font-bold' : 'text-slate-400 font-bold'} uppercase tracking-wider block">Ngày Hết Hạn</span>
-                    <span class="text-xs font-mono font-bold ${isExpiringSoon ? 'text-rose-300' : 'text-slate-200'}">${planExpiresAt ? formatDateTimeVN(planExpiresAt) : '---'}</span>
-                  </div>
-                </div>
-
-                <div class="p-3.5 rounded-2xl bg-slate-900/80 border ${isExpiringSoon ? 'border-rose-500/40 bg-rose-950/20' : 'border-slate-800'} flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl ${isExpiringSoon ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'} flex items-center justify-center text-sm flex-shrink-0">
-                    <i class="fa-solid fa-hourglass-half"></i>
-                  </div>
-                  <div>
-                    <span class="text-[10px] ${isExpiringSoon ? 'text-rose-400 font-bold' : 'text-slate-400 font-bold'} uppercase tracking-wider block">Thời Gian Còn Lại</span>
-                    <span class="text-xs font-mono font-black ${isExpiringSoon ? 'text-rose-400' : 'text-emerald-400'}">
-                      ${daysRemaining !== null && daysRemaining !== undefined ? (daysRemaining > 0 ? `${daysRemaining} ngày` : 'Đã hết hạn') : 'Đang hoạt động'}
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-
-              <!-- Time Progress Bar -->
-              <div class="space-y-2 pt-1">
-                <div class="flex items-center justify-between text-[11px] font-mono">
-                  <span class="text-slate-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-chart-simple text-[10px]"></i> Tiến độ chu kỳ gói:
-                  </span>
-                  <span class="font-bold ${isExpiringSoon ? 'text-rose-400' : 'text-slate-200'}">
-                    Đã dùng: <b>${elapsedPercent}%</b> &bull; Còn lại: <b>${daysRemaining || 0} ngày</b>
-                  </span>
-                </div>
-                <div class="w-full h-3 rounded-full bg-slate-950 border border-slate-800 overflow-hidden relative p-0.5">
-                  <div class="h-full rounded-full transition-all duration-700 ${isExpiringSoon ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-red-600 animate-pulse' : isPlatinum ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400' : isPremium ? 'gradient-amber' : 'gradient-purple'}" 
-                    style="width: ${Math.min(100, Math.max(4, elapsedPercent))}%;"></div>
-                </div>
-              </div>
-
-              ${isExpiringSoon ? `
-                <!-- Warning Alert Banner for Expiring Soon -->
-                <div class="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
-                  <div class="flex items-center gap-2.5 text-xs">
-                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base flex-shrink-0 animate-bounce"></i>
-                    <div>
-                      <span class="font-extrabold text-rose-300 block">Cảnh Báo: Gói Dịch Vụ Sắp Hết Hạn!</span>
-                      <span class="text-[11px] text-rose-200/80">Tài khoản chỉ còn <b>${daysRemaining} ngày</b>. Hãy gia hạn ngay để không bị ngắt kết nối AI & Cố vấn 50/30/20.</span>
-                    </div>
-                  </div>
-                  <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('${currentPlan}')" class="px-3.5 py-1.5 rounded-xl gradient-rose text-white text-xs font-bold shadow-md shadow-rose-500/30 hover:scale-105 active:scale-95 transition flex-shrink-0">
-                    Gia Hạn Ngay ➔
-                  </button>
-                </div>
-              ` : ''}
-            ` : `
-              <!-- Free Plan Information Box -->
-              <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/30 flex-shrink-0">
-                    <i class="fa-solid fa-infinity"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-extrabold text-slate-200">Gói Miễn Phí (Vĩnh Viễn)</h4>
-                    <p class="text-[11px] text-slate-400">Không giới hạn thời hạn sử dụng. Nâng cấp lên gói VIP bất cứ lúc nào để mở rộng hạn mức.</p>
-                  </div>
-                </div>
-                <button type="button" onclick="window.fintrackSubscription.openUpgradeModal('PLATINUM')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white font-black shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition flex-shrink-0 flex items-center gap-1.5">
-                  <i class="fa-solid fa-crown text-xs"></i>
-                  <span>Nâng Cấp Lên Platinum</span>
-                </button>
-              </div>
-            `}
-
-          </div>
-        </div>
+        <!-- 1. DARK CYBER CARD: TRẠNG THÁI GÓI HIỆN TẠI DUY NHẤT (Current Plan Status Banner) -->
+        ${this.renderCurrentPlanBanner(user)}
 
         <!-- 2. Live AI Daily Usage Quota Card -->
         <div class="glass-card p-5 rounded-3xl border border-slate-800 bg-slate-900/60">
@@ -480,6 +349,216 @@ export class SubscriptionComponent {
     this.loadUserSubscriptionOrders();
   }
 
+  // Cuộn mượt xuống khu vực bảng giá dịch vụ
+  scrollToPricingCards() {
+    const el = document.getElementById('pricing-cards-section') || document.getElementById('subscription-tiers-grid');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // =========================================================================
+  // RENDER BANNER GÓI TÀI KHOẢN HIỆN TẠI (CURRENT PLAN STATUS BANNER)
+  // Phân cấp 3 nhóm: Gói Free, Gói Trả Phí Trung Gian (Pro/Premium), Gói Platinum VIP
+  // =========================================================================
+  renderCurrentPlanBanner(user = null) {
+    const u = user || this.app?.currentUser || (typeof window !== 'undefined' && window.fintrackApp?.currentUser) || {};
+    const currentPlan = (u.plan || 'FREE').toUpperCase();
+    const daysRemaining = u.days_remaining;
+    const planActivatedAt = u.plan_activated_at;
+    const planExpiresAt = u.plan_expires_at;
+    const isPaid = currentPlan === 'PRO' || currentPlan === 'PREMIUM' || currentPlan === 'PLATINUM';
+    const isExpiringSoon = isPaid && (daysRemaining !== null && daysRemaining !== undefined && daysRemaining <= 5);
+
+    const isPlatinum = currentPlan === 'PLATINUM';
+    const isPremium = currentPlan === 'PREMIUM' || currentPlan === 'VIP';
+    const isPro = currentPlan === 'PRO';
+    const isFree = !isPaid;
+
+    // Tính % thời gian đã sử dụng trong chu kỳ gói
+    let elapsedPercent = 0;
+    if (isPaid && planActivatedAt && planExpiresAt) {
+      const startMs = new Date(planActivatedAt).getTime();
+      const endMs = new Date(planExpiresAt).getTime();
+      const nowMs = Date.now();
+      const totalMs = Math.max(1, endMs - startMs);
+      const elapsedMs = Math.max(0, nowMs - startMs);
+      elapsedPercent = Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100)));
+    }
+
+    // 1. QUY TẮC HIỂN THỊ NÚT HÀNH ĐỘNG THEO CẤP ĐỘ GÓI (PLAN TIER LOGIC)
+    let actionButtonsHtml = '';
+
+    if (isFree) {
+      // -----------------------------------------------------------------------
+      // A. Gói Miễn Phí (FREE):
+      // - DUY NHẤT 1 Button: [⚡ Khám Phá & Nâng Cấp Gói VIP]
+      // - Gradient Emerald/Cyan phát sáng, cuộn mượt xuống #pricing-cards-section
+      // -----------------------------------------------------------------------
+      actionButtonsHtml = `
+        <button type="button" 
+          id="btn-banner-upgrade-free"
+          onclick="scrollToPricingCards()" 
+          class="py-2.5 px-5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:brightness-110 shadow-lg shadow-emerald-500/30 border border-emerald-300/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-bolt text-slate-950"></i>
+          <span>Khám Phá & Nâng Cấp Gói VIP</span>
+          <i class="fa-solid fa-arrow-down text-xs text-slate-950 ml-0.5"></i>
+        </button>
+      `;
+    } else if (isPro) {
+      // -----------------------------------------------------------------------
+      // B1. Gói Trả Phí Trung Gian PRO:
+      // - Hiển thị CẢ 2 Nút Button cạnh nhau:
+      //   + BUTTON 1: [🔄 Gia Hạn Gói Hiện Tại] (Gradient Indigo/Blue #6366f1 -> #3b82f6, chữ trắng đậm)
+      //   + BUTTON 2: [⚡ Nâng Cấp Gói Cao Hơn] (Gradient Emerald/Cyan neon, chữ slate-950 đậm)
+      // -----------------------------------------------------------------------
+      actionButtonsHtml = `
+        <button type="button" 
+          id="btn-banner-renew-current"
+          onclick="openUpgradeModal('PRO')" 
+          class="py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:brightness-110 shadow-lg shadow-indigo-500/30 border border-indigo-400/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-arrows-rotate text-white"></i>
+          <span>Gia Hạn Gói Hiện Tại</span>
+        </button>
+
+        <button type="button" 
+          id="btn-banner-upgrade-higher"
+          onclick="scrollToPricingCards()" 
+          class="py-2.5 px-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:brightness-110 shadow-lg shadow-emerald-500/30 border border-emerald-300/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-bolt text-slate-950"></i>
+          <span>Nâng Cấp Gói Cao Hơn</span>
+          <i class="fa-solid fa-arrow-down text-xs text-slate-950 ml-0.5"></i>
+        </button>
+      `;
+    } else if (isPremium) {
+      // -----------------------------------------------------------------------
+      // B2. Gói Trả Phí Trung Gian PREMIUM:
+      // - Hiển thị CẢ 2 Nút Button cạnh nhau:
+      //   + BUTTON 1: [🔄 Gia Hạn Gói Hiện Tại] (Gradient Amber/Orange #f59e0b -> #ea580c, chữ slate-950 đậm)
+      //   + BUTTON 2: [⚡ Nâng Cấp Gói Cao Hơn] (Gradient Emerald/Cyan neon, chữ slate-950 đậm)
+      // -----------------------------------------------------------------------
+      actionButtonsHtml = `
+        <button type="button" 
+          id="btn-banner-renew-current"
+          onclick="openUpgradeModal('PREMIUM')" 
+          class="py-2.5 px-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:brightness-110 shadow-lg shadow-amber-500/30 border border-amber-300/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-arrows-rotate text-slate-950"></i>
+          <span>Gia Hạn Gói Hiện Tại</span>
+        </button>
+
+        <button type="button" 
+          id="btn-banner-upgrade-higher"
+          onclick="scrollToPricingCards()" 
+          class="py-2.5 px-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:brightness-110 shadow-lg shadow-emerald-500/30 border border-emerald-300/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-bolt text-slate-950"></i>
+          <span>Nâng Cấp Gói Cao Hơn</span>
+          <i class="fa-solid fa-arrow-down text-xs text-slate-950 ml-0.5"></i>
+        </button>
+      `;
+    } else if (isPlatinum) {
+      // -----------------------------------------------------------------------
+      // C. Gói Cao Nhất (PLATINUM VIP):
+      // - ẨN HOÀN TOÀN nút "Nâng Cấp Gói" (vì đã ở cấp tối đa)
+      // - DUY NHẤT 1 Button: [🔄 Gia Hạn Platinum VIP]
+      // - Style Neon Emerald Gradient phát sáng nổi bật (#34d399 -> #5eead4 -> #22d3ee), chữ slate-950 đậm
+      // - Click: Mở trực tiếp Modal Gia Hạn Platinum VIP
+      // -----------------------------------------------------------------------
+      actionButtonsHtml = `
+        <button type="button" 
+          id="btn-banner-renew-platinum"
+          onclick="openUpgradeModal('PLATINUM')" 
+          class="py-2.5 px-5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:brightness-110 shadow-lg shadow-emerald-500/30 border border-emerald-300/60 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+          <i class="fa-solid fa-arrows-rotate text-slate-950"></i>
+          <span>Gia Hạn Platinum VIP</span>
+        </button>
+      `;
+    }
+
+    // 2. BADGE CẤP ĐỘ VÀ THỜI HẠN CÒN LẠI (VÍ DỤ: "ĐANG HOẠT ĐỘNG – CÒN 57 NGÀY")
+    let statusBadgeHtml = '';
+    if (isExpiringSoon) {
+      statusBadgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse shadow-sm shadow-rose-500/20">⚠️ CẢNH BÁO: CÒN ${daysRemaining} NGÀY</span>`;
+    } else if (isPaid) {
+      const badgeColor = isPlatinum 
+        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20' 
+        : isPremium 
+          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/20' 
+          : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm shadow-indigo-500/20';
+      const remainingText = (daysRemaining !== null && daysRemaining !== undefined) ? `CÒN ${daysRemaining} NGÀY` : 'VÔ THỜI HẠN';
+      statusBadgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${badgeColor}">ĐANG HOẠT ĐỘNG – ${remainingText}</span>`;
+    } else {
+      statusBadgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">🌱 MIỄN PHÍ VĨNH VIỄN</span>`;
+    }
+
+    return `
+      <!-- 1. DARK CYBER CARD: TRẠNG THÁI GÓI HIỆN TẠI DUY NHẤT (Current Plan Status Banner) -->
+      <div id="current-plan-banner" class="glass-card p-6 rounded-3xl border ${isExpiringSoon ? 'border-rose-500/60 shadow-xl shadow-rose-500/20' : isPlatinum ? 'border-emerald-500/50 shadow-2xl shadow-emerald-500/20 ring-1 ring-emerald-500/30' : isPremium ? 'border-amber-400/50 shadow-xl shadow-amber-500/15' : isPro ? 'border-indigo-500/50 shadow-xl shadow-indigo-500/15' : 'border-slate-800 shadow-xl'} relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900/90 to-slate-950">
+        
+        <!-- Background Cyber Glow -->
+        <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full ${isExpiringSoon ? 'bg-rose-500/15' : isPlatinum ? 'bg-emerald-500/15' : isPremium ? 'bg-amber-500/15' : isPro ? 'bg-indigo-500/15' : 'bg-emerald-500/10'} blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl ${isPlatinum ? 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white shadow-xl shadow-emerald-500/30 ring-1 ring-emerald-400/40' : isPremium ? 'gradient-amber text-slate-950 shadow-lg shadow-amber-500/30' : isPro ? 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-emerald-400 border border-slate-700'} flex items-center justify-center text-2xl flex-shrink-0">
+                <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : isPro ? 'fa-bolt' : 'fa-seedling'}"></i>
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Gói Tài Khoản Hiện Tại:</span>
+                  <h3 class="text-base sm:text-lg font-black text-slate-100">
+                    ${isPlatinum ? '👑💎 Platinum VIP' : isPremium ? '👑 FinTrack Premium' : isPro ? '⚡ FinTrack Pro' : '🌱 FinTrack Free'}
+                  </h3>
+                  ${statusBadgeHtml}
+                </div>
+                <p class="text-xs text-slate-300 mt-1">
+                  ${isPaid 
+                    ? `Hạn dùng đến: <b class="text-slate-100 font-mono">${planExpiresAt ? formatDateTimeVN(planExpiresAt) : '---'}</b> &bull; Đã sử dụng: <b class="${isExpiringSoon ? 'text-rose-400' : isPlatinum ? 'text-emerald-400' : isPremium ? 'text-amber-400' : 'text-indigo-400'} font-mono">${elapsedPercent}%</b> chu kỳ gói.`
+                    : 'Hạn mức 10 lượt gọi AI / ngày, quản lý tối đa 2 ví tài chính cơ bản. Nâng cấp VIP để mở khóa toàn bộ tính năng cao cấp.'}
+                </p>
+              </div>
+            </div>
+
+            <!-- Action Buttons Container (Bên phải banner, layout flex gap-2.5 items-center) -->
+            <div id="banner-action-buttons" class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start md:self-auto">
+              ${actionButtonsHtml}
+            </div>
+          </div>
+
+          ${isPaid ? `
+            <!-- Mini Progress Bar for Active Subscription Cycle -->
+            <div class="pt-3 border-t border-slate-800/80 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] font-mono">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                  <i class="fa-solid fa-chart-simple text-[10px]"></i> Tiến độ thời hạn gói:
+                </span>
+                <span class="font-bold ${isExpiringSoon ? 'text-rose-400' : 'text-slate-300'}">
+                  Đã dùng: <b>${elapsedPercent}%</b> &bull; Còn lại: <b>${daysRemaining || 0} ngày</b>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden relative">
+                <div class="h-full rounded-full transition-all duration-700 ${isExpiringSoon ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-red-600 animate-pulse' : isPlatinum ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400' : isPremium ? 'gradient-amber' : 'gradient-purple'}" 
+                  style="width: ${Math.min(100, Math.max(4, elapsedPercent))}%;"></div>
+              </div>
+            </div>
+
+            ${isExpiringSoon ? `
+              <!-- Warning Alert Banner for Expiring Soon -->
+              <div class="p-3 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 flex items-center gap-2.5 text-xs animate-in fade-in">
+                <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base flex-shrink-0 animate-bounce"></i>
+                <div>
+                  <span class="font-extrabold text-rose-300 block">Cảnh Báo: Gói Dịch Vụ Sắp Hết Hạn!</span>
+                  <span class="text-[11px] text-rose-200/80">Tài khoản chỉ còn <b>${daysRemaining} ngày</b>. Hãy chọn gia hạn gói bên dưới để tiếp tục trải nghiệm không gián đoạn.</span>
+                </div>
+              </div>
+            ` : ''}
+          ` : ''}
+
+        </div>
+      </div>
+    `;
+  }
+
   // Render the 4 Pricing Cards Grid in a balanced 4-column layout
   renderSubscriptionPlans(currentPlanParam = null) {
     const currentUser = this.app?.currentUser || {};
@@ -488,7 +567,7 @@ export class SubscriptionComponent {
     const userRank = tierRank[userPlanKey] ?? 0;
 
     return `
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-7xl mx-auto">
+      <div id="pricing-cards-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-7xl mx-auto scroll-mt-6">
         ${this.plans.map(plan => {
           const planCode = (plan.code || plan.id || '').toUpperCase();
           const targetRank = tierRank[planCode] ?? 0;
@@ -626,7 +705,7 @@ export class SubscriptionComponent {
 
               <!-- Action Button -->
               <button type="button" 
-                class="w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${btnClass}"
+                class="btn-sparkle-burst w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${btnClass}"
                 ${isDisabled ? 'disabled' : ''}
                 onclick="window.fintrackSubscription.openUpgradeModal('${plan.id}')">
                 <span>${btnText}</span>
@@ -883,7 +962,7 @@ export class SubscriptionComponent {
                 <div class="flex justify-between"><span class="text-slate-400">Số dư còn lại:</span><span id="vipWalletRemainText" class="text-cyan-400 font-bold font-mono">...</span></div>
               </div>
               <div id="vipWalletActionArea">
-                <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="btn-sparkle-burst w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                   ✅ Xác Nhận Trừ Ví & Gia Hạn Ngay
                 </button>
               </div>
@@ -957,12 +1036,14 @@ export class SubscriptionComponent {
       window.closeUpgradeModal();
 
       // Confetti Fireworks Celebration
-      if (window.confetti) {
-        window.confetti({
-          particleCount: 160,
-          spread: 90,
-          origin: { y: 0.6 }
-        });
+      if (typeof window.confetti === 'function') {
+        try {
+          window.confetti({
+            particleCount: 160,
+            spread: 90,
+            origin: { y: 0.6 }
+          });
+        } catch (_) {}
       }
 
       // Success Toast
@@ -971,7 +1052,9 @@ export class SubscriptionComponent {
       // Refresh User and Header UI
       try {
         this.app.currentUser = await api.getMe();
-        this.app.renderUserProfileHeader();
+        if (typeof this.app.renderUserProfileHeader === 'function') {
+          this.app.renderUserProfileHeader();
+        }
       } catch (_) {}
 
       // Re-render subscription page & notifications
@@ -979,7 +1062,7 @@ export class SubscriptionComponent {
       if (mainContainer) {
         this.render(mainContainer);
       }
-      if (this.app.updateNotificationBadge) {
+      if (typeof this.app.updateNotificationBadge === 'function') {
         this.app.updateNotificationBadge(false);
       }
     };
@@ -1082,7 +1165,7 @@ export class SubscriptionComponent {
         if (vipWalletRemainText) vipWalletRemainText.innerHTML = `<span class="text-cyan-400 font-bold font-mono">${formatVND(rem)}</span>`;
         if (vipWalletActionArea) {
           vipWalletActionArea.innerHTML = `
-            <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <button id="btnConfirmPayWallet" onclick="handlePayVIPWithWallet()" class="btn-sparkle-burst w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
               ✅ Xác Nhận Trừ Ví & Gia Hạn Ngay (${formatVND(pricing.price)})
             </button>
           `;
@@ -1136,21 +1219,30 @@ export class SubscriptionComponent {
       }
     };
 
-    // Global Demo Trigger: triggerVIPDemoPay()
+    // Global Demo Trigger: triggerVIPDemoPay() / demoSimulatePayment()
     window.triggerVIPDemoPay = async () => {
-      if (!currentOrder?.order_code) return;
+      const orderCodeEl = document.getElementById('vipOrderCode');
+      const displayedOrderCode = (orderCodeEl ? orderCodeEl.textContent.trim().replace(/^#/, '') : null) || currentOrder?.order_code;
+      if (!displayedOrderCode) return;
+
       const btn = document.getElementById('btnVIPDemoPay');
       const originalHtml = btn ? btn.innerHTML : '';
       if (btn) {
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang giả lập MB Bank chuyển tiền...`;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang giả lập MB Bank chuyển tiền...`;
         btn.disabled = true;
       }
 
       try {
-        await api.mockReceiveMoney(currentOrder.order_code, currentOrder.amount, currentOrder.transfer_memo, currentOrder.user_id);
+        const pricing = getDurationPricing(selectedMonths);
+        const amt = currentOrder?.amount || pricing.price;
+        const memo = currentOrder?.transfer_memo || `FTP ${this.app.currentUser?.id || 1} ${displayedOrderCode}`;
+        const uId = this.app.currentUser?.id || currentOrder?.user_id || 1;
+
+        await api.mockReceiveMoney(displayedOrderCode, amt, memo, uId);
         this.app.showToast('✅ MB Bank đã báo tiền về thành công!', 'success');
         handlePaymentSuccess('Demo MB Bank Webhook');
       } catch (mockErr) {
+        console.error('Lỗi Demo VIP Pay:', mockErr);
         this.app.showToast(mockErr.message || 'Lỗi gửi tín hiệu giả lập', 'error');
         if (btn) {
           btn.innerHTML = originalHtml;
@@ -1158,6 +1250,7 @@ export class SubscriptionComponent {
         }
       }
     };
+    window.demoSimulatePayment = window.triggerVIPDemoPay;
 
     // Global Pay with Wallet: handlePayVIPWithWallet()
     window.handlePayVIPWithWallet = async () => {
@@ -1297,3 +1390,33 @@ export class SubscriptionComponent {
     }
   }
 }
+
+// Standalone helper function for direct banner rendering
+export const renderCurrentPlanBanner = (user = null) => {
+  if (window.fintrackSubscription) {
+    return window.fintrackSubscription.renderCurrentPlanBanner(user);
+  }
+  const tempComp = new SubscriptionComponent(window.fintrackApp || {});
+  return tempComp.renderCurrentPlanBanner(user);
+};
+
+export const scrollToPricingCards = () => {
+  const el = document.getElementById('pricing-cards-section') || document.getElementById('subscription-tiers-grid');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+export const openUpgradeModal = (planId) => {
+  if (window.fintrackSubscription?.openUpgradeModal) {
+    return window.fintrackSubscription.openUpgradeModal(planId);
+  }
+};
+
+// Global bindings for inline onclick attributes
+if (typeof window !== 'undefined') {
+  window.renderCurrentPlanBanner = renderCurrentPlanBanner;
+  window.scrollToPricingCards = scrollToPricingCards;
+  window.openUpgradeModal = openUpgradeModal;
+}
+

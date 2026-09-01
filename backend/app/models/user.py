@@ -39,14 +39,29 @@ class User(Base):
         if not self.plan_expires_at or (self.plan or "").upper() == "FREE":
             return None
         now = datetime.datetime.utcnow()
-        if self.plan_expires_at <= now:
+        exp = self.plan_expires_at
+        if hasattr(exp, 'tzinfo') and exp.tzinfo is not None:
+            exp = exp.replace(tzinfo=None)
+        if exp <= now:
             return 0
-        diff = self.plan_expires_at - now
+        diff = exp - now
         return diff.days + (1 if diff.seconds > 0 else 0)
+
+    @property
+    def plan_expire_date(self) -> Optional[datetime.datetime]:
+        return self.plan_expires_at
+
+    @plan_expire_date.setter
+    def plan_expire_date(self, val: Optional[datetime.datetime]):
+        self.plan_expires_at = val
 
     @property
     def is_active(self) -> bool:
         return (self.status or "ACTIVE").upper() == "ACTIVE"
+
+    @is_active.setter
+    def is_active(self, val: bool):
+        self.status = "ACTIVE" if val else "LOCKED"
 
     @property
     def is_banned(self) -> bool:

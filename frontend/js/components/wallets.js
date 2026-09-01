@@ -25,11 +25,11 @@ export class WalletsComponent {
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button id="btn-open-transfer" class="px-4 py-2.5 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
+            <button id="btn-open-transfer" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
               <i class="fa-solid fa-arrow-right-arrow-left"></i>
               <span>Chuyển Tiền Giữa Các Ví Ảo</span>
             </button>
-            <button id="btn-add-wallet" class="px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
+            <button id="btn-add-wallet" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
               <i class="fa-solid fa-plus"></i>
               <span>+ Thêm Ví Ảo Mới</span>
             </button>
@@ -375,7 +375,7 @@ export class WalletsComponent {
               <button type="button" id="virtual-deposit-cancel" class="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
                 Hủy Bỏ
               </button>
-              <button type="submit" id="virtual-deposit-submit" class="w-2/3 py-2.5 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+              <button type="submit" id="virtual-deposit-submit" class="btn-sparkle-burst w-2/3 py-2.5 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-circle-check"></i>
                 <span>Xác Nhận Nạp Tiền Ảo</span>
               </button>

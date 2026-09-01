@@ -629,23 +629,29 @@ class APIClient {
   }
 
   mockReceiveMoney(orderCode = null, amount = null, description = null, userId = null) {
+    const cleanCode = orderCode ? String(orderCode).replace(/^#/, '').trim() : null;
     return this.request('/payments/mock-receive-money', {
       method: 'POST',
       body: JSON.stringify({
-        order_code: orderCode,
-        amount: amount,
+        order_code: cleanCode,
+        amount: amount !== null && amount !== undefined ? parseFloat(amount) : null,
         description: description,
-        user_id: userId
+        user_id: userId ? parseInt(userId) : null
       })
     });
   }
 
+  demoSimulatePayment(orderCode = null, amount = null, description = null, userId = null) {
+    return this.mockReceiveMoney(orderCode, amount, description, userId);
+  }
+
   mockMBReceive(orderCode, amount = null, description = null) {
+    const cleanCode = orderCode ? String(orderCode).replace(/^#/, '').trim() : null;
     return this.request('/payments/mock-mb-receive', {
       method: 'POST',
       body: JSON.stringify({
-        order_code: orderCode,
-        amount: amount,
+        order_code: cleanCode,
+        amount: amount !== null && amount !== undefined ? parseFloat(amount) : null,
         description: description
       })
     });

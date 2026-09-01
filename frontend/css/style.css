@@ -35,8 +35,15 @@
 }
 
 /* ==========================================================================
-   GLOBAL DARK THEME BASE STYLES
+   GLOBAL DARK THEME BASE STYLES & TYPOGRAPHY CORE
    ========================================================================== */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 html, body {
   font-family: var(--font-main);
   background-color: var(--bg-main) !important;
@@ -502,7 +509,7 @@ button:active:not(:disabled),
   background-color: rgba(245, 158, 11, 0.15) !important;
 }
 
-/* Text Colors */
+/* Text Colors & High Contrast Overrides */
 .text-slate-800, .text-slate-900, .text-gray-900, .text-gray-800 {
   color: #f8fafc !important;
 }
@@ -516,7 +523,7 @@ button:active:not(:disabled),
   color: #94a3b8 !important;
 }
 .text-slate-400, .text-gray-400 {
-  color: #64748b !important;
+  color: #94a3b8 !important;
 }
 .text-emerald-700 {
   color: #34d399 !important;
@@ -1206,11 +1213,298 @@ html, body {
   .btn-neon-cta,
   .modal-close-touch-btn,
   #vip-modal-close-btn,
-  .btn-ripple::after {
+  .btn-ripple::after,
+  .btn-sparkle-burst,
+  .btn-sparkle-burst.is-bouncing,
+  .elastic-pill-bounce,
+  .sparkle-particle {
     transition: none !important;
     transform: none !important;
     animation: none !important;
   }
+  .sparkle-burst-container {
+    display: none !important;
+  }
 }
+
+/* ==========================================================================
+   YOUTUBE SUBSCRIBE SPARKLE BURST & ELASTIC PILL BOUNCE ANIMATIONS (120 FPS GPU)
+   ========================================================================== */
+
+/* 1. Keyframes: Co Giãn Đàn Hồi (Elastic Pill Bounce) */
+@keyframes elasticPillBounce {
+  0% {
+    transform: scale(0.92) translateZ(0);
+  }
+  38% {
+    transform: scale(1.04) translateZ(0);
+  }
+  70% {
+    transform: scale(0.98) translateZ(0);
+  }
+  100% {
+    transform: scale(1) translateZ(0);
+  }
+}
+
+/* 2. Keyframes: Bắn Hạt Lấp Lánh 360 độ (Sparkle Particle Radial Fly) */
+@keyframes sparkleParticleFly {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(0) rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
+}
+
+/* 3. Utility Class: Nút Bấm Hiệu Ứng Sparkle Burst & Elastic Bounce */
+.btn-sparkle-burst {
+  position: relative;
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Khi nhấn (:active): nút co lại 0.92 */
+.btn-sparkle-burst:active {
+  transform: scale(0.92) translateZ(0) !important;
+}
+
+/* Khi kích hoạt trigger event đàn hồi */
+.btn-sparkle-burst.is-bouncing,
+.elastic-pill-bounce {
+  animation: elasticPillBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+/* 4. Particle Burst Container & Elements */
+.sparkle-burst-container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999999;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  will-change: transform;
+}
+
+.sparkle-particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  animation: sparkleParticleFly 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sparkle-particle.shape-circle {
+  border-radius: 50%;
+}
+
+.sparkle-particle.shape-star {
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  border-radius: 0;
+}
+
+.sparkle-particle.shape-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  border-radius: 0;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY SCALE & CONTRAST OPTIMIZATION (ZOOM 90% & 100% RETINA SHARPNESS)
+   ========================================================================== */
+
+/* 1. Base Scale & Minimum Font Size Bounds (Zero Unreadable Text) */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Enforce Minimum Text Scale for Micro-Classes */
+.text-\[8px\],
+.text-\[9px\],
+.text-\[10px\],
+.text-\[11px\] {
+  font-size: 0.8125rem !important; /* ~13px */
+  line-height: 1.2rem !important;
+}
+
+.text-xs {
+  font-size: 0.8125rem !important; /* ~13px */
+  line-height: 1.15rem !important;
+}
+
+.text-sm {
+  font-size: 0.9rem !important; /* ~14.4px */
+  line-height: 1.3rem !important;
+}
+
+/* 2. Secondary & Descriptive Text Contrast */
+.gamification-desc,
+.badge-card p,
+.sub-text,
+.card-subtext,
+#tab-badges p,
+#badges-cards-grid p,
+.text-secondary,
+.text-muted-desc {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  color: #94a3b8 !important;
+}
+
+/* 3. Badge Cards & Title Contrast */
+.badge-card h4,
+.badge-title,
+#badges-cards-grid h3,
+.gamification-badge-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #f8fafc !important;
+}
+
+/* Status & Unlock Date Badge Tags */
+.badge-status-text,
+.badge-unlocked-date,
+#badges-cards-grid .badge-status,
+#badges-cards-grid .badge-date {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+
+/* 4. Stat Numbers, XP, Streaks & Progress Counters */
+.stat-value,
+.gamification-stat-val,
+#gamification-streak-days,
+#gamification-badges-unlocked {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+.gamification-xp-mono,
+#gamification-xp-text,
+.progress-counter,
+.font-mono-val {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+/* 5. Left Sidebar Navigation Menu Items */
+#sidebar .nav-item,
+#sidebar .user-nav-item,
+#sidebar .admin-nav-item,
+.sidebar-nav-btn {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+}
+
+#sidebar .nav-item.active,
+#sidebar .user-nav-item.active,
+#sidebar .admin-nav-item.active {
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+
+#sidebar .nav-item i,
+#sidebar .user-nav-item i,
+#sidebar .admin-nav-item i {
+  font-size: 15px !important;
+}
+
+/* 6. Card Top Banner Gamification Adjustments */
+#achievement-user-summary {
+  padding: 1.5rem !important;
+}
+
+#achievement-user-summary .text-2xl {
+  font-size: 1.35rem !important;
+}
+
+/* 7. Tag Pills, Filter Tabs & Secondary Buttons */
+.badge-filter-tab,
+.admin-subtab-pill,
+.quick-chip,
+.chat-prompt-pill,
+.interactive-pill {
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   CURRENT PLAN STATUS BANNER & TIER ACTION BUTTONS
+   ========================================================================== */
+.text-slate-950 {
+  color: #020617 !important;
+}
+
+#current-plan-banner {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#banner-action-buttons button {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fallback & High Specificity Gradients for Action Buttons */
+#banner-action-buttons button[class*="from-emerald-400"],
+button.bg-gradient-to-r[class*="from-emerald-400"] {
+  background: linear-gradient(90deg, #34d399 0%, #5eead4 50%, #22d3ee 100%) !important;
+  color: #020617 !important;
+}
+
+#banner-action-buttons button[class*="from-indigo-500"],
+button.bg-gradient-to-r[class*="from-indigo-500"] {
+  background: linear-gradient(90deg, #6366f1 0%, #4f46e5 50%, #2563eb 100%) !important;
+  color: #ffffff !important;
+}
+
+#banner-action-buttons button[class*="from-amber-400"],
+button.bg-gradient-to-r[class*="from-amber-400"] {
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #ea580c 100%) !important;
+  color: #020617 !important;
+}
+
+#banner-action-buttons button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -70%;
+  width: 25%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#banner-action-buttons button:hover::after {
+  transform: translateX(700%) rotate(25deg);
+}
+
+
+
 
 

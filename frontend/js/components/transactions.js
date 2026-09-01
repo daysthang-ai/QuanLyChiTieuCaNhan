@@ -41,7 +41,7 @@ export class TransactionsComponent {
             </button>
 
             <!-- Primary Add Transaction Button -->
-            <button id="btn-add-tx" class="px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center gap-2">
+            <button id="btn-add-tx" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center gap-2">
               <i class="fa-solid fa-plus"></i>
               <span>Thêm Giao Dịch</span>
             </button>
@@ -564,7 +564,7 @@ export class TransactionsComponent {
               <button type="button" id="modal-cancel-btn" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
                 Hủy
               </button>
-              <button type="submit" class="px-6 py-2.5 rounded-xl gradient-emerald text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center gap-1.5">
+              <button type="submit" class="btn-sparkle-burst px-6 py-2.5 rounded-xl gradient-emerald text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center gap-1.5">
                 <i class="fa-solid fa-check"></i>
                 <span>${existingTx ? 'Cập Nhật Giao Dịch' : 'Lưu Giao Dịch Ngay'}</span>
               </button>

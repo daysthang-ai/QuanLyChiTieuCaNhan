@@ -356,6 +356,99 @@ def test_vip_modal_2_tab_payments_and_sepay_webhook_flow(client: TestClient, aut
     assert pay_data["wallet"]["balance"] >= 0
 
 
+def test_vip_demo_simulation_flow_with_order_code(client: TestClient, auth_headers):
+    # 1. Create a VIP Order for Platinum (1 month)
+    vip_payload = {
+        "plan_code": "PLATINUM",
+        "duration_months": 1
+    }
+    create_vip_res = client.post("/api/v1/payments/create-vip-order", json=vip_payload, headers=auth_headers)
+    assert create_vip_res.status_code == 200
+    vip_order = create_vip_res.json()
+    order_code = vip_order["order_code"]
+    assert order_code.startswith("ORD-")
+
+    # 2. Simulate User clicking "⚡ Demo Chuyển Tiền" in Modal (sending #ORD-XXXXXX with hash prefix)
+    demo_payload = {
+        "order_code": f"#{order_code}",
+        "amount": vip_order["amount"],
+        "description": vip_order["transfer_memo"],
+        "user_id": None
+    }
+    demo_res = client.post("/api/v1/payments/demo-simulate", json=demo_payload, headers=auth_headers)
+    assert demo_res.status_code == 200
+    demo_data = demo_res.json()
+    assert demo_data["success"] is True
+    assert demo_data["status"] == "APPROVED"
+    assert demo_data["user"]["plan"] == "PLATINUM"
+    assert demo_data["user"]["plan_tier"] == "FinTrack Platinum VIP"
+
+    # 3. Check Order status is now APPROVED and is_approved is True
+    status_res = client.get(f"/api/v1/payments/check-status/{order_code}")
+    assert status_res.status_code == 200
+    status_data = status_res.json()
+    assert status_data["status"] == "APPROVED"
+    assert status_data["is_approved"] is True
+
+    # 4. Verify User state via /auth/me
+    me_res = client.get("/api/v1/auth/me", headers=auth_headers)
+    assert me_res.status_code == 200
+    me = me_res.json()
+    assert me["plan"] == "PLATINUM"
+    assert me["plan_tier"] == "FinTrack Platinum VIP"
+    assert me["is_plan_active"] is True
+    assert me["days_remaining"] is not None
+    assert me["days_remaining"] >= 29
+
+
+def test_vip_demo_simulation_accumulates_days(client: TestClient, auth_headers):
+    # 1. Create and approve first order (30 days)
+    p1 = {"plan_code": "PLATINUM", "duration_months": 1}
+    r1 = client.post("/api/v1/payments/create-vip-order", json=p1, headers=auth_headers)
+    assert r1.status_code == 200
+    ord1 = r1.json()["order_code"]
+
+    res_demo1 = client.post("/api/payments/demo-simulate", json={"order_code": ord1})
+    assert res_demo1.status_code == 200
+
+    me1 = client.get("/api/v1/auth/me", headers=auth_headers).json()
+    days_1 = me1["days_remaining"]
+
+    # 2. Create and approve second order for 3 months (90 days)
+    p2 = {"plan_code": "PLATINUM", "duration_months": 3}
+    r2 = client.post("/api/v1/payments/create-vip-order", json=p2, headers=auth_headers)
+    assert r2.status_code == 200
+    ord2 = r2.json()["order_code"]
+
+    res_demo2 = client.post("/api/payments/mock-receive-money", json={"order_code": ord2})
+    assert res_demo2.status_code == 200
+
+    me2 = client.get("/api/v1/auth/me", headers=auth_headers).json()
+    days_2 = me2["days_remaining"]
+
+    # Days should accumulate: ~30 + 90 = ~120 days
+    assert days_2 >= days_1 + 88
+
+
+def test_vip_demo_simulation_on_the_fly_fallback(client: TestClient, auth_headers):
+    # Test demo simulate with arbitrary generated code and user_id without pre-existing DB order
+    me = client.get("/api/v1/auth/me", headers=auth_headers).json()
+    user_id = me["id"]
+
+    demo_payload = {
+        "order_code": "ORD-999888",
+        "amount": 199000,
+        "description": f"FTP {user_id} 999888",
+        "user_id": user_id
+    }
+    demo_res = client.post("/api/v1/payments/demo-simulate", json=demo_payload, headers=auth_headers)
+    assert demo_res.status_code == 200
+    data = demo_res.json()
+    assert data["success"] is True
+    assert data["status"] == "APPROVED"
+
+
+
 
 
 

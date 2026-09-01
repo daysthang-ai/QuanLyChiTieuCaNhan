@@ -225,7 +225,7 @@ export class BudgetsComponent {
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
               <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Hủy</button>
-              <button type="submit" id="budget-submit-btn" class="px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
+              <button type="submit" id="budget-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
                 ${existing ? 'Lưu Hạn Mức' : 'Xác Nhận Đặt'}
               </button>
             </div>
