@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class Notification(Base):
     """
@@ -21,7 +21,7 @@ class Notification(Base):
     is_read = Column(Boolean, default=False, nullable=False)
     is_pinned = Column(Boolean, default=False, nullable=False)
     created_by_role = Column(String(20), default="ADMIN", nullable=True)  # ADMIN, MODERATOR
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="notifications", foreign_keys=[user_id])
@@ -38,7 +38,7 @@ class NotificationRead(Base):
     id = Column(Integer, primary_key=True, index=True)
     notification_id = Column(Integer, ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    read_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    read_at = Column(DateTime, default=get_utc_now, nullable=False)
 
     notification = relationship("Notification", back_populates="reads")
     user = relationship("User", foreign_keys=[user_id])
@@ -53,7 +53,7 @@ class NotificationDismiss(Base):
     id = Column(Integer, primary_key=True, index=True)
     notification_id = Column(Integer, ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    dismissed_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    dismissed_at = Column(DateTime, default=get_utc_now, nullable=False)
 
     notification = relationship("Notification", back_populates="dismissals")
     user = relationship("User", foreign_keys=[user_id])

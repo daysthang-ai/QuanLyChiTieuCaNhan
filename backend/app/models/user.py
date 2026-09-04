@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class User(Base):
     __tablename__ = "users"
@@ -20,8 +20,8 @@ class User(Base):
     is_plan_active = Column(Boolean, default=True, nullable=False)
     currency = Column(String(10), default="VND", nullable=False)
     avatar_url = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)
 
     # Relationships
     wallets = relationship("Wallet", back_populates="user", cascade="all, delete-orphan")
@@ -38,7 +38,7 @@ class User(Base):
     def days_remaining(self) -> Optional[int]:
         if not self.plan_expires_at or (self.plan or "").upper() == "FREE":
             return None
-        now = datetime.datetime.utcnow()
+        now = get_utc_now()
         exp = self.plan_expires_at
         if hasattr(exp, 'tzinfo') and exp.tzinfo is not None:
             exp = exp.replace(tzinfo=None)

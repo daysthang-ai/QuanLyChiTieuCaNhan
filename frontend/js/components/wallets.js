@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=4.1';
-import { formatVND, formatDateVN } from '../utils/formatters.js?v=4.1';
+import { api } from '../api.js?v=20260904_01';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_01';
 
 export class WalletsComponent {
   constructor(app) {
@@ -9,7 +9,7 @@ export class WalletsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-wallets" class="user-tab-pane space-y-8 animate-in fade-in duration-300">
+      <div id="view-wallets" data-tab-id="wallets" class="content-section user-tab-pane space-y-8 animate-in fade-in duration-300">
         
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
@@ -25,11 +25,11 @@ export class WalletsComponent {
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button id="btn-open-transfer" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
+            <button id="btn-open-transfer" type="button" onclick="window.openTransferModal()" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-arrow-right-arrow-left"></i>
               <span>Chuyển Tiền Giữa Các Ví Ảo</span>
             </button>
-            <button id="btn-add-wallet" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2">
+            <button id="btn-add-wallet" type="button" onclick="window.openWalletModal()" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-95 transition flex items-center gap-2 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-plus"></i>
               <span>+ Thêm Ví Ảo Mới</span>
             </button>
@@ -145,7 +145,7 @@ export class WalletsComponent {
               <div class="flex flex-wrap items-center gap-4 text-xs font-mono pt-1 text-slate-400">
                 <div class="flex items-center gap-1.5">
                   <i class="fa-solid fa-building-columns text-amber-400"></i>
-                  <span>MB Bank: <strong class="text-slate-200">0374617569</strong></span>
+                  <span>MBBank: <strong class="text-slate-200 font-mono">****7569</strong></span>
                 </div>
                 <div class="flex items-center gap-1.5">
                   <i class="fa-solid fa-user-shield text-amber-400"></i>
@@ -170,11 +170,11 @@ export class WalletsComponent {
               </div>
 
               <div class="flex items-center gap-2">
-                <button id="btn-real-deposit" class="px-4 py-2.5 rounded-xl gradient-amber text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+                <button id="btn-real-deposit" type="button" onclick="window.openRealDepositModal()" class="px-4 py-2.5 rounded-xl gradient-amber text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition flex items-center gap-2 cursor-pointer relative z-20 pointer-events-auto">
                   <i class="fa-solid fa-qrcode text-sm"></i>
                   <span>⚡ Nạp Tiền Thật (Quét VietQR MB)</span>
                 </button>
-                <button id="btn-goto-subscription" class="px-3.5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5">
+                <button id="btn-goto-subscription" type="button" onclick="window.openSubscriptionModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto">
                   <i class="fa-solid fa-crown text-amber-400"></i>
                   <span>Gói VIP</span>
                 </button>
@@ -296,6 +296,12 @@ export class WalletsComponent {
     const modalEl = document.getElementById('modal-deposit-wallet') || document.getElementById('generic-modal');
     if (!modalEl) return;
 
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
+
     let selectedAmount = 500000;
 
     modalEl.innerHTML = `
@@ -387,7 +393,13 @@ export class WalletsComponent {
       </div>
     `;
 
-    const close = () => { modalEl.innerHTML = ''; };
+    const close = () => {
+      modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
+    };
     document.getElementById('deposit-modal-close')?.addEventListener('click', close);
     document.getElementById('virtual-deposit-cancel')?.addEventListener('click', close);
 
@@ -458,6 +470,12 @@ export class WalletsComponent {
     const modalEl = document.getElementById('modal-deposit-wallet') || document.getElementById('generic-modal');
     if (!modalEl || !realWallet) return;
 
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
+
     let selectedAmount = 200000;
     let currentOrder = null;
     let pollInterval = null;
@@ -474,6 +492,10 @@ export class WalletsComponent {
         debounceTimer = null;
       }
       modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
     };
 
     // Initial render modal shell
@@ -809,6 +831,12 @@ export class WalletsComponent {
     const modalEl = document.getElementById('generic-modal');
     if (!modalEl) return;
 
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
+
     const isAdmin = this.app.currentUser?.role === 'ADMIN';
 
     modalEl.innerHTML = `
@@ -922,7 +950,13 @@ export class WalletsComponent {
       </div>
     `;
 
-    const close = () => { modalEl.innerHTML = ''; };
+    const close = () => {
+      modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
+    };
     document.getElementById('modal-close-btn')?.addEventListener('click', close);
     document.getElementById('modal-cancel-btn')?.addEventListener('click', close);
 
@@ -977,6 +1011,12 @@ export class WalletsComponent {
       this.app.showToast('Bạn cần ít nhất 2 ví ảo trong sổ kế toán để thực hiện chuyển tiền', 'info');
       return;
     }
+
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
 
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -1042,7 +1082,13 @@ export class WalletsComponent {
       </div>
     `;
 
-    const close = () => { modalEl.innerHTML = ''; };
+    const close = () => {
+      modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
+    };
     document.getElementById('modal-close-btn')?.addEventListener('click', close);
     document.getElementById('modal-cancel-btn')?.addEventListener('click', close);
 

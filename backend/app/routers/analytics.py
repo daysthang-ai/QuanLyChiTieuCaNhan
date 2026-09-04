@@ -184,6 +184,7 @@ def get_category_breakdown(
     return items
 
 @router.get("/fifty-thirty-twenty", response_model=FiftyThirtyTwentyRule)
+@router.get("/50-30-20", response_model=FiftyThirtyTwentyRule, include_in_schema=False)
 def get_fifty_thirty_twenty_analysis(
     month_year: Optional[str] = None,
     current_user: User = Depends(get_current_user),

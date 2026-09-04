@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, SubscriptionOrder, Notification
 from backend.app.routers.auth import get_current_user
 
@@ -44,6 +44,7 @@ def create_subscription_order(
         order_code = f"ORD-{random_digits}"
 
     memo = data.transfer_memo or f"FT{plan_code} {current_user.id} {random_digits}"
+    now = get_utc_now()
 
     new_order = SubscriptionOrder(
         order_code=order_code,
@@ -55,12 +56,16 @@ def create_subscription_order(
         transfer_memo=memo,
         status="PENDING",
         proof_image=data.proof_image,
-        created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow()
+        created_at=now,
+        updated_at=now
     )
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
+    try:
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi tạo đơn hàng: {str(e)}")
 
     return {
         "message": f"Đơn hàng #{order_code} đã được tạo thành công và đang chờ Quản trị viên đối soát & kích hoạt!",

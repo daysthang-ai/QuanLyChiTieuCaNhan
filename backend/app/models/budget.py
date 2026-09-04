@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class Budget(Base):
     __tablename__ = "budgets"
@@ -14,8 +14,8 @@ class Budget(Base):
     month_year = Column(String(7), nullable=False, index=True)  # YYYY-MM
     alert_80_sent = Column(Boolean, default=False, nullable=False)
     alert_100_sent = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)
 
     # Relationships
     user = relationship("User", back_populates="budgets")

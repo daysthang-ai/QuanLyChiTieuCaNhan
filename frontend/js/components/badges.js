@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=5.5';
-import { formatVND } from '../utils/formatters.js?v=5.5';
+import { api } from '../api.js?v=20260904_01';
+import { formatVND } from '../utils/formatters.js?v=20260904_01';
 
 export class BadgesComponent {
   constructor(app) {
@@ -10,7 +10,7 @@ export class BadgesComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-badges" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-badges" data-tab-id="badges" class="content-section user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Gamification Banner Header -->
         <div id="achievement-user-summary" class="glass-card p-6 rounded-3xl relative overflow-hidden border border-amber-500/20 shadow-xl bg-gradient-to-r from-slate-900 via-amber-950/20 to-slate-900 transition-all duration-300">

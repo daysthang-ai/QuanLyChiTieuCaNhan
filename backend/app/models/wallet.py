@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class Wallet(Base):
     __tablename__ = "wallets"
@@ -21,8 +21,8 @@ class Wallet(Base):
     bank_code = Column(String(50), nullable=True)
     auto_debit_enabled = Column(Boolean, default=False, nullable=True)
     linked_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)
 
     # Relationships
     user = relationship("User", back_populates="wallets")

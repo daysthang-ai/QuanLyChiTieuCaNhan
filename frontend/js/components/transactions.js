@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=5.5';
-import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js?v=5.5';
+import { api } from '../api.js?v=20260904_01';
+import { formatVND, formatDateVN, formatDateTimeVN, getGroupBadge } from '../utils/formatters.js?v=20260904_01';
 
 export class TransactionsComponent {
   constructor(app) {
@@ -20,7 +20,7 @@ export class TransactionsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-transactions" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-transactions" data-tab-id="transactions" class="content-section user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header & Action Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -31,19 +31,19 @@ export class TransactionsComponent {
 
           <div class="flex flex-wrap items-center gap-2">
             <!-- 1-Click Export Buttons -->
-            <button id="btn-tx-export-excel" class="px-3.5 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 active:scale-95 transition flex items-center gap-1.5 border border-emerald-500/30">
+            <button id="btn-tx-export-excel" class="px-3.5 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/35 active:scale-95 transition flex items-center gap-1.5 border border-emerald-500/30 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-file-excel"></i>
               <span>Xuất Excel</span>
             </button>
-            <button id="btn-tx-export-pdf" class="px-3.5 py-2.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold shadow-md shadow-rose-600/20 hover:shadow-rose-600/35 active:scale-95 transition flex items-center gap-1.5 border border-rose-500/30">
+            <button id="btn-tx-export-pdf" class="px-3.5 py-2.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold shadow-md shadow-rose-600/20 hover:shadow-rose-600/35 active:scale-95 transition flex items-center gap-1.5 border border-rose-500/30 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-file-pdf"></i>
               <span>Xuất PDF</span>
             </button>
 
             <!-- Primary Add Transaction Button -->
-            <button id="btn-add-tx" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center gap-2">
+            <button id="btn-add-tx" type="button" onclick="window.openTransactionModal()" class="btn-sparkle-burst px-4 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center gap-2 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-plus"></i>
-              <span>Thêm Giao Dịch</span>
+              <span>+ Ghi Thu - Chi</span>
             </button>
           </div>
         </div>
@@ -110,22 +110,22 @@ export class TransactionsComponent {
         </div>
 
         <!-- Transactions Table Card -->
-        <div class="glass-card rounded-2xl overflow-hidden shadow-sm">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+        <div class="glass-card rounded-2xl overflow-hidden shadow-sm border border-slate-800/80">
+          <div class="w-full overflow-x-auto overflow-y-hidden rounded-xl custom-scrollbar">
+            <table class="w-full text-left text-xs fintrack-table table-fixed border-collapse">
+              <thead class="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[10px] font-mono">
                 <tr>
-                  <th class="py-3 px-4">Thời Gian</th>
-                  <th class="py-3 px-4 w-28 min-w-[100px] text-center">Loại</th>
-                  <th class="py-3 px-4">Danh Mục</th>
-                  <th class="py-3 px-4">Ghi Chú</th>
-                  <th class="py-3 px-4">Ví Thanh Toán</th>
-                  <th class="py-3 px-4 text-right font-bold">Số Tiền (VNĐ)</th>
-                  <th class="py-3 px-4 text-center">Hành Động</th>
+                  <th class="w-[16%] py-3 px-3">Thời Gian</th>
+                  <th class="w-[10%] py-3 px-3 text-center">Loại</th>
+                  <th class="w-[18%] py-3 px-3">Danh Mục</th>
+                  <th class="w-[24%] py-3 px-3">Ghi Chú</th>
+                  <th class="w-[14%] py-3 px-3">Ví Thanh Toán</th>
+                  <th class="w-[12%] py-3 px-3 text-right font-bold">Số Tiền (VNĐ)</th>
+                  <th class="w-[6%] py-3 px-3 text-center">Hành Động</th>
                 </tr>
               </thead>
-              <tbody id="transactions-table-body" class="divide-y divide-slate-800/60">
-                <tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải danh sách giao dịch...</td></tr>
+              <tbody id="transactions-table-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+                <tr><td colspan="7" class="py-12 text-center text-slate-400 font-sans">Đang tải danh sách giao dịch...</td></tr>
               </tbody>
             </table>
           </div>
@@ -270,39 +270,39 @@ export class TransactionsComponent {
         const walletName = t.wallet ? t.wallet.name : '';
 
         return `
-          <tr class="hover:bg-slate-800/60 transition group">
-            <td class="py-3 px-4 text-slate-400 font-medium whitespace-nowrap text-[11px]">
+          <tr class="hover:bg-slate-800/60 transition duration-150 group">
+            <td class="py-3 px-3 text-slate-400 font-medium whitespace-nowrap text-[11px] truncate">
               ${formatDateTimeVN(t.transaction_date)}
             </td>
-            <td class="py-3 px-4 text-center whitespace-nowrap">${typeBadge}</td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
+            <td class="py-3 px-3 text-center whitespace-nowrap">${typeBadge}</td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2 min-w-0">
                 <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${catColor}">
                   <i class="fa-solid fa-${catIcon}"></i>
                 </span>
-                <span class="font-bold text-slate-200">${catName}</span>
+                <span class="font-bold text-slate-200 truncate">${catName}</span>
               </div>
             </td>
-            <td class="py-3 px-4 text-slate-300">
-              <div class="flex items-center gap-1.5">
-                <span>${t.note || '-'}</span>
+            <td class="py-3 px-3 text-slate-300 font-sans">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="truncate" title="${t.note || ''}">${t.note || '-'}</span>
                 ${t.receipt_url ? `
-                  <button onclick="window.openReceipt('${t.receipt_url}')" class="text-emerald-400 hover:text-emerald-300 text-xs" title="Xem hóa đơn đính kèm">
+                  <button onclick="window.openReceipt('${t.receipt_url}')" class="text-emerald-400 hover:text-emerald-300 text-xs flex-shrink-0" title="Xem hóa đơn đính kèm">
                     <i class="fa-solid fa-paperclip"></i>
                   </button>
                 ` : ''}
-                ${t.created_by_ai === 'AI_PARSED' ? `<span class="text-[9px] px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30"><i class="fa-solid fa-wand-magic-sparkles text-[8px]"></i> AI</span>` : ''}
+                ${t.created_by_ai === 'AI_PARSED' ? `<span class="text-[9px] px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles text-[8px]"></i> AI</span>` : ''}
               </div>
             </td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] border border-slate-700/60 font-medium">
+            <td class="py-3 px-3">
+              <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] border border-slate-700/60 font-medium truncate inline-block max-w-full font-sans">
                 ${walletName || '-'}
               </span>
             </td>
-            <td class="py-3 px-4 text-right font-black font-mono text-sm ${amountColor} whitespace-nowrap">
+            <td class="py-3 px-3 text-right font-black font-mono text-xs ${amountColor} whitespace-nowrap truncate">
               ${sign} ${formatVND(t.amount)}
             </td>
-            <td class="py-3 px-4 text-center whitespace-nowrap">
+            <td class="py-3 px-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition">
                 <button onclick="window.editTransaction(${t.id})" class="w-7 h-7 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-slate-100 flex items-center justify-center transition" title="Sửa">
                   <i class="fa-regular fa-pen-to-square"></i>
@@ -348,7 +348,7 @@ export class TransactionsComponent {
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        a.remove();
+        if (a && typeof a.remove === 'function') a.remove();
         window.URL.revokeObjectURL(url);
         this.app.showToast(`Tải file ${filename} thành công!`, 'success');
       }
@@ -376,6 +376,12 @@ export class TransactionsComponent {
 
     const modalEl = document.getElementById('generic-modal');
     if (!modalEl) return;
+
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
 
     const virtualWallets = this.allWallets.filter(w => w.wallet_scope !== 'real');
     const targetWallets = virtualWallets.length > 0 ? virtualWallets : this.allWallets;
@@ -740,7 +746,13 @@ export class TransactionsComponent {
     }
 
     // Modal close binds
-    const closeModal = () => { modalEl.innerHTML = ''; };
+    const closeModal = () => {
+      modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
+    };
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
     document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
 

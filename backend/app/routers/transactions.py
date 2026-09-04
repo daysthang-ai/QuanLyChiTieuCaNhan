@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, desc
 
 from backend.app.config import settings
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, Transaction, Wallet, Category, Budget
 from backend.app.schemas import TransactionCreate, TransactionUpdate, TransactionOut
 from backend.app.routers.auth import get_current_user
@@ -92,7 +92,7 @@ def create_transaction(
     else:
         raise HTTPException(status_code=400, detail="Loại giao dịch không hợp lệ (EXPENSE, INCOME, TRANSFER)")
 
-    tx_date = tx_in.transaction_date or datetime.datetime.utcnow()
+    tx_date = tx_in.transaction_date or get_utc_now()
 
     new_tx = Transaction(
         user_id=current_user.id,
@@ -106,10 +106,14 @@ def create_transaction(
         receipt_url=tx_in.receipt_url,
         created_by_ai=tx_in.created_by_ai or "MANUAL"
     )
-    db.add(new_tx)
-    db.commit()
-    db.refresh(new_tx)
-    return new_tx
+    try:
+        db.add(new_tx)
+        db.commit()
+        db.refresh(new_tx)
+        return new_tx
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi lưu giao dịch: {str(e)}")
 
 @router.get("/{tx_id}", response_model=TransactionOut)
 def get_transaction(
@@ -171,9 +175,13 @@ def update_transaction(
             if new_to_wallet:
                 new_to_wallet.balance += tx.amount
 
-    db.commit()
-    db.refresh(tx)
-    return tx
+    try:
+        db.commit()
+        db.refresh(tx)
+        return tx
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi cập nhật giao dịch: {str(e)}")
 
 @router.delete("/{tx_id}")
 def delete_transaction(
@@ -198,9 +206,13 @@ def delete_transaction(
             if to_wallet:
                 to_wallet.balance -= tx.amount
 
-    db.delete(tx)
-    db.commit()
-    return {"message": "Đã xóa giao dịch thành công và cập nhật lại số dư ví."}
+    try:
+        db.delete(tx)
+        db.commit()
+        return {"message": "Đã xóa giao dịch thành công và cập nhật lại số dư ví."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi xóa giao dịch: {str(e)}")
 
 @router.post("/upload-receipt")
 async def upload_receipt(

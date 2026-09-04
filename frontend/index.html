@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>FinTrack AI - Hệ Thống Quản Lý Chi Tiêu Cá Nhân Thông Minh</title>
   
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2228%22>💎</text></svg>">
 
   <!-- Local Minified Tailwind CSS (120 FPS Optimized, Zero CDN Warning) -->
-  <link rel="stylesheet" href="/static/css/tailwind.min.css?v=1.0">
+  <link rel="stylesheet" href="/static/css/tailwind.min.css?v=20260904_01">
   
   <!-- FontAwesome 6 Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,7 +24,87 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/static/css/style.css?v=7.5">
+  <link rel="stylesheet" href="/static/css/style.css?v=20260904_11">
+
+  <!-- Immediate Global Functions in Head -->
+  <script>
+    window.openAuthModal = function(mode) {
+      console.log("[FinTrack] Kích hoạt mở modal:", mode);
+      const modal = document.getElementById('auth-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+
+        if (mode && typeof window.switchAuthMode === 'function') {
+          window.switchAuthMode(mode);
+        } else if (mode === 'register') {
+          const fullnameGroup = document.getElementById('auth-fullname-group');
+          if (fullnameGroup) fullnameGroup.classList.remove('hidden');
+          const submitText = document.getElementById('auth-submit-text');
+          if (submitText) submitText.textContent = 'Đăng Ký Tài Khoản';
+          const subtitle = document.getElementById('auth-modal-subtitle');
+          if (subtitle) subtitle.textContent = 'Tạo tài khoản quản lý chi tiêu thông minh';
+        } else if (mode === 'demo-user') {
+          const emailInput = document.getElementById('auth-email');
+          const passwordInput = document.getElementById('auth-password');
+          if (emailInput) emailInput.value = 'user@fintrack.ai';
+          if (passwordInput) passwordInput.value = 'User@123456';
+        } else if (mode === 'demo-admin') {
+          const emailInput = document.getElementById('auth-email');
+          const passwordInput = document.getElementById('auth-password');
+          if (emailInput) emailInput.value = 'admin@fintrack.ai';
+          if (passwordInput) passwordInput.value = 'Admin@123456';
+        }
+      } else {
+        console.error("Lỗi: Không tìm thấy #auth-modal trong HTML!");
+      }
+    };
+
+    window.closeAuthModal = function() {
+      const modal = document.getElementById('auth-modal');
+      if (modal) {
+        modal.classList.add('hidden', 'pointer-events-none');
+        modal.classList.remove('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'none', 'important');
+        modal.style.setProperty('pointer-events', 'none', 'important');
+      }
+    };
+
+    window.switchLandingTab = function(tabName) {
+      if (window.fintrackApp?.switchLandingTab) {
+        window.fintrackApp.switchLandingTab(tabName);
+        return;
+      }
+      const validTabs = ['home', 'advisor', 'features', 'pricing', 'about'];
+      const activeTab = validTabs.includes(tabName) ? tabName : 'home';
+      validTabs.forEach(tab => {
+        const container = document.getElementById(`tab-landing-${tab}`);
+        if (container) {
+          if (tab === activeTab) {
+            container.classList.remove('hidden');
+            container.style.removeProperty('display');
+          } else {
+            container.classList.add('hidden');
+            container.style.setProperty('display', 'none', 'important');
+          }
+        }
+      });
+      document.querySelectorAll('.landing-tab-btn').forEach(btn => {
+        const targetTab = btn.getAttribute('data-landing-tab');
+        if (targetTab === activeTab) {
+          btn.className = 'landing-tab-btn flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)] transition-all cursor-pointer';
+        } else {
+          btn.className = 'landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer';
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
 </head>
 <body class="bg-[#07090e] text-[#FFFFFF] min-h-screen relative overflow-x-hidden antialiased selection:bg-[#00FFAA] selection:text-[#07090e] flex flex-col">
 
@@ -30,19 +113,669 @@
   <div class="ambient-glow glow-orb-right"></div>
   <div class="ambient-glow glow-orb-bottom"></div>
 
-  <!-- Top Navigation Bar (Independent Floating Glass Header) -->
-  <header id="top-glass-header" class="glass-nav px-6 lg:px-10 py-3.5 flex items-center justify-between">
+  <!-- ==========================================================================
+       0. LANDING PAGE CONTAINER (#landing-page-container)
+       Hệ thống Landing Page theo mô hình Tab Navigation độc lập
+       ========================================================================== -->
+  <div id="landing-page-container" class="w-full min-h-screen relative z-20 flex flex-col justify-between pointer-events-auto">
+    
+    <!-- A. LANDING HEADER (Fixed glass navbar with Tab Navigation) -->
+    <header class="sticky top-0 left-0 right-0 w-full h-[68px] z-50 flex items-center justify-between px-4 sm:px-6 lg:px-12 bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 pointer-events-auto relative">
+      <!-- Logo & Brand -->
+      <a href="javascript:void(0)" onclick="window.switchLandingTab('home')" class="flex items-center gap-3 group">
+        <div class="logo-neon-glow-wrapper !w-9 !h-9 !rounded-xl flex-shrink-0">
+          <div class="logo-neon-inner !rounded-[10px]">
+            <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-sm"></i>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5 leading-none">
+            <span class="text-xl font-black tracking-tight text-white font-sans">FinTrack</span>
+            <span class="text-xs font-black px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 tracking-wider">AI</span>
+          </div>
+          <span class="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-1">Smart Finance & Advisor</span>
+        </div>
+      </a>
+
+      <!-- Middle Tab Navigation Menu (Pill Container) -->
+      <nav class="hidden md:flex items-center gap-1.5 p-1.5 rounded-full bg-slate-900/80 border border-slate-800/80 backdrop-blur-md">
+        <button type="button" class="landing-tab-btn flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)] transition-all cursor-pointer" data-landing-tab="home" onclick="window.switchLandingTab('home')">
+          <i class="fa-solid fa-house"></i>
+          <span>Trang Chủ</span>
+        </button>
+        <button type="button" class="landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer" data-landing-tab="advisor" onclick="window.switchLandingTab('advisor')">
+          <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+          <span>Cố Vấn AI</span>
+        </button>
+        <button type="button" class="landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer" data-landing-tab="features" onclick="window.switchLandingTab('features')">
+          <i class="fa-solid fa-shapes text-cyan-400"></i>
+          <span>Tính Năng</span>
+        </button>
+        <button type="button" class="landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer" data-landing-tab="pricing" onclick="window.switchLandingTab('pricing')">
+          <i class="fa-solid fa-crown text-amber-400"></i>
+          <span>Bảng Giá VIP</span>
+        </button>
+        <button type="button" class="landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer" data-landing-tab="about" onclick="window.switchLandingTab('about')">
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+          <span>Về Chúng Tôi</span>
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Quick Demo User -->
+        <button type="button" onclick="window.openAuthModal('login')" 
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-emerald-950/60 hover:text-emerald-300 hover:border-emerald-500/50 text-slate-200 font-bold text-xs border border-slate-700 active:scale-95 transition shadow-sm cursor-pointer" title="Trải nghiệm nhanh với tài khoản Demo">
+          <i class="fa-solid fa-user text-emerald-400 text-xs"></i>
+          <span>Demo User</span>
+        </button>
+
+        <!-- Quick Demo Admin -->
+        <button type="button" onclick="window.openAuthModal('login')" 
+          class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-rose-950/60 hover:text-rose-300 hover:border-rose-500/50 text-slate-200 font-bold text-xs border border-slate-700 active:scale-95 transition shadow-sm cursor-pointer" title="Trải nghiệm Admin Portal">
+          <i class="fa-solid fa-shield-halved text-rose-400 text-xs"></i>
+          <span>Demo Admin</span>
+        </button>
+
+        <!-- Login / Register Button -->
+        <button type="button" onclick="window.openAuthModal('login')" 
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Đăng Nhập / Đăng Ký</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN TAB CONTENTS CONTAINER -->
+    <main class="flex-1 flex flex-col justify-center">
+
+      <!-- ======================================================================
+           TAB 1: [TRANG CHỦ] (#tab-landing-home)
+           ====================================================================== -->
+      <div id="tab-landing-home" class="landing-tab-content w-full flex-1 flex flex-col justify-center">
+        <!-- Hero Section -->
+        <section class="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-7xl mx-auto w-full flex flex-col justify-center">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-black tracking-wider uppercase mb-6 shadow-sm shadow-cyan-500/20 mx-auto animate-pulse">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+            <span>FINTRACK AI 2.0 • QUẢN LÝ TÀI CHÍNH THẾ HỆ MỚI</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-5xl mx-auto">
+            Làm Chủ Tài Chính Cá Nhân Với Sức Mạnh Của <br class="hidden sm:inline" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-300 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]">FinTrack AI</span>
+          </h1>
+
+          <p class="mt-5 text-sm sm:text-base lg:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+            Hệ thống phân tích thu chi đa ví chuẩn xác, bóc tách hóa đơn NLP ngôn ngữ tự nhiên, thiết lập ngân sách 50/30/20 khoa học và tự động kích hoạt nạp gói VIP qua VietQR / SePay 24/7.
+          </p>
+
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+            <button type="button" onclick="window.openAuthModal('register')" 
+              class="px-6 py-3.5 rounded-2xl gradient-emerald text-white text-sm font-black shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 active:scale-95 transition flex items-center gap-2.5 cursor-pointer">
+              <i class="fa-solid fa-rocket text-amber-300"></i>
+              <span>Bắt Đầu Trải Nghiệm Miễn Phí</span>
+            </button>
+
+            <button type="button" onclick="window.openAuthModal('login')" 
+              class="px-5 py-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 text-sm font-bold border border-slate-700 active:scale-95 transition flex items-center gap-2 shadow-lg group cursor-pointer">
+              <i class="fa-solid fa-user text-emerald-400 group-hover:scale-110 transition"></i>
+              <span>Demo User (1 Click)</span>
+            </button>
+
+            <button type="button" onclick="window.openAuthModal('login')" 
+              class="px-5 py-3.5 rounded-2xl bg-slate-900/90 hover:bg-rose-950/40 text-slate-200 text-sm font-bold border border-rose-500/30 active:scale-95 transition flex items-center gap-2 shadow-lg group cursor-pointer">
+              <i class="fa-solid fa-shield-halved text-rose-400 group-hover:scale-110 transition"></i>
+              <span>Demo Admin (1 Click)</span>
+            </button>
+
+            <button type="button" onclick="window.openAuthModal('login')" 
+              class="px-5 py-3.5 rounded-2xl bg-slate-800/60 hover:bg-slate-800 text-cyan-300 text-sm font-bold border border-cyan-500/30 active:scale-95 transition flex items-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-shapes text-cyan-400"></i>
+              <span>Khám Phá Tính Năng</span>
+            </button>
+          </div>
+
+          <!-- Live Preview Dashboard Simulation -->
+          <div class="mt-12 max-w-5xl mx-auto w-full p-4 sm:p-6 rounded-[28px] border-2 border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.25)] bg-slate-950/80 backdrop-blur-2xl text-left">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-800/80">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="ml-2 text-xs font-mono text-slate-400 font-bold">FinTrack Live Dashboard Simulation</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE SIMULATION
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-cyan-500/30">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-400 font-bold uppercase">Tổng Số Dư</span>
+                  <i class="fa-solid fa-wallet text-cyan-400"></i>
+                </div>
+                <div class="text-xl font-black text-cyan-300 font-mono">+45.250.000 ₫</div>
+                <span class="text-[10px] text-cyan-400 font-bold">▲ +12.4% so với tháng trước</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-400 font-bold uppercase">Thu Nhập Tháng</span>
+                  <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i>
+                </div>
+                <div class="text-xl font-black text-emerald-300 font-mono">+18.500.000 ₫</div>
+                <span class="text-[10px] text-emerald-400 font-bold">▲ Đạt 102% chỉ tiêu</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-rose-500/30">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-400 font-bold uppercase">Chi Tiêu Tháng</span>
+                  <i class="fa-solid fa-arrow-trend-down text-rose-400"></i>
+                </div>
+                <div class="text-xl font-black text-rose-300 font-mono">-8.200.000 ₫</div>
+                <span class="text-[10px] text-slate-400 font-bold">Kiểm soát an toàn 44.3%</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-400 font-bold uppercase">Quỹ Tiết Kiệm</span>
+                  <i class="fa-solid fa-piggy-bank text-amber-400"></i>
+                </div>
+                <div class="text-xl font-black text-amber-300 font-mono">120.000.000 ₫</div>
+                <span class="text-[10px] text-amber-300 font-bold">🎯 Đạt 78% Mục tiêu Mua Nhà</span>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/80 via-slate-900 to-indigo-950/80 border border-indigo-500/40 flex items-start gap-3.5">
+              <div class="w-8 h-8 rounded-xl gradient-indigo flex items-center justify-center flex-shrink-0 text-white shadow-md shadow-indigo-500/30">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-xs"></i>
+              </div>
+              <div class="text-xs text-slate-200 leading-relaxed">
+                <span class="font-black text-indigo-300 uppercase tracking-wider block mb-0.5">FinTrack AI Advisor:</span>
+                "Bạn đang kiểm soát chi tiêu rất tốt trong tháng này! Phân bổ ngân sách đạt chuẩn 50/30/20 (Thiết yếu 48% • Linh hoạt 28% • Tiết kiệm 24%). Đề xuất chuyển thêm 2.000.000 ₫ vào Mục Tiêu Mua Nhà để hoàn thành sớm hơn 1 tháng!"
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Core Values Summary -->
+          <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto w-full">
+            <div class="p-6 rounded-3xl bg-slate-900/70 border border-cyan-500/30 hover:border-cyan-400 transition-all">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <h3 class="text-base font-black text-slate-100 mb-1.5">Tiết Kiệm Thời Gian</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Ghi chép giao dịch trong 3 giây qua câu nói tự nhiên, AI tự trích xuất số tiền, thời gian và danh mục mà không cần nhập thủ công.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-3xl bg-slate-900/70 border border-emerald-500/30 hover:border-emerald-400 transition-all">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <h3 class="text-base font-black text-slate-100 mb-1.5">Minh Bạch Dòng Tiền</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Báo cáo cơ cấu thu chi trực quan, cảnh báo hạn mức thông minh và phân bổ dòng tiền chuẩn xác theo nguyên tắc 50/30/20.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-3xl bg-slate-900/70 border border-indigo-500/30 hover:border-indigo-400 transition-all">
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <h3 class="text-base font-black text-slate-100 mb-1.5">An Toàn Zero-PII</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Bảo mật cấp ngân hàng, khử khuẩn 100% dữ liệu nhạy cảm trước khi xử lý qua AI, không lưu số thẻ hay mật khẩu tài khoản.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ======================================================================
+           TAB 2: [CỐ VẤN AI] (#tab-landing-advisor)
+           ====================================================================== -->
+      <div id="tab-landing-advisor" class="landing-tab-content w-full flex-1 flex flex-col justify-center hidden">
+        <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div class="text-center mb-12">
+            <span class="text-xs font-black uppercase tracking-widest text-indigo-400 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 inline-block mb-3">
+              <i class="fa-solid fa-brain mr-1.5 text-amber-300"></i>TRÍ TUỆ NHÂN TẠO & CỐ VẤN TÀI CHÍNH 24/7
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white">Chuyên Gia Tài Chính Riêng Đồng Hành Cùng Bạn</h2>
+            <p class="mt-3 text-sm text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              FinTrack AI không chỉ dừng lại ở việc lưu trữ dữ liệu, mà còn thấu hiểu hành vi tiêu dùng, đưa ra lời khuyên cá nhân hóa giúp bạn tối ưu hóa dòng tiền và sớm đạt tự do tài chính.
+            </p>
+          </div>
+
+          <!-- 3 Pillars Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-indigo-500/30 hover:border-indigo-400 transition-all flex flex-col justify-between">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl mb-4">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Bóc Tách NLP Tự Nhiên</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Nhận diện câu nói tự nhiên: <em>"Ăn tối 250k ví Momo"</em>, <em>"Nhận thưởng 2tr Techcombank"</em>. Tự động trích xuất số tiền, thời gian, danh mục và ví thanh toán chuẩn xác.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-indigo-300 flex items-center gap-1">
+                <span>Nhận diện ngữ nghĩa tiếng Việt</span>
+                <i class="fa-solid fa-check text-emerald-400"></i>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-emerald-500/30 hover:border-emerald-400 transition-all flex flex-col justify-between">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-4">
+                  <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Phân Tích Chuẩn 50/30/20</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Tự động phân bổ dòng tiền: <strong>50% Nhu cầu thiết yếu</strong> • <strong>30% Mong muốn linh hoạt</strong> • <strong>20% Tiết kiệm & Tích lũy</strong>. Cảnh báo lệch tỷ lệ và đưa ra giải pháp tái cân bằng.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+                <span>Định chuẩn tài chính quốc tế</span>
+                <i class="fa-solid fa-check text-emerald-400"></i>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-amber-500/30 hover:border-amber-400 transition-all flex flex-col justify-between">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-4">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Cảnh Báo Bội Chi Sớm</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Hệ thống AI dự báo nguy cơ vượt hạn mức trước khi kỳ hạn kết thúc. Đề xuất kế hoạch phân bổ tiền nhàn rỗi để hoàn thành mục tiêu tiết kiệm sớm nhất.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                <span>Dự báo & Phòng ngừa rủi ro</span>
+                <i class="fa-solid fa-check text-emerald-400"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Mock Chat Box Demo -->
+          <div class="max-w-4xl mx-auto p-6 sm:p-8 rounded-[28px] border-2 border-indigo-500/40 bg-slate-950/80 shadow-2xl backdrop-blur-2xl">
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl gradient-indigo flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
+                  <i class="fa-solid fa-robot text-amber-300 text-sm"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-black text-slate-100">FinTrack AI Advisor Simulation</h4>
+                  <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Trực tuyến 24/7
+                  </span>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase">NLP Engine</span>
+            </div>
+
+            <!-- Chat Messages Flow -->
+            <div class="space-y-4 text-xs">
+              <!-- User Message -->
+              <div class="flex items-start justify-end gap-2.5">
+                <div class="max-w-lg p-3.5 rounded-2xl rounded-tr-none bg-emerald-950/50 border border-emerald-500/40 text-slate-100">
+                  "Hôm nay mình ăn tối với đồng nghiệp hết 280k thanh toán qua ví Momo, vừa nhận thưởng 2 triệu vào Techcombank."
+                </div>
+                <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300">👤</div>
+              </div>
+
+              <!-- AI Response -->
+              <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-full gradient-indigo flex items-center justify-center text-[10px] text-white flex-shrink-0">💎</div>
+                <div class="max-w-lg p-3.5 rounded-2xl rounded-tl-none bg-slate-900/90 border border-indigo-500/30 text-slate-200 space-y-2 leading-relaxed">
+                  <p class="font-bold text-emerald-400">✅ Đã tự động hạch toán 2 giao dịch thành công:</p>
+                  <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                    <li><strong>Chi tiêu: -280.000 ₫</strong> (Ăn uống / Giao lưu • Ví Momo)</li>
+                    <li><strong>Thu nhập: +2.000.000 ₫</strong> (Thưởng / Thu nhập phụ • Techcombank)</li>
+                  </ul>
+                  <p class="text-indigo-300 pt-1 border-t border-slate-800">
+                    💡 <strong>Gợi ý AI:</strong> Bạn nên trích ngay 400.000 ₫ (20%) vào Mục Tiêu 'Quỹ Khẩn Cấp' để duy trì tỷ lệ tích lũy vàng nhé!
+                  </p>
+                </div>
+              </div>
+
+              <!-- User Message 2 -->
+              <div class="flex items-start justify-end gap-2.5">
+                <div class="max-w-lg p-3.5 rounded-2xl rounded-tr-none bg-emerald-950/50 border border-emerald-500/40 text-slate-100">
+                  "Sức khỏe tài chính tháng này của tôi đang ở mức nào?"
+                </div>
+                <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300">👤</div>
+              </div>
+
+              <!-- AI Response 2 -->
+              <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-full gradient-indigo flex items-center justify-center text-[10px] text-white flex-shrink-0">💎</div>
+                <div class="max-w-lg p-3.5 rounded-2xl rounded-tl-none bg-slate-900/90 border border-indigo-500/30 text-slate-200 space-y-1.5 leading-relaxed">
+                  <p class="font-bold text-cyan-300">📊 Điểm Sức Khỏe Tài Chính: 88/100 (Rất tốt)</p>
+                  <p class="text-slate-300">
+                    Tỷ lệ chi tiêu thiết yếu của bạn đang ở mức 46% (rất an toàn). Bạn đã tiết kiệm được 22% tổng thu nhập tháng này, vượt 2% so với mục tiêu chuẩn 50/30/20!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 text-center">
+              <button type="button" onclick="openAuthModal('login')" 
+                class="px-6 py-3 rounded-xl gradient-indigo text-white font-bold text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 active:scale-95 transition inline-flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-comments"></i>
+                <span>Trò Chuyện Trực Tiếp Với AI FinTrack Ngay</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ======================================================================
+           TAB 3: [TÍNH NĂNG] (#tab-landing-features)
+           ====================================================================== -->
+      <div id="tab-landing-features" class="landing-tab-content w-full flex-1 flex flex-col justify-center hidden">
+        <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div class="text-center mb-12">
+            <span class="text-xs font-black uppercase tracking-widest text-cyan-400 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 inline-block mb-3">
+              <i class="fa-solid fa-shapes mr-1.5 text-cyan-300"></i>HỆ THỐNG TÍNH NĂNG TOÀN DIỆN
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white">Mọi Công Cụ Quản Lý Tài Chính Trong Một Nền Tảng</h2>
+            <p class="mt-3 text-sm text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Bộ công cụ tài chính toàn diện kết hợp trí tuệ nhân tạo, tối ưu cho cả cá nhân, gia đình và nhà sáng tạo tự do.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Feature 1 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-cyan-500/30 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition-all flex flex-col justify-between group cursor-pointer" onclick="openAuthModal('login')">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Ghi Thu - Chi & Đa Ví</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Quản lý đồng thời tài khoản ngân hàng (MB, VCB, Techcombank), ví điện tử (Momo, ZaloPay) và tiền mặt với số dư đồng bộ thời gian thực.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-cyan-400 flex items-center gap-1 group-hover:text-cyan-300">
+                <span>Chi tiết thu chi đa nguồn</span>
+                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-indigo-500/30 hover:border-indigo-400 hover:shadow-[0_0_30px_rgba(99,102,241,0.25)] transition-all flex flex-col justify-between group cursor-pointer" onclick="openAuthModal('login')">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Trợ Lý AI & Bóc Tách NLP</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Nhập nhanh giao dịch bằng câu nói tự nhiên: <em>"Ăn tối 250k ví Momo"</em>. AI tự trích xuất số tiền, ngày giờ, danh mục và cập nhật tức thì.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-indigo-300 flex items-center gap-1 group-hover:text-indigo-200">
+                <span>Bóc tách thông minh 24/7</span>
+                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-emerald-500/30 hover:border-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.25)] transition-all flex flex-col justify-between group cursor-pointer" onclick="openAuthModal('login')">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">Hạn Mức & Tiết Kiệm</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Thiết lập ngân sách theo danh mục, phân bổ chuẩn mô hình 50/30/20, theo dõi mục tiêu tài chính với hiệu ứng chúc mừng Confetti sống động.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-emerald-400 flex items-center gap-1 group-hover:text-emerald-300">
+                <span>Mô hình 50/30/20 & Kế hoạch</span>
+                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-amber-500/30 hover:border-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.25)] transition-all flex flex-col justify-between group cursor-pointer" onclick="openAuthModal('login')">
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-100 mb-2">VietQR & SePay Tức Thì</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  Cổng thanh toán tự động tạo mã VietQR động chuẩn NAPAS247, webhook SePay kích hoạt gói VIP và cộng số dư ví trong 3 giây.
+                </p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] font-bold text-amber-300 flex items-center gap-1 group-hover:text-amber-200">
+                <span>Tự động hóa 100% không chờ đợi</span>
+                <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="button" onclick="openAuthModal('login')" class="px-7 py-3.5 rounded-2xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 active:scale-95 transition inline-flex items-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-rocket text-amber-300"></i>
+              <span>Trải Nghiệm Toàn Bộ Tính Năng Ngay</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ======================================================================
+           TAB 4: [BẢNG GIÁ VIP] (#tab-landing-pricing)
+           ====================================================================== -->
+      <div id="tab-landing-pricing" class="landing-tab-content w-full flex-1 flex flex-col justify-center hidden">
+        <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div class="text-center mb-12">
+            <span class="text-xs font-black uppercase tracking-widest text-amber-400 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 inline-block mb-3">
+              <i class="fa-solid fa-crown mr-1.5 text-amber-300"></i>BẢNG GIÁ & GÓI CƯỚC DỊCH VỤ
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white">Lựa Chọn Gói Cước Phù Hợp Cho Mọi Nhu Cầu</h2>
+            <p class="mt-3 text-sm text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Trải nghiệm miễn phí trọn đời hoặc nâng cấp gói VIP để mở khóa toàn bộ sức mạnh AI và quản lý tài chính không giới hạn.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+            <!-- Plan 1: Free -->
+            <div class="p-8 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-slate-400 block mb-1">GÓI CƠ BẢN</span>
+                <h3 class="text-2xl font-black text-white mb-2">FREE</h3>
+                <div class="text-3xl font-black text-slate-100 font-mono mb-6">0 ₫ <span class="text-xs font-normal text-slate-400">/ mãi mãi</span></div>
+                
+                <ul class="space-y-3 text-xs text-slate-300 mb-8">
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Ghi chép thu chi không giới hạn</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Quản lý tối đa 2 ví tài chính</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Biểu đồ thống kê cơ bản</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Cố vấn AI 10 lượt / ngày</li>
+                </ul>
+              </div>
+              <button type="button" onclick="window.openAuthModal('register')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 active:scale-95 transition cursor-pointer">
+                Bắt Đầu Miễn Phí
+              </button>
+            </div>
+
+            <!-- Plan 2: FINTRACK VIP (Featured) -->
+            <div class="p-8 rounded-3xl bg-gradient-to-b from-[#2e1065]/90 to-slate-900/90 border-2 border-purple-500 shadow-[0_0_35px_rgba(168,85,247,0.3)] relative flex flex-col justify-between transform md:-translate-y-2">
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-black tracking-wider uppercase shadow-md shadow-purple-500/40">
+                ⭐ PHỔ BIẾN NHẤT
+              </div>
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-purple-300 block mb-1">NÂNG CẤP THÔNG MINH</span>
+                <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                  <span>FINTRACK VIP</span>
+                  <i class="fa-solid fa-crown text-amber-400 text-base"></i>
+                </h3>
+                <div class="text-3xl font-black text-purple-300 font-mono mb-1">79.000 ₫ <span class="text-xs font-normal text-slate-400">/ tháng</span></div>
+                <span class="text-[10px] text-slate-400 line-through block mb-6">Giá gốc: 99.000 ₫ / tháng</span>
+                
+                <ul class="space-y-3 text-xs text-slate-200 mb-8">
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-purple-400"></i> <strong>Không giới hạn</strong> ví tài chính & thẻ</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-purple-400"></i> <strong>Trợ lý AI FinTrack</strong> 24/7 không giới hạn</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-purple-400"></i> Phân bổ ngân sách chuẩn 50/30/20</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-purple-400"></i> Xuất báo cáo Excel & PDF chuyên nghiệp</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-purple-400"></i> Nạp tự động VietQR / SePay tức thì</li>
+                </ul>
+              </div>
+              <button type="button" onclick="window.openAuthModal('login')" class="w-full py-3.5 rounded-xl gradient-indigo text-white font-black text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 active:scale-95 transition cursor-pointer">
+                Trải Nghiệm FINTRACK VIP
+              </button>
+            </div>
+
+            <!-- Plan 3: PLATINUM VIP -->
+            <div class="p-8 rounded-3xl bg-slate-900/80 border border-emerald-500/40 hover:border-emerald-400 transition flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-400 block mb-1">CHUYÊN GIA & DOANH NHÂN</span>
+                <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                  <span>PLATINUM VIP</span>
+                  <i class="fa-solid fa-gem text-emerald-400 text-base"></i>
+                </h3>
+                <div class="text-3xl font-black text-emerald-300 font-mono mb-6">199.000 ₫ <span class="text-xs font-normal text-slate-400">/ tháng</span></div>
+                
+                <ul class="space-y-3 text-xs text-slate-300 mb-8">
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> <strong>Toàn bộ quyền lợi</strong> của FINTRACK VIP</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Băng thông AI ưu tiên cao cấp tốc</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Hỗ trợ khiếu nại & CSKH VIP 1-1 riêng biệt</li>
+                  <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-emerald-400"></i> Huy hiệu Platinum độc quyền trên toàn hệ thống</li>
+                </ul>
+              </div>
+              <button type="button" onclick="window.openAuthModal('login')" class="w-full py-3 rounded-xl gradient-emerald text-white font-bold text-xs shadow-md shadow-emerald-500/25 active:scale-95 transition cursor-pointer">
+                Đăng Ký PLATINUM VIP
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ======================================================================
+           TAB 5: [VỀ CHÚNG TÔI] (#tab-landing-about)
+           ====================================================================== -->
+      <div id="tab-landing-about" class="landing-tab-content w-full flex-1 flex flex-col justify-center hidden">
+        <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div class="text-center mb-12">
+            <span class="text-xs font-black uppercase tracking-widest text-teal-400 px-3.5 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 inline-block mb-3">
+              <i class="fa-solid fa-shield-halved mr-1.5 text-teal-300"></i>VỀ CHÚNG TÔI & TÔN CHỈ BẢO MẬT
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white">Cam Kết An Toàn & Trải Nghiệm Hoàn Hảo</h2>
+            <p class="mt-3 text-sm text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              FinTrack AI được phát triển với sứ mệnh mang lại giải pháp quản lý tài chính cá nhân thông minh, bảo mật cấp ngân hàng và hoàn toàn minh bạch cho người dùng Việt Nam.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+            <!-- Commitment 1 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-cyan-500/30">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg">
+                  <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-100">Bảo Mật Zero-PII Cấp Ngân Hàng</h3>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Chúng tôi không lưu trữ mật khẩu ngân hàng, OTP hay số thẻ thanh toán. Công nghệ Zero-PII Sanitizer khử khuẩn toàn bộ dữ liệu nhạy cảm trước khi xử lý bằng AI.
+              </p>
+            </div>
+
+            <!-- Commitment 2 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-emerald-500/30">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                  <i class="fa-solid fa-server"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-100">Hạ Tầng Đám Mây 99.9% Uptime</h3>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Hệ thống vận hành liên tục với tiêu chuẩn sẵn sàng cao, sao lưu dữ liệu phân tán định kỳ, đảm bảo trải nghiệm thông suốt mọi lúc mọi nơi.
+              </p>
+            </div>
+
+            <!-- Commitment 3 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-amber-500/30">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-100">Tự Động Hóa Realtime Webhook</h3>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Cổng thanh toán tự động VietQR kết hợp Webhook SePay hạch toán chuẩn xác từng giao dịch nạp tiền và kích hoạt gói VIP chỉ trong 3 giây.
+              </p>
+            </div>
+
+            <!-- Commitment 4 -->
+            <div class="p-6 rounded-3xl bg-slate-900/80 border border-indigo-500/30">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+                  <i class="fa-solid fa-headset"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-100">Hỗ Trợ Kỹ Thuật Chuyên Nghiệp 24/7</h3>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Đội ngũ hỗ trợ chuyên môn sẵn sàng đồng hành, tiếp nhận phản hồi và xử lý yêu cầu khiếu nại nhanh chóng qua hệ thống Support Ticket.
+              </p>
+            </div>
+          </div>
+
+          <div class="max-w-3xl mx-auto p-6 rounded-2xl bg-slate-950/80 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
+            <div class="font-bold text-slate-200">FinTrack AI System • Smart Finance Platform</div>
+            <div>Email hỗ trợ: <span class="text-cyan-400 font-mono">support@fintrack.ai</span> • Hotline: <span class="text-emerald-400 font-mono">1900 8888</span></div>
+            <div class="text-[11px] text-slate-500">Phiên bản: FinTrack AI 2.0.4 (Build 2026) • Thiết kế chuẩn Dark Cyber Neon</div>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- F. SHARED FOOTER FOR LANDING PAGE -->
+    <footer class="border-t border-slate-800/80 bg-[#07090e] pt-8 pb-8 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div class="flex items-center gap-2">
+          <div class="logo-neon-glow-wrapper !w-6 !h-6 !rounded-lg flex-shrink-0">
+            <div class="logo-neon-inner !rounded-[6px]">
+              <i class="fa-solid fa-gem text-amber-400 text-[10px]"></i>
+            </div>
+          </div>
+          <span class="font-bold text-slate-400">FinTrack AI</span>
+          <span>— Hệ Thống Quản Lý Chi Tiêu Cá Nhân Thông Minh</span>
+        </div>
+        <div class="flex items-center gap-6 font-medium">
+          <a href="javascript:void(0)" onclick="window.switchLandingTab('about')" class="hover:text-slate-300 transition">Điều khoản sử dụng</a>
+          <a href="javascript:void(0)" onclick="window.switchLandingTab('about')" class="hover:text-slate-300 transition">Chính sách bảo mật</a>
+          <a href="javascript:void(0)" onclick="window.switchLandingTab('about')" class="hover:text-slate-300 transition">Hỗ trợ khách hàng</a>
+        </div>
+        <div class="text-[11px]">
+          © 2026 FinTrack AI. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       1. APP WORKSPACE CONTAINER (#app-workspace-container)
+       Chứa Header làm việc, Sidebar điều hướng, và các màn hình Dashboard, Thu chi...
+       ========================================================================== -->
+  <div id="app-workspace-container" class="w-full min-h-screen relative z-10 flex flex-col hidden" style="display: none !important;">
+
+    <!-- Top Navigation Bar (Independent Fixed Glass Header) -->
+    <header id="top-glass-header" class="fixed top-0 left-0 right-0 w-full h-[68px] z-[100] flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80">
     
     <!-- Logo & Brand -->
     <div class="flex items-center gap-3">
-      <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition" aria-label="Mở menu">
+      <button id="mobile-menu-btn" class="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition flex items-center justify-center cursor-pointer flex-shrink-0" aria-label="Thu gọn / Mở rộng menu" title="Thu gọn / Mở rộng Sidebar">
         <i class="fa-solid fa-bars text-lg"></i>
       </button>
       <a href="#" class="flex items-center gap-3 group">
         <!-- Animated Rotating Neon Glow Icon Wrapper -->
-        <div class="logo-neon-glow-wrapper">
-          <div class="logo-neon-inner">
-            <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-lg"></i>
+        <div class="logo-neon-glow-wrapper !w-9 !h-9 !rounded-xl flex-shrink-0">
+          <div class="logo-neon-inner !rounded-[10px]">
+            <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-sm"></i>
           </div>
         </div>
         <div class="flex flex-col">
@@ -59,26 +792,26 @@
     <div class="flex items-center gap-3">
       
       <!-- Admin Portal Switch Button (Visible when in User Mode for Admin) -->
-      <button id="header-admin-portal-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl gradient-rose text-white text-xs font-black shadow-md shadow-rose-500/25 hover:shadow-rose-500/40 active:scale-95 transition">
+      <button id="header-admin-portal-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl gradient-rose text-white text-xs font-black shadow-md shadow-rose-500/25 hover:shadow-rose-500/40 active:scale-95 transition cursor-pointer relative z-20 pointer-events-auto">
         <i class="fa-solid fa-shield-halved text-amber-300"></i>
         <span>🛡️ Admin Portal</span>
       </button>
 
       <!-- Exit Admin Portal Button (Visible when in Admin Mode) -->
-      <button id="header-exit-admin-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition shadow-md">
+      <button id="header-exit-admin-btn" class="hidden items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition shadow-md cursor-pointer relative z-20 pointer-events-auto">
         <i class="fa-solid fa-user text-emerald-400"></i>
         <span>👤 Chế Độ Cá Nhân</span>
       </button>
 
       <!-- AI Quick Parse Button (Only in User Mode) -->
-      <button id="header-quick-ai-btn" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 active:scale-95 transition ai-pulse-btn">
+      <button id="header-quick-ai-btn" data-btn-alias="btn-ai-quick" type="button" onclick="window.openQuickAiModal()" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl gradient-indigo text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 active:scale-95 transition ai-pulse-btn cursor-pointer relative z-20 pointer-events-auto" title="Nhập giao dịch bằng ngôn ngữ tự nhiên AI">
         <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
         <span>⚡ Nhập Nhanh AI</span>
       </button>
 
       <!-- Notification Bell with Interactive Dropdown (User Mode) -->
       <div class="relative" id="header-notif-wrapper">
-        <button id="header-notification-btn" class="relative w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition border border-slate-700/50 active:scale-95 shadow-sm" title="Hộp thư & Thông báo">
+        <button id="header-notification-btn" class="relative w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition border border-slate-700/50 active:scale-95 shadow-sm cursor-pointer z-20 pointer-events-auto" title="Hộp thư & Thông báo">
           <i class="fa-solid fa-bell text-xs"></i>
           <span id="header-notification-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-[10px] font-black text-white items-center justify-center shadow-lg shadow-rose-500/50 animate-pulse">0</span>
         </button>
@@ -91,7 +824,7 @@
               <span class="text-xs font-black text-slate-100">Thông Báo Từ Admin</span>
               <span id="dropdown-unread-badge" class="px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30">0 mới</span>
             </div>
-            <button id="btn-dropdown-mark-read" class="text-[11px] text-slate-400 hover:text-emerald-400 font-bold transition flex items-center gap-1">
+            <button id="btn-dropdown-mark-read" class="text-[11px] text-slate-400 hover:text-emerald-400 font-bold transition flex items-center gap-1 cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-check-double text-[10px]"></i> Đã đọc hết
             </button>
           </div>
@@ -101,7 +834,7 @@
           </div>
 
           <div class="p-2.5 border-t border-slate-800 bg-slate-900/80 text-center">
-            <button id="btn-dropdown-view-all" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <button id="btn-dropdown-view-all" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto">
               <span>Mở Toàn Bộ Hộp Thư Thông Báo</span>
               <i class="fa-solid fa-arrow-right text-[10px] text-pink-400"></i>
             </button>
@@ -114,7 +847,7 @@
         <div class="text-right hidden md:block">
           <div class="flex items-center justify-end gap-1.5">
             <span id="user-display-name" class="text-xs font-extrabold text-slate-100 block">Nguyễn Văn An</span>
-            <span id="user-display-plan" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 cursor-pointer hover:border-amber-500/50 hover:text-amber-300 transition" title="Gói tài khoản - Nhấn để xem & nâng cấp">FREE</span>
+            <span id="user-display-plan" onclick="window.openSubscriptionModal()" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 cursor-pointer relative z-20 pointer-events-auto hover:border-amber-500/50 hover:text-amber-300 transition" title="Gói tài khoản - Nhấn để xem & nâng cấp">FREE</span>
           </div>
           <span id="user-display-email" class="text-[10px] text-slate-400 block font-medium">user@fintrack.ai</span>
         </div>
@@ -122,7 +855,7 @@
         <img id="user-display-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar" 
           class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 shadow-sm cursor-pointer" />
 
-        <button id="btn-logout" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-red-950/60 hover:text-red-400 text-slate-400 flex items-center justify-center transition border border-slate-700/50" title="Đăng xuất">
+        <button id="btn-logout" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-red-950/60 hover:text-red-400 text-slate-400 flex items-center justify-center transition border border-slate-700/50 cursor-pointer relative z-20 pointer-events-auto" title="Đăng xuất">
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
         </button>
       </div>
@@ -130,230 +863,219 @@
     </div>
   </header>
 
-  <!-- Mobile Sidebar Backdrop Overlay -->
-  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+  <!-- 1. Mobile Sidebar Backdrop Overlay (Disabled to prevent screen freezing) -->
+  <!-- <div id="sidebarOverlay" class="hidden" style="display: none !important;"></div> -->
 
-  <!-- Main App Layout (Sidebar + Content View inside Independent Glass Container) -->
-  <div id="main-glass-wrapper" class="flex-1 flex max-w-full w-full p-4 lg:p-6 gap-6 relative" style="border: 2px solid #06b6d4; box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15); background: rgba(11, 19, 41, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 28px;">
+  <!-- 2. App Main Layout Container (Parent Flex Container for Sticky Sidebar & Main Content) -->
+  <div id="app-layout-container" class="app-main-layout w-full max-w-[1920px] mx-auto pt-[76px] px-4 sm:px-6 lg:px-8 pb-4 flex gap-6 items-start transition-all duration-300 relative flex-1 min-w-0 hidden">
+
+    <!-- Sidebar Navigation (Sticky Collapsible Sidebar) -->
+    <aside id="sidebar" class="sticky top-[76px] h-[calc(100vh-88px)] flex-shrink-0 flex flex-col justify-between glass-card rounded-2xl p-3 pb-6 shadow-lg shadow-cyan-950/20 z-30 pointer-events-auto bg-[#0b0f19] lg:bg-slate-900/60 border border-cyan-500/30 overflow-y-auto overflow-x-hidden self-start">
       
-      <!-- Sidebar Navigation -->
-      <aside id="sidebar" class="w-64 xl:w-72 flex-shrink-0 min-w-[260px] flex flex-col justify-between glass-card rounded-3xl p-3.5 h-[calc(100vh-160px)] sticky top-24 transform-gpu shadow-lg shadow-cyan-950/20" style="border: 1px solid rgba(6, 182, 212, 0.3);">
-      
-      <!-- Mobile Sidebar Header with Close Button -->
-      <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800 lg:hidden">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="logo-neon-glow-wrapper !w-9 !h-9 !rounded-xl">
-            <div class="logo-neon-inner !rounded-[10px]">
-              <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-sm"></i>
-            </div>
-          </div>
-          <div class="flex flex-col min-w-0">
-            <div class="flex items-center gap-1 leading-none">
-              <span class="text-base font-black tracking-tight text-white font-sans">FinTrack</span>
-              <span class="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 tracking-wider">AI</span>
-            </div>
-            <span id="sidebar-mobile-subtitle" class="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5 truncate">Smart Finance & Advisor</span>
+      <!-- Sidebar Header (Perfect vertical alignment with Header logo) -->
+      <div class="flex items-center gap-3 pb-2.5 mb-2 border-b border-slate-800/80 pl-[36px] pr-1">
+        <div class="logo-neon-glow-wrapper !w-9 !h-9 !rounded-xl flex-shrink-0">
+          <div class="logo-neon-inner !rounded-[10px]">
+            <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-sm"></i>
           </div>
         </div>
-        <button id="close-sidebar-btn" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700/50 active:scale-95 shrink-0" title="Đóng menu">
-          <i class="fa-solid fa-xmark text-sm"></i>
-        </button>
+        <span class="text-xs font-black uppercase tracking-wider text-slate-200">MENU QUẢN LÝ</span>
       </div>
       
       <!-- 1. USER NAVIGATION MENU (Visible in User Mode) -->
-      <nav id="sidebar-user-nav" class="space-y-1 overflow-y-auto custom-scrollbar flex-1 pr-1">
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2 block">Menu Quản Lý</span>
+      <nav id="sidebar-user-nav" class="space-y-1 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-4">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1.5 block">Danh Mục Chính</span>
         
-        <a href="#" class="nav-btn nav-item user-nav-item active flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="dashboard">
+        <a href="#" class="nav-btn nav-item user-nav-item active flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="dashboard">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-chart-pie text-emerald-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-chart-pie text-emerald-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Tổng Quan Dashboard</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="transactions">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="transactions">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-receipt text-blue-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-receipt text-blue-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Ghi Thu - Chi</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="wallets">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="wallets">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-wallet text-indigo-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-wallet text-indigo-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Ví & Tài Khoản</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="budgets">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="budgets">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-bullseye text-amber-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-bullseye text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hạn Mức Ngân Sách</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="savings">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="savings">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-piggy-bank text-teal-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-piggy-bank text-teal-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Mục Tiêu Tiết Kiệm</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="categories">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="categories">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-tags text-rose-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-tags text-rose-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Danh Mục Thu/Chi</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="analytics">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="analytics">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-chart-line text-cyan-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-chart-line text-cyan-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Phân Tích & Báo Cáo</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition" data-tab="badges">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition" data-tab="badges">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-award text-amber-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-award text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Huy Hiệu & Thành Tích</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">✨ Mới</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">✨ Mới</span>
         </a>
 
         <!-- Subscription / VIP Upgrade Option in Sidebar -->
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition border border-amber-500/20" data-tab="subscription">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-amber-950/40 hover:text-amber-300 transition border border-amber-500/20" data-tab="subscription">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-crown text-amber-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-crown text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Gói Dịch Vụ</span>
           </div>
-          <span id="sidebar-subscription-badge" class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">👑 Nâng Cấp</span>
+          <span id="sidebar-subscription-badge" class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">👑 Nâng Cấp</span>
         </a>
 
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 pt-4 mb-2 block">AI Cố Vấn / Trợ Giúp</span>
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 pt-3 mb-1.5 block">AI Cố Vấn / Trợ Giúp</span>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-indigo-950/50 hover:text-indigo-300 transition" data-tab="ai_assistant">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-indigo-950/50 hover:text-indigo-300 transition" data-tab="ai_assistant">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Trợ Lý AI FinTrack</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-indigo text-white whitespace-nowrap">24/7</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-indigo text-white whitespace-nowrap">24/7</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="notifications">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="notifications">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-bell text-pink-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-bell text-pink-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hộp Thư & Thông Báo</span>
           </div>
-          <span id="sidebar-notification-badge" class="hidden shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">0</span>
+          <span id="sidebar-notification-badge" class="ml-auto hidden shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">0</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-teal-950/40 hover:text-teal-300 transition" data-tab="support">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-teal-950/40 hover:text-teal-300 transition" data-tab="support">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-headset text-emerald-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-headset text-emerald-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hỗ Trợ & Khiếu Nại</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 whitespace-nowrap">24/7</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 whitespace-nowrap">24/7</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="settings">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="settings">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-gear text-slate-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-gear text-slate-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Cài Đặt & Bảo Mật</span>
           </div>
         </a>
 
         <!-- Admin Shortcut in User Sidebar (Visible for Admins) -->
-        <div id="admin-nav-section" class="hidden pt-3">
-          <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest px-3 mb-2 block">Hệ Thống</span>
-          <a href="javascript:void(0)" onclick="switchPortal('admin')" class="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-slate-900/60 border border-rose-500/30 hover:border-rose-500/60 hover:bg-rose-950/20 text-slate-200 transition-all group" data-tab="admin_dashboard">
+        <div id="admin-nav-section" class="hidden pt-2.5">
+          <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest px-3 mb-1.5 block">Hệ Thống</span>
+          <a href="javascript:void(0)" onclick="switchPortal('admin')" class="flex items-center justify-between w-full px-3 py-2 rounded-xl bg-slate-900/60 border border-rose-500/30 hover:border-rose-500/60 hover:bg-rose-950/20 text-slate-200 transition-all group" data-tab="admin_dashboard">
             <div class="flex items-center gap-2.5">
-              <i class="fa-solid fa-shield-halved text-rose-400 text-sm group-hover:scale-110 transition-transform"></i>
-              <span id="admin-portal-nav-text" class="text-sm font-semibold tracking-wide text-rose-200">Vào Admin Portal</span>
+              <i class="fa-solid fa-shield-halved text-rose-400 text-sm w-5 h-5 flex items-center justify-center group-hover:scale-110 transition-transform"></i>
+              <span id="admin-portal-nav-text" class="text-xs font-semibold tracking-wide text-rose-200">Vào Admin Portal</span>
             </div>
-            <span id="admin-portal-role-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 uppercase">Root</span>
+            <span id="admin-portal-role-badge" class="ml-auto text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 uppercase">Root</span>
           </a>
         </div>
       </nav>
 
       <!-- 2. DEDICATED ADMIN NAVIGATION MENU (Visible ONLY in Admin Portal Mode) -->
       <nav id="sidebar-admin-nav" class="space-y-1 overflow-y-auto custom-scrollbar flex-1 pr-1 hidden">
-        <div class="px-3 pb-2 mb-2 border-b border-slate-800">
+        <div class="px-3 pb-2 mb-1.5 border-b border-slate-800">
           <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest block flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> CONTROL CENTER
           </span>
           <span class="text-[10px] text-slate-400 font-mono">Quản Trị Hệ Thống</span>
         </div>
         
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_dashboard">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_dashboard">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-chart-pie text-rose-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-chart-pie text-rose-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Tổng Quan Hệ Thống</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_users">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_users">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-users-gear text-blue-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-users-gear text-blue-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Quản Lý Người Dùng</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_subscriptions">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_subscriptions">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-credit-card text-emerald-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-credit-card text-emerald-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Quản Lý Nạp & Gói Cước</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">VIP</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">VIP</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_bank_gateway">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_bank_gateway">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-building-columns text-amber-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-building-columns text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Cổng Ngân Hàng & VietQR</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">VietQR</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">VietQR</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_ai">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_ai">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-brain text-indigo-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-brain text-indigo-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Quản Trị AI & Token</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_master_data">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_master_data">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-layer-group text-amber-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-layer-group text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Danh Mục Mặc Định</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_logs">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_logs">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-clock-rotate-left text-cyan-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-clock-rotate-left text-cyan-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Nhật Ký Hệ Thống</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="admin_notifications">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="admin_notifications">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-bullhorn text-pink-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-bullhorn text-pink-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Phát & Quản Lý Thông Báo</span>
           </div>
-          <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 whitespace-nowrap">Mới</span>
+          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 whitespace-nowrap">Mới</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_support">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_support">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-headset text-teal-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-headset text-teal-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hỗ Trợ & Khiếu Nại</span>
           </div>
         </a>
 
-        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition" data-tab="admin_settings">
+        <a href="#" class="nav-btn nav-item admin-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="admin_settings">
           <div class="flex items-center gap-2.5 min-w-0">
-            <i class="fa-solid fa-sliders text-purple-400 text-sm shrink-0 w-4"></i>
+            <i class="fa-solid fa-sliders text-purple-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Cài Đặt Hệ Thống</span>
           </div>
         </a>
@@ -361,23 +1083,23 @@
 
       <!-- Sidebar Bottom Card / Footers -->
       <!-- User Footer Card -->
-      <div id="sidebar-user-footer" class="p-3.5 rounded-2xl gradient-indigo text-white shadow-lg shadow-indigo-500/20 text-xs">
-        <div class="flex items-center gap-2 mb-1.5 font-bold">
-          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-          <span>FinTrack AI 1.0</span>
+      <div id="sidebar-user-footer" class="p-2.5 rounded-xl gradient-indigo text-white shadow-md shadow-indigo-500/20 text-xs">
+        <div class="flex items-center gap-2 mb-1 font-bold">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-xs"></i>
+          <span class="text-xs">FinTrack AI 1.0</span>
         </div>
-        <p class="text-[11px] text-white/80 leading-tight">
-          Hỗ trợ bóc tách tự nhiên & Cố vấn 50/30/20 thông minh.
+        <p class="text-[10px] text-white/80 leading-tight">
+          Cố vấn tài chính & Bóc tách NLP thông minh.
         </p>
       </div>
 
       <!-- Admin Footer Card -->
-      <div id="sidebar-admin-footer" class="hidden p-3.5 rounded-2xl bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-500/30 text-xs space-y-2">
+      <div id="sidebar-admin-footer" class="hidden p-2.5 rounded-xl bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-500/30 text-xs space-y-1.5">
         <div class="flex items-center gap-2 font-bold text-rose-300">
-          <i class="fa-solid fa-shield-halved text-amber-300"></i>
-          <span>Admin Cyber Console</span>
+          <i class="fa-solid fa-shield-halved text-amber-300 text-xs"></i>
+          <span class="text-xs">Admin Cyber Console</span>
         </div>
-        <button id="btn-sidebar-exit-admin" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition flex items-center justify-center gap-1.5">
+        <button id="btn-sidebar-exit-admin" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 active:scale-95 transition flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-arrow-left text-emerald-400 text-[10px]"></i>
           <span>Về Chế Độ Cá Nhân</span>
         </button>
@@ -385,29 +1107,516 @@
 
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 min-w-0" id="main-content-view">
-      <!-- Injected by Router -->
-    </main>
+    <!-- Master Floating Glass Container for Main Content -->
+    <div id="main-glass-wrapper" class="flex-1 min-w-0 flex flex-col p-4 lg:p-6 pb-8 lg:pb-10 relative rounded-[28px] overflow-visible transition-all duration-300" style="border: 2px solid #06b6d4; box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15); background: rgba(11, 19, 41, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+      <!-- Main Content Area -->
+      <main class="flex-1 min-w-0 overflow-y-visible transition-all duration-300 pb-8" id="main-content-view">
+        <!-- Injected by Router -->
+      </main>
+    </div>
 
-  </div>
+  </div> <!-- /#app-layout-container -->
+</div> <!-- /#app-workspace-container -->
 
   <!-- Toast Notification Container -->
-  <div id="toast-container"></div>
+  <div id="toast-container" class="pointer-events-none"></div>
 
-  <!-- Generic Modal (Dynamic) -->
-  <div id="generic-modal"></div>
-  <div id="upgradeModal"></div>
-  <div id="vipModal"></div>
+  <!-- ==========================================================================
+       MODALS DIRECTLY UNDER <body> (DOCUMENT ROOT)
+       ========================================================================== -->
+
+  <!-- Generic Modal (Dynamic Component Modal) -->
+  <div id="generic-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Deposit Wallet Modal Container -->
-  <div id="modal-deposit-wallet"></div>
+  <div id="modal-deposit-wallet" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
-  <!-- Auth Modal (Login / Register) -->
-  <div id="auth-modal"></div>
+  <!-- Upgrade & VIP Modals -->
+  <div id="upgradeModal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="vipModal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="subscription-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="vip-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="service-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="upgrade-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+
+  <!-- Transaction Modal (Ghi Thu - Chi) -->
+  <div id="transaction-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+
+  <!-- Transfer Modal (Chuyển tiền giữa các ví) -->
+  <div id="transfer-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+
+  <!-- Wallet Modal / Add Wallet Modal (Thêm / Sửa ví ảo) -->
+  <div id="wallet-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="add-wallet-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+
+  <!-- Deposit Modal / Real Deposit Modal (Nạp tiền thật VietQR) -->
+  <div id="deposit-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="real-deposit-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+
+  <!-- Export & Filter Modals -->
+  <div id="export-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="filter-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Application Module Script -->
-  <script type="module" src="/static/js/app.js?v=7.5"></script>
+  <script type="module" src="/static/js/app.js?v=20260904_13"></script>
 
+  <!-- ==========================================================================
+       AUTH MODAL (Đăng Nhập / Đăng Ký)
+       Đặt ngoài cùng độc lập, ngay trước thẻ đóng </body>
+       ========================================================================== -->
+  <div id="auth-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeAuthModal()">
+    <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden border border-slate-800 text-slate-100 mx-4" onclick="event.stopPropagation()">
+      
+      <!-- Close Button -->
+      <button type="button" id="btn-close-auth-modal" onclick="window.closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700/50 cursor-pointer" title="Đóng">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <!-- Decorative top glowing gradient bar -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-pink-500 to-amber-400"></div>
+
+      <!-- Header / Brand -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 via-pink-500 to-amber-400 p-[2px] shadow-xl shadow-pink-500/25 mb-3">
+          <div class="w-full h-full bg-slate-950/80 backdrop-blur-md rounded-[14px] flex items-center justify-center">
+            <i class="fa-solid fa-gem text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-amber-300 to-yellow-200 text-2xl drop-shadow-[0_0_10px_rgba(244,63,94,0.6)]"></i>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-1.5 leading-none mb-1">
+          <span class="text-2xl font-black tracking-tight text-white font-sans">FinTrack</span>
+          <span class="text-xs font-black px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow-sm shadow-pink-500/40 tracking-wider">AI</span>
+        </div>
+        <p class="text-slate-400 text-xs mt-1">
+          Hệ thống Quản lý Chi tiêu Cá nhân & Cố vấn AI
+        </p>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="auth-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <i class="fa-regular fa-envelope text-xs"></i>
+            </span>
+            <input type="email" id="auth-email" required placeholder="email@domain.com"
+              class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Mật khẩu</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <i class="fa-solid fa-lock text-xs"></i>
+            </span>
+            <input type="password" id="auth-password" required placeholder="••••••••"
+              class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono" />
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="auth-submit-btn" 
+          class="w-full py-3 px-4 rounded-xl gradient-emerald text-white font-bold text-xs shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-5 cursor-pointer">
+          <span>Đăng Nhập</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </form>
+
+      <!-- 2 Demo Account Helper Buttons (Fill Input Only) -->
+      <div class="mt-5 pt-4 border-t border-slate-800 space-y-2.5">
+        <div class="text-center">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Điền nhanh tài khoản mẫu:</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" id="btn-demo-user"
+            class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-emerald-950/60 hover:text-emerald-300 hover:border-emerald-500/50 text-slate-200 font-bold text-xs border border-slate-700 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm group cursor-pointer">
+            <i class="fa-solid fa-user text-emerald-400 group-hover:scale-110 transition"></i>
+            <span>Demo User</span>
+          </button>
+          <button type="button" id="btn-demo-admin"
+            class="py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-rose-950/60 hover:text-rose-300 hover:border-rose-500/50 text-slate-200 font-bold text-xs border border-slate-700 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm group cursor-pointer">
+            <i class="fa-solid fa-shield-halved text-rose-400 group-hover:scale-110 transition"></i>
+            <span>Demo Admin</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Switch to Register / Login -->
+      <div class="mt-6 text-center text-xs text-slate-400">
+        Chưa có tài khoản? <button type="button" id="switch-to-register" onclick="if(window.switchAuthMode) window.switchAuthMode('register')" class="text-emerald-400 font-bold hover:underline ml-1 cursor-pointer">Đăng ký mới</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       AI INPUT MODAL (#ai-input-modal / #quick-ai-modal)
+       Đặt ngoài cùng độc lập, ngay trước thẻ đóng </body>
+       ========================================================================== -->
+  <div id="ai-input-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeQuickAiModal()">
+    <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-200 text-slate-100 mx-4 pointer-events-auto" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl gradient-indigo text-white flex items-center justify-center text-xs shadow-md shadow-indigo-500/30">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-100">Nhập Giao Dịch Bằng AI</h3>
+            <p class="text-[11px] text-slate-400">Tự động bóc tách số tiền, danh mục, ví từ câu nói tự nhiên</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeQuickAiModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition cursor-pointer" title="Đóng">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Nhập câu nói tự nhiên tiếng Việt:</label>
+          <div class="relative">
+            <textarea id="ai-input-text-static" rows="2" placeholder="Ví dụ: Ăn trưa bún bò 45k trả qua MoMo hôm qua" 
+              class="w-full p-3 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none leading-relaxed font-medium"></textarea>
+          </div>
+        </div>
+
+        <!-- Quick prompt chips -->
+        <div>
+          <span class="text-[11px] text-slate-400 font-semibold block mb-1.5">Gợi ý câu mẫu:</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="document.getElementById('ai-input-text-static').value='Ăn trưa cơm tấm 35k tiền mặt'" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition cursor-pointer">
+              🍱 Cơm tấm 35k
+            </button>
+            <button type="button" onclick="document.getElementById('ai-input-text-static').value='Đổ xăng xe máy 70k MoMo'" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition cursor-pointer">
+              ⛽ Đổ xăng 70k
+            </button>
+            <button type="button" onclick="document.getElementById('ai-input-text-static').value='Nhận lương tháng này 15 triệu vào Techcombank'" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition cursor-pointer">
+              💵 Lương 15tr
+            </button>
+            <button type="button" onclick="document.getElementById('ai-input-text-static').value='Mua sắm Shopee áo thun 180k qua thẻ ngân hàng'" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition cursor-pointer">
+              🛍️ Shopee 180k
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" id="btn-submit-quick-ai" 
+          onclick="if(window.fintrackApp?.aiAssistant?.parseNaturalText) { window.fintrackApp.aiAssistant.parseNaturalText(document.getElementById('ai-input-text-static').value); } else { alert('Vui lòng đăng nhập để sử dụng tính năng AI!'); window.openAuthModal('login'); }"
+          class="w-full py-3 px-4 rounded-xl gradient-indigo text-white font-bold text-xs shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-bolt text-amber-300"></i>
+          <span>Phân Tích & Điền Giao Dịch Ngay</span>
+        </button>
+
+        <!-- Live Result Preview Card -->
+        <div id="ai-parse-preview-static" class="hidden p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3 animate-in fade-in">
+          <!-- Rendered dynamically upon AI parse -->
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Safe Global Modal Controller Script -->
+  <script>
+    window.openModalById = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) {
+        console.warn("Không tìm thấy modal:", modalId);
+        return;
+      }
+      modal.classList.remove('hidden', 'pointer-events-none');
+      modal.classList.add('flex', 'pointer-events-auto');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('z-index', '999999', 'important');
+      modal.style.setProperty('pointer-events', 'auto', 'important');
+    };
+
+    window.closeModalById = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.add('hidden', 'pointer-events-none');
+      modal.classList.remove('flex', 'pointer-events-auto');
+      modal.style.setProperty('display', 'none', 'important');
+      modal.style.setProperty('pointer-events', 'none', 'important');
+    };
+
+    // Auto-sync dynamic modal host containers (#generic-modal, #modal-deposit-wallet, #upgradeModal, #vipModal)
+    function setupDynamicModalSync() {
+      const dynamicHostIds = ['generic-modal', 'modal-deposit-wallet', 'upgradeModal', 'vipModal'];
+      dynamicHostIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el || el._syncAttached) return;
+        el._syncAttached = true;
+        const updateVisibility = () => {
+          const hasContent = el.childNodes.length > 0 && el.innerHTML.trim() !== '';
+          if (hasContent) {
+            el.classList.remove('hidden', 'pointer-events-none');
+            el.classList.add('pointer-events-auto');
+            el.style.setProperty('display', 'block', 'important');
+            el.style.setProperty('z-index', '999999', 'important');
+            el.style.setProperty('pointer-events', 'auto', 'important');
+          } else {
+            el.classList.add('hidden', 'pointer-events-none');
+            el.classList.remove('pointer-events-auto');
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+          }
+        };
+        const observer = new MutationObserver(updateVisibility);
+        observer.observe(el, { childList: true });
+        updateVisibility();
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupDynamicModalSync);
+    } else {
+      setupDynamicModalSync();
+    }
+
+    window.openAuthModal = function(mode = 'login') {
+      try {
+        console.log("Kích hoạt mở Auth Modal:", mode);
+        const modal = document.getElementById('auth-modal');
+        if (!modal) {
+          console.error("Lỗi: Không tìm thấy thẻ #auth-modal trong HTML!");
+          return;
+        }
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+
+        if (typeof window.switchAuthMode === 'function') {
+          window.switchAuthMode(mode || 'login');
+        } else if (mode === 'demo-user') {
+          const emailInput = document.getElementById('auth-email');
+          const passwordInput = document.getElementById('auth-password');
+          if (emailInput) emailInput.value = 'user@fintrack.ai';
+          if (passwordInput) passwordInput.value = 'User@123456';
+        } else if (mode === 'demo-admin') {
+          const emailInput = document.getElementById('auth-email');
+          const passwordInput = document.getElementById('auth-password');
+          if (emailInput) emailInput.value = 'admin@fintrack.ai';
+          if (passwordInput) passwordInput.value = 'Admin@123456';
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi mở Auth Modal:", err);
+      }
+    };
+
+    window.closeAuthModal = function() {
+      window.closeModalById('auth-modal');
+    };
+
+    window.openQuickAiModal = function() {
+      try {
+        if (window.fintrackApp?.aiAssistant?.openQuickParserModal) {
+          window.fintrackApp.aiAssistant.openQuickParserModal();
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi aiAssistant, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('ai-input-modal') || document.getElementById('quick-ai-modal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+        const input = modal.querySelector('textarea, input');
+        if (input) input.focus();
+      } else {
+        console.warn("Không tìm thấy modal #ai-input-modal!");
+      }
+    };
+
+    window.closeQuickAiModal = function() {
+      window.closeModalById('ai-input-modal');
+      window.closeModalById('quick-ai-modal');
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+
+    window.openAiModal = window.openQuickAiModal;
+    window.closeAiModal = window.closeQuickAiModal;
+
+    window.openTransactionModal = function(type = 'EXPENSE', defaultWalletId = null) {
+      try {
+        if (window.fintrackApp?.transactions?.openTransactionModal) {
+          const editId = (typeof type === 'number' || (typeof type === 'string' && /^\d+$/.test(type))) ? parseInt(type) : null;
+          const finalType = editId ? 'EXPENSE' : (type || 'EXPENSE');
+          window.fintrackApp.transactions.openTransactionModal(editId, finalType, defaultWalletId);
+          return;
+        } else if (window.fintrackApp?.openTransactionModal) {
+          window.fintrackApp.openTransactionModal(type);
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi transactions component, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('transaction-modal') || document.getElementById('add-tx-modal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+      }
+    };
+
+    window.closeTransactionModal = function() {
+      window.closeModalById('transaction-modal');
+      window.closeModalById('add-tx-modal');
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+
+    window.openWalletModal = function(editId = null) {
+      try {
+        if (window.fintrackApp?.wallets?.openWalletModal) {
+          window.fintrackApp.wallets.openWalletModal(editId);
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi wallets component, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('wallet-modal') || document.getElementById('add-wallet-modal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+      }
+    };
+
+    window.openAddWalletModal = function() {
+      window.openWalletModal(null);
+    };
+
+    window.closeAddWalletModal = function() {
+      window.closeWalletModal();
+    };
+
+    window.closeWalletModal = function() {
+      window.closeModalById('wallet-modal');
+      window.closeModalById('add-wallet-modal');
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+
+    window.openTransferModal = function() {
+      try {
+        if (window.fintrackApp?.wallets?.openTransferModal) {
+          window.fintrackApp.wallets.openTransferModal();
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi wallets transfer component, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('transfer-modal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+      }
+    };
+
+    window.closeTransferModal = function() {
+      window.closeModalById('transfer-modal');
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+
+    window.openRealDepositModal = function(walletId = null) {
+      try {
+        if (window.fintrackApp?.wallets?.openRealDepositModal) {
+          window.fintrackApp.wallets.openRealDepositModal(walletId);
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi real deposit component, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('deposit-modal') || document.getElementById('real-deposit-modal') || document.getElementById('modal-deposit-wallet') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+      }
+    };
+
+    window.closeRealDepositModal = function() {
+      const modal = document.getElementById('deposit-modal') || document.getElementById('real-deposit-modal') || document.getElementById('modal-deposit-wallet');
+      if (modal) {
+        modal.classList.add('hidden', 'pointer-events-none');
+        modal.classList.remove('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'none', 'important');
+        modal.style.setProperty('pointer-events', 'none', 'important');
+      }
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+
+    window.openSubscriptionModal = function(tier = 'VIP') {
+      try {
+        if (typeof window.switchTab === 'function') {
+          window.switchTab('subscription');
+          return;
+        } else if (window.fintrackApp?.navigate) {
+          window.fintrackApp.navigate('subscription');
+          return;
+        } else if (window.fintrackApp?.subscription?.openUpgradeModal) {
+          window.fintrackApp.subscription.openUpgradeModal(tier);
+          return;
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi subscription component, chuyển fallback DOM modal:", err);
+      }
+      const modal = document.getElementById('subscription-modal') || document.getElementById('vip-modal') || document.getElementById('upgrade-modal') || document.getElementById('upgradeModal') || document.getElementById('generic-modal');
+      if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
+      }
+    };
+
+    window.closeSubscriptionModal = function() {
+      ['subscription-modal', 'vip-modal', 'upgrade-modal', 'upgradeModal', 'vipModal'].forEach(id => {
+        window.closeModalById(id);
+      });
+      const generic = document.getElementById('generic-modal');
+      if (generic && !generic.classList.contains('hidden')) {
+        window.closeModalById('generic-modal');
+        generic.innerHTML = '';
+      }
+    };
+  </script>
 </body>
 </html>

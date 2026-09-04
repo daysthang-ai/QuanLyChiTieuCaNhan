@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, SavingGoal, Wallet, Category, Transaction
 from backend.app.schemas import (
     SavingGoalCreate, SavingGoalUpdate, SavingGoalDeposit, SavingGoalOut
@@ -55,10 +55,14 @@ def create_saving_goal(
         color=goal_in.color or "#10B981",
         note=goal_in.note
     )
-    db.add(new_goal)
-    db.commit()
-    db.refresh(new_goal)
-    return enrich_goal_out(new_goal)
+    try:
+        db.add(new_goal)
+        db.commit()
+        db.refresh(new_goal)
+        return enrich_goal_out(new_goal)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi tạo mục tiêu tiết kiệm: {str(e)}")
 
 @router.post("/{goal_id}/deposit", response_model=SavingGoalOut)
 def deposit_to_goal(
@@ -94,7 +98,7 @@ def deposit_to_goal(
             category_id=sav_cat.id if sav_cat else None,
             type="EXPENSE",
             amount=deposit_in.amount,
-            transaction_date=datetime.datetime.utcnow(),
+            transaction_date=get_utc_now(),
             note=deposit_in.note or f"Nạp tiền vào mục tiêu: {goal.name}",
             created_by_ai="MANUAL"
         )
@@ -104,10 +108,14 @@ def deposit_to_goal(
     if goal.current_amount >= goal.target_amount:
         goal.status = "COMPLETED"
 
-    goal.updated_at = datetime.datetime.utcnow()
-    db.commit()
-    db.refresh(goal)
-    return enrich_goal_out(goal)
+    goal.updated_at = get_utc_now()
+    try:
+        db.commit()
+        db.refresh(goal)
+        return enrich_goal_out(goal)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi nạp tiền mục tiêu tiết kiệm: {str(e)}")
 
 @router.put("/{goal_id}", response_model=SavingGoalOut)
 def update_saving_goal(
@@ -130,10 +138,14 @@ def update_saving_goal(
     if goal_in.color is not None: goal.color = goal_in.color
     if goal_in.note is not None: goal.note = goal_in.note
 
-    goal.updated_at = datetime.datetime.utcnow()
-    db.commit()
-    db.refresh(goal)
-    return enrich_goal_out(goal)
+    goal.updated_at = get_utc_now()
+    try:
+        db.commit()
+        db.refresh(goal)
+        return enrich_goal_out(goal)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi cập nhật mục tiêu tiết kiệm: {str(e)}")
 
 @router.delete("/{goal_id}")
 def delete_saving_goal(
@@ -146,6 +158,10 @@ def delete_saving_goal(
     if not goal:
         raise HTTPException(status_code=404, detail="Không tìm thấy mục tiêu tiết kiệm")
 
-    db.delete(goal)
-    db.commit()
-    return {"message": "Đã xóa mục tiêu tiết kiệm thành công"}
+    try:
+        db.delete(goal)
+        db.commit()
+        return {"message": "Đã xóa mục tiêu tiết kiệm thành công"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi xóa mục tiêu tiết kiệm: {str(e)}")

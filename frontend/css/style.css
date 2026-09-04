@@ -42,6 +42,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 html, body {
@@ -50,6 +51,14 @@ html, body {
   color: var(--text-primary) !important;
   overflow-x: hidden;
   color-scheme: dark;
+}
+
+/* Strict Container Isolation: Landing Page vs App Workspace */
+#landing-page-container.hidden,
+#app-workspace-container.hidden,
+#view-landing.hidden,
+.landing-tab-content.hidden {
+  display: none !important;
 }
 
 /* Glassmorphism Dark Cards (Layered Glass Effect - 120 FPS GPU Acceleration) */
@@ -203,13 +212,12 @@ html, body {
   }
 }
 
-#generic-modal > div,
-#auth-modal > div {
+#generic-modal > div {
   animation: backdropFadeIn 0.25s ease-out forwards;
 }
 
 #generic-modal > div > div,
-#auth-modal > div > div {
+#auth-modal > div {
   animation: modalPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -732,72 +740,6 @@ tbody tr:hover {
 }
 
 /* ==========================================================================
-   MOBILE SIDEBAR DRAWER & RESPONSIVE BEHAVIOR
-   ========================================================================== */
-#sidebar-backdrop {
-  opacity: 0;
-  pointer-events: none !important;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 40;
-}
-
-#sidebar-backdrop.active {
-  opacity: 1;
-  pointer-events: auto !important;
-}
-
-/* Ensure empty modals never intercept clicks */
-#generic-modal:empty,
-#auth-modal:empty {
-  display: none !important;
-  pointer-events: none !important;
-}
-
-#toast-container {
-  pointer-events: none !important;
-}
-
-#toast-container .toast-msg {
-  pointer-events: auto !important;
-}
-
-@media (min-width: 1024px) {
-  #sidebar-backdrop {
-    display: none !important;
-    pointer-events: none !important;
-  }
-}
-
-@media (max-width: 1023px) {
-  #sidebar {
-    position: fixed !important;
-    top: 64px !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    z-index: 45 !important;
-    width: 288px !important;
-    max-width: 85vw !important;
-    height: calc(100vh - 64px) !important;
-    height: calc(100dvh - 64px) !important;
-    background-color: #0d1424 !important;
-    border-radius: 0 !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
-    border-right: 1px solid rgba(51, 65, 85, 0.6) !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
-    transform: translateX(-100%) !important;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    overflow-y: auto !important;
-    display: flex !important;
-  }
-
-  #sidebar.mobile-open {
-    transform: translateX(0) !important;
-  }
-}
-
-/* ==========================================================================
    ADMIN CYBER CONTROL CENTER - DYNAMIC HORIZONTAL SUB-TABS & TRANSITIONS
    ========================================================================== */
 .admin-subtab-bar {
@@ -947,41 +889,57 @@ html, body {
   left: 30%;
 }
 
-/* 3. Thanh Tab Ngang Toàn Chiều Rộng (Full-Width Header với Nền Kính Trong Suốt) */
-#top-glass-header, .glass-nav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
+/* 3. Thanh Tab Ngang Toàn Chiều Rộng (Full-Width Fixed Header) */
+#top-glass-header, #main-header, .glass-nav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100 !important;
   width: 100% !important;
   max-width: 100% !important;
-  margin: 0 0 20px 0 !important;
-  border-radius: 0 0 20px 20px !important;
-  background: rgba(11, 19, 41, 0.65) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  height: 68px !important;
+  min-height: 68px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background-color: rgba(11, 15, 25, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  border-bottom: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.8) !important;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.15) !important;
   transition: all 0.25s ease;
   transform: translateZ(0);
 }
 
 @media (min-width: 768px) {
-  #top-glass-header, .glass-nav {
-    border-radius: 0 0 24px 24px !important;
-    margin: 0 0 24px 0 !important;
+  #top-glass-header, #main-header, .glass-nav {
+    border-radius: 0 !important;
+    margin: 0 !important;
   }
 }
 
 /* 4. Khung Kính Tổng với Viền Neon Phát Sáng & Nền Kính Trong Suốt (Master Floating Glass Container) */
-#main-glass-wrapper, #master-glass-wrapper {
+.app-main-layout {
   position: relative;
   z-index: 10;
   margin: 0 auto 24px auto !important;
+  padding-top: 76px !important;
   max-width: 98% !important;
   width: 1750px !important;
+  min-height: calc(100vh - 100px);
+  display: flex;
+  align-items: flex-start;
+}
+
+#main-glass-wrapper, #master-glass-wrapper {
+  position: relative;
+  z-index: 10;
+  flex: 1 1 0%;
+  min-width: 0;
+  width: 100%;
   border-radius: 28px !important;
   background: rgba(11, 19, 41, 0.65) !important;
   backdrop-filter: blur(16px) !important;
@@ -990,6 +948,7 @@ html, body {
   box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15), 0 20px 40px -15px rgba(0, 0, 0, 0.7) !important;
   min-height: calc(100vh - 130px);
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   contain: paint;
   isolation: isolate;
@@ -998,12 +957,12 @@ html, body {
 
 #sidebar {
   border: 1px solid rgba(6, 182, 212, 0.3) !important;
+  pointer-events: auto !important;
 }
 
 @media (min-width: 768px) {
-  #main-glass-wrapper, #master-glass-wrapper {
+  .app-main-layout {
     max-width: 96% !important;
-    border-radius: 28px !important;
   }
 }
 
@@ -1405,27 +1364,47 @@ html {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
 
-/* 5. Left Sidebar Navigation Menu Items */
+/* 5. Left Sidebar Navigation Menu Items & Button Clickability */
 #sidebar .nav-item,
 #sidebar .user-nav-item,
 #sidebar .admin-nav-item,
-.sidebar-nav-btn {
-  font-size: 14px !important;
+#sidebar .sidebar-link,
+#sidebar .nav-btn,
+#sidebar .sidebar-nav-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 10;
+  font-size: 13px !important;
   font-weight: 500 !important;
-  line-height: 1.4 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.01em;
+  padding: 0.5rem 0.75rem !important; /* py-2 px-3 */
+  border-radius: 0.75rem !important; /* rounded-xl */
+  transition: all 0.2s ease !important;
 }
 
 #sidebar .nav-item.active,
 #sidebar .user-nav-item.active,
 #sidebar .admin-nav-item.active {
   font-weight: 700 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
 }
 
 #sidebar .nav-item i,
 #sidebar .user-nav-item i,
 #sidebar .admin-nav-item i {
-  font-size: 15px !important;
+  font-size: 14px !important;
+  width: 1.25rem !important; /* w-5 */
+  height: 1.25rem !important; /* h-5 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
 }
 
 /* 6. Card Top Banner Gamification Adjustments */
@@ -1504,7 +1483,317 @@ button.bg-gradient-to-r[class*="from-amber-400"] {
   transform: translateX(700%) rotate(25deg);
 }
 
+/* ==========================================================================
+   MODAL & TOAST Z-INDEX HIERARCHY OVERRIDES
+   ========================================================================== */
+#toast-container {
+  z-index: 99999 !important;
+  position: fixed !important;
+  pointer-events: none;
+}
 
+#toast-container > * {
+  pointer-events: auto;
+}
 
+#generic-modal,
+#upgradeModal,
+#vipModal,
+#modal-deposit-wallet,
+.app-modal-overlay {
+  z-index: 9000 !important;
+}
 
+.modal-backdrop,
+.modal-overlay {
+  z-index: 8990 !important;
+}
 
+/* ==========================================================================
+   STICKY PERMANENT SIDEBAR & OVERLAY SUPPRESSION
+   ========================================================================== */
+#sidebarOverlay,
+#sidebar-backdrop {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ==========================================================================
+   MODAL & TOAST CLICK SAFETY
+   ========================================================================== */
+#generic-modal:empty,
+#upgradeModal:empty,
+#vipModal:empty,
+#modal-deposit-wallet:empty,
+#generic-modal.hidden,
+#upgradeModal.hidden,
+#vipModal.hidden,
+#modal-deposit-wallet.hidden,
+#auth-modal.hidden {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+#auth-modal {
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+}
+
+#toast-container {
+  pointer-events: none !important;
+}
+
+#toast-container .toast-msg {
+  pointer-events: auto !important;
+}
+
+/* ==========================================================================
+   COLLAPSIBLE SIDEBAR WITH SMOOTH ANIMATION TRANSITIONS
+   ========================================================================== */
+#sidebar {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 76px !important;
+  height: calc(100vh - 88px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible;
+  opacity: 1;
+  z-index: 40 !important;
+  align-self: flex-start !important;
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              min-width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              max-width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.2s ease,
+              margin 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              padding 0.3s ease,
+              border-width 0.3s ease !important;
+  will-change: width, min-width;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+}
+
+#sidebar.collapsed,
+#sidebar.sidebar-collapsed {
+  width: 0px !important;
+  min-width: 0px !important;
+  max-width: 0px !important;
+  margin-left: 0px !important;
+  margin-right: -1.5rem !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  border-width: 0px !important;
+  border-color: transparent !important;
+  overflow: hidden !important;
+}
+
+#sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(6, 182, 212, 0.5);
+}
+
+.app-main-layout {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 1.5rem !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  will-change: width;
+}
+
+#main-glass-wrapper {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: visible !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  will-change: width;
+}
+
+#main-content-view,
+#main-content,
+main {
+  width: 100% !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  overflow-y: visible !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  will-change: width;
+}
+
+#view-subscription {
+  width: 100% !important;
+  max-width: 1700px !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* ==========================================================================
+   ZERO LAYOUT SHIFT DATA TABLES & SMOOTH HOVER (CHỐNG GIẬT & RUNG LẮC)
+   ========================================================================== */
+.history-table {
+  width: 100% !important;
+  min-width: 1180px !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  contain: layout style;
+}
+
+.fintrack-table,
+table:not(.history-table) {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  contain: layout style;
+}
+
+.history-table th,
+.history-table td,
+.fintrack-table th,
+.fintrack-table td,
+table th,
+table td {
+  transform: none !important;
+  -webkit-transform: none !important;
+  box-sizing: border-box !important;
+}
+
+.history-table tbody tr,
+.fintrack-table tbody tr,
+table tbody tr {
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+  will-change: background-color, border-color;
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+.history-table tbody tr:hover,
+.fintrack-table tbody tr:hover,
+table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.45) !important; /* Slate-800 với opacity nhẹ */
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+.history-table tbody tr:hover td,
+.fintrack-table tbody tr:hover td,
+table tbody tr:hover td {
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+/* Left Accent Border for table rows (Zero layout shift with pre-allocated 2px transparent border) */
+.history-table tbody tr.row-accent-border,
+.fintrack-table tbody tr.row-accent-border {
+  border-left: 2px solid transparent !important;
+}
+
+.history-table tbody tr.row-accent-border:hover,
+.fintrack-table tbody tr.row-accent-border:hover {
+  border-left-color: #34d399 !important; /* Emerald-400 Neon Accent */
+}
+
+/* Đảm bảo các nút action/icon bên trong table cell không gây scale hay layout shift cho row */
+table tbody tr td button,
+table tbody tr td .btn,
+table tbody tr td [role="button"] {
+  transform: translateZ(0) !important;
+}
+table tbody tr td button:hover,
+table tbody tr td .btn:hover {
+  transform: translateY(-1px) translateZ(0) !important;
+}
+
+/* ==========================================================================
+   BUDGET WARNING STATUS SYSTEM (NEON REFINED & EYE-PLEASING DARK THEME)
+   ========================================================================== */
+
+/* 1. Safe State (< 80%) */
+.budget-badge-safe {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.budget-progress-safe {
+  background: linear-gradient(90deg, #10b981 0%, #06b6d4 100%) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35) !important;
+}
+
+.budget-card-safe {
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  background: rgba(11, 19, 41, 0.65) !important;
+}
+.budget-card-safe:hover {
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* 2. Warning State (80% - 99%) */
+.budget-badge-warning {
+  background: rgba(245, 158, 11, 0.20) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.budget-progress-warning {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%) !important;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.35) !important;
+}
+
+.budget-card-warning {
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  background: rgba(24, 18, 10, 0.65) !important;
+}
+.budget-card-warning:hover {
+  border-color: rgba(251, 191, 36, 0.6) !important;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.18) !important;
+}
+
+/* 3. Overspent State (>= 100%) */
+.budget-badge-overspent {
+  background: rgba(244, 63, 94, 0.20) !important;
+  color: #fda4af !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+
+.budget-progress-overspent {
+  background: linear-gradient(90deg, #e11d48 0%, #f43f5e 100%) !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.35) !important;
+}
+
+.budget-card-overspent {
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+  background: rgba(28, 10, 16, 0.65) !important;
+}
+.budget-card-overspent:hover {
+  border-color: rgba(244, 63, 94, 0.65) !important;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.2) !important;
+}

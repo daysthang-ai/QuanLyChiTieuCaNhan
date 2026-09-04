@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class AIChatLog(Base):
     __tablename__ = "ai_chat_logs"
@@ -12,7 +12,7 @@ class AIChatLog(Base):
     response_text = Column(Text, nullable=False)
     prompt_template_used = Column(String(100), nullable=True)
     response_time_ms = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
 
     # Relationships
     user = relationship("User", back_populates="ai_logs")

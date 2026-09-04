@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, SupportTicket
 from backend.app.routers.auth import get_current_user
 
@@ -33,6 +33,7 @@ def create_support_ticket(
         random_digits = f"{random.randint(10000, 99999)}"
         ticket_code = f"TCK-{random_digits}"
 
+    now = get_utc_now()
     new_ticket = SupportTicket(
         ticket_code=ticket_code,
         user_id=current_user.id,
@@ -41,12 +42,16 @@ def create_support_ticket(
         priority=data.priority or "MEDIUM",
         status="OPEN",
         message=data.message.strip(),
-        created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow()
+        created_at=now,
+        updated_at=now
     )
-    db.add(new_ticket)
-    db.commit()
-    db.refresh(new_ticket)
+    try:
+        db.add(new_ticket)
+        db.commit()
+        db.refresh(new_ticket)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi gửi yêu cầu hỗ trợ: {str(e)}")
 
     return {
         "message": f"Yêu cầu hỗ trợ #{ticket_code} đã được gửi thành công! Đội ngũ FinTrack AI sẽ phản hồi sớm nhất.",

@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class SystemSetting(Base):
     """
@@ -18,4 +18,4 @@ class SystemSetting(Base):
     key = Column(String(100), unique=True, index=True, nullable=False)
     value = Column(Text, nullable=True)
     description = Column(String(255), nullable=True)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)

@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=5.5';
-import { formatVND, formatDateVN } from '../utils/formatters.js?v=5.5';
+import { api } from '../api.js?v=20260904_01';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_01';
 
 export class AIAssistantComponent {
   constructor(app) {
@@ -18,6 +18,12 @@ export class AIAssistantComponent {
   openQuickParserModal() {
     const modalEl = document.getElementById('generic-modal');
     if (!modalEl) return;
+
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('pointer-events-auto');
+    modalEl.style.setProperty('display', 'block', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
 
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -82,7 +88,13 @@ export class AIAssistantComponent {
       </div>
     `;
 
-    const close = () => { modalEl.innerHTML = ''; };
+    const close = () => {
+      modalEl.innerHTML = '';
+      modalEl.classList.add('hidden', 'pointer-events-none');
+      modalEl.classList.remove('pointer-events-auto');
+      modalEl.style.setProperty('display', 'none', 'important');
+      modalEl.style.setProperty('pointer-events', 'none', 'important');
+    };
     document.getElementById('quick-modal-close')?.addEventListener('click', close);
 
     // Chip click

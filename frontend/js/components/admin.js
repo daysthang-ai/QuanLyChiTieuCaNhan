@@ -218,7 +218,7 @@ export class AdminComponent {
         currentActiveSubtab = this.activeOrdersFilter || 'orders_all';
         subtabs = [
           { id: 'orders_all', icon: 'fa-layer-group text-slate-300', label: '📋 Tất Cả Đơn' },
-          { id: 'orders_pending', icon: 'fa-clock text-amber-400', label: '⏳ Chờ Duyệt' },
+          { id: 'orders_pending', icon: 'fa-triangle-exclamation text-amber-400', label: '⚠️ Cần Đối Soát (Chờ Duyệt)' },
           { id: 'orders_approved', icon: 'fa-circle-check text-emerald-400', label: '✅ Đã Phê Duyệt' },
           { id: 'orders_rejected', icon: 'fa-circle-xmark text-rose-400', label: '❌ Đã Từ Chối' },
           { id: 'orders_export_csv', icon: 'fa-file-excel text-teal-300', label: '📥 Xuất CSV', isAction: true }
@@ -1087,7 +1087,7 @@ export class AdminComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 50,
+        resizeDelay: 0,
         plugins: {
           legend: {
             position: 'top',
@@ -1141,7 +1141,7 @@ export class AdminComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 50,
+        resizeDelay: 0,
         cutout: '72%',
         plugins: {
           legend: { display: false }
@@ -2196,17 +2196,27 @@ export class AdminComponent {
   }
 
   // =========================================================================
-  // 6. SYSTEM LOGS TAB & SECURITY SUB-TAB FILTERING
+  // 6. SYSTEM LOGS TAB & SECURITY SUB-TAB FILTERING (Cyber Security Console)
   // =========================================================================
   async renderLogsTab(container) {
-    container.innerHTML = `<div class="py-16 text-center text-slate-500 text-xs animate-pulse">Đang tải nhật ký kiểm toán & bảo mật...</div>`;
+    container.innerHTML = `
+      <div class="py-16 text-center text-slate-500 text-xs animate-pulse flex flex-col items-center justify-center gap-2">
+        <i class="fa-solid fa-shield-halved text-cyan-400 text-2xl animate-spin"></i>
+        <span>Đang kết nối trung tâm an ninh & tải nhật ký kiểm toán...</span>
+      </div>
+    `;
 
     try {
       const data = await api.getAdminLogs();
-      this.logsData = data.logs;
+      this.logsData = Array.isArray(data?.logs) ? data.logs : [];
       this.renderLogsContent(container);
     } catch (e) {
-      container.innerHTML = `<div class="p-6 text-center text-rose-400 text-xs">Lỗi khi tải Logs: ${e.message}</div>`;
+      container.innerHTML = `
+        <div class="p-6 text-center text-rose-400 text-xs">
+          <i class="fa-solid fa-triangle-exclamation text-base mb-2 block"></i>
+          Lỗi khi tải Logs: ${e.message}
+        </div>
+      `;
     }
   }
 
@@ -2214,89 +2224,299 @@ export class AdminComponent {
     if (!this.logsData) return;
     const allLogs = this.logsData;
 
+    // Fast counters calculation for KPIs
+    const totalLogs = allLogs.length;
+    const countSecurity = allLogs.filter(l => (l.type || '').toUpperCase() === 'SECURITY').length;
+    const countAi = allLogs.filter(l => {
+      const t = (l.type || '').toUpperCase();
+      return t === 'AI_API' || t === 'AI_ENGINE' || t === 'AI';
+    }).length;
+    const countData = allLogs.filter(l => {
+      const t = (l.type || '').toUpperCase();
+      return t === 'DATA_CHANGE' || t === 'CONFIG' || t === 'BACKUP';
+    }).length;
+    const countError = allLogs.filter(l => {
+      const t = (l.type || '').toUpperCase();
+      return t.includes('ERROR') || (l.level || '').toUpperCase() === 'ERROR';
+    }).length;
+
     // Filter logs according to active subtab
     let filteredLogs = allLogs;
-    if (this.activeLogsFilter === 'logs_security') {
-      filteredLogs = allLogs.filter(l => l.type === 'SECURITY');
-    } else if (this.activeLogsFilter === 'logs_ai') {
-      filteredLogs = allLogs.filter(l => l.type === 'AI_API' || l.type === 'AI_ENGINE');
-    } else if (this.activeLogsFilter === 'logs_data') {
-      filteredLogs = allLogs.filter(l => l.type === 'DATA_CHANGE');
-    } else if (this.activeLogsFilter === 'logs_error') {
-      filteredLogs = allLogs.filter(l => l.type === 'ERROR_LOG' || l.type === 'ERROR');
+    const activeFilter = this.activeLogsFilter || 'logs_all';
+    if (activeFilter === 'logs_security') {
+      filteredLogs = allLogs.filter(l => (l.type || '').toUpperCase() === 'SECURITY');
+    } else if (activeFilter === 'logs_ai') {
+      filteredLogs = allLogs.filter(l => {
+        const t = (l.type || '').toUpperCase();
+        return t === 'AI_API' || t === 'AI_ENGINE' || t === 'AI';
+      });
+    } else if (activeFilter === 'logs_data') {
+      filteredLogs = allLogs.filter(l => {
+        const t = (l.type || '').toUpperCase();
+        return t === 'DATA_CHANGE' || t === 'CONFIG' || t === 'BACKUP';
+      });
+    } else if (activeFilter === 'logs_error') {
+      filteredLogs = allLogs.filter(l => {
+        const t = (l.type || '').toUpperCase();
+        return t.includes('ERROR') || (l.level || '').toUpperCase() === 'ERROR' || (l.level || '').toUpperCase() === 'WARNING';
+      });
     }
 
     container.innerHTML = `
-      <div class="space-y-4 admin-subtab-content-anim">
+      <div class="space-y-5 admin-subtab-content-anim">
         
-        <!-- Search bar -->
-        <div class="glass-card p-4 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-3 border border-slate-800">
-          <div class="flex-1 relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <i class="fa-solid fa-magnifying-glass text-xs"></i>
-            </span>
-            <input type="text" id="admin-logs-search" placeholder="Tìm kiếm trong log (Hành động, IP, Email)..." 
-              class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-rose-500 font-mono" />
+        <!-- 1. Log Summary KPI Cards (3 Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="admin-logs-kpi-container">
+          
+          <!-- Card 1: Tổng Sự Kiện (Cyan) -->
+          <div class="glass-card p-4 rounded-2xl border border-cyan-500/30 relative overflow-hidden flex items-center justify-between shadow-lg shadow-cyan-500/5 group hover:border-cyan-400/60 transition-all duration-300">
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-cyan-500/20 transition"></div>
+            <div class="relative z-10">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block font-mono">Tổng Sự Kiện Ghi Nhận</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span class="text-2xl font-black text-cyan-300 font-mono tracking-tight" id="kpi-logs-total">${totalLogs}</span>
+                <span class="text-[10px] text-cyan-500 font-mono font-bold">events</span>
+              </div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-lg border border-cyan-500/30 shadow-sm relative z-10">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
           </div>
-          <span class="text-xs text-slate-400 font-mono">Hiển thị: <b class="text-cyan-400 font-bold">${filteredLogs.length}</b> sự kiện</span>
+
+          <!-- Card 2: Bảo Mật & Truy Cập (Rose) -->
+          <div class="glass-card p-4 rounded-2xl border border-rose-500/30 relative overflow-hidden flex items-center justify-between shadow-lg shadow-rose-500/5 group hover:border-rose-400/60 transition-all duration-300">
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-rose-500/20 transition"></div>
+            <div class="relative z-10">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block font-mono">Cảnh Báo Bảo Mật / Security</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span class="text-2xl font-black text-rose-400 font-mono tracking-tight" id="kpi-logs-security">${countSecurity}</span>
+                <span class="text-[10px] text-rose-500 font-mono font-bold">secured</span>
+              </div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-lg border border-rose-500/30 shadow-sm relative z-10">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+          </div>
+
+          <!-- Card 3: Gọi AI & Vận Hành (Indigo) -->
+          <div class="glass-card p-4 rounded-2xl border border-indigo-500/30 relative overflow-hidden flex items-center justify-between shadow-lg shadow-indigo-500/5 group hover:border-indigo-400/60 transition-all duration-300">
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-indigo-500/20 transition"></div>
+            <div class="relative z-10">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block font-mono">Lượt Gọi AI / System Operations</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span class="text-2xl font-black text-indigo-300 font-mono tracking-tight" id="kpi-logs-ai">${countAi}</span>
+                <span class="text-[10px] text-indigo-500 font-mono font-bold">inferences</span>
+              </div>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30 shadow-sm relative z-10">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Logs Feed Table -->
-        <div class="glass-card p-5 rounded-3xl border border-slate-800" id="admin-logs-table-container">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead>
-                <tr class="text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px] font-mono">
-                  <th class="pb-2.5 font-bold">Thời Gian</th>
-                  <th class="pb-2.5 font-bold">Loại Log</th>
-                  <th class="pb-2.5 font-bold">Tài Khoản / Tác Nhân</th>
-                  <th class="pb-2.5 font-bold">Địa Chỉ IP</th>
-                  <th class="pb-2.5 font-bold">Hành Động</th>
-                  <th class="pb-2.5 font-bold">Chi Tiết Sự Kiện</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800/60 font-mono text-[11px]" id="admin-logs-tbody">
-                ${filteredLogs.length > 0 ? filteredLogs.map(l => `
-                  <tr class="hover:bg-slate-800/40 transition">
-                    <td class="py-2.5 text-slate-400 whitespace-nowrap">${l.timestamp}</td>
-                    <td class="py-2.5">
-                      <span class="px-2 py-0.5 rounded-full text-[9px] font-black ${l.type === 'SECURITY' ? 'bg-rose-500/20 text-rose-300' : l.type === 'ERROR_LOG' ? 'bg-red-500/30 text-red-200' : l.type === 'AI_API' || l.type === 'AI_ENGINE' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-300'}">
-                        ${l.type}
+        <!-- 2. Interactive Neon Filter Pills -->
+        <div class="flex flex-wrap items-center gap-2 pt-1" id="admin-logs-filter-pills">
+          <button type="button" data-log-filter="logs_all" 
+            class="log-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeFilter === 'logs_all' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.35)]' : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+            <i class="fa-solid fa-file-lines text-xs text-cyan-400"></i>
+            <span>Tất cả</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-slate-800/90 text-[10px] font-mono text-slate-300 border border-slate-700/50">${totalLogs}</span>
+          </button>
+
+          <button type="button" data-log-filter="logs_security" 
+            class="log-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeFilter === 'logs_security' ? 'bg-rose-500/20 text-rose-300 border border-rose-400/60 shadow-[0_0_15px_rgba(244,63,94,0.35)]' : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+            <i class="fa-solid fa-shield-halved text-xs text-rose-400"></i>
+            <span>Bảo mật</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-slate-800/90 text-[10px] font-mono text-slate-300 border border-slate-700/50">${countSecurity}</span>
+          </button>
+
+          <button type="button" data-log-filter="logs_ai" 
+            class="log-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeFilter === 'logs_ai' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/60 shadow-[0_0_15px_rgba(99,102,241,0.35)]' : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+            <i class="fa-solid fa-robot text-xs text-indigo-400"></i>
+            <span>Gọi AI API</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-slate-800/90 text-[10px] font-mono text-slate-300 border border-slate-700/50">${countAi}</span>
+          </button>
+
+          <button type="button" data-log-filter="logs_data" 
+            class="log-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeFilter === 'logs_data' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.35)]' : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+            <i class="fa-solid fa-arrows-rotate text-xs text-emerald-400"></i>
+            <span>Đổi dữ liệu & Config</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-slate-800/90 text-[10px] font-mono text-slate-300 border border-slate-700/50">${countData}</span>
+          </button>
+
+          <button type="button" data-log-filter="logs_error" 
+            class="log-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeFilter === 'logs_error' ? 'bg-red-500/20 text-red-300 border border-red-400/60 shadow-[0_0_15px_rgba(239,68,68,0.35)]' : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+            <i class="fa-solid fa-circle-xmark text-xs text-red-400"></i>
+            <span>Lỗi hệ thống</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-slate-800/90 text-[10px] font-mono text-slate-300 border border-slate-700/50">${countError}</span>
+          </button>
+        </div>
+
+        <!-- 3. Softly Rounded Cyber Search & Controls Bar -->
+        <div class="glass-card p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800 bg-slate-950/60 shadow-md">
+          <div class="flex-1 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-cyan-400/80">
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input type="text" id="admin-logs-search" placeholder="Tìm kiếm theo hành động, IP, Email, chi tiết sự kiện..." 
+              class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-800 bg-slate-900/90 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono transition" />
+          </div>
+
+          <div class="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
+            <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Hiển thị:</span>
+              <b class="text-cyan-300 font-bold" id="admin-logs-count">${filteredLogs.length}</b>
+              <span>/ ${allLogs.length} sự kiện</span>
+            </div>
+
+            <button id="btn-refresh-logs" type="button" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-cyan-300 text-xs transition active:scale-95" title="Làm mới nhật ký">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Cyber Security Logs Table -->
+        <div class="glass-card p-5 rounded-3xl border border-slate-800 overflow-x-auto shadow-xl" id="admin-logs-table-container">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px] font-mono">
+                <th class="pb-3 font-bold">Thời Gian</th>
+                <th class="pb-3 font-bold">Loại Log</th>
+                <th class="pb-3 font-bold">Tài Khoản / Tác Nhân</th>
+                <th class="pb-3 font-bold">Địa Chỉ IP</th>
+                <th class="pb-3 font-bold">Hành Động</th>
+                <th class="pb-3 font-bold">Chi Tiết Sự Kiện</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono text-[11px]" id="admin-logs-tbody">
+              ${filteredLogs.length > 0 ? filteredLogs.map(l => {
+                const t = (l.type || '').toUpperCase();
+                
+                // Badge Logic for LOG TYPE
+                let badgeHtml = '';
+                if (t === 'SECURITY') {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.25)] inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-shield-halved text-rose-400"></i> SECURITY
+                    </span>
+                  `;
+                } else if (t === 'DATA_CHANGE') {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.25)] inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-database text-emerald-400"></i> DATA CHANGE
+                    </span>
+                  `;
+                } else if (t === 'CONFIG' || t === 'BACKUP') {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.25)] inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid ${t === 'BACKUP' ? 'fa-server' : 'fa-sliders'} text-amber-400"></i> ${t}
+                    </span>
+                  `;
+                } else if (t === 'AI_API' || t === 'AI_ENGINE' || t === 'AI') {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-[0_0_10px_rgba(99,102,241,0.25)] inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-brain text-indigo-400"></i> AI API
+                    </span>
+                  `;
+                } else if (t.includes('ERROR')) {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/25 text-red-300 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.25)] inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-triangle-exclamation text-red-400"></i> ERROR
+                    </span>
+                  `;
+                } else {
+                  badgeHtml = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700 inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-circle-info text-slate-400"></i> ${t}
+                    </span>
+                  `;
+                }
+
+                return `
+                  <tr class="hover:bg-slate-800/40 transition group">
+                    <td class="py-3 text-slate-400 whitespace-nowrap font-mono">
+                      <i class="fa-regular fa-clock text-[10px] text-slate-500 mr-1"></i>${l.timestamp}
+                    </td>
+                    <td class="py-3">
+                      ${badgeHtml}
+                    </td>
+                    <td class="py-3">
+                      <div class="font-sans font-bold text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid ${t === 'SECURITY' ? 'fa-user-shield text-rose-400' : t === 'AI_API' ? 'fa-robot text-indigo-400' : 'fa-user-astronaut text-cyan-400'} text-xs"></i>
+                        <span>${l.user}</span>
+                      </div>
+                    </td>
+                    <td class="py-3">
+                      <span class="px-2 py-0.5 rounded-lg bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 font-mono text-[10px] inline-flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-network-wired text-[9px] text-cyan-400"></i>
+                        ${l.ip}
                       </span>
                     </td>
-                    <td class="py-2.5 text-slate-200 font-sans font-bold">${l.user}</td>
-                    <td class="py-2.5 text-slate-400">${l.ip}</td>
-                    <td class="py-2.5 text-cyan-300 font-bold font-sans">${l.action}</td>
-                    <td class="py-2.5 text-slate-300 font-sans">${l.details}</td>
-                  </tr>
-                `).join('') : `
-                  <tr>
-                    <td colspan="6" class="py-12 text-center text-slate-500 text-xs font-sans">
-                      Không có sự kiện nào thuộc nhóm này.
+                    <td class="py-3 text-cyan-300 font-bold font-sans">
+                      ${l.action}
+                    </td>
+                    <td class="py-3 max-w-md">
+                      <div class="font-mono text-[11px] text-slate-300 break-words leading-relaxed line-clamp-2 hover:line-clamp-none transition-all cursor-text bg-slate-950/40 p-1.5 rounded-lg border border-slate-800/60" title="${l.details}">
+                        ${l.details}
+                      </div>
                     </td>
                   </tr>
-                `}
-              </tbody>
-            </table>
-          </div>
+                `;
+              }).join('') : `
+                <tr>
+                  <td colspan="6" class="py-12 text-center text-slate-500 text-xs font-sans">
+                    <i class="fa-solid fa-satellite-dish text-3xl text-slate-700 mb-2 block animate-pulse"></i>
+                    Không có sự kiện nhật ký nào thuộc bộ lọc này.
+                  </td>
+                </tr>
+              `}
+            </tbody>
+          </table>
         </div>
 
       </div>
     `;
 
+    // Bind Filter Pills click
+    container.querySelectorAll('.log-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filterKey = btn.getAttribute('data-log-filter');
+        this.activeLogsFilter = filterKey;
+        this.renderAdminSubTabs(this.activeAdminTab);
+        this.renderLogsContent(container);
+      });
+    });
+
+    // Real-time Search Input Listener
     const searchInput = document.getElementById('admin-logs-search');
     searchInput?.addEventListener('input', () => {
       const q = searchInput.value.toLowerCase().trim();
+      let matchCount = 0;
       document.querySelectorAll('#admin-logs-tbody tr').forEach(row => {
         const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? '' : 'none';
+        const matches = text.includes(q);
+        row.style.display = matches ? '' : 'none';
+        if (matches) matchCount++;
       });
+      const countEl = document.getElementById('admin-logs-count');
+      if (countEl) countEl.textContent = matchCount;
+    });
+
+    // Refresh Button Listener
+    document.getElementById('btn-refresh-logs')?.addEventListener('click', async (e) => {
+      const icon = e.currentTarget.querySelector('i');
+      if (icon) icon.classList.add('fa-spin');
+      await this.renderLogsTab(container);
+      this.app.showToast('Đã làm mới nhật ký kiểm toán hệ thống!', 'info');
     });
   }
 
   applyLogsFilter(filterId) {
     const container = document.getElementById('admin-view-body');
     if (!container) return;
+    this.activeLogsFilter = filterId;
     this.renderLogsContent(container);
   }
 
@@ -3040,44 +3260,44 @@ export class AdminComponent {
     container.innerHTML = `
       <div class="space-y-6 admin-subtab-content-anim">
         
-        <!-- KPI Metrics Header -->
+        <!-- KPI Metrics Header (4 Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="admin-orders-kpi-container">
           <div class="glass-card p-4 rounded-2xl border border-blue-500/30 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tổng Đơn Hàng</span>
               <span class="text-xl font-black text-slate-100 font-mono" id="kpi-orders-total">...</span>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-base border border-blue-500/30">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-base border border-blue-500/30 shadow-sm">
               <i class="fa-solid fa-receipt"></i>
-            </div>
-          </div>
-
-          <div class="glass-card p-4 rounded-2xl border border-amber-500/30 flex items-center justify-between">
-            <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Chờ Phê Duyệt</span>
-              <span class="text-xl font-black text-amber-300 font-mono" id="kpi-orders-pending">...</span>
-            </div>
-            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base border border-amber-500/30">
-              <i class="fa-solid fa-clock"></i>
             </div>
           </div>
 
           <div class="glass-card p-4 rounded-2xl border border-emerald-500/30 flex items-center justify-between">
             <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đã Phê Duyệt</span>
-              <span class="text-xl font-black text-emerald-400 font-mono" id="kpi-orders-approved">...</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đã Tự Động Duyệt</span>
+              <span class="text-xl font-black text-emerald-400 font-mono" id="kpi-orders-auto-approved">...</span>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/30">
-              <i class="fa-solid fa-circle-check"></i>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/30 shadow-sm">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+          </div>
+
+          <div class="glass-card p-4 rounded-2xl border border-amber-500/30 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Cần Đối Soát (Chờ Duyệt)</span>
+              <span class="text-xl font-black text-amber-300 font-mono" id="kpi-orders-pending">...</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base border border-amber-500/30 shadow-sm">
+              <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
           </div>
 
           <div class="glass-card p-4 rounded-2xl border border-purple-500/30 flex items-center justify-between">
             <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Doanh Thu Gói VIP</span>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Doanh Thu VIP Thực Tế</span>
               <span class="text-xl font-black text-purple-300 font-mono" id="kpi-orders-revenue">...</span>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30 shadow-sm">
               <i class="fa-solid fa-coins"></i>
             </div>
           </div>
@@ -3091,9 +3311,9 @@ export class AdminComponent {
               <input type="text" id="admin-orders-search" placeholder="Tìm mã đơn, tên, email, cú pháp CK..." 
                 class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:ring-2 focus:ring-emerald-500" />
             </div>
-            <select id="admin-orders-status-select" class="px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-800 text-slate-300">
+            <select id="admin-orders-status-select" class="px-3 py-2 text-xs rounded-xl bg-slate-950 border border-slate-800 text-slate-300 focus:ring-2 focus:ring-emerald-500">
               <option value="ALL">📋 Tất cả trạng thái</option>
-              <option value="PENDING">⏳ Chờ duyệt (Pending)</option>
+              <option value="PENDING">⚠️ Cần đối soát thủ công (Chờ duyệt)</option>
               <option value="APPROVED">✅ Đã duyệt (Approved)</option>
               <option value="REJECTED">❌ Đã từ chối (Rejected)</option>
             </select>
@@ -3154,7 +3374,7 @@ export class AdminComponent {
     else if (this.activeOrdersFilter === 'orders_rejected') statusFilter = 'REJECTED';
 
     const statusSelect = document.getElementById('admin-orders-status-select');
-    if (statusSelect && statusFilter !== 'ALL') statusSelect.value = statusFilter;
+    if (statusSelect) statusSelect.value = statusFilter;
 
     const search = document.getElementById('admin-orders-search')?.value.trim() || '';
 
@@ -3163,15 +3383,29 @@ export class AdminComponent {
       const orders = Array.isArray(data?.orders) ? data.orders : (Array.isArray(data?.items) ? data.items : []);
       const kpi = data?.kpi || {};
 
-      // Update KPIs
+      // Update 4 Summary KPI Cards
       const kTotal = document.getElementById('kpi-orders-total');
+      const kAuto = document.getElementById('kpi-orders-auto-approved');
       const kPending = document.getElementById('kpi-orders-pending');
-      const kApproved = document.getElementById('kpi-orders-approved');
       const kRev = document.getElementById('kpi-orders-revenue');
 
-      if (kTotal) kTotal.textContent = kpi.total_orders || orders.length;
-      if (kPending) kPending.textContent = kpi.pending_count || 0;
-      if (kApproved) kApproved.textContent = kpi.approved_count || 0;
+      const autoApprovedCount = (kpi.auto_approved_count !== undefined) 
+        ? kpi.auto_approved_count 
+        : orders.filter(o => (o.status === 'APPROVED' || o.status === 'PAID') && (
+            o.payment_method === 'REAL_WALLET' || 
+            o.payment_method === 'REAL_WALLET_DIRECT' || 
+            o.payment_method === 'AUTO_MOCK_BANK' || 
+            (o.approved_by && (
+              o.approved_by.toUpperCase().includes('AUTO') || 
+              o.approved_by.toUpperCase().includes('DIRECT') || 
+              o.approved_by.toUpperCase().includes('WALLET') ||
+              o.approved_by.toUpperCase().includes('SYSTEM')
+            ))
+          )).length;
+
+      if (kTotal) kTotal.textContent = kpi.total_orders ?? orders.length;
+      if (kAuto) kAuto.textContent = autoApprovedCount;
+      if (kPending) kPending.textContent = kpi.pending_count ?? orders.filter(o => o.status === 'PENDING').length;
       if (kRev) kRev.textContent = formatVND(kpi.total_revenue || 0);
 
       if (orders.length === 0) {
@@ -3200,11 +3434,20 @@ export class AdminComponent {
           <tbody class="divide-y divide-slate-800/60 font-sans text-xs">
             ${orders.map(o => {
               const isPending = o.status === 'PENDING';
-              const isApproved = o.status === 'APPROVED';
+              const isApproved = o.status === 'APPROVED' || o.status === 'PAID';
               const isRejected = o.status === 'REJECTED';
+              const isAuto = o.payment_method === 'REAL_WALLET_DIRECT' 
+                || o.payment_method === 'AUTO_MOCK_BANK' 
+                || o.payment_method === 'REAL_WALLET'
+                || (o.approved_by && (
+                     o.approved_by.toUpperCase().includes('AUTO') || 
+                     o.approved_by.toUpperCase().includes('DIRECT') || 
+                     o.approved_by.toUpperCase().includes('WALLET') ||
+                     o.approved_by.toUpperCase().includes('SYSTEM')
+                   ));
 
               return `
-                <tr class="hover:bg-slate-800/40 transition">
+                <tr id="order-row-${o.id}" class="hover:bg-slate-800/40 transition">
                   <td class="py-3 font-mono font-bold text-emerald-400">${o.order_code}</td>
                   <td class="py-3">
                     <div class="font-bold text-slate-100">${o.user_name}</div>
@@ -3223,33 +3466,45 @@ export class AdminComponent {
                   <td class="py-3 text-slate-400 font-mono text-[11px] whitespace-nowrap">
                     ${o.created_at}
                   </td>
-                  <td class="py-3">
+                  <td class="py-3 order-status-cell">
                     ${isPending ? `
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
-                        ⏳ Chờ duyệt
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse inline-flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Cần đối soát (Chờ duyệt)
                       </span>
-                    ` : isApproved ? `
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        ✅ Đã duyệt (${o.approved_by || 'Admin'})
-                      </span>
-                    ` : `
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40" title="${o.rejection_reason || ''}">
-                        ❌ Từ chối
+                    ` : isApproved ? (
+                      isAuto ? `
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm inline-flex items-center gap-1">
+                          <i class="fa-solid fa-bolt text-emerald-400"></i> Tự động duyệt (Automatic)
+                        </span>
+                      ` : `
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm inline-flex items-center gap-1">
+                          <i class="fa-solid fa-circle-check text-teal-400"></i> Đã duyệt (${o.approved_by || 'Admin'})
+                        </span>
+                      `
+                    ) : `
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 inline-flex items-center gap-1" title="${o.rejection_reason || ''}">
+                        <i class="fa-solid fa-circle-xmark text-rose-400"></i> Đã từ chối
                       </span>
                     `}
                   </td>
-                  <td class="py-3 text-right whitespace-nowrap">
+                  <td class="py-3 text-right whitespace-nowrap order-action-cell">
                     ${isPending ? `
                       <div class="inline-flex items-center gap-1.5">
-                        <button type="button" class="btn-approve-order px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/25 active:scale-95 transition flex items-center gap-1" data-id="${o.id}" data-code="${o.order_code}">
+                        <button type="button" class="btn-approve-order px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/25 active:scale-95 transition flex items-center gap-1" data-id="${o.id}" data-code="${o.order_code}" data-user="${o.user_name || o.user_id}" data-plan="${o.plan_code || 'VIP'}" data-amount="${o.amount || 0}">
                           <i class="fa-solid fa-check"></i> Duyệt
                         </button>
-                        <button type="button" class="btn-reject-order px-2 py-1 rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800/50 font-bold text-xs active:scale-95 transition" data-id="${o.id}" data-code="${o.order_code}">
+                        <button type="button" class="btn-reject-order px-2 py-1 rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800/50 font-bold text-xs active:scale-95 transition flex items-center gap-1" data-id="${o.id}" data-code="${o.order_code}">
                           <i class="fa-solid fa-xmark"></i> Từ chối
                         </button>
                       </div>
-                    ` : `
-                      <span class="text-[11px] text-slate-500 font-mono">Hoàn tất</span>
+                    ` : isApproved ? (
+                      isAuto ? `
+                        <span class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-mono font-bold"><i class="fa-solid fa-bolt text-xs"></i> Tự động hoàn tất</span>
+                      ` : `
+                        <span class="inline-flex items-center gap-1 text-[11px] text-teal-400 font-mono font-bold"><i class="fa-solid fa-check-double text-xs"></i> Đã kích hoạt VIP</span>
+                      `
+                    ) : `
+                      <span class="inline-flex items-center gap-1 text-[11px] text-slate-500 font-mono"><i class="fa-solid fa-ban text-xs"></i> Đã đóng</span>
                     `}
                   </td>
                 </tr>
@@ -3259,18 +3514,69 @@ export class AdminComponent {
         </table>
       `;
 
-      // Bind approve / reject handlers
+      // Bind approve / reject handlers with safe confirmation and in-place row update
       tableContainer.querySelectorAll('.btn-approve-order').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
           const code = btn.getAttribute('data-code');
-          if (!confirm(`Bạn có chắc chắn muốn PHÊ DUYỆT đơn hàng #${code} và kích hoạt gói VIP cho người dùng ngay không?`)) return;
+          const userName = btn.getAttribute('data-user') || '';
+          const planCode = btn.getAttribute('data-plan') || 'VIP';
+          const amount = parseFloat(btn.getAttribute('data-amount') || 0);
+
+          if (!confirm(`Bạn có chắc chắn muốn DUYỆT THỦ CÔNG đơn hàng #${code} của ${userName}?\nThao tác này sẽ nâng cấp gói ${planCode} ngay cho người dùng.`)) return;
+
           try {
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
             const res = await api.approveAdminSubscriptionOrder(id);
             this.app.showToast(res.message || 'Đã phê duyệt đơn hàng thành công!', 'success');
-            await this.loadAdminSubscriptions();
+
+            // In-place row update without reloading whole page
+            const row = document.getElementById(`order-row-${id}`);
+            if (row) {
+              const statusCell = row.querySelector('.order-status-cell');
+              const actionCell = row.querySelector('.order-action-cell');
+              if (statusCell) {
+                statusCell.innerHTML = `
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm inline-flex items-center gap-1">
+                    <i class="fa-solid fa-circle-check text-teal-400"></i> Đã duyệt (${res.order?.approved_by || 'Admin'})
+                  </span>
+                `;
+              }
+              if (actionCell) {
+                actionCell.innerHTML = `
+                  <span class="inline-flex items-center gap-1 text-[11px] text-teal-400 font-mono font-bold">
+                    <i class="fa-solid fa-check-double text-xs"></i> Đã kích hoạt VIP
+                  </span>
+                `;
+              }
+              row.classList.add('bg-emerald-950/20');
+            }
+
+            // In-place KPI counters update
+            const kPending = document.getElementById('kpi-orders-pending');
+            if (kPending) {
+              const currentPending = parseInt(kPending.textContent, 10);
+              if (!isNaN(currentPending) && currentPending > 0) {
+                kPending.textContent = currentPending - 1;
+              }
+            }
+            const kRev = document.getElementById('kpi-orders-revenue');
+            if (kRev && amount > 0) {
+              const rawRevText = kRev.textContent.replace(/[^\d]/g, '');
+              const currentRev = parseFloat(rawRevText) || 0;
+              kRev.textContent = formatVND(currentRev + amount);
+            }
+
+            // In-place user plan update if current user is the one being approved
+            if (this.app.currentUser && res.order?.user_email && this.app.currentUser.email === res.order.user_email) {
+              this.app.currentUser.plan = res.order.plan_tier || planCode;
+              this.app.currentUser.is_plan_active = true;
+              this.app.currentUser.plan_expires_at = res.order.expires_at;
+              if (typeof this.app.updateUserUI === 'function') {
+                this.app.updateUserUI();
+              }
+            }
           } catch (err) {
             this.app.showToast(err.message || 'Lỗi khi phê duyệt', 'error');
             btn.disabled = false;
@@ -3283,16 +3589,49 @@ export class AdminComponent {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
           const code = btn.getAttribute('data-code');
-          const reason = prompt(`Nhập lý do từ chối đơn hàng #${code}:`, 'Không nhận được chuyển khoản hoặc sai cú pháp');
+          const reason = prompt(`Nhập lý do từ chối đơn hàng #${code}:`, 'Không nhận được chuyển khoản hoặc sai cú pháp chuyển tiền');
           if (!reason || !reason.trim()) return;
+
           try {
             btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
             const res = await api.rejectAdminSubscriptionOrder(id, reason.trim());
             this.app.showToast(res.message || 'Đã từ chối đơn hàng.', 'success');
-            await this.loadAdminSubscriptions();
+
+            // In-place row update without page reload
+            const row = document.getElementById(`order-row-${id}`);
+            if (row) {
+              const statusCell = row.querySelector('.order-status-cell');
+              const actionCell = row.querySelector('.order-action-cell');
+              if (statusCell) {
+                statusCell.innerHTML = `
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 inline-flex items-center gap-1" title="${reason.trim()}">
+                    <i class="fa-solid fa-circle-xmark text-rose-400"></i> Đã từ chối
+                  </span>
+                `;
+              }
+              if (actionCell) {
+                actionCell.innerHTML = `
+                  <span class="inline-flex items-center gap-1 text-[11px] text-slate-500 font-mono">
+                    <i class="fa-solid fa-ban text-xs"></i> Đã đóng
+                  </span>
+                `;
+              }
+              row.classList.add('bg-rose-950/10');
+            }
+
+            // In-place KPI pending update
+            const kPending = document.getElementById('kpi-orders-pending');
+            if (kPending) {
+              const currentPending = parseInt(kPending.textContent, 10);
+              if (!isNaN(currentPending) && currentPending > 0) {
+                kPending.textContent = currentPending - 1;
+              }
+            }
           } catch (err) {
             this.app.showToast(err.message || 'Lỗi khi từ chối', 'error');
             btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-xmark"></i> Từ chối`;
           }
         });
       });

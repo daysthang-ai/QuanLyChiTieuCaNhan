@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 class Category(Base):
     __tablename__ = "categories"
@@ -14,7 +14,7 @@ class Category(Base):
     icon = Column(String(50), default="tag", nullable=False)
     color = Column(String(30), default="#10B981", nullable=False)
     is_default = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
 
     # Relationships
     user = relationship("User", back_populates="categories")

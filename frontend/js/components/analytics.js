@@ -14,7 +14,7 @@ export class AnalyticsComponent {
     this.destroyCharts();
 
     container.innerHTML = `
-      <div id="tab-analytics" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-reports" data-tab-id="analytics" class="content-section user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header & Action Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -415,7 +415,7 @@ export class AnalyticsComponent {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          resizeDelay: 50,
+          resizeDelay: 0,
           cutout: '70%',
           plugins: {
             legend: { display: false },
@@ -547,7 +547,7 @@ export class AnalyticsComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 50,
+        resizeDelay: 0,
         interaction: {
           mode: 'index',
           intersect: false
@@ -678,7 +678,7 @@ export class AnalyticsComponent {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      a.remove();
+      if (a && typeof a.remove === 'function') a.remove();
       window.URL.revokeObjectURL(url);
 
       this.app.showToast(`Tải file ${filename} thành công!`, 'success');

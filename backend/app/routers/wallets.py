@@ -3,7 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, Wallet, Transaction, Category, Notification
 from backend.app.schemas import WalletCreate, WalletUpdate, WalletOut, WalletTransfer, WalletDeposit, BankLinkRequest
 from backend.app.routers.auth import get_current_user
@@ -132,10 +132,14 @@ def update_wallet(
     if wallet_in.bank_code is not None: wallet.bank_code = wallet_in.bank_code
     if wallet_in.auto_debit_enabled is not None: wallet.auto_debit_enabled = wallet_in.auto_debit_enabled
 
-    wallet.updated_at = datetime.datetime.utcnow()
-    db.commit()
-    db.refresh(wallet)
-    return wallet
+    wallet.updated_at = get_utc_now()
+    try:
+        db.commit()
+        db.refresh(wallet)
+        return wallet
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi cập nhật ví: {str(e)}")
 
 @router.delete("/{wallet_id}")
 def delete_wallet(
@@ -156,15 +160,19 @@ def delete_wallet(
     tx_count = db.query(Transaction).filter(
         (Transaction.wallet_id == wallet_id) | (Transaction.to_wallet_id == wallet_id)
     ).count()
-    if tx_count > 0:
-        # Soft delete
-        wallet.is_active = False
-        db.commit()
-        return {"message": "Ví đã có giao dịch nên đã được ẩn khỏi danh sách."}
-    else:
-        db.delete(wallet)
-        db.commit()
-        return {"message": "Đã xóa ví thành công."}
+    try:
+        if tx_count > 0:
+            # Soft delete
+            wallet.is_active = False
+            db.commit()
+            return {"message": "Ví đã có giao dịch nên đã được ẩn khỏi danh sách."}
+        else:
+            db.delete(wallet)
+            db.commit()
+            return {"message": "Đã xóa ví thành công."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi xóa ví: {str(e)}")
 
 @router.post("/transfer")
 def transfer_between_wallets(
@@ -196,7 +204,7 @@ def transfer_between_wallets(
     to_w.balance += transfer_in.amount
 
     # Create transaction log
-    tx_date = transfer_in.date or datetime.datetime.utcnow()
+    tx_date = transfer_in.date or get_utc_now()
     tx = Transaction(
         user_id=current_user.id,
         wallet_id=from_w.id,
@@ -207,8 +215,12 @@ def transfer_between_wallets(
         note=transfer_in.note or f"Chuyển từ {from_w.name} sang {to_w.name}",
         created_by_ai="MANUAL"
     )
-    db.add(tx)
-    db.commit()
+    try:
+        db.add(tx)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi thực hiện chuyển tiền: {str(e)}")
 
     return {
         "message": f"Chuyển thành công {transfer_in.amount:,.0f} đ từ {from_w.name} sang {to_w.name}",
@@ -233,7 +245,7 @@ def deposit_to_wallet(
 
     old_balance = wallet.balance
     wallet.balance += deposit_in.amount
-    wallet.updated_at = datetime.datetime.utcnow()
+    wallet.updated_at = get_utc_now()
 
     # Find or create income category for wallet deposits
     cat_name = "Nạp Tiền Thật (Cổng Dịch Vụ)" if wallet.wallet_scope == "real" else "Thu Nhập & Nạp Tiền"
@@ -274,14 +286,18 @@ def deposit_to_wallet(
         category_id=cat.id,
         type="INCOME",
         amount=deposit_in.amount,
-        transaction_date=datetime.datetime.utcnow(),
+        transaction_date=get_utc_now(),
         note=tx_note,
         created_by_ai="WALLET_DEPOSIT" if wallet.wallet_scope != "real" else "REAL_PAYMENT_DEPOSIT"
     )
-    db.add(tx)
-    db.commit()
-    db.refresh(wallet)
-    db.refresh(tx)
+    try:
+        db.add(tx)
+        db.commit()
+        db.refresh(wallet)
+        db.refresh(tx)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi nạp tiền vào ví: {str(e)}")
 
     scope_name = "Ví Tiền Thật / VIP" if wallet.wallet_scope == "real" else f"Ví '{wallet.name}'"
     return {
@@ -319,7 +335,7 @@ def link_bank_account(
         Wallet.account_number_masked == masked_acc
     ).first()
 
-    now = datetime.datetime.utcnow()
+    now = get_utc_now()
     bank_colors = {
         "TCB": "#E11B22",
         "VCB": "#005F37",
@@ -331,34 +347,38 @@ def link_bank_account(
     }
     color = bank_colors.get(data.bank_code.upper(), "#3B82F6")
 
-    if existing:
-        existing.is_linked = True
-        existing.auto_debit_enabled = data.auto_debit_consent
-        existing.linked_at = now
-        existing.updated_at = now
-        db.commit()
-        db.refresh(existing)
-        target_wallet = existing
-    else:
-        new_wallet = Wallet(
-            user_id=current_user.id,
-            name=f"{data.bank_name} ({data.account_holder})",
-            wallet_type="BANK",
-            balance=data.initial_balance if data.initial_balance else 5000000.0,
-            currency=current_user.currency or "VND",
-            account_number_masked=masked_acc,
-            icon="building-columns" if data.bank_code.upper() != "MOMO" else "mobile-screen",
-            color=color,
-            is_active=True,
-            is_linked=True,
-            bank_code=data.bank_code.upper(),
-            auto_debit_enabled=data.auto_debit_consent,
-            linked_at=now
-        )
-        db.add(new_wallet)
-        db.commit()
-        db.refresh(new_wallet)
-        target_wallet = new_wallet
+    try:
+        if existing:
+            existing.is_linked = True
+            existing.auto_debit_enabled = data.auto_debit_consent
+            existing.linked_at = now
+            existing.updated_at = now
+            db.commit()
+            db.refresh(existing)
+            target_wallet = existing
+        else:
+            new_wallet = Wallet(
+                user_id=current_user.id,
+                name=f"{data.bank_name} ({data.account_holder})",
+                wallet_type="BANK",
+                balance=data.initial_balance if data.initial_balance else 5000000.0,
+                currency=current_user.currency or "VND",
+                account_number_masked=masked_acc,
+                icon="building-columns" if data.bank_code.upper() != "MOMO" else "mobile-screen",
+                color=color,
+                is_active=True,
+                is_linked=True,
+                bank_code=data.bank_code.upper(),
+                auto_debit_enabled=data.auto_debit_consent,
+                linked_at=now
+            )
+            db.add(new_wallet)
+            db.commit()
+            db.refresh(new_wallet)
+            target_wallet = new_wallet
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi liên kết tài khoản ngân hàng: {str(e)}")
 
     # Create a notification in Hộp Thư & Thông Báo
     notif = Notification(

@@ -1,24 +1,383 @@
-import { api } from './api.js?v=7.0';
-import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=7.0';
-import { AuthComponent } from './components/auth.js?v=7.0';
-import { DashboardComponent } from './components/dashboard.js?v=7.0';
-import { TransactionsComponent } from './components/transactions.js?v=7.0';
-import { WalletsComponent } from './components/wallets.js?v=7.0';
-import { CategoriesComponent } from './components/categories.js?v=7.0';
-import { BudgetsComponent } from './components/budgets.js?v=7.0';
-import { SavingsComponent } from './components/savings.js?v=7.0';
-import { AnalyticsComponent } from './components/analytics.js?v=7.0';
-import { AIAssistantComponent } from './components/ai_assistant.js?v=7.0';
-import { BadgesComponent } from './components/badges.js?v=7.0';
-import { AdminComponent } from './components/admin.js?v=7.0';
-import { SubscriptionComponent } from './components/subscription.js?v=7.5';
-import { NotificationsComponent } from './components/notifications.js?v=7.0';
-import { SupportComponent } from './components/support.js?v=7.0';
+import { api } from './api.js?v=20260904_10';
+import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=20260904_10';
+import { AuthComponent } from './components/auth.js?v=20260904_10';
+import { DashboardComponent } from './components/dashboard.js?v=20260904_11';
+import { TransactionsComponent } from './components/transactions.js?v=20260904_10';
+import { WalletsComponent } from './components/wallets.js?v=20260904_10';
+import { CategoriesComponent } from './components/categories.js?v=20260904_10';
+import { BudgetsComponent } from './components/budgets.js?v=20260904_11';
+import { SavingsComponent } from './components/savings.js?v=20260904_10';
+import { AnalyticsComponent } from './components/analytics.js?v=20260904_10';
+import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_10';
+import { BadgesComponent } from './components/badges.js?v=20260904_10';
+import { AdminComponent } from './components/admin.js?v=20260904_13';
+import { SubscriptionComponent } from './components/subscription.js?v=20260904_10';
+import { NotificationsComponent } from './components/notifications.js?v=20260904_10';
+import { SupportComponent } from './components/support.js?v=20260904_10';
+
+// 1. Auth Modal
+window.openAuthModal = function(mode = 'login') {
+  try {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+      modal.classList.remove('hidden', 'pointer-events-none');
+      modal.classList.add('flex', 'pointer-events-auto');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('z-index', '999999', 'important');
+      modal.style.setProperty('pointer-events', 'auto', 'important');
+      if (typeof window.switchAuthMode === 'function') {
+        window.switchAuthMode(mode);
+      }
+    } else {
+      console.error("Lỗi: Không tìm thấy #auth-modal trong HTML!");
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi khi mở Auth Modal:', err);
+  }
+};
+
+window.closeAuthModal = function() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+};
+
+// Auto-sync dynamic modal host containers (#generic-modal, #modal-deposit-wallet, #upgradeModal, #vipModal)
+function setupDynamicModalSync() {
+  const dynamicHostIds = ['generic-modal', 'modal-deposit-wallet', 'upgradeModal', 'vipModal'];
+  dynamicHostIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el._syncAttached) return;
+    el._syncAttached = true;
+    const updateVisibility = () => {
+      const hasContent = el.childNodes.length > 0 && el.innerHTML.trim() !== '';
+      if (hasContent) {
+        el.classList.remove('hidden', 'pointer-events-none');
+        el.classList.add('pointer-events-auto');
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('z-index', '999999', 'important');
+        el.style.setProperty('pointer-events', 'auto', 'important');
+      } else {
+        el.classList.add('hidden', 'pointer-events-none');
+        el.classList.remove('pointer-events-auto');
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      }
+    };
+    const observer = new MutationObserver(updateVisibility);
+    observer.observe(el, { childList: true });
+    updateVisibility();
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupDynamicModalSync);
+} else {
+  setupDynamicModalSync();
+}
+
+window.openModalById = function(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) {
+    console.warn("Không tìm thấy modal:", modalId);
+    return;
+  }
+  modal.classList.remove('hidden', 'pointer-events-none');
+  modal.classList.add('flex', 'pointer-events-auto');
+  modal.style.setProperty('display', 'flex', 'important');
+  modal.style.setProperty('z-index', '999999', 'important');
+  modal.style.setProperty('pointer-events', 'auto', 'important');
+};
+
+window.closeModalById = function(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.add('hidden', 'pointer-events-none');
+  modal.classList.remove('flex', 'pointer-events-auto');
+  modal.style.setProperty('display', 'none', 'important');
+  modal.style.setProperty('pointer-events', 'none', 'important');
+};
+
+// 2. Quick AI Modal
+window.openQuickAiModal = function() {
+  try {
+    if (window.fintrackApp?.aiAssistant?.openQuickParserModal) {
+      window.fintrackApp.aiAssistant.openQuickParserModal();
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi aiAssistant, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('ai-input-modal') || document.getElementById('quick-ai-modal') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+    const input = modal.querySelector('textarea, input');
+    if (input) input.focus();
+  }
+};
+
+window.closeQuickAiModal = function() {
+  const modal = document.getElementById('ai-input-modal') || document.getElementById('quick-ai-modal');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+window.openAiModal = window.openQuickAiModal;
+window.closeAiModal = window.closeQuickAiModal;
+
+// 3. Transaction Modal (+ Ghi Thu - Chi)
+window.openTransactionModal = function(type = 'EXPENSE', defaultWalletId = null) {
+  try {
+    if (window.fintrackApp?.transactions?.openTransactionModal) {
+      const editId = (typeof type === 'number' || (typeof type === 'string' && /^\d+$/.test(type))) ? parseInt(type) : null;
+      const finalType = editId ? 'EXPENSE' : (type || 'EXPENSE');
+      window.fintrackApp.transactions.openTransactionModal(editId, finalType, defaultWalletId);
+      return;
+    } else if (window.fintrackApp?.openTransactionModal) {
+      window.fintrackApp.openTransactionModal(type);
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi transactions component, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('transaction-modal') || document.getElementById('add-tx-modal') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+  }
+};
+
+window.closeTransactionModal = function() {
+  const modal = document.getElementById('transaction-modal') || document.getElementById('add-tx-modal');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+// 4. Wallet & Transfer Modal
+window.openWalletModal = function(editId = null) {
+  try {
+    if (window.fintrackApp?.wallets?.openWalletModal) {
+      window.fintrackApp.wallets.openWalletModal(editId);
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi wallets component, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('wallet-modal') || document.getElementById('add-wallet-modal') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+  }
+};
+
+window.closeWalletModal = function() {
+  const modal = document.getElementById('wallet-modal') || document.getElementById('add-wallet-modal');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+window.openAddWalletModal = function() {
+  window.openWalletModal(null);
+};
+
+window.closeAddWalletModal = function() {
+  window.closeWalletModal();
+};
+
+window.openTransferModal = function() {
+  try {
+    if (window.fintrackApp?.wallets?.openTransferModal) {
+      window.fintrackApp.wallets.openTransferModal();
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi transfer modal component, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('transfer-modal') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+  }
+};
+
+window.closeTransferModal = function() {
+  const modal = document.getElementById('transfer-modal');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+window.openRealDepositModal = function(walletId = null) {
+  try {
+    if (window.fintrackApp?.wallets?.openRealDepositModal) {
+      window.fintrackApp.wallets.openRealDepositModal(walletId);
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi real deposit component, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('deposit-modal') || document.getElementById('real-deposit-modal') || document.getElementById('modal-deposit-wallet') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+  }
+};
+
+window.closeRealDepositModal = function() {
+  const modal = document.getElementById('deposit-modal') || document.getElementById('real-deposit-modal') || document.getElementById('modal-deposit-wallet');
+  if (modal) {
+    modal.classList.add('hidden', 'pointer-events-none');
+    modal.classList.remove('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+window.openSubscriptionModal = function(tier = 'VIP') {
+  try {
+    if (typeof window.switchTab === 'function') {
+      window.switchTab('subscription');
+      return;
+    } else if (window.fintrackApp?.navigate) {
+      window.fintrackApp.navigate('subscription');
+      return;
+    } else if (window.fintrackApp?.subscription?.openUpgradeModal) {
+      window.fintrackApp.subscription.openUpgradeModal(tier);
+      return;
+    }
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi subscription component, chuyển fallback DOM modal:', err);
+  }
+  const modal = document.getElementById('subscription-modal') || document.getElementById('vip-modal') || document.getElementById('upgrade-modal') || document.getElementById('upgradeModal') || document.getElementById('generic-modal');
+  if (modal) {
+    modal.classList.remove('hidden', 'pointer-events-none');
+    modal.classList.add('flex', 'pointer-events-auto');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('z-index', '999999', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+  }
+};
+
+window.closeSubscriptionModal = function() {
+  ['subscription-modal', 'vip-modal', 'upgrade-modal', 'upgradeModal', 'vipModal'].forEach(id => {
+    window.closeModalById(id);
+  });
+  const generic = document.getElementById('generic-modal');
+  if (generic && !generic.classList.contains('hidden')) {
+    window.closeModalById('generic-modal');
+    generic.innerHTML = '';
+  }
+};
+
+let resizeAnimFrameId = null;
+export const triggerRealtimeChartResize = (durationMs = 350) => {
+  if (resizeAnimFrameId) {
+    cancelAnimationFrame(resizeAnimFrameId);
+  }
+  const startTime = performance.now();
+  const step = (now) => {
+    if (window.Chart && Chart.instances) {
+      Object.values(Chart.instances).forEach(chart => {
+        if (chart && typeof chart.resize === 'function') {
+          chart.resize();
+        }
+      });
+    }
+    if (now - startTime < durationMs) {
+      resizeAnimFrameId = requestAnimationFrame(step);
+    } else {
+      if (window.Chart && Chart.instances) {
+        Object.values(Chart.instances).forEach(chart => {
+          if (chart && typeof chart.resize === 'function') {
+            chart.resize();
+          }
+        });
+      }
+      resizeAnimFrameId = null;
+    }
+  };
+  resizeAnimFrameId = requestAnimationFrame(step);
+};
+window.triggerRealtimeChartResize = triggerRealtimeChartResize;
+
+const forceResetOverlay = () => {
+  const overlay = document.getElementById('sidebarOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    overlay.style.setProperty('display', 'none', 'important');
+  }
+  document.body.style.overflow = '';
+  document.body.classList.remove('overflow-hidden');
+};
+
+forceResetOverlay();
 
 class App {
   constructor() {
     this.currentUser = null;
     this.activeTab = 'dashboard';
+
+    // Đảm bảo reset trạng thái overlay và cuộn trang ngay khi khởi tạo
+    forceResetOverlay();
 
     // Components initialized safely with try-catch
     const initComponent = (factory, name) => {
@@ -46,11 +405,122 @@ class App {
     this.support = initComponent(() => new SupportComponent(this), 'SupportComponent');
 
     // Global hook for admin, subscription, and support subroutines
+    window.fintrackApp = this;
     window.fintrackAdmin = this.admin;
     window.fintrackSubscription = this.subscription;
     window.fintrackNotifications = this.notifications;
     window.fintrackSupport = this.support;
     window.switchPortal = (portal) => this.switchPortal(portal);
+    window.showLandingPage = (tab = 'home') => this.showLandingPage(tab);
+    window.switchLandingTab = (tab = 'home') => this.switchLandingTab(tab);
+    window.enterDashboard = () => this.enterDashboard();
+    window.openAuthModal = function(mode) {
+      const modal = document.getElementById('auth-modal');
+      if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+        if (mode && typeof window.switchAuthMode === 'function') {
+          window.switchAuthMode(mode);
+        }
+      } else {
+        console.error("Lỗi: Không tìm thấy #auth-modal trong HTML!");
+      }
+    };
+    window.closeAuthModal = function() {
+      const modal = document.getElementById('auth-modal');
+      if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+      }
+    };
+    window.switchAuthMode = (mode = 'login') => {
+      this.auth?.renderAuthModal(mode);
+    };
+    window.quickDemoLogin = (role = 'user') => {
+      if (this.auth) {
+        if (role === 'admin') {
+          this.auth.loginDirect('admin@fintrack.ai', 'Admin@123456');
+        } else {
+          this.auth.loginDirect('user@fintrack.ai', 'User@123456');
+        }
+      }
+    };
+  }
+
+  switchLandingTab(tabName = 'home') {
+    const validTabs = ['home', 'advisor', 'features', 'pricing', 'about'];
+    const activeTab = validTabs.includes(tabName) ? tabName : 'home';
+
+    validTabs.forEach(tab => {
+      const container = document.getElementById(`tab-landing-${tab}`);
+      if (container) {
+        if (tab === activeTab) {
+          container.classList.remove('hidden');
+          container.style.removeProperty('display');
+        } else {
+          container.classList.add('hidden');
+          container.style.setProperty('display', 'none', 'important');
+        }
+      }
+    });
+
+    document.querySelectorAll('.landing-tab-btn').forEach(btn => {
+      const targetTab = btn.getAttribute('data-landing-tab');
+      if (targetTab === activeTab) {
+        btn.className = 'landing-tab-btn flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)] transition-all cursor-pointer';
+      } else {
+        btn.className = 'landing-tab-btn flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent transition-all cursor-pointer';
+      }
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  showLandingPage(tab = 'home') {
+    const landing = document.getElementById('landing-page-container') || document.getElementById('view-landing');
+    const workspace = document.getElementById('app-workspace-container');
+    const header = document.getElementById('top-glass-header');
+    const appContainer = document.getElementById('app-layout-container');
+    if (landing) {
+      landing.classList.remove('hidden');
+      landing.style.removeProperty('display');
+    }
+    if (workspace) {
+      workspace.classList.add('hidden');
+      workspace.style.setProperty('display', 'none', 'important');
+    }
+    if (header) header.classList.add('hidden');
+    if (appContainer) appContainer.classList.add('hidden');
+    this.switchLandingTab(tab);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  enterDashboard() {
+    const landing = document.getElementById('landing-page-container') || document.getElementById('view-landing');
+    const workspace = document.getElementById('app-workspace-container') || document.getElementById('view-app');
+    const header = document.getElementById('top-glass-header');
+    const appContainer = document.getElementById('app-layout-container');
+    if (landing) {
+      landing.classList.add('hidden', 'pointer-events-none');
+      landing.classList.remove('pointer-events-auto');
+      landing.style.setProperty('display', 'none', 'important');
+      landing.style.setProperty('pointer-events', 'none', 'important');
+    }
+    if (workspace) {
+      workspace.classList.remove('hidden', 'pointer-events-none');
+      workspace.classList.add('pointer-events-auto');
+      workspace.style.removeProperty('display');
+      workspace.style.setProperty('display', 'flex', 'important');
+      workspace.style.setProperty('pointer-events', 'auto', 'important');
+    }
+    if (header) {
+      header.classList.remove('hidden', 'pointer-events-none');
+      header.classList.add('pointer-events-auto');
+    }
+    if (appContainer) {
+      appContainer.classList.remove('hidden', 'pointer-events-none');
+      appContainer.classList.add('pointer-events-auto');
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    triggerRealtimeChartResize(400);
   }
 
   switchPortal(portal) {
@@ -62,11 +532,15 @@ class App {
   }
 
   async init() {
-    // 1. Configure Chart.js for Dark Theme safely
+    // Reset overlay & body overflow khi khởi động
+    forceResetOverlay();
+
+    // 1. Configure Chart.js for Dark Theme safely with 0ms resize delay
     try {
       if (window.Chart) {
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+        Chart.defaults.resizeDelay = 0;
       }
     } catch (chartErr) {
       console.warn('[FinTrack] Lỗi cấu hình Chart.js:', chartErr);
@@ -76,6 +550,7 @@ class App {
     try {
       window.addEventListener('fintrack:unauthorized', () => {
         this.currentUser = null;
+        this.showLandingPage();
         if (this.auth?.renderAuthModal) {
           this.auth.renderAuthModal(false);
         }
@@ -85,6 +560,7 @@ class App {
         this.currentUser = null;
         const msg = e.detail?.message || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.';
         this.showToast(msg, 'error');
+        this.showLandingPage();
         if (this.auth?.renderAuthModal) {
           this.auth.renderAuthModal(false);
         }
@@ -109,13 +585,7 @@ class App {
     }
 
     if (!token) {
-      try {
-        if (this.auth?.renderAuthModal) {
-          this.auth.renderAuthModal(false);
-        }
-      } catch (authErr) {
-        console.error('[FinTrack] Lỗi hiển thị Auth Modal:', authErr);
-      }
+      this.showLandingPage();
       return;
     }
 
@@ -129,25 +599,24 @@ class App {
         localStorage.removeItem('token');
         this.currentUser = null;
         this.showToast('Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên.', 'error');
-        if (this.auth?.renderAuthModal) {
-          this.auth.renderAuthModal(false);
-        }
+        this.showLandingPage();
         return;
       }
+      this.enterDashboard();
       this.initApp();
     } catch (e) {
       console.warn('[FinTrack] Session expired hoặc không thể xác thực tài khoản:', e);
-      try {
-        if (this.auth?.renderAuthModal) {
-          this.auth.renderAuthModal(false);
-        }
-      } catch (authErr) {
-        console.error('[FinTrack] Lỗi mở Auth Modal khi phiên hết hạn:', authErr);
-      }
+      api.setToken('');
+      localStorage.removeItem('fintrack_token');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
+      this.currentUser = null;
+      this.showLandingPage();
     }
   }
 
   initApp() {
+    this.enterDashboard();
     this._seenNotifIds = new Set();
     this._hasInitNotifs = false;
 
@@ -292,12 +761,12 @@ class App {
       } else {
         this.navigate('notifications');
       }
-      toast.remove();
+      if (toast && typeof toast.remove === 'function') toast.remove();
     });
 
     toastContainer.appendChild(toast);
     setTimeout(() => {
-      if (toast.parentElement) toast.remove();
+      if (toast && toast.parentElement && typeof toast.remove === 'function') toast.remove();
     }, 8000);
   }
 
@@ -545,10 +1014,10 @@ class App {
         if (isPaid) {
           const isPlatinum = plan === 'PLATINUM';
           const isPremium = plan === 'PREMIUM';
-          sidebarUserFooter.className = `p-3 rounded-2xl bg-slate-900/90 border ${isExpiringSoon ? 'border-rose-500/40 shadow-rose-500/10' : isPlatinum ? 'border-emerald-500/50 shadow-emerald-500/20' : isPremium ? 'border-amber-500/40 shadow-amber-500/10' : 'border-purple-500/40 shadow-purple-500/10'} shadow-lg text-xs space-y-1.5`;
+          sidebarUserFooter.className = `p-2.5 rounded-xl bg-slate-900/90 border ${isExpiringSoon ? 'border-rose-500/40 shadow-rose-500/10' : isPlatinum ? 'border-emerald-500/50 shadow-emerald-500/20' : isPremium ? 'border-amber-500/40 shadow-amber-500/10' : 'border-purple-500/40 shadow-purple-500/10'} shadow-md text-xs space-y-1`;
           sidebarUserFooter.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="font-black text-[11px] flex items-center gap-1.5 ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-300' : 'text-purple-300'}">
+              <span class="font-bold text-[11px] flex items-center gap-1.5 ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-300' : 'text-purple-300'}">
                 <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : 'fa-bolt'} text-[10px]"></i>
                 <span>${isPlatinum ? 'Platinum VIP' : isPremium ? 'FinTrack Premium' : 'FinTrack VIP Pro'}</span>
               </span>
@@ -559,17 +1028,17 @@ class App {
             <p class="text-[10px] text-slate-400">
               ${this.currentUser.plan_expires_at ? `Hạn dùng: <b class="text-slate-300 font-mono">${formatDateVN(this.currentUser.plan_expires_at)}</b>` : 'Gói thành viên VIP'}
             </p>
-            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold transition flex items-center justify-center gap-1 border border-slate-700 shadow-sm active:scale-95">
+            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold transition flex items-center justify-center gap-1 border border-slate-700 shadow-sm active:scale-95">
               <i class="fa-solid fa-clock-rotate-left text-[9px] ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : 'text-purple-300'}"></i>
               <span>${isExpiringSoon ? 'Gia hạn gói ngay' : 'Quản lý thời hạn'}</span>
             </button>
           `;
         } else {
-          sidebarUserFooter.className = 'p-3 rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-lg text-xs space-y-1.5';
+          sidebarUserFooter.className = 'p-2.5 rounded-xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-md text-xs space-y-1';
           sidebarUserFooter.innerHTML = `
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5 font-bold text-[11px] text-slate-200">
-                <i class="fa-solid fa-seedling text-emerald-400"></i>
+                <i class="fa-solid fa-seedling text-emerald-400 text-[10px]"></i>
                 <span>Gói Miễn Phí</span>
               </div>
               <span class="text-[9px] text-slate-400 font-mono">Vĩnh viễn</span>
@@ -577,7 +1046,7 @@ class App {
             <p class="text-[10px] text-slate-400 leading-tight">
               Mở khóa AI không giới hạn & Cố vấn 50/30/20.
             </p>
-            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[10px] font-black shadow-md hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[10px] font-black shadow-sm hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1">
               <i class="fa-solid fa-crown text-[9px]"></i>
               <span>Nâng Cấp VIP Ngay</span>
             </button>
@@ -625,84 +1094,97 @@ class App {
   }
 
   bindNavigation() {
-    // Mobile Sidebar Elements
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-    const sidebar = document.getElementById('sidebar');
 
-    const updateMenuIcon = (isOpen) => {
-      const icon = mobileMenuBtn?.querySelector('i');
-      if (icon) {
-        if (isOpen) {
-          icon.className = 'fa-solid fa-xmark text-lg text-emerald-400';
-        } else {
-          icon.className = 'fa-solid fa-bars text-lg';
-        }
-      }
-    };
+    window.toggleSidebar = function() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
 
-    const openMobileSidebar = () => {
-      if (sidebar) sidebar.classList.add('mobile-open');
-      if (sidebarBackdrop) {
-        sidebarBackdrop.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          sidebarBackdrop.classList.add('active');
-        });
-      }
-      document.body.classList.add('overflow-hidden');
-      updateMenuIcon(true);
-    };
-
-    const closeMobileSidebar = () => {
-      if (sidebar) sidebar.classList.remove('mobile-open');
-      if (sidebarBackdrop) {
-        sidebarBackdrop.classList.remove('active');
-        setTimeout(() => {
-          if (!sidebar?.classList.contains('mobile-open')) {
-            sidebarBackdrop.classList.add('hidden');
-          }
-        }, 300);
-      }
-      document.body.classList.remove('overflow-hidden');
-      updateMenuIcon(false);
-    };
-
-    const toggleMobileSidebar = () => {
-      if (sidebar?.classList.contains('mobile-open')) {
-        closeMobileSidebar();
+      const isCollapsed = sidebar.classList.contains('sidebar-collapsed') || sidebar.classList.contains('collapsed');
+      if (isCollapsed) {
+        // Mở rộng Menu
+        sidebar.classList.remove('sidebar-collapsed', 'collapsed');
+        sidebar.style.removeProperty('width');
+        sidebar.style.removeProperty('opacity');
+        sidebar.style.removeProperty('margin-left');
       } else {
-        openMobileSidebar();
+        // Thu gọn Menu & Mở rộng nội dung
+        sidebar.classList.add('sidebar-collapsed', 'collapsed');
+        sidebar.style.removeProperty('width');
+        sidebar.style.removeProperty('opacity');
+        sidebar.style.removeProperty('margin-left');
+      }
+      triggerRealtimeChartResize(350);
+    };
+
+    window.closeSidebar = function(force = false) {
+      // Tuyệt đối không đóng menu trên Desktop (>= 1024px) trừ khi được ép buộc (force = true)
+      if (!force && window.innerWidth >= 1024) {
+        return;
+      }
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.classList.add('sidebar-collapsed', 'collapsed');
+        sidebar.style.removeProperty('width');
+        sidebar.style.removeProperty('opacity');
+        sidebar.style.removeProperty('margin-left');
+        triggerRealtimeChartResize(350);
       }
     };
 
-    this.openMobileSidebar = openMobileSidebar;
-    this.closeMobileSidebar = closeMobileSidebar;
-    this.toggleMobileSidebar = toggleMobileSidebar;
+    window.openSidebar = function() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.classList.remove('sidebar-collapsed', 'collapsed');
+        sidebar.style.removeProperty('width');
+        sidebar.style.removeProperty('opacity');
+        sidebar.style.removeProperty('margin-left');
+        triggerRealtimeChartResize(350);
+      }
+    };
+
+    this.openMobileSidebar = window.openSidebar;
+    this.closeMobileSidebar = window.closeSidebar;
+    this.toggleMobileSidebar = window.toggleSidebar;
+    this.openSidebar = window.openSidebar;
+    this.closeSidebar = window.closeSidebar;
+    this.toggleSidebar = window.toggleSidebar;
+
+    const sidebarEl = document.getElementById('sidebar');
+    if (sidebarEl && !this._sidebarTransitionBound) {
+      this._sidebarTransitionBound = true;
+      sidebarEl.addEventListener('transitionrun', () => triggerRealtimeChartResize(350));
+      sidebarEl.addEventListener('transitionstart', () => triggerRealtimeChartResize(350));
+      sidebarEl.addEventListener('transitionend', () => triggerRealtimeChartResize(50));
+    }
+
+    const mainWrapper = document.getElementById('main-glass-wrapper');
+    if (mainWrapper && window.ResizeObserver && !this._mainResizeObserverBound) {
+      this._mainResizeObserverBound = true;
+      const ro = new ResizeObserver(() => {
+        if (window.Chart && Chart.instances) {
+          Object.values(Chart.instances).forEach(chart => {
+            if (chart && typeof chart.resize === 'function') {
+              chart.resize();
+            }
+          });
+        }
+      });
+      ro.observe(mainWrapper);
+    }
 
     mobileMenuBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      toggleMobileSidebar();
-    });
-
-    closeSidebarBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeMobileSidebar();
-    });
-
-    sidebarBackdrop?.addEventListener('click', () => {
-      closeMobileSidebar();
+      window.toggleSidebar();
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && sidebar?.classList.contains('mobile-open')) {
-        closeMobileSidebar();
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 1024 && sidebar?.classList.contains('mobile-open')) {
-        closeMobileSidebar();
+      if (e.key === 'Escape') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !sidebar.classList.contains('sidebar-collapsed') && window.innerWidth < 1024) {
+          window.closeSidebar();
+        }
       }
     });
 
@@ -713,23 +1195,27 @@ class App {
       const tab = btn.getAttribute('data-tab');
       if (tab) {
         this.navigate(tab);
-        closeMobileSidebar();
+        if (window.innerWidth < 1024) {
+          closeSidebar();
+        }
       }
     };
 
-    document.querySelectorAll('.nav-btn').forEach(btn => {
+    document.querySelectorAll('.nav-btn, .nav-item, .sidebar-link, [data-tab]').forEach(btn => {
       btn.addEventListener('click', (e) => handleNavClick(btn, e));
     });
 
     // Document-level fallback delegation for any dynamic data-tab element
     document.addEventListener('click', (e) => {
-      const navBtn = e.target.closest('.nav-btn, .btn-goto-tab, [data-tab]');
+      const navBtn = e.target.closest('.nav-btn, .nav-item, .sidebar-link, .btn-goto-tab, [data-tab]');
       if (navBtn && !navBtn.classList.contains('filter-tab-btn') && !navBtn.classList.contains('tx-type-tab') && !navBtn.classList.contains('dash-period-pill')) {
         const tab = navBtn.getAttribute('data-tab');
-        if (tab && tab !== this.activeTab) {
+        if (tab) {
           e.preventDefault();
           this.navigate(tab);
-          closeMobileSidebar();
+          if (window.innerWidth < 1024) {
+            closeSidebar();
+          }
         }
       }
     });
@@ -856,8 +1342,84 @@ class App {
            document.querySelector('main');
   }
 
+  normalizeTab(tabName) {
+    if (!tabName) return 'dashboard';
+    const raw = String(tabName).toLowerCase().replace(/^tab-/, '').replace(/^view-/, '').replace(/^#/, '').trim();
+    const aliasMap = {
+      'dashboard': 'dashboard',
+      'tong-quan': 'dashboard',
+      'transactions': 'transactions',
+      'thu-chi': 'transactions',
+      'giao-dich': 'transactions',
+      'wallets': 'wallets',
+      'vi': 'wallets',
+      'tai-khoan': 'wallets',
+      'categories': 'categories',
+      'danh-muc': 'categories',
+      'category': 'categories',
+      'budgets': 'budgets',
+      'han-muc': 'budgets',
+      'ngan-sach': 'budgets',
+      'savings': 'savings',
+      'tiet-kiem': 'savings',
+      'analytics': 'analytics',
+      'reports': 'analytics',
+      'bao-cao': 'analytics',
+      'phan-tich': 'analytics',
+      'badges': 'badges',
+      'huy-hieu': 'badges',
+      'thanh-tich': 'badges',
+      'ai_assistant': 'ai_assistant',
+      'ai': 'ai_assistant',
+      'tro-ly-ai': 'ai_assistant',
+      'subscription': 'subscription',
+      'vip': 'subscription',
+      'goi-dich-vu': 'subscription',
+      'notifications': 'notifications',
+      'thong-bao': 'notifications',
+      'support': 'support',
+      'ho-tro': 'support',
+      'settings': 'settings',
+      'cai-dat': 'settings',
+      'admin': 'admin_dashboard',
+      'admin_dashboard': 'admin_dashboard',
+      'admin_users': 'admin_users',
+      'admin_ai': 'admin_ai',
+      'admin_finance': 'admin_finance',
+      'admin_settings': 'admin_settings',
+      'admin_logs': 'admin_logs'
+    };
+    return aliasMap[raw] || raw;
+  }
+
   switchTab(tabName) {
-    const cleanTab = (tabName || 'dashboard').replace(/^tab-/, '').replace(/^#/, '');
+    const cleanTab = this.normalizeTab(tabName);
+
+    // 1. Ẩn tất cả các view nội dung nếu có element tĩnh
+    document.querySelectorAll('.content-section, .user-tab-pane, .admin-tab-pane').forEach(el => el.classList.add('hidden'));
+
+    // 2. Hiển thị đúng view được chọn (nếu có element tĩnh)
+    const targetView = document.getElementById(cleanTab) || document.getElementById(`view-${cleanTab}`) || document.getElementById(`tab-${cleanTab}`);
+    if (targetView) {
+      targetView.classList.remove('hidden');
+    }
+
+    // 3. Highlight tab đang active trong sidebar
+    document.querySelectorAll('#sidebar .nav-item, #sidebar a, #sidebar .user-nav-item, #sidebar .admin-nav-item').forEach(el => {
+      el.classList.remove('active', 'bg-emerald-500/10', 'text-emerald-400');
+      const dataTab = el.getAttribute('data-tab');
+      const href = el.getAttribute('href');
+      if (dataTab === cleanTab || href === `#${cleanTab}` || (cleanTab.startsWith('admin_') && dataTab === cleanTab)) {
+        el.classList.add('active');
+      }
+    });
+
+    // 4. CHỈ đóng sidebar nếu là màn hình nhỏ (mobile drawer < 1024px)
+    if (window.innerWidth < 1024) {
+      window.closeSidebar?.();
+    }
+    // TRÊN DESKTOP (>= 1024px): GIỮ NGUYÊN TRẠNG THÁI HIỂN THỊ CỦA SIDEBAR, KHÔNG CAN THIỆP!
+
     if (cleanTab.startsWith('admin_') || cleanTab === 'admin') {
       return this.switchAdminTab(cleanTab);
     }
@@ -865,49 +1427,67 @@ class App {
   }
 
   switchUserTab(targetTabId) {
-    const cleanTab = (targetTabId || 'dashboard').replace(/^tab-/, '').replace(/^#/, '');
+    const cleanTab = this.normalizeTab(targetTabId);
 
-    // 1. Chỉ ẩn các tab của User nếu tồn tại trong DOM
-    document.querySelectorAll('.user-tab-pane').forEach(pane => {
+    // 1. Ẩn tất cả các tab content view khác
+    document.querySelectorAll('.content-section, .user-tab-pane').forEach(pane => {
       pane.classList.add('hidden');
     });
 
-    // 2. Bỏ active menu User
-    document.querySelectorAll('.user-nav-item').forEach(item => {
-      item.classList.remove('active', 'text-emerald-400', 'bg-emerald-950/30');
+    // 2. Bỏ active toàn bộ menu User
+    document.querySelectorAll('.user-nav-item, .nav-btn').forEach(item => {
+      const itemTab = this.normalizeTab(item.getAttribute('data-tab') || '');
+      if (itemTab !== cleanTab) {
+        item.classList.remove('active', 'text-emerald-400', 'bg-emerald-950/30');
+      }
     });
 
-    // 3. Hiện đúng tab được chọn nếu có element tĩnh
-    const activePane = document.getElementById(cleanTab.startsWith('tab-') ? cleanTab : `tab-${cleanTab}`);
+    // 3. Hiện đúng tab được chọn nếu tồn tại container tĩnh
+    const activePane = document.getElementById(`view-${cleanTab}`) || 
+                       document.getElementById(`tab-${cleanTab}`) ||
+                       document.querySelector(`[data-tab-id="${cleanTab}"]`);
     if (activePane) {
       activePane.classList.remove('hidden');
     }
 
-    // 4. Highlight menu tương ứng
-    const activeNav = document.querySelector(`.user-nav-item[data-tab="${cleanTab}"], [data-tab="${cleanTab}"]`);
+    // 4. Highlight menu tương ứng với neon glow active
+    const activeNav = document.querySelector(`.user-nav-item[data-tab="${cleanTab}"], .nav-btn[data-tab="${cleanTab}"], [data-tab="${cleanTab}"]`);
     if (activeNav) {
       activeNav.classList.add('active');
+    }
+
+    // 5. Chỉ đóng sidebar nếu ở mobile
+    if (window.innerWidth < 1024) {
+      window.closeSidebar?.();
     }
 
     return this.navigate(cleanTab);
   }
 
   switchAdminTab(targetTabId) {
-    const cleanTab = (targetTabId || 'admin_dashboard').replace(/^tab-/, '').replace(/^#/, '');
-    const finalTab = cleanTab.startsWith('admin_') || cleanTab === 'admin' ? cleanTab : `admin_${cleanTab}`;
+    const cleanTab = this.normalizeTab(targetTabId);
+    const finalTab = cleanTab.startsWith('admin_') ? cleanTab : `admin_${cleanTab}`;
 
     // Ẩn các admin pane nếu có
-    document.querySelectorAll('.admin-tab-pane').forEach(pane => {
+    document.querySelectorAll('.admin-tab-pane, .content-section').forEach(pane => {
       pane.classList.add('hidden');
     });
 
     // Highlight admin menu
-    document.querySelectorAll('.admin-nav-item').forEach(item => {
-      item.classList.remove('active');
+    document.querySelectorAll('.admin-nav-item, .nav-btn').forEach(item => {
+      const itemTab = this.normalizeTab(item.getAttribute('data-tab') || '');
+      if (itemTab !== finalTab) {
+        item.classList.remove('active');
+      }
     });
     const activeNav = document.querySelector(`.admin-nav-item[data-tab="${finalTab}"], [data-tab="${finalTab}"]`);
     if (activeNav) {
       activeNav.classList.add('active');
+    }
+
+    // Chỉ đóng sidebar nếu ở mobile
+    if (window.innerWidth < 1024) {
+      window.closeSidebar?.();
     }
 
     return this.navigate(finalTab);
@@ -922,10 +1502,13 @@ class App {
   }
 
   navigate(tabName) {
-    if (this.closeMobileSidebar) {
-      this.closeMobileSidebar();
+    // CHỈ đóng sidebar trên màn hình điện thoại (< 1024px)
+    if (window.innerWidth < 1024) {
+      if (this.closeMobileSidebar) {
+        this.closeMobileSidebar();
+      }
     }
-    const cleanTab = (tabName || 'dashboard').replace(/^tab-/, '').replace(/^#/, '');
+    const cleanTab = this.normalizeTab(tabName);
     
     const role = (this.currentUser?.role || '').toUpperCase();
     const isRootAdmin = role === 'ADMIN';
@@ -948,10 +1531,10 @@ class App {
     this.activeTab = cleanTab;
     this.setUIMode(isAdminTab);
 
-    // Update sidebar UI state
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      const bTab = (btn.getAttribute('data-tab') || '').replace(/^tab-/, '');
-      if (bTab === cleanTab) {
+    // Update sidebar UI state: add active class for neon highlight
+    document.querySelectorAll('.nav-btn, .user-nav-item, .admin-nav-item').forEach(btn => {
+      const bTab = this.normalizeTab(btn.getAttribute('data-tab') || '');
+      if (bTab === cleanTab || (isAdminTab && bTab === 'admin_dashboard' && cleanTab === 'admin')) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
@@ -961,7 +1544,7 @@ class App {
     const mainContainer = this.getMainContainer();
     if (!mainContainer) return;
 
-    // Ensure main container is visible
+    // Ensure main container is visible and styled
     mainContainer.classList.remove('hidden');
     mainContainer.style.display = '';
 
@@ -1050,11 +1633,81 @@ class App {
   }
 
   openQuickAIModal() {
-    this.aiAssistant.openQuickParserModal();
+    try {
+      if (this.aiAssistant?.openQuickParserModal) {
+        this.aiAssistant.openQuickParserModal();
+      } else if (typeof window.openQuickAiModal === 'function') {
+        window.openQuickAiModal();
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openQuickAIModal error:', e);
+      if (typeof window.openQuickAiModal === 'function') window.openQuickAiModal();
+    }
   }
 
-  openTransactionModal(editId = null) {
-    this.transactions.openTransactionModal(editId);
+  openTransactionModal(editId = null, type = 'EXPENSE', defaultWalletId = null) {
+    try {
+      if (this.transactions?.openTransactionModal) {
+        this.transactions.openTransactionModal(editId, type, defaultWalletId);
+      } else if (typeof window.openTransactionModal === 'function') {
+        window.openTransactionModal(type, defaultWalletId);
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openTransactionModal error:', e);
+      if (typeof window.openTransactionModal === 'function') window.openTransactionModal(type, defaultWalletId);
+    }
+  }
+
+  openWalletModal(editId = null) {
+    try {
+      if (this.wallets?.openWalletModal) {
+        this.wallets.openWalletModal(editId);
+      } else if (typeof window.openWalletModal === 'function') {
+        window.openWalletModal(editId);
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openWalletModal error:', e);
+      if (typeof window.openWalletModal === 'function') window.openWalletModal(editId);
+    }
+  }
+
+  openTransferModal() {
+    try {
+      if (this.wallets?.openTransferModal) {
+        this.wallets.openTransferModal();
+      } else if (typeof window.openTransferModal === 'function') {
+        window.openTransferModal();
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openTransferModal error:', e);
+      if (typeof window.openTransferModal === 'function') window.openTransferModal();
+    }
+  }
+
+  openRealDepositModal(walletId = null) {
+    try {
+      if (this.wallets?.openRealDepositModal) {
+        this.wallets.openRealDepositModal(walletId);
+      } else if (typeof window.openRealDepositModal === 'function') {
+        window.openRealDepositModal(walletId);
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openRealDepositModal error:', e);
+      if (typeof window.openRealDepositModal === 'function') window.openRealDepositModal(walletId);
+    }
+  }
+
+  openSubscriptionModal(tier = 'VIP') {
+    try {
+      if (typeof window.openSubscriptionModal === 'function') {
+        window.openSubscriptionModal(tier);
+      } else if (this.subscription?.openUpgradeModal) {
+        this.subscription.openUpgradeModal(tier);
+      }
+    } catch (e) {
+      console.warn('[FinTrack] openSubscriptionModal error:', e);
+      this.navigate('subscription');
+    }
   }
 
   showToast(message, type = 'info') {
@@ -1085,7 +1738,9 @@ class App {
     container.appendChild(toast);
     setTimeout(() => {
       toast.classList.add('toast-exit');
-      setTimeout(() => toast.remove(), 280);
+      setTimeout(() => {
+        if (toast && typeof toast.remove === 'function') toast.remove();
+      }, 280);
     }, 3200);
   }
 
@@ -1389,142 +2044,240 @@ class App {
  * @param {Object} [options] - Tùy chỉnh (count, minRadius, maxRadius, colors)
  */
 export function triggerSparkleBurst(target, options = {}) {
-  let element = null;
-  let clickX = null;
-  let clickY = null;
+  try {
+    let element = null;
+    let clickX = null;
+    let clickY = null;
 
-  if (!target) return;
+    if (!target) return;
 
-  if (target instanceof Event) {
-    element = target.currentTarget || target.target?.closest?.('button, a, .btn-sparkle-burst, [data-sparkle-burst]');
-    if (typeof target.clientX === 'number' && typeof target.clientY === 'number' && (target.clientX !== 0 || target.clientY !== 0)) {
-      clickX = target.clientX;
-      clickY = target.clientY;
+    if (target instanceof Event) {
+      element = target.currentTarget || target.target?.closest?.('button, a, .btn-sparkle-burst, [data-sparkle-burst]');
+      if (typeof target.clientX === 'number' && typeof target.clientY === 'number' && (target.clientX !== 0 || target.clientY !== 0)) {
+        clickX = target.clientX;
+        clickY = target.clientY;
+      }
+    } else if (typeof target === 'string') {
+      element = document.querySelector(target);
+    } else if (target instanceof HTMLElement) {
+      element = target;
     }
-  } else if (typeof target === 'string') {
-    element = document.querySelector(target);
-  } else if (target instanceof HTMLElement) {
-    element = target;
-  }
 
-  if (!element) return;
+    if (!element || !element.classList) return;
 
-  // 1. Hiệu ứng Co giãn đàn hồi (Elastic Pill Bounce: 0.92 -> 1.04 -> 1.0)
-  element.classList.remove('is-bouncing');
-  void element.offsetWidth; // Trigger synchronous reflow để restart keyframes mượt mà
-  element.classList.add('is-bouncing');
-
-  const onAnimEnd = () => {
-    element.classList.remove('is-bouncing');
-    element.removeEventListener('animationend', onAnimEnd);
-  };
-  element.addEventListener('animationend', onAnimEnd, { once: true });
-
-  // 2. Tôn trọng tùy chọn giảm chuyển động của hệ điều hành
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return;
-  }
-
-  // 3. Tính toán tâm bắn tia lấp lánh (vị trí click chuột/chạm hoặc tâm button)
-  const rect = element.getBoundingClientRect();
-  const originX = (clickX !== null && clickX >= rect.left && clickX <= rect.right)
-    ? clickX
-    : rect.left + rect.width / 2;
-  const originY = (clickY !== null && clickY >= rect.top && clickY <= rect.bottom)
-    ? clickY
-    : rect.top + rect.height / 2;
-
-  // 4. Tạo container hạt lấp lánh (Fixed GPU Composited Layer)
-  const container = document.createElement('div');
-  container.className = 'sparkle-burst-container';
-  container.style.left = `${originX}px`;
-  container.style.top = `${originY}px`;
-  document.body.appendChild(container);
-
-  // 5. Sinh 8 - 12 hạt particle neon bắn tỏa tròn 360 độ
-  const count = options.count || (Math.floor(Math.random() * 5) + 8); // 8 - 12 hạt
-  const minRadius = options.minRadius || 30; // Bán kính từ 30px
-  const maxRadius = options.maxRadius || 42; // đến ~40px
-
-  // Bảng màu Neon đồng bộ FinTrack: Cyan, Emerald, Amber, Magenta
-  const neonPalette = [
-    { bg: '#00f2fe', glow: 'rgba(0, 242, 254, 0.9)' },   // Cyan Neon (#00f2fe / #06b6d4)
-    { bg: '#00ffaa', glow: 'rgba(0, 255, 170, 0.9)' },   // Emerald Neon (#10b981 / #00ffaa)
-    { bg: '#fbbf24', glow: 'rgba(251, 191, 36, 0.9)' },   // Amber Neon (#fbbf24 / #f59e0b)
-    { bg: '#ec4899', glow: 'rgba(236, 72, 153, 0.9)' },  // Magenta Neon (#ec4899 / #f43f5e)
-    { bg: '#06b6d4', glow: 'rgba(6, 182, 212, 0.9)' },   // Cyan Bright
-    { bg: '#10b981', glow: 'rgba(16, 185, 129, 0.9)' }   // Emerald Bright
-  ];
-
-  const shapes = ['shape-circle', 'shape-diamond', 'shape-star'];
-  const angleStep = (2 * Math.PI) / count;
-
-  for (let i = 0; i < count; i++) {
-    const particle = document.createElement('div');
-
-    // Phân bố đều góc 360 độ kèm jitter ngẫu nhiên tự nhiên
-    const baseAngle = i * angleStep;
-    const jitter = (Math.random() - 0.5) * (angleStep * 0.45);
-    const angle = baseAngle + jitter;
-
-    // Bán kính di chuyển từ 30px - 40px
-    const distance = minRadius + Math.random() * (maxRadius - minRadius);
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-
-    // Kích thước hạt từ 3px - 5px
-    const size = Math.floor(Math.random() * 3) + 3; // 3px, 4px hoặc 5px
-    const color = neonPalette[i % neonPalette.length];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)];
-    const rot = Math.floor((Math.random() - 0.5) * 360);
-
-    particle.className = `sparkle-particle ${shape}`;
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    particle.style.backgroundColor = color.bg;
-    particle.style.boxShadow = `0 0 6px ${color.bg}, 0 0 10px ${color.glow}`;
-    particle.style.setProperty('--tx', `${tx.toFixed(1)}px`);
-    particle.style.setProperty('--ty', `${ty.toFixed(1)}px`);
-    particle.style.setProperty('--rot', `${rot}deg`);
-
-    // Thời gian bay nhanh trong vòng ~0.45s - 0.52s
-    const duration = 0.45 + Math.random() * 0.08;
-    particle.style.animationDuration = `${duration.toFixed(2)}s`;
-
-    container.appendChild(particle);
-  }
-
-  // 6. Tự hủy (clean up) DOM container sau khi hiệu ứng kết thúc (~0.58s)
-  setTimeout(() => {
-    if (container && container.parentNode) {
-      container.parentNode.removeChild(container);
+    // 1. Hiệu ứng Co giãn đàn hồi (Elastic Pill Bounce: 0.92 -> 1.04 -> 1.0)
+    if (typeof element.classList.remove === 'function') {
+      element.classList.remove('is-bouncing');
     }
-  }, 580);
+    void element.offsetWidth; // Trigger synchronous reflow để restart keyframes mượt mà
+    if (typeof element.classList.add === 'function') {
+      element.classList.add('is-bouncing');
+    }
+
+    const onAnimEnd = () => {
+      if (element && element.classList && typeof element.classList.remove === 'function') {
+        element.classList.remove('is-bouncing');
+      }
+      if (element && typeof element.removeEventListener === 'function') {
+        element.removeEventListener('animationend', onAnimEnd);
+      }
+    };
+    if (typeof element.addEventListener === 'function') {
+      element.addEventListener('animationend', onAnimEnd, { once: true });
+    }
+
+    // 2. Tôn trọng tùy chọn giảm chuyển động của hệ điều hành
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    // 3. Clean up any stale sparkle containers trước khi tạo mới
+    const oldSparkles = document.querySelectorAll('.sparkle, .particle, .burst-effect, .sparkle-burst-container');
+    oldSparkles.forEach(el => {
+      if (el && typeof el.remove === 'function') {
+        el.remove();
+      }
+    });
+
+    // 4. Tính toán tâm bắn tia lấp lánh (vị trí click chuột/chạm hoặc tâm button)
+    const rect = element.getBoundingClientRect();
+    const originX = (clickX !== null && clickX >= rect.left && clickX <= rect.right)
+      ? clickX
+      : rect.left + rect.width / 2;
+    const originY = (clickY !== null && clickY >= rect.top && clickY <= rect.bottom)
+      ? clickY
+      : rect.top + rect.height / 2;
+
+    // 5. Tạo container hạt lấp lánh (Fixed GPU Composited Layer)
+    const container = document.createElement('div');
+    container.className = 'sparkle-burst-container burst-effect';
+    container.style.left = `${originX}px`;
+    container.style.top = `${originY}px`;
+    document.body.appendChild(container);
+
+    // 6. Sinh 8 - 12 hạt particle neon bắn tỏa tròn 360 độ
+    const count = options.count || (Math.floor(Math.random() * 5) + 8); // 8 - 12 hạt
+    const minRadius = options.minRadius || 30; // Bán kính từ 30px
+    const maxRadius = options.maxRadius || 42; // đến ~40px
+
+    // Bảng màu Neon đồng bộ FinTrack: Cyan, Emerald, Amber, Magenta
+    const neonPalette = [
+      { bg: '#00f2fe', glow: 'rgba(0, 242, 254, 0.9)' },   // Cyan Neon (#00f2fe / #06b6d4)
+      { bg: '#00ffaa', glow: 'rgba(0, 255, 170, 0.9)' },   // Emerald Neon (#10b981 / #00ffaa)
+      { bg: '#fbbf24', glow: 'rgba(251, 191, 36, 0.9)' },   // Amber Neon (#fbbf24 / #f59e0b)
+      { bg: '#ec4899', glow: 'rgba(236, 72, 153, 0.9)' },  // Magenta Neon (#ec4899 / #f43f5e)
+      { bg: '#06b6d4', glow: 'rgba(6, 182, 212, 0.9)' },   // Cyan Bright
+      { bg: '#10b981', glow: 'rgba(16, 185, 129, 0.9)' }   // Emerald Bright
+    ];
+
+    const shapes = ['shape-circle', 'shape-diamond', 'shape-star'];
+    const angleStep = (2 * Math.PI) / count;
+
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+
+      // Phân bố đều góc 360 độ kèm jitter ngẫu nhiên tự nhiên
+      const baseAngle = i * angleStep;
+      const jitter = (Math.random() - 0.5) * (angleStep * 0.45);
+      const angle = baseAngle + jitter;
+
+      // Bán kính di chuyển từ 30px - 40px
+      const distance = minRadius + Math.random() * (maxRadius - minRadius);
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+
+      // Kích thước hạt từ 3px - 5px
+      const size = Math.floor(Math.random() * 3) + 3; // 3px, 4px hoặc 5px
+      const color = neonPalette[i % neonPalette.length];
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      const rot = Math.floor((Math.random() - 0.5) * 360);
+
+      particle.className = `sparkle-particle ${shape} particle sparkle`;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.backgroundColor = color.bg;
+      particle.style.boxShadow = `0 0 6px ${color.bg}, 0 0 10px ${color.glow}`;
+      particle.style.setProperty('--tx', `${tx.toFixed(1)}px`);
+      particle.style.setProperty('--ty', `${ty.toFixed(1)}px`);
+      particle.style.setProperty('--rot', `${rot}deg`);
+
+      // Thời gian bay nhanh trong vòng ~0.45s - 0.52s
+      const duration = 0.45 + Math.random() * 0.08;
+      particle.style.animationDuration = `${duration.toFixed(2)}s`;
+
+      container.appendChild(particle);
+    }
+
+    // 7. Tự hủy (clean up) DOM container sau khi hiệu ứng kết thúc (~0.58s)
+    setTimeout(() => {
+      if (container && typeof container.remove === 'function') {
+        container.remove();
+      } else if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    }, 580);
+  } catch (err) {
+    console.warn("Lỗi hiệu ứng sparkle:", err);
+  }
 }
 
 // Instantiate and start app
 try {
   window.fintrackApp = new App();
   window.triggerSparkleBurst = triggerSparkleBurst;
+  window.showLandingPage = (tab = 'home') => window.fintrackApp?.showLandingPage(tab);
+  window.switchLandingTab = (tab = 'home') => window.fintrackApp?.switchLandingTab(tab);
+  window.enterDashboard = () => window.fintrackApp?.enterDashboard();
+  window.switchAuthMode = (mode = 'login') => window.fintrackApp?.auth?.renderAuthModal(mode);
+
+  // Signal that the module is ready and drain any queued stub calls
+  window._ftReady = true;
+  if (Array.isArray(window._ftStubQueue) && window._ftStubQueue.length > 0) {
+    window._ftStubQueue.forEach(([name, arg]) => {
+      try {
+        if (typeof window[name] === 'function') window[name](arg);
+      } catch(e) { console.warn('[FinTrack] Stub queue drain error:', name, e); }
+    });
+    window._ftStubQueue = [];
+  }
+  window.quickDemoLogin = (role = 'user') => {
+    if (role === 'admin') {
+      window.fintrackApp?.auth?.loginDirect('admin@fintrack.ai', 'Admin@123456');
+    } else {
+      window.fintrackApp?.auth?.loginDirect('user@fintrack.ai', 'User@123456');
+    }
+  };
   window.navigate = (tab) => window.fintrackApp?.navigate(tab);
   window.switchTab = (tab) => window.fintrackApp?.switchTab(tab);
   window.switchUserTab = (tab) => window.fintrackApp?.switchUserTab(tab);
   window.switchAdminTab = (tab) => window.fintrackApp?.switchAdminTab(tab);
   window.navigateView = (tab) => window.fintrackApp?.navigateView(tab);
   window.showSection = (tab) => window.fintrackApp?.showSection(tab);
+  window.loadCategories = () => window.fintrackApp?.categories?.loadCategories();
+  window.renderWallets = () => window.fintrackApp?.wallets?.render(window.fintrackApp.getMainContainer());
+  window.renderBudgets = () => window.fintrackApp?.budgets?.render(window.fintrackApp.getMainContainer());
+  window.loadBudgets = () => window.fintrackApp?.budgets?.loadBudgets();
+  window.loadDashboard = () => window.fintrackApp?.dashboard?.render(window.fintrackApp.getMainContainer());
+  window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const isCollapsed = sidebar.classList.contains('sidebar-collapsed') || sidebar.classList.contains('collapsed');
+    if (isCollapsed) {
+      sidebar.classList.remove('sidebar-collapsed', 'collapsed');
+      sidebar.style.removeProperty('width');
+      sidebar.style.removeProperty('opacity');
+      sidebar.style.removeProperty('margin-left');
+    } else {
+      sidebar.classList.add('sidebar-collapsed', 'collapsed');
+      sidebar.style.removeProperty('width');
+      sidebar.style.removeProperty('opacity');
+      sidebar.style.removeProperty('margin-left');
+    }
+    triggerRealtimeChartResize(350);
+  };
+  window.closeSidebar = function(force = false) {
+    if (!force && window.innerWidth >= 1024) {
+      return;
+    }
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.add('sidebar-collapsed', 'collapsed');
+      sidebar.style.removeProperty('width');
+      sidebar.style.removeProperty('opacity');
+      sidebar.style.removeProperty('margin-left');
+      triggerRealtimeChartResize(350);
+    }
+  };
+  window.openSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.remove('sidebar-collapsed', 'collapsed');
+      sidebar.style.removeProperty('width');
+      sidebar.style.removeProperty('opacity');
+      sidebar.style.removeProperty('margin-left');
+      triggerRealtimeChartResize(350);
+    }
+  };
 } catch (appInitErr) {
   console.error('[FinTrack] Lỗi nghiêm trọng khi khởi tạo App instance:', appInitErr);
 }
 
 // Lắng nghe sự kiện click toàn cục để kích hoạt hiệu ứng cho mọi phần tử có class .btn-sparkle-burst
 document.addEventListener('click', (e) => {
-  const sparkleBtn = e.target.closest('.btn-sparkle-burst, [data-sparkle-burst]');
-  if (sparkleBtn) {
-    triggerSparkleBurst(e);
+  try {
+    if (!e || !e.target) return;
+    const sparkleBtn = e.target.closest ? e.target.closest('.btn-sparkle-burst, [data-sparkle-burst]') : null;
+    if (sparkleBtn) {
+      triggerSparkleBurst(e);
+    }
+  } catch (clickErr) {
+    console.warn('[FinTrack] Bỏ qua lỗi click event ngầm:', clickErr);
   }
 }, true);
 
 const startApp = () => {
+  forceResetOverlay();
   try {
     if (window.fintrackApp && typeof window.fintrackApp.init === 'function') {
       window.fintrackApp.init().catch(err => {

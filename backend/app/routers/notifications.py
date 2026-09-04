@@ -5,13 +5,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, or_, and_
 
-from backend.app.database import get_db
-from backend.app.models import User, Notification, NotificationRead, NotificationDismiss
+from backend.app.database import get_db, get_utc_now
+from backend.app.models import Notification, NotificationRead, NotificationDismiss, User
 from backend.app.routers.auth import get_current_user
 
-router = APIRouter(prefix="/notifications", tags=["Thông Báo Người Dùng (User Notifications)"])
+router = APIRouter(prefix="/notifications", tags=["Hộp thư & Thông báo Hệ thống"])
 
-# ----------------- Schemas -----------------
+# ----------------- Pydantic Schemas -----------------
 class NotificationItemOut(BaseModel):
     id: int
     user_id: Optional[int] = None
@@ -36,7 +36,7 @@ class NotificationListResponse(BaseModel):
 
 # ----------------- Helper Functions -----------------
 def format_relative_time(dt: datetime.datetime) -> str:
-    now = datetime.datetime.utcnow()
+    now = get_utc_now()
     diff = now - dt
     seconds = int(diff.total_seconds())
 
@@ -376,7 +376,7 @@ def reset_demo_notifications(
             icon="triangle-exclamation",
             link_tab="budgets",
             is_read=False,
-            created_at=datetime.datetime.utcnow() - datetime.timedelta(minutes=25)
+            created_at=get_utc_now() - datetime.timedelta(minutes=25)
         ),
         Notification(
             user_id=current_user.id,
@@ -387,7 +387,7 @@ def reset_demo_notifications(
             icon="lightbulb",
             link_tab="analytics",
             is_read=False,
-            created_at=datetime.datetime.utcnow() - datetime.timedelta(hours=2)
+            created_at=get_utc_now() - datetime.timedelta(hours=2)
         ),
         Notification(
             user_id=None,
@@ -398,7 +398,7 @@ def reset_demo_notifications(
             icon="bullhorn",
             link_tab="subscription",
             is_read=True,
-            created_at=datetime.datetime.utcnow() - datetime.timedelta(days=1)
+            created_at=get_utc_now() - datetime.timedelta(days=1)
         ),
         Notification(
             user_id=current_user.id,
@@ -409,7 +409,7 @@ def reset_demo_notifications(
             icon="triangle-exclamation",
             link_tab="budgets",
             is_read=True,
-            created_at=datetime.datetime.utcnow() - datetime.timedelta(days=2)
+            created_at=get_utc_now() - datetime.timedelta(days=2)
         ),
         Notification(
             user_id=current_user.id,
@@ -420,7 +420,7 @@ def reset_demo_notifications(
             icon="receipt",
             link_tab="transactions",
             is_read=False,
-            created_at=datetime.datetime.utcnow() - datetime.timedelta(days=3)
+            created_at=get_utc_now() - datetime.timedelta(days=3)
         )
     ]
     for notif in sample_notifs:

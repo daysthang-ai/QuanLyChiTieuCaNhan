@@ -11,7 +11,7 @@ export class BudgetsComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-budgets" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-budgets" data-tab-id="budgets" class="content-section user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -97,19 +97,38 @@ export class BudgetsComponent {
       container.innerHTML = budgets.map(b => {
         const isOver = b.status === 'OVERSPENT';
         const isWarn = b.status === 'WARNING';
-        const statusBadge = isOver
-          ? `<span class="px-2.5 py-1 rounded-full bg-red-100 text-red-700 font-bold text-[10px] flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Bội chi (${Math.round(b.percentage)}%)</span>`
-          : isWarn
-          ? `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Cảnh báo 80% (${b.percentage}%)</span>`
-          : `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] flex items-center gap-1"><i class="fa-solid fa-shield-check"></i> An toàn (${b.percentage}%)</span>`;
 
-        const progressBarColor = isOver ? 'bg-red-500' : isWarn ? 'bg-amber-500' : 'bg-emerald-500';
+        // 3 Trạng thái cảnh báo hạn mức ngân sách (Dark theme dịu mắt & tươi tắn)
+        const statusBadge = isOver
+          ? `<span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold text-[10px] flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Bội chi (${Math.round(b.percentage)}%)</span>`
+          : isWarn
+          ? `<span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] flex items-center gap-1 shadow-sm"><i class="fa-solid fa-circle-exclamation text-amber-400"></i> Cảnh báo 80% (${Math.round(b.percentage)}%)</span>`
+          : `<span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold text-[10px] flex items-center gap-1 shadow-sm"><i class="fa-solid fa-shield-check text-emerald-400"></i> An toàn (${Math.round(b.percentage)}%)</span>`;
+
+        const progressBarClass = isOver 
+          ? 'budget-progress-overspent bg-gradient-to-r from-rose-600 to-rose-500' 
+          : isWarn 
+          ? 'budget-progress-warning bg-gradient-to-r from-amber-500 to-amber-400' 
+          : 'budget-progress-safe bg-gradient-to-r from-emerald-500 to-cyan-500';
+
+        const progressBarStyle = isOver
+          ? 'background: linear-gradient(90deg, #e11d48 0%, #f43f5e 100%); box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);'
+          : isWarn
+          ? 'background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);'
+          : 'background: linear-gradient(90deg, #10b981 0%, #06b6d4 100%); box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);';
+
+        const cardBorderClass = isOver 
+          ? 'border-rose-500/35 bg-rose-950/15 hover:border-rose-500/60' 
+          : isWarn 
+          ? 'border-amber-500/35 bg-amber-950/15 hover:border-amber-500/60' 
+          : 'border-slate-800/80 bg-slate-900/60 hover:border-emerald-500/40';
+
         const catName = b.category ? b.category.name : 'Danh mục';
         const catIcon = b.category ? b.category.icon : 'tag';
         const catColor = b.category ? b.category.color : '#10B981';
 
         return `
-          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition relative group border ${isOver ? 'border-red-200 bg-red-50/20' : isWarn ? 'border-amber-200 bg-amber-50/20' : 'border-slate-200'}">
+          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group border ${cardBorderClass}">
             
             <div>
               <!-- Top Row -->
@@ -119,7 +138,7 @@ export class BudgetsComponent {
                     <i class="fa-solid fa-${catIcon}"></i>
                   </span>
                   <div>
-                    <h3 class="font-extrabold text-sm text-slate-800">${catName}</h3>
+                    <h3 class="font-extrabold text-sm text-slate-100">${catName}</h3>
                     <span class="text-[10px] text-slate-400 uppercase font-semibold">${b.period === 'MONTHLY' ? 'Hạn mức tháng' : 'Hạn mức tuần'}</span>
                   </div>
                 </div>
@@ -129,25 +148,25 @@ export class BudgetsComponent {
               <!-- Progress bar -->
               <div class="mt-4 mb-2">
                 <div class="flex justify-between text-xs font-bold mb-1.5">
-                  <span class="text-slate-300">Đã chi: <b class="${isOver ? 'text-rose-400' : 'text-slate-100'}">${formatVND(b.spent_amount)}</b></span>
-                  <span class="text-slate-400">Hạn mức: ${formatVND(b.amount_limit)}</span>
+                  <span class="text-slate-300">Đã chi: <b class="${isOver ? 'text-rose-400 font-mono' : isWarn ? 'text-amber-300 font-mono' : 'text-slate-100 font-mono'}">${formatVND(b.spent_amount)}</b></span>
+                  <span class="text-slate-400 font-mono">Hạn mức: ${formatVND(b.amount_limit)}</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700/50">
-                  <div class="${progressBarColor} progress-animated h-full rounded-full transition-all duration-700" style="width: ${Math.min(100, b.percentage)}%"></div>
+                <div class="w-full bg-slate-950/80 h-2.5 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                  <div class="${progressBarClass} progress-animated h-full rounded-full transition-all duration-700" style="width: ${Math.min(100, b.percentage)}%; ${progressBarStyle}"></div>
                 </div>
               </div>
             </div>
 
             <!-- Footer: Remaining & Actions -->
-            <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-100 text-xs">
-              <span class="text-slate-500 font-medium">
-                ${isOver ? `<b class="text-red-600">Vượt: -${formatVND(b.spent_amount - b.amount_limit)}</b>` : `Còn lại: <b class="text-emerald-600">${formatVND(b.remaining_amount)}</b>`}
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80 text-xs">
+              <span class="text-slate-400 font-medium">
+                ${isOver ? `<span class="text-rose-400 font-bold font-mono">Vượt: -${formatVND(b.spent_amount - b.amount_limit)}</span>` : isWarn ? `Còn lại: <b class="text-amber-300 font-mono">${formatVND(b.remaining_amount)}</b>` : `Còn lại: <b class="text-emerald-400 font-mono">${formatVND(b.remaining_amount)}</b>`}
               </span>
-              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                <button onclick="window.editBudget(${b.id})" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center" title="Sửa">
+              <div class="flex items-center gap-1 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
+                <button onclick="window.editBudget(${b.id})" class="w-7 h-7 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer" title="Sửa">
                   <i class="fa-regular fa-pen-to-square text-xs"></i>
                 </button>
-                <button onclick="window.deleteBudget(${b.id})" class="w-7 h-7 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 flex items-center justify-center" title="Xóa">
+                <button onclick="window.deleteBudget(${b.id})" class="w-7 h-7 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 flex items-center justify-center transition cursor-pointer" title="Xóa">
                   <i class="fa-regular fa-trash-can text-xs"></i>
                 </button>
               </div>

@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from backend.app.config import settings
 from backend.app.database import engine, Base, SessionLocal
@@ -112,6 +112,25 @@ FinTrack AI là giải pháp quản lý tài chính cá nhân toàn diện kết
     redoc_url="/redoc"
 )
 
+# No-Cache Middleware for Frontend Static & HTML Files
+@app.middleware("http")
+async def add_no_cache_header(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path.lower()
+    if (
+        path.startswith("/static")
+        or path.startswith("/frontend")
+        or path == "/"
+        or path.endswith(".html")
+        or path.endswith(".js")
+        or path.endswith(".css")
+        or path.endswith(".json")
+    ):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -150,6 +169,7 @@ app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
 if frontend_dir.exists():
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="frontend_static")
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir)), name="frontend_dir")
 
 @app.get("/", response_class=FileResponse)
 async def root():

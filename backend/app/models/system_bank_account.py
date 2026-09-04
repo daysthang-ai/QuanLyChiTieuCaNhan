@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Text, Boolean, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database import Base
+from backend.app.database import Base, get_utc_now
 
 
 class SystemBankAccount(Base):
@@ -20,8 +20,8 @@ class SystemBankAccount(Base):
     qr_template = Column(String(30), nullable=False, default="compact2")
     memo_prefix = Column(String(50), nullable=False, default="NAP VIP")
     is_active = Column(Boolean, default=True, index=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)
 
     # Relationships
     transactions = relationship("BankTransaction", back_populates="bank_account", cascade="all, delete-orphan")
@@ -43,7 +43,7 @@ class BankTransaction(Base):
     sender_account = Column(String(50), nullable=True)
     amount = Column(Float, nullable=False)
     description = Column(Text, nullable=False)
-    transaction_date = Column(DateTime, default=datetime.datetime.utcnow)
+    transaction_date = Column(DateTime, default=get_utc_now)
     
     # Status: MATCHED (Đã khớp đơn tự động), UNMATCHED (Chưa khớp đơn), MANUALLY_MATCHED (Khớp thủ công)
     status = Column(String(30), default="MATCHED", index=True)
@@ -52,7 +52,7 @@ class BankTransaction(Base):
     matched_user_id = Column(Integer, nullable=True, index=True)
     matched_user_name = Column(String(150), nullable=True)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=get_utc_now)
 
     # Relationships
     bank_account = relationship("SystemBankAccount", back_populates="transactions")

@@ -21,6 +21,10 @@ class AIService:
 
     async def _call_llm(self, system_prompt: str, user_prompt: str, json_mode: bool = False) -> str:
         """Dispatches request to configured AI provider or falls back to offline engine."""
+        # Enforce strict Zero-PII sanitization before calling any external LLM
+        safe_system_prompt = sanitize_text_for_ai(system_prompt)
+        safe_user_prompt = sanitize_text_for_ai(user_prompt)
+
         provider = settings.AI_PROVIDER.lower()
 
         # 1. Google Gemini API
@@ -46,7 +50,7 @@ class AIService:
                         "contents": [
                             {
                                 "role": "user",
-                                "parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]
+                                "parts": [{"text": f"{safe_system_prompt}\n\n{safe_user_prompt}"}]
                             }
                         ],
                         "generationConfig": {
@@ -81,8 +85,8 @@ class AIService:
                 payload = {
                     "model": settings.OPENAI_MODEL,
                     "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
+                        {"role": "system", "content": safe_system_prompt},
+                        {"role": "user", "content": safe_user_prompt}
                     ],
                     "temperature": 0.2 if json_mode else 0.7
                 }
@@ -103,7 +107,7 @@ class AIService:
                 url = f"{settings.OLLAMA_BASE_URL}/api/generate"
                 payload = {
                     "model": settings.OLLAMA_MODEL,
-                    "prompt": f"{system_prompt}\n\n{user_prompt}",
+                    "prompt": f"{safe_system_prompt}\n\n{safe_user_prompt}",
                     "stream": False,
                     "format": "json" if json_mode else ""
                 }
@@ -436,7 +440,7 @@ class AIService:
                     "Đặt hạn mức tuần cho danh mục Ăn uống để không bị dồn áp lực cuối tháng.",
                     "Trích lập tự động 20% thu nhập ngay khi nhận lương vào mục tiêu tiết kiệm."
                 ],
-                "generated_at": datetime.datetime.utcnow()
+                "generated_at": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             }
 
         # Fallback Comprehensive Markdown Report
@@ -484,7 +488,7 @@ class AIService:
                 "Chia nhỏ hạn mức ăn uống theo tuần.",
                 "Cắt giảm các đơn mua sắm ngẫu hứng online."
             ],
-            "generated_at": datetime.datetime.utcnow()
+            "generated_at": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         }
 
     # =========================================================================

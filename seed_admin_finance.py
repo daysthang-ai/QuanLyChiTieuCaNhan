@@ -16,7 +16,10 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from backend.app.database import SessionLocal
-from backend.app.models import User, Wallet, Category, Transaction, Budget, SavingGoal
+from backend.app.models import (
+    User, Wallet, Category, Transaction, Budget, SavingGoal,
+    SubscriptionOrder, SystemBankAccount, BankTransaction, Notification
+)
 
 print("==================================================================")
 print("CHUẨN HÓA TOÀN BỘ SỐ LIỆU TÀI CHÍNH CỦA ADMIN (admin@fintrack.ai)")
@@ -155,6 +158,17 @@ try:
         amount=10000000.0,
         note="Thanh toán tạm ứng hợp đồng dự án AI FinTrack",
         transaction_date=datetime.datetime(2026, 9, 1, 14, 30, 0)
+    ))
+    # Nạp tiền vào Ví Dịch Vụ & VIP FinTrack (+500.000 đ theo đơn ORD-5854)
+    tx_list.append(Transaction(
+        user_id=admin.id,
+        wallet_id=w_vip.id,
+        category_id=None,
+        type="INCOME",
+        amount=500000.0,
+        note="Nạp tiền thật vào Ví Dịch Vụ & VIP FinTrack qua VietQR MB Bank (Mã #ORD-5854)",
+        created_by_ai="REAL_PAYMENT_DEPOSIT",
+        transaction_date=datetime.datetime(2026, 8, 31, 14, 15, 20)
     ))
 
     # Chi tiêu tháng 9 (-18.450.000 đ, đủ 6 danh mục neon)
@@ -925,6 +939,190 @@ try:
         db.add_all([ug1, ug2])
         db.commit()
         print("-> Đã tạo 2 mục tiêu tiết kiệm cho User Demo.")
+
+    # =========================================================================
+    # PHẦN C: ĐỒNG BỘ BẢNG KÊ ĐƠN HÀNG VIP (subscription_orders) & ĐỐI SOÁT NGÂN HÀNG (bank_transactions)
+    # =========================================================================
+    print("\n------------------------------------------------------------------")
+    print("CHUẨN HÓA BẢNG KÊ ĐƠN HÀNG VIP (subscription_orders) & BANK TRANSACTIONS")
+    print("------------------------------------------------------------------")
+    
+    # Xóa sạch các đơn hàng cũ và giao dịch ngân hàng cũ
+    db.query(BankTransaction).delete()
+    db.query(SubscriptionOrder).delete()
+    db.commit()
+
+    # Khởi tạo hoặc lấy tài khoản ngân hàng thụ hưởng MB Bank
+    system_bank = db.query(SystemBankAccount).first()
+    if not system_bank:
+        system_bank = SystemBankAccount(
+            bank_code="MB",
+            bank_name="MB Bank (Ngân Hàng Quân Đội)",
+            account_number="0374617569",
+            account_name="DANG QUYET THANG",
+            branch="Hội Sở Chính",
+            qr_template="compact2",
+            memo_prefix="NAP VIP",
+            is_active=True
+        )
+        db.add(system_bank)
+        db.flush()
+
+    orders_seed = [
+        # 1. Đơn 1: Đặng Quyết Thắng | Platinum VIP (30 ngày) | 199.000 đ | Đã duyệt (SePay Webhook) | 01/09/2026
+        SubscriptionOrder(
+            order_code="ORD-863906",
+            user_id=admin.id,
+            plan_code="PLATINUM",
+            plan_duration_days=30,
+            amount=199000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo="FTP 1 863906",
+            status="APPROVED",
+            approved_by="AUTO_WEBHOOK_SEPAY",
+            created_at=datetime.datetime(2026, 9, 1, 9, 30, 0),
+            updated_at=datetime.datetime(2026, 9, 1, 9, 30, 15)
+        ),
+        # 2. Đơn 2: Đặng Quyết Thắng | Nạp Ví Tiền Thật | 500.000 đ | Đã duyệt (Auto VietQR) | 31/08/2026
+        SubscriptionOrder(
+            order_code="ORD-5854",
+            user_id=admin.id,
+            plan_code="REAL_WALLET",
+            plan_duration_days=30,
+            amount=500000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo="FT NAP 5854",
+            status="APPROVED",
+            approved_by="AUTO_VIETQR_MB",
+            created_at=datetime.datetime(2026, 8, 31, 14, 15, 0),
+            updated_at=datetime.datetime(2026, 8, 31, 14, 15, 20)
+        ),
+        # 3. Đơn 3: Nguyễn Văn Tiến | Gói Pro (30 ngày) | 49.000 đ | Đã duyệt | 28/08/2026
+        SubscriptionOrder(
+            order_code="ORD-418620",
+            user_id=user_demo.id if user_demo else admin.id,
+            plan_code="PRO",
+            plan_duration_days=30,
+            amount=49000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo=f"FTPRO {user_demo.id if user_demo else 2} 418620",
+            status="APPROVED",
+            approved_by="admin@fintrack.ai",
+            created_at=datetime.datetime(2026, 8, 28, 16, 45, 0),
+            updated_at=datetime.datetime(2026, 8, 28, 16, 47, 0)
+        ),
+        # 4. Đơn 4: Nguyễn Văn Tiến | Nạp Ví Tiền Thật | 100.000 đ | Chờ duyệt | 01/09/2026
+        SubscriptionOrder(
+            order_code="ORD-6417",
+            user_id=user_demo.id if user_demo else admin.id,
+            plan_code="REAL_WALLET",
+            plan_duration_days=30,
+            amount=100000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo="FT NAP 6417",
+            status="PENDING",
+            created_at=datetime.datetime(2026, 9, 1, 10, 15, 0),
+            updated_at=datetime.datetime(2026, 9, 1, 10, 15, 0)
+        ),
+        # 5. Đơn 5: Đặng Quyết Thắng | Platinum VIP (90 ngày) | 567.000 đ | Đã từ chối (Sai cú pháp) | 25/08/2026
+        SubscriptionOrder(
+            order_code="ORD-692128",
+            user_id=admin.id,
+            plan_code="PLATINUM",
+            plan_duration_days=90,
+            amount=567000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo="FTP 1 692128",
+            status="REJECTED",
+            rejection_reason="Sai cú pháp chuyển khoản MB Bank (không ghi rõ mã đơn)",
+            approved_by="admin@fintrack.ai",
+            created_at=datetime.datetime(2026, 8, 25, 11, 20, 0),
+            updated_at=datetime.datetime(2026, 8, 25, 11, 35, 0)
+        ),
+        # 6. Đơn 6: Nguyễn Văn Tiến | Gói Premium (30 ngày) | 99.000 đ | Đã từ chối (Chưa nhận được giao dịch) | 20/08/2026
+        SubscriptionOrder(
+            order_code="ORD-849202",
+            user_id=user_demo.id if user_demo else admin.id,
+            plan_code="PREMIUM",
+            plan_duration_days=30,
+            amount=99000.0,
+            payment_method="MB_VIETQR",
+            transfer_memo=f"FTPREMIUM {user_demo.id if user_demo else 2} 849202",
+            status="REJECTED",
+            rejection_reason="Chưa nhận được biến động số dư ngân hàng sau 24h",
+            approved_by="admin@fintrack.ai",
+            created_at=datetime.datetime(2026, 8, 20, 15, 30, 0),
+            updated_at=datetime.datetime(2026, 8, 20, 15, 45, 0)
+        )
+    ]
+    db.add_all(orders_seed)
+    db.commit()
+    print(f"-> Đã tạo {len(orders_seed)} đơn hàng chuẩn (3 APPROVED: 748.000 đ, 1 PENDING: 100.000 đ, 2 REJECTED: 666.000 đ).")
+
+    # Tạo lịch sử biến động số dư ngân hàng (Bank Transactions) khớp với các đơn đã duyệt
+    bank_tx_seed = [
+        BankTransaction(
+            bank_account_id=system_bank.id,
+            bank_code="MB",
+            account_number=system_bank.account_number,
+            reference_code="MB99281048",
+            sender_name="DANG QUYET THANG",
+            sender_account="****7569",
+            amount=199000.0,
+            description="MBVCB.99281048.FTP 1 863906",
+            status="MATCHED",
+            matched_order_code="ORD-863906",
+            matched_user_id=admin.id,
+            matched_user_name="Đặng Quyết Thắng",
+            transaction_date=datetime.datetime(2026, 9, 1, 9, 30, 15)
+        ),
+        BankTransaction(
+            bank_account_id=system_bank.id,
+            bank_code="MB",
+            account_number=system_bank.account_number,
+            reference_code="MB88210952",
+            sender_name="DANG QUYET THANG",
+            sender_account="****7569",
+            amount=500000.0,
+            description="MBVCB.88210952.FT NAP 5854",
+            status="MATCHED",
+            matched_order_code="ORD-5854",
+            matched_user_id=admin.id,
+            matched_user_name="Đặng Quyết Thắng",
+            transaction_date=datetime.datetime(2026, 8, 31, 14, 15, 20)
+        ),
+        BankTransaction(
+            bank_account_id=system_bank.id,
+            bank_code="MB",
+            account_number=system_bank.account_number,
+            reference_code="MB77123490",
+            sender_name="NGUYEN VAN TIEN",
+            sender_account="****1234",
+            amount=49000.0,
+            description=f"MBVCB.77123490.FTPRO {user_demo.id if user_demo else 2} 418620",
+            status="MATCHED",
+            matched_order_code="ORD-418620",
+            matched_user_id=user_demo.id if user_demo else 2,
+            matched_user_name="Nguyễn Văn Tiến",
+            transaction_date=datetime.datetime(2026, 8, 28, 16, 45, 0)
+        ),
+        BankTransaction(
+            bank_account_id=system_bank.id,
+            bank_code="MB",
+            account_number=system_bank.account_number,
+            reference_code="MB66312880",
+            sender_name="DANG QUYET THANG",
+            sender_account="****7569",
+            amount=567000.0,
+            description="MBVCB.66312880.DANG QUYET THANG CHUYEN TIEN",
+            status="UNMATCHED",
+            notes="Chưa khớp được đơn hàng (sai cú pháp chuyển tiền)",
+            transaction_date=datetime.datetime(2026, 8, 25, 11, 20, 0)
+        )
+    ]
+    db.add_all(bank_tx_seed)
+    db.commit()
+    print(f"-> Đã tạo {len(bank_tx_seed)} giao dịch ngân hàng đối soát (3 MATCHED, 1 UNMATCHED).")
 
     print("\n==================================================================")
     print("HOÀN TẤT CHUẨN HÓA TOÀN BỘ SỐ LIỆU TÀI CHÍNH ADMIN & USER DEMO 100%!")

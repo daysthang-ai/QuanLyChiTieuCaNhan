@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, or_
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import (
     User, SubscriptionOrder, Notification, Wallet, Transaction, Category,
     SystemSetting, SystemBankAccount, BankTransaction
@@ -214,7 +214,7 @@ def process_bank_transfer_payment(
     7. Cập nhật trạng thái bank_transactions thành MATCHED hoặc UNMATCHED.
     """
     try:
-        now = datetime.datetime.utcnow()
+        now = get_utc_now()
         desc_clean = (description or "").strip()
         desc_upper = desc_clean.upper()
 
@@ -1187,7 +1187,7 @@ def create_vip_order(
         except (ValueError, TypeError):
             duration_days = days_map.get(plan_code, 30)
 
-        now = datetime.datetime.utcnow()
+        now = get_utc_now()
         active_acc = get_or_create_active_bank_account(db)
 
         # Sinh mã 6 chữ số ngẫu nhiên không trùng lặp
@@ -1295,7 +1295,7 @@ def pay_vip_with_wallet(
         price = price_map.get(plan_code, 199000.0)
         duration_days = days_map.get(plan_code, 30)
 
-        now = datetime.datetime.utcnow()
+        now = get_utc_now()
 
         # Tìm hoặc tạo ví tiền thật (Real Payment Wallet)
         real_wallet = db.query(Wallet).filter(
@@ -1505,7 +1505,7 @@ def mock_receive_money(
             db=db,
             amount=float(amount),
             description=description,
-            reference_code=f"MOCK-{int(datetime.datetime.utcnow().timestamp())}",
+            reference_code=f"MOCK-{int(get_utc_now().timestamp())}",
             sender_name="MÔ PHỎNG MB BANK (DEMO)",
             approved_by="AUTO_MOCK_BANK"
         )

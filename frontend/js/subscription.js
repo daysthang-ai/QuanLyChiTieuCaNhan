@@ -1,5 +1,5 @@
 // FinTrack Subscription Module Entry Point
-import { SubscriptionComponent, renderCurrentPlanBanner, scrollToPricingCards } from './components/subscription.js';
+import { SubscriptionComponent, renderCurrentPlanBanner, scrollToPricingCards } from './components/subscription.js?v=20260904_01';
 
 export { SubscriptionComponent, renderCurrentPlanBanner, scrollToPricingCards };
 

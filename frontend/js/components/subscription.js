@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=4.1';
-import { formatVND, formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=4.1';
+import { api } from '../api.js?v=20260904_01';
+import { formatVND, formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=20260904_01';
 
 // Fallback plans data in case of network latency
 const FALLBACK_PLANS = [
@@ -202,7 +202,7 @@ export class SubscriptionComponent {
     };
 
     container.innerHTML = `
-      <div id="tab-subscription" class="user-tab-pane w-full max-w-7xl mx-auto space-y-7 animate-in fade-in duration-300">
+      <div id="view-subscription" data-tab-id="subscription" class="content-section user-tab-pane w-full max-w-[1700px] mx-auto px-2 sm:px-4 space-y-7 transition-all duration-300 ease-in-out animate-in fade-in">
         
         <!-- Header Banner -->
         <div class="relative rounded-3xl p-6 sm:p-8 overflow-hidden border border-amber-500/30 shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#1e1508]">
@@ -567,7 +567,7 @@ export class SubscriptionComponent {
     const userRank = tierRank[userPlanKey] ?? 0;
 
     return `
-      <div id="pricing-cards-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-7xl mx-auto scroll-mt-6">
+      <div id="pricing-cards-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 w-full mx-auto scroll-mt-6 transition-all duration-300">
         ${this.plans.map(plan => {
           const planCode = (plan.code || plan.id || '').toUpperCase();
           const targetRank = tierRank[planCode] ?? 0;
@@ -726,7 +726,11 @@ export class SubscriptionComponent {
     const modalEl = document.getElementById('upgradeModal') || document.getElementById('vipModal') || document.getElementById('generic-modal');
     if (!modalEl) return;
 
-    modalEl.classList.remove('hidden');
+    modalEl.classList.remove('hidden', 'pointer-events-none');
+    modalEl.classList.add('flex', 'pointer-events-auto');
+    modalEl.style.setProperty('display', 'flex', 'important');
+    modalEl.style.setProperty('z-index', '999999', 'important');
+    modalEl.style.setProperty('pointer-events', 'auto', 'important');
 
     const plan = this.plans.find(p => p.id === planId) || {
       id: planId,
@@ -829,12 +833,18 @@ export class SubscriptionComponent {
     window.closeUpgradeModal = function() {
       const modal = document.getElementById('upgradeModal') || document.getElementById('vipModal') || document.getElementById('generic-modal');
       if (modal) {
-        modal.classList.add('hidden');
+        modal.classList.add('hidden', 'pointer-events-none');
+        modal.classList.remove('flex', 'pointer-events-auto');
+        modal.style.setProperty('display', 'none', 'important');
+        modal.style.setProperty('pointer-events', 'none', 'important');
         modal.innerHTML = '';
       }
       const altModal = document.getElementById('generic-modal');
       if (altModal && altModal !== modal) {
-        altModal.classList.add('hidden');
+        altModal.classList.add('hidden', 'pointer-events-none');
+        altModal.classList.remove('flex', 'pointer-events-auto');
+        altModal.style.setProperty('display', 'none', 'important');
+        altModal.style.setProperty('pointer-events', 'none', 'important');
         altModal.innerHTML = '';
       }
       // Dừng tiến trình polling ngầm nếu đang chạy
@@ -1334,17 +1344,17 @@ export class SubscriptionComponent {
       }
 
       container.innerHTML = `
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="w-full overflow-x-auto overflow-y-hidden rounded-xl custom-scrollbar border border-slate-800/80" style="scrollbar-width: thin;">
+          <table class="w-full text-left text-xs history-table table-fixed border-collapse" style="min-width: 1180px; width: 100%; table-layout: fixed; border-collapse: collapse;">
             <thead>
-              <tr class="text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px] font-mono">
-                <th class="pb-2.5 font-bold">Mã Đơn</th>
-                <th class="pb-2.5 font-bold">Thời Gian</th>
-                <th class="pb-2.5 font-bold">Gói Dịch Vụ</th>
-                <th class="pb-2.5 font-bold">Số Tiền</th>
-                <th class="pb-2.5 font-bold">Phương Thức</th>
-                <th class="pb-2.5 font-bold">Trạng Thái</th>
-                <th class="pb-2.5 font-bold">Ghi Chú</th>
+              <tr class="text-slate-400 border-b border-slate-800 bg-slate-900/90 uppercase tracking-wider text-[10px] font-mono">
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 110px;">MÃ ĐƠN</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 140px;">THỜI GIAN</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 140px;">GÓI DỊCH VỤ</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 120px;">SỐ TIỀN (VNĐ)</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 140px;">PHƯƠNG THỨC</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap" style="width: 180px;">TRẠNG THÁI</th>
+                <th class="py-3 px-3 font-bold whitespace-nowrap text-left" style="width: 350px; text-align: left;">GHI CHÚ</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60 font-mono text-[11px]">
@@ -1352,27 +1362,81 @@ export class SubscriptionComponent {
                 const isApproved = o.status === 'APPROVED';
                 const isPending = o.status === 'PENDING';
                 const isRejected = o.status === 'REJECTED';
-                const isPlat = (o.plan_code || '').toUpperCase() === 'PLATINUM';
-                const isPrem = (o.plan_code || '').toUpperCase() === 'PREMIUM';
+                const planCode = (o.plan_code || '').toUpperCase();
+                const isPlat = planCode === 'PLATINUM';
+                const isPrem = planCode === 'PREMIUM';
+
+                // 1. Badge Gói Dịch Vụ (Cưỡng chế inline style nền & viền chuẩn xác)
+                let planBadgeHtml = '';
+                if (isPlat) {
+                  planBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(6, 78, 59, 0.5); color:#6ee7b7; border:1px solid rgba(16, 185, 129, 0.35); white-space:nowrap;">
+                      <i class="fa-solid fa-crown text-emerald-400 text-[10px]"></i> PLATINUM VIP
+                    </span>
+                  `;
+                } else if (isPrem) {
+                  planBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(120, 53, 15, 0.35); color:#fde047; border:1px solid rgba(245, 158, 11, 0.35); white-space:nowrap;">
+                      <i class="fa-solid fa-gem text-amber-400 text-[10px]"></i> PREMIUM VIP
+                    </span>
+                  `;
+                } else {
+                  planBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(88, 28, 135, 0.45); color:#d8b4fe; border:1px solid rgba(168, 85, 247, 0.35); white-space:nowrap;">
+                      <i class="fa-solid fa-star text-amber-400 text-[10px]"></i> FINTRACK VIP
+                    </span>
+                  `;
+                }
+
+                // 2. Badge Trạng Thái (Cưỡng chế inline style nền & viền chuẩn xác)
+                let statusBadgeHtml = '';
+                if (isPending) {
+                  statusBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(120, 53, 15, 0.35); color:#fcd34d; border:1px solid rgba(245, 158, 11, 0.35); white-space:nowrap;">
+                      ⏳ Chờ Quản Trị Duyệt
+                    </span>
+                  `;
+                } else if (isApproved) {
+                  statusBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(6, 78, 59, 0.5); color:#6ee7b7; border:1px solid rgba(16, 185, 129, 0.35); white-space:nowrap;">
+                      📗 Đã Kích Hoạt
+                    </span>
+                  `;
+                } else {
+                  statusBadgeHtml = `
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:9999px; font-size:11px; font-weight:600; background-color:rgba(136, 19, 55, 0.4); color:#fda4af; border:1px solid rgba(244, 63, 94, 0.35); white-space:nowrap;">
+                      ❌ Bị Từ Chối
+                    </span>
+                  `;
+                }
+
+                // 3. Ghi Chú (Hiển thị trọn vẹn 100% text, không bị cắt cụt)
+                let noteHtml = '';
+                if (isApproved) {
+                  const approvedBy = o.approved_by || (o.payment_method === 'SEPAY_PG' ? 'AUTO_WEBHOOK_SEPAY' : 'AUTO_VIETQR_MB');
+                  noteHtml = `<span class="text-xs font-mono text-emerald-400 whitespace-nowrap">Duyệt bởi ${approvedBy}</span>`;
+                } else if (isRejected) {
+                  const reason = o.rejection_reason || 'Sai cú pháp chuyển khoản MB Bank (không ghi rõ mã đơn)';
+                  noteHtml = `<span class="text-xs text-rose-400 whitespace-nowrap">${reason}</span>`;
+                } else {
+                  const memo = o.transfer_memo || `FT NAP ${o.order_code}`;
+                  noteHtml = `<span class="text-xs font-mono text-slate-400 whitespace-nowrap">${memo}</span>`;
+                }
 
                 return `
-                  <tr class="hover:bg-slate-800/40 transition">
-                    <td class="py-3 font-bold text-amber-300">#${o.order_code}</td>
-                    <td class="py-3 text-slate-400 whitespace-nowrap">${o.created_at || '---'}</td>
-                    <td class="py-3">
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isPlat ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : isPrem ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}">
-                        ${isPlat ? '👑💎 PLATINUM VIP' : isPrem ? '👑 PREMIUM' : '⭐ FINTRACK VIP'}
-                      </span>
+                  <tr class="hover:bg-slate-800/40 transition-colors duration-150" style="transition: background-color 0.15s ease;">
+                    <td class="py-3.5 px-3 text-amber-400 font-mono font-bold text-xs whitespace-nowrap">#${o.order_code}</td>
+                    <td class="py-3.5 px-3 text-slate-400 text-xs font-mono whitespace-nowrap">${o.created_at || '---'}</td>
+                    <td class="py-3.5 px-3 whitespace-nowrap">
+                      ${planBadgeHtml}
                     </td>
-                    <td class="py-3 font-bold text-slate-100">${formatVND(o.amount || 0)}</td>
-                    <td class="py-3 text-slate-400 font-sans">${o.payment_method === 'MB_VIETQR' ? 'VietQR MB Bank' : o.payment_method}</td>
-                    <td class="py-3">
-                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPending ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse' : isApproved ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">
-                        ${isPending ? '⏳ Chờ Quản Trị Duyệt' : isApproved ? '✅ Đã Kích Hoạt' : '❌ Bị Từ Chối'}
-                      </span>
+                    <td class="py-3.5 px-3 text-slate-100 font-mono font-bold text-xs whitespace-nowrap">${formatVND(o.amount || 0)}</td>
+                    <td class="py-3.5 px-3 text-slate-400 text-xs whitespace-nowrap font-sans">${o.payment_method === 'MB_VIETQR' ? 'VietQR MB Bank' : o.payment_method === 'SEPAY_PG' ? 'Cổng SePay Auto' : o.payment_method}</td>
+                    <td class="py-3.5 px-3 whitespace-nowrap">
+                      ${statusBadgeHtml}
                     </td>
-                    <td class="py-3 text-slate-400 font-sans text-[10px]">
-                      ${isRejected && o.rejection_reason ? `<span class="text-rose-400 font-bold">${o.rejection_reason}</span>` : isApproved && o.approved_by ? `<span class="text-emerald-400 font-bold">Duyệt bởi ${o.approved_by}</span>` : `<span class="text-slate-500">${o.transfer_memo || 'Đang đối soát...'}</span>`}
+                    <td class="py-3.5 px-3 whitespace-nowrap text-left" style="white-space: nowrap; padding-right: 24px;">
+                      ${noteHtml}
                     </td>
                   </tr>
                 `;

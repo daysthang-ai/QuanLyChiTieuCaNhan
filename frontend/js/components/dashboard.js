@@ -15,7 +15,7 @@ export class DashboardComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-dashboard" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-dashboard" data-tab-id="dashboard" class="content-section user-tab-pane space-y-6 pb-10 animate-in fade-in duration-300">
         
         <!-- Header & Quick Actions -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -34,13 +34,13 @@ export class DashboardComponent {
             
             <!-- Quick Time Filter Pills -->
             <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800 shadow-inner">
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_month">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer relative z-20 pointer-events-auto ${this.selectedPeriod === 'this_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_month">
                 Tháng này
               </button>
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'last_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="last_month">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer relative z-20 pointer-events-auto ${this.selectedPeriod === 'last_month' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="last_month">
                 Tháng trước
               </button>
-              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition ${this.selectedPeriod === 'this_quarter' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_quarter">
+              <button type="button" class="dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer relative z-20 pointer-events-auto ${this.selectedPeriod === 'this_quarter' ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}" data-period="this_quarter">
                 Quý này
               </button>
             </div>
@@ -53,7 +53,7 @@ export class DashboardComponent {
             </div>
 
             <!-- Primary Add Transaction Action -->
-            <button id="btn-add-tx-top" class="btn-sparkle-burst px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/35 active:scale-95 transition-all duration-200 flex items-center gap-1.5 transform-gpu">
+            <button id="btn-add-tx-top" type="button" onclick="window.openTransactionModal()" class="btn-sparkle-burst px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/35 active:scale-95 transition-all duration-200 flex items-center gap-1.5 transform-gpu cursor-pointer relative z-20 pointer-events-auto">
               <i class="fa-solid fa-plus text-xs"></i>
               <span>Ghi Thu - Chi</span>
             </button>
@@ -132,7 +132,7 @@ export class DashboardComponent {
                 <i class="fa-solid fa-bullseye text-cyan-400"></i>
                 Giám Sát Ngân Sách
               </h3>
-              <button id="btn-view-all-budgets" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline">Chi tiết &rarr;</button>
+              <button id="btn-view-all-budgets" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer relative z-20 pointer-events-auto">Chi tiết &rarr;</button>
             </div>
             <div id="budget-alerts-list" class="space-y-3">
               <div class="text-xs text-slate-400 text-center py-6">Đang tải dữ liệu ngân sách...</div>
@@ -146,16 +146,16 @@ export class DashboardComponent {
                 <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
                 Giao Dịch Gần Đây
               </h3>
-              <button id="btn-view-all-txs" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline">Xem tất cả &rarr;</button>
+              <button id="btn-view-all-txs" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer relative z-20 pointer-events-auto">Xem tất cả &rarr;</button>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
+            <div class="w-full overflow-x-auto overflow-y-hidden rounded-xl custom-scrollbar border border-slate-800/80">
+              <table class="w-full text-left text-xs fintrack-table table-fixed border-collapse">
                 <thead>
-                  <tr class="border-b border-slate-800 text-slate-400 font-semibold uppercase">
-                    <th class="pb-2.5">Thời Gian</th>
-                    <th class="pb-2.5">Danh Mục & Ghi Chú</th>
-                    <th class="pb-2.5">Ví</th>
-                    <th class="pb-2.5 text-right font-bold">Số Tiền (VNĐ)</th>
+                  <tr class="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-semibold uppercase text-[10px] font-mono">
+                    <th class="w-[20%] py-2.5 px-3">Thời Gian</th>
+                    <th class="w-[44%] py-2.5 px-3">Danh Mục & Ghi Chú</th>
+                    <th class="w-[16%] py-2.5 px-3">Ví</th>
+                    <th class="w-[20%] py-2.5 px-3 text-right font-bold">Số Tiền (VNĐ)</th>
                   </tr>
                 </thead>
                 <tbody id="recent-transactions-tbody" class="divide-y divide-slate-800/60">
@@ -340,8 +340,8 @@ export class DashboardComponent {
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-xl font-black text-emerald-400 font-mono tracking-tight">${kpis.savings_rate_month}%</span>
-          <span class="text-xs text-slate-400">(${formatVND(kpis.net_savings_month)})</span>
+          <span class="text-xl font-black text-emerald-400 font-mono tracking-tight">${Number(kpis.savings_rate_month || 0).toFixed(1)}%</span>
+          <span class="text-xs text-slate-400 font-mono">(${kpis.net_savings_month >= 0 ? '+' : ''}${formatVND(kpis.net_savings_month)})</span>
         </div>
         <div class="mt-1 text-[11px] ${kpis.savings_rate_month >= 20 ? 'text-emerald-400' : 'text-rose-400'} flex items-center gap-1">
           <i class="fa-solid ${kpis.savings_rate_month >= 20 ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'} text-[10px]"></i>
@@ -438,7 +438,7 @@ export class DashboardComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 200,
+        resizeDelay: 0,
         animation: {
           duration: 900,
           easing: 'easeOutQuart'
@@ -632,7 +632,7 @@ export class DashboardComponent {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 200,
+        resizeDelay: 0,
         cutout: '74%',
         animation: {
           animateRotate: true,
@@ -685,18 +685,34 @@ export class DashboardComponent {
     container.innerHTML = budgets.slice(0, 4).map(b => {
       const isOver = b.status === 'OVERSPENT';
       const isWarn = b.status === 'WARNING';
-      const colorClass = isOver ? 'bg-rose-500' : isWarn ? 'bg-rose-400' : 'bg-emerald-500';
-      const textClass = isOver ? 'text-rose-400' : isWarn ? 'text-rose-400' : 'text-emerald-400';
-      const badgeText = isOver ? `Vượt ${Math.round(b.percentage - 100)}%` : isWarn ? `Đã dùng ${b.percentage}%` : 'An toàn';
+      const badgeClass = isOver 
+        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' 
+        : isWarn 
+        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' 
+        : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+
+      const progressBarClass = isOver 
+        ? 'budget-progress-overspent bg-gradient-to-r from-rose-600 to-rose-500' 
+        : isWarn 
+        ? 'budget-progress-warning bg-gradient-to-r from-amber-500 to-amber-400' 
+        : 'budget-progress-safe bg-gradient-to-r from-emerald-500 to-cyan-500';
+
+      const progressBarStyle = isOver
+        ? 'background: linear-gradient(90deg, #e11d48 0%, #f43f5e 100%); box-shadow: 0 0 8px rgba(244, 63, 94, 0.35);'
+        : isWarn
+        ? 'background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 0 8px rgba(251, 191, 36, 0.35);'
+        : 'background: linear-gradient(90deg, #10b981 0%, #06b6d4 100%); box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);';
+
+      const badgeText = isOver ? `Bội chi (${Math.round(b.percentage)}%)` : isWarn ? `Cảnh báo (${Math.round(b.percentage)}%)` : `An toàn (${Math.round(b.percentage)}%)`;
 
       return `
-        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-700/50 hover:border-slate-600 transition transform-gpu">
+        <div class="p-2.5 rounded-xl bg-slate-900/60 border ${isOver ? 'border-rose-500/35 bg-rose-950/15' : isWarn ? 'border-amber-500/35 bg-amber-950/15' : 'border-slate-700/50'} hover:border-slate-600 transition transform-gpu">
           <div class="flex items-center justify-between text-xs mb-1.5">
             <span class="font-bold text-slate-200">${b.category ? b.category.name : 'Danh mục'}</span>
-            <span class="font-bold ${textClass} text-[11px]">${badgeText}</span>
+            <span class="px-2 py-0.5 rounded-full font-bold ${badgeClass} text-[10px] shadow-sm">${badgeText}</span>
           </div>
-          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-            <div class="${colorClass} progress-animated h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, b.percentage)}%"></div>
+          <div class="w-full bg-slate-950/80 h-2 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+            <div class="${progressBarClass} progress-animated h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, b.percentage)}%; ${progressBarStyle}"></div>
           </div>
           <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
             <span>Đã chi: ${formatVND(b.spent_amount)}</span>
@@ -717,36 +733,36 @@ export class DashboardComponent {
     }
 
     tbody.innerHTML = txs.map(t => {
-      const isIncome = t.type === 'INCOME';
+      const isIncome = t.type === 'INCOME' || t.type === 'TOPUP' || t.type === 'DEPOSIT';
       const isTransfer = t.type === 'TRANSFER';
-      const sign = isIncome ? '+' : isTransfer ? '⮂' : '-';
-      const amountColor = isIncome ? 'text-emerald-400' : isTransfer ? 'text-cyan-400' : 'text-rose-400';
+      const sign = isIncome ? '+' : isTransfer ? '⮂ ' : '-';
+      const amountColor = isIncome ? 'text-emerald-400 font-semibold' : isTransfer ? 'text-cyan-400 font-semibold' : 'text-rose-400 font-semibold';
 
-      const catName = t.category ? t.category.name : isTransfer ? 'Chuyển tiền' : 'Chung';
+      const catName = t.category ? t.category.name : isTransfer ? 'Chuyển tiền' : (isIncome ? 'Nạp tiền / Thu nhập' : 'Chi tiêu');
       const catColor = isIncome ? '#10B981' : isTransfer ? '#06B6D4' : '#F43F5E';
-      const catIcon = t.category ? (t.category.icon || 'receipt') : 'arrow-right-arrow-left';
+      const catIcon = t.category ? (t.category.icon || 'receipt') : (isTransfer ? 'arrow-right-arrow-left' : (isIncome ? 'circle-arrow-down' : 'receipt'));
 
       return `
-        <tr class="hover:bg-slate-800/50 transition">
-          <td class="py-2.5 text-slate-400 text-[11px] whitespace-nowrap font-mono">
+        <tr class="hover:bg-slate-800/60 transition duration-150 border-b border-slate-800/40">
+          <td class="py-3 px-3 text-slate-300 text-[11px] whitespace-nowrap font-mono truncate">
             ${formatDateVN(t.transaction_date)}
           </td>
-          <td class="py-2.5">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${catColor}30; color: ${catColor}; border: 1px solid ${catColor}50;">
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow-sm flex-shrink-0" style="background-color: ${catColor}25; color: ${catColor}; border: 1px solid ${catColor}50;">
                 <i class="fa-solid fa-${catIcon}"></i>
               </span>
-              <div class="min-w-0">
-                <span class="font-bold text-slate-200 block truncate">${catName}</span>
-                ${t.note ? `<span class="text-[10px] text-slate-400 block truncate">${t.note}</span>` : ''}
+              <div class="min-w-0 flex-1">
+                <span class="font-bold text-slate-100 block truncate text-xs">${catName}</span>
+                ${t.note ? `<span class="text-[10px] text-slate-400 block truncate" title="${t.note}">${t.note}</span>` : ''}
               </div>
             </div>
           </td>
-          <td class="py-2.5 text-slate-400 text-[11px] whitespace-nowrap">
-            <span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700 text-slate-300">${t.wallet ? t.wallet.name : ''}</span>
+          <td class="py-3 px-3 text-slate-300 text-[11px] whitespace-nowrap truncate">
+            <span class="px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/80 text-slate-200 font-medium truncate inline-block max-w-full">${t.wallet ? t.wallet.name : 'Ví'}</span>
           </td>
-          <td class="py-2.5 text-right font-black font-mono text-xs ${amountColor} whitespace-nowrap">
-            ${sign} ${formatVND(t.amount)}
+          <td class="py-3 px-3 text-right font-black font-mono text-xs ${amountColor} whitespace-nowrap truncate">
+            ${sign}${formatVND(t.amount)}
           </td>
         </tr>
       `;

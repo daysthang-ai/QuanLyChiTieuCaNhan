@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=5.5';
-import { formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=5.5';
+import { api } from '../api.js?v=20260904_01';
+import { formatDateVN, formatDateTimeVN } from '../utils/formatters.js?v=20260904_01';
 
 export class SupportComponent {
   constructor(app) {
@@ -35,7 +35,7 @@ export class SupportComponent {
     const resolvedTickets = this.tickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length;
 
     container.innerHTML = `
-      <div id="tab-support" class="user-tab-pane max-w-6xl mx-auto space-y-7 animate-in fade-in duration-300">
+      <div id="tab-support" class="user-tab-pane w-full max-w-[1700px] mx-auto px-2 sm:px-4 space-y-7 transition-all duration-300 ease-in-out animate-in fade-in">
         
         <!-- Header Banner -->
         <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-teal-950/60 via-slate-900/90 to-cyan-950/50 border border-teal-500/30 shadow-2xl">

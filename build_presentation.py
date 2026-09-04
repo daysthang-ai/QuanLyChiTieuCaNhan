@@ -1,666 +1,1292 @@
 """
-Script tạo file PowerPoint báo cáo thuyết trình đồ án FinTrack AI: BaoCao_FinTrackAI_Demo.pptx
-Sử dụng python-pptx, hỗ trợ kế thừa template.pptx nếu có hoặc tự động vẽ giao diện Dark Cyber Glassmorphism.
+Script tạo Slide Báo Cáo Đề Tài "FinTrack AI - Ứng Dụng Quản Lý Chi Tiêu Cá Nhân Tích Hợp Trí Tuệ Nhân Tạo"
+Nhóm 03: Đặng Quyết Thắng (Trưởng nhóm), Nguyễn Văn Tiến, Quách Minh Hiếu
+Giảng viên hướng dẫn: ThS. Hà Thị Thanh (ICTU)
+Phong cách: Dark Cyber Neon Theme (Glassmorphism, 16:9 Widescreen, Tiếng Việt tự nhiên, dễ thuyết trình)
 """
 
 import sys
 import os
-from pathlib import Path
 
-# Đảm bảo in tiếng Việt không bị lỗi encoding trên Windows console
-try:
-    sys.stdout.reconfigure(encoding='utf-8')
-except Exception:
-    pass
+# Cấu hình encoding stdout để tránh lỗi charmap trên Windows console
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
 from pptx import Presentation
 from pptx.util import Inches, Pt
+from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
-from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
-# --- BẢNG MÀU CHUẨN DARK CYBER NEON ---
-COLOR_BG_DARK = RGBColor(11, 15, 25)        # #0B0F19 (Nền tối Cyber)
-COLOR_CARD_BG = RGBColor(17, 24, 39)        # #111827 (Nền Card)
-COLOR_CARD_BORDER = RGBColor(30, 41, 59)    # #1E293B (Viền Card)
-COLOR_CYAN = RGBColor(0, 242, 254)          # #00F2FE (Xanh ngọc sáng)
-COLOR_CYAN_LIGHT = RGBColor(56, 189, 248)   # #38BDF8
-COLOR_PURPLE = RGBColor(168, 85, 247)       # #A855F7 (Tím Neon)
-COLOR_PINK = RGBColor(236, 72, 153)         # #EC4899 (Hồng Neon)
-COLOR_GOLD = RGBColor(245, 158, 11)         # #F59E0B (Vàng Gold)
-COLOR_EMERALD = RGBColor(16, 185, 129)      # #10B981 (Xanh lục)
-COLOR_WHITE = RGBColor(240, 246, 252)       # #F0F6FC (Trắng sáng)
-COLOR_GRAY = RGBColor(148, 163, 184)        # #94A3B8 (Xám chữ phụ)
-COLOR_ROSE = RGBColor(244, 63, 94)          # #F43F5E (Đỏ/Rose)
+# ==============================================================================
+# BẢNG MÀU CHỦ ĐẠO (DARK CYBER NEON THEME)
+# ==============================================================================
+COLOR_BG_DARK = RGBColor(11, 15, 25)       # #0B0F19 Nền tối chủ đạo
+COLOR_BG_CARD = RGBColor(17, 24, 39)       # #111827 Nền thẻ Card Glassmorphism
+COLOR_BG_CARD_LIGHT = RGBColor(24, 33, 53) # #182135 Nền thẻ phụ
+COLOR_BG_BADGE = RGBColor(30, 41, 59)      # #1E293B Nền Badge tag
 
-def set_shape_flat_color(shape, bg_rgb, border_rgb=None, border_width=1):
-    """Thiết lập màu nền và viền cho shape."""
-    shape.fill.solid()
-    shape.fill.fore_color.rgb = bg_rgb
-    if border_rgb:
-        shape.line.color.rgb = border_rgb
-        shape.line.width = Pt(border_width)
-    else:
-        shape.line.fill.background()
+# Neon Accent Colors
+COLOR_NEON_CYAN = RGBColor(0, 229, 255)    # #00E5FF Xanh ngọc Neon
+COLOR_NEON_EMERALD = RGBColor(0, 255, 170) # #00FFAA Xanh lá Neon
+COLOR_NEON_AMBER = RGBColor(245, 158, 11)  # #F59E0B Vàng cam Gold
+COLOR_NEON_PINK = RGBColor(255, 0, 122)    # #FF007A Hồng Neon
+COLOR_NEON_PURPLE = RGBColor(139, 92, 246) # #8B5CF6 Tím Neon
+COLOR_NEON_BLUE = RGBColor(59, 130, 246)   # #3B82F6 Xanh dương
 
-def create_background_decor(slide, width, height, slide_title=""):
-    """Vẽ background Cyber Dark kèm thanh Top Header và Footer."""
-    # Nền chính
-    bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, width, height)
-    set_shape_flat_color(bg, COLOR_BG_DARK, None)
-    
-    # Thanh Neon phát sáng đỉnh slide (Gradient simulation)
-    top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, width, Inches(0.08))
-    set_shape_flat_color(top_bar, COLOR_CYAN, None)
+# Text Colors
+COLOR_TEXT_WHITE = RGBColor(255, 255, 255) # Trắng sáng
+COLOR_TEXT_LIGHT = RGBColor(226, 232, 240) # Trắng xám nhạt (dễ đọc)
+COLOR_TEXT_MUTED = RGBColor(148, 163, 184) # Xám vừa
+COLOR_TEXT_DIM = RGBColor(100, 116, 139)   # Xám mờ
 
-    # Footer
-    footer_box = slide.shapes.add_textbox(Inches(0.8), height - Inches(0.45), width - Inches(1.6), Inches(0.35))
-    tf = footer_box.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = "FinTrack AI • Nền Tảng Quản Lý Chi Tiêu Cá Nhân Tích Hợp AI • Nhóm 03 - ICTU 2026"
-    p.font.size = Pt(10)
-    p.font.color.rgb = COLOR_GRAY
-    p.font.name = "Segoe UI"
+FONT_MAIN = "Segoe UI"
+FONT_HEADING = "Segoe UI"
+TOTAL_SLIDES = 11
 
-    # Slide Title nếu có
-    if slide_title:
-        title_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.4), width - Inches(1.6), Inches(0.9))
-        tf_title = title_box.text_frame
-        tf_title.word_wrap = True
-        p_title = tf_title.paragraphs[0]
-        p_title.text = slide_title
-        p_title.font.size = Pt(24)
-        p_title.font.bold = True
-        p_title.font.color.rgb = COLOR_CYAN
-        p_title.font.name = "Segoe UI"
+# ==============================================================================
+# CÁC HÀM TIỆN ÍCH XÂY DỰNG GIAO DIỆN SLIDE
+# ==============================================================================
 
-def add_demo_slide(prs, slide_num_str, title, feature_bullets, demo_title, demo_hint):
-    """Tạo slide Demo chia đôi bố cục: Trái = Tóm tắt tính năng, Phải = Placeholder ảnh Demo."""
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    w, h = prs.slide_width, prs.slide_height
-    create_background_decor(slide, w, h, f"[{slide_num_str}] {title}")
+def create_presentation():
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+    return prs
 
-    col_w = Inches(5.6)
-    col_h = Inches(5.6)
-    top_pos = Inches(1.35)
+def set_slide_background(slide):
+    """Vẽ nền tối toàn màn hình cho Slide"""
+    bg = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(13.333), Inches(7.5)
+    )
+    bg.fill.solid()
+    bg.fill.fore_color.rgb = COLOR_BG_DARK
+    bg.line.fill.background()
+    return bg
 
-    # 1. CỘT TRÁI: Thẻ Tóm tắt Tính năng
-    left_card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), top_pos, col_w, col_h)
-    set_shape_flat_color(left_card, COLOR_CARD_BG, COLOR_CARD_BORDER, 1.5)
-
-    # Header Card Trái
-    hdr_box = slide.shapes.add_textbox(Inches(1.1), top_pos + Inches(0.2), col_w - Inches(0.6), Inches(0.5))
-    tf_hdr = hdr_box.text_frame
-    p_hdr = tf_hdr.paragraphs[0]
-    p_hdr.text = "⚡ ĐẶC TẢ TÍNH NĂNG NỔI BẬT"
-    p_hdr.font.size = Pt(15)
-    p_hdr.font.bold = True
-    p_hdr.font.color.rgb = COLOR_GOLD
-    p_hdr.font.name = "Segoe UI"
-
-    # Bullet contents
-    content_box = slide.shapes.add_textbox(Inches(1.1), top_pos + Inches(0.7), col_w - Inches(0.6), col_h - Inches(0.9))
-    tf_cnt = content_box.text_frame
-    tf_cnt.word_wrap = True
-
-    for i, (head, desc) in enumerate(feature_bullets):
-        p = tf_cnt.add_paragraph() if i > 0 else tf_cnt.paragraphs[0]
-        p.text = f"• {head}: "
-        p.font.bold = True
-        p.font.size = Pt(13)
-        p.font.color.rgb = COLOR_CYAN_LIGHT
-        p.font.name = "Segoe UI"
-        
-        # Thêm đoạn text chi tiết
-        run = p.add_run()
-        run.text = desc
-        run.font.bold = False
-        run.font.size = Pt(12.5)
-        run.font.color.rgb = COLOR_WHITE
-        p.space_after = Pt(10)
-
-    # 2. CỘT PHẢI: Khung Placeholder Chèn Ảnh Demo
-    right_card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), top_pos, col_w, col_h)
-    set_shape_flat_color(right_card, RGBColor(15, 23, 42), COLOR_PURPLE, 1.5)
-
-    # Placeholder text & icon area
-    demo_box = slide.shapes.add_textbox(Inches(7.1), top_pos + Inches(0.3), col_w - Inches(0.6), Inches(0.6))
-    tf_demo = demo_box.text_frame
-    p_demo = tf_demo.paragraphs[0]
-    p_demo.text = f"🖼️ GIAO DIỆN MINH HỌA (DEMO)"
-    p_demo.font.size = Pt(14)
-    p_demo.font.bold = True
-    p_demo.font.color.rgb = COLOR_PURPLE
-    p_demo.font.name = "Segoe UI"
-
-    # Sub box inside image area
-    inner_placeholder = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(7.1), top_pos + Inches(0.9), col_w - Inches(0.6), col_h - Inches(1.2))
-    set_shape_flat_color(inner_placeholder, RGBColor(8, 12, 22), RGBColor(51, 65, 85), 1)
-
-    ph_text_box = slide.shapes.add_textbox(Inches(7.3), top_pos + Inches(2.2), col_w - Inches(1.0), Inches(2.0))
-    tf_ph = ph_text_box.text_frame
-    tf_ph.word_wrap = True
-    p_ph1 = tf_ph.paragraphs[0]
-    p_ph1.alignment = PP_ALIGN.CENTER
-    p_ph1.text = f"[ CHÈN HÌNH ẢNH MINH HỌA TẠI ĐÂY ]\n"
-    p_ph1.font.bold = True
-    p_ph1.font.size = Pt(14)
-    p_ph1.font.color.rgb = COLOR_CYAN
-
-    p_ph2 = tf_ph.add_paragraph()
-    p_ph2.alignment = PP_ALIGN.CENTER
-    p_ph2.text = demo_hint
-    p_ph2.font.size = Pt(11.5)
-    p_ph2.font.color.rgb = COLOR_GRAY
-
-def build_presentation():
-    template_path = Path("template.pptx")
-    
-    if template_path.exists():
-        print(f"[FinTrack AI] Tìm thấy template: {template_path.resolve()}, đang kế thừa...")
-        prs = Presentation(template_path)
-    else:
-        print("[FinTrack AI] Khởi tạo Presentation chuẩn 16:9 Dark Cyber...")
-        prs = Presentation()
-        prs.slide_width = Inches(13.333)
-        prs.slide_height = Inches(7.5)
-
-    w, h = prs.slide_width, prs.slide_height
-
-    # =========================================================================
-    # SLIDE 1: TRANG BÌA (Title Slide)
-    # =========================================================================
-    slide1 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide1, w, h)
-
-    # Brand Title Box
-    title_box = slide1.shapes.add_textbox(Inches(1.0), Inches(1.3), w - Inches(2.0), Inches(2.6))
-    tf = title_box.text_frame
-    tf.word_wrap = True
-    
-    p_tag = tf.paragraphs[0]
-    p_tag.text = "ĐỒ ÁN HỌC PHẦN: ỨNG DỤNG TRÍ TUỆ NHÂN TẠO (AI APPS 2026)"
-    p_tag.font.size = Pt(13)
+def add_header(slide, tag_text, title_text, subtitle_text, accent_color=COLOR_NEON_CYAN):
+    """Tạo Header chuẩn hóa với Tag, Tiêu đề lớn và Phụ đề"""
+    # 1. Tag pill
+    tag_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.4), Inches(8.0), Inches(0.35))
+    tf_tag = tag_box.text_frame
+    tf_tag.word_wrap = True
+    tf_tag.margin_left = tf_tag.margin_top = tf_tag.margin_right = tf_tag.margin_bottom = 0
+    p_tag = tf_tag.paragraphs[0]
+    p_tag.text = tag_text.upper()
+    p_tag.font.name = FONT_MAIN
+    p_tag.font.size = Pt(10.5)
     p_tag.font.bold = True
-    p_tag.font.color.rgb = COLOR_GOLD
-    p_tag.font.name = "Segoe UI"
-    p_tag.space_after = Pt(8)
+    p_tag.font.color.rgb = accent_color
 
-    p_main = tf.add_paragraph()
-    p_main.text = "FINTRACK AI - HỆ THỐNG QUẢN LÝ CHI TIÊU CÁ NHÂN CÓ TÍCH HỢP AI"
-    p_main.font.size = Pt(28)
-    p_main.font.bold = True
-    p_main.font.color.rgb = COLOR_CYAN
-    p_main.font.name = "Segoe UI"
-    p_main.space_after = Pt(10)
+    # 2. Tiêu đề chính
+    title_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.72), Inches(11.7), Inches(0.55))
+    tf_title = title_box.text_frame
+    tf_title.word_wrap = True
+    tf_title.margin_left = tf_title.margin_top = tf_title.margin_right = tf_title.margin_bottom = 0
+    p_title = tf_title.paragraphs[0]
+    p_title.text = title_text
+    p_title.font.name = FONT_HEADING
+    p_title.font.size = Pt(21)
+    p_title.font.bold = True
+    p_title.font.color.rgb = COLOR_TEXT_WHITE
 
-    p_sub = tf.add_paragraph()
-    p_sub.text = "Nền tảng Quản lý Tài chính Thông minh • Bóc tách Giao dịch Tiếng Việt • Cố vấn 50/30/20 & Bảo mật Zero-PII"
-    p_sub.font.size = Pt(15)
-    p_sub.font.color.rgb = COLOR_WHITE
-    p_sub.font.name = "Segoe UI"
+    # 3. Phụ đề tóm lược
+    sub_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.25), Inches(11.7), Inches(0.35))
+    tf_sub = sub_box.text_frame
+    tf_sub.word_wrap = True
+    tf_sub.margin_left = tf_sub.margin_top = tf_sub.margin_right = tf_sub.margin_bottom = 0
+    p_sub = tf_sub.paragraphs[0]
+    p_sub.text = subtitle_text
+    p_sub.font.name = FONT_MAIN
+    p_sub.font.size = Pt(11.5)
+    p_sub.font.color.rgb = COLOR_TEXT_MUTED
 
-    # Info Card (Giảng viên & Sinh viên)
-    info_card = slide1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.0), Inches(4.3), w - Inches(2.0), Inches(2.4))
-    set_shape_flat_color(info_card, COLOR_CARD_BG, COLOR_CARD_BORDER, 1.5)
+    # 4. Đường kẻ neon ngăn cách header
+    line = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.65), Inches(11.733), Inches(0.02)
+    )
+    line.fill.solid()
+    line.fill.fore_color.rgb = accent_color
+    line.line.fill.background()
 
-    info_box = slide1.shapes.add_textbox(Inches(1.3), Inches(4.5), w - Inches(2.6), Inches(2.0))
-    tf_info = info_box.text_frame
-    tf_info.word_wrap = True
+def add_footer(slide, slide_num, total_slides=TOTAL_SLIDES, accent_color=COLOR_NEON_CYAN):
+    """Tạo Footer chuẩn hóa cho tất cả các slide nội dung"""
+    line = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(6.88), Inches(11.733), Inches(0.015)
+    )
+    line.fill.solid()
+    line.fill.fore_color.rgb = RGBColor(30, 41, 59)
+    line.line.fill.background()
 
-    p_gv = tf_info.paragraphs[0]
-    p_gv.text = "👩‍🏫 Giảng viên hướng dẫn: "
-    p_gv.font.bold = True
-    p_gv.font.size = Pt(14)
-    p_gv.font.color.rgb = COLOR_GOLD
-    r_gv = p_gv.add_run()
-    r_gv.text = "ThS. Hà Thị Thanh"
-    r_gv.font.bold = True
-    r_gv.font.color.rgb = COLOR_WHITE
-    p_gv.space_after = Pt(10)
+    # Text bên trái
+    footer_box = slide.shapes.add_textbox(Inches(0.8), Inches(6.96), Inches(7.0), Inches(0.35))
+    tf = footer_box.text_frame
+    tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
+    p = tf.paragraphs[0]
+    p.text = "✦ FinTrack AI • Ứng Dụng Quản Lý Chi Tiêu Cá Nhân Tích Hợp AI  |  Nhóm 03 (ICTU)"
+    p.font.name = FONT_MAIN
+    p.font.size = Pt(9.5)
+    p.font.color.rgb = COLOR_TEXT_DIM
 
-    p_sv = tf_info.add_paragraph()
-    p_sv.text = "👥 Nhóm sinh viên thực hiện: "
-    p_sv.font.bold = True
-    p_sv.font.size = Pt(14)
-    p_sv.font.color.rgb = COLOR_CYAN_LIGHT
-    r_sv = p_sv.add_run()
-    r_sv.text = "Nhóm 03 - Lớp Công Nghệ Thông Tin K20 (ICTU 2026)"
-    r_sv.font.bold = True
-    r_sv.font.color.rgb = COLOR_WHITE
-    p_sv.space_after = Pt(6)
+    # Slide number bên phải
+    num_box = slide.shapes.add_textbox(Inches(9.5), Inches(6.96), Inches(3.0), Inches(0.35))
+    tf_num = num_box.text_frame
+    tf_num.margin_left = tf_num.margin_top = tf_num.margin_right = tf_num.margin_bottom = 0
+    p_num = tf_num.paragraphs[0]
+    p_num.text = f"Slide {slide_num:02d} / {total_slides:02d}"
+    p_num.alignment = PP_ALIGN.RIGHT
+    p_num.font.name = FONT_MAIN
+    p_num.font.size = Pt(9.5)
+    p_num.font.bold = True
+    p_num.font.color.rgb = accent_color
 
-    p_names = tf_info.add_paragraph()
-    p_names.text = "• Đặng Quyết Thắng (Trưởng nhóm)   • Nguyễn Văn Tiến   • Quách Minh Hiếu"
-    p_names.font.bold = True
-    p_names.font.size = Pt(14)
-    p_names.font.color.rgb = COLOR_PURPLE
+def add_card(slide, left, top, width, height, border_color=COLOR_NEON_CYAN, bg_color=COLOR_BG_CARD):
+    """Tạo Card Glassmorphism viền Neon"""
+    card = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(left), Inches(top), Inches(width), Inches(height)
+    )
+    card.fill.solid()
+    card.fill.fore_color.rgb = bg_color
+    card.line.color.rgb = border_color
+    card.line.width = Pt(1.5)
+    return card
 
-    # =========================================================================
-    # SLIDE 2: ĐẶT VẤN ĐỀ & MỤC TIÊU PHÁT TRIỂN
-    # =========================================================================
-    slide2 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide2, w, h, "01. ĐẶT VẤN ĐỀ & MỤC TIÊU PHÁT TRIỂN DỰ ÁN")
+# ==============================================================================
+# HÀM TẠO 11 SLIDES THUYẾT TRÌNH DỄ HIỂU & DỄ NÓI
+# ==============================================================================
 
-    card_w = Inches(5.6)
-    card_h = Inches(5.6)
+def build_slide_1(prs):
+    """SLIDE 1: TRANG BÌA"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+
+    # Top Tag Ribbon
+    top_badge = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(3.4), Inches(0.55), Inches(6.533), Inches(0.4)
+    )
+    top_badge.fill.solid()
+    top_badge.fill.fore_color.rgb = COLOR_BG_BADGE
+    top_badge.line.color.rgb = COLOR_NEON_CYAN
+    top_badge.line.width = Pt(1)
+    tf_badge = top_badge.text_frame
+    p_b = tf_badge.paragraphs[0]
+    p_b.text = "✦ BÁO CÁO ĐỀ TÀI HỌC PHẦN ỨNG DỤNG TRÍ TUỆ NHÂN TẠO ✦"
+    p_b.alignment = PP_ALIGN.CENTER
+    p_b.font.name = FONT_MAIN
+    p_b.font.size = Pt(11)
+    p_b.font.bold = True
+    p_b.font.color.rgb = COLOR_NEON_CYAN
+
+    # Main Giant Title
+    main_title_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.05), Inches(11.733), Inches(1.35))
+    tf_title = main_title_box.text_frame
+    tf_title.word_wrap = True
     
-    # Cột 1: Thực trạng & Bất cập
-    c1 = slide2.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.35), card_w, card_h)
-    set_shape_flat_color(c1, COLOR_CARD_BG, COLOR_ROSE, 1.5)
+    p1 = tf_title.paragraphs[0]
+    p1.text = "FINTRACK AI"
+    p1.alignment = PP_ALIGN.CENTER
+    p1.font.name = FONT_HEADING
+    p1.font.size = Pt(38)
+    p1.font.bold = True
+    p1.font.color.rgb = COLOR_TEXT_WHITE
 
-    tb1 = slide2.shapes.add_textbox(Inches(1.1), Inches(1.55), card_w - Inches(0.6), card_h - Inches(0.4))
-    tf1 = tb1.text_frame
+    p2 = tf_title.add_paragraph()
+    p2.text = "ỨNG DỤNG QUẢN LÝ CHI TIÊU CÁ NHÂN TÍCH HỢP TRÍ TUỆ NHÂN TẠO"
+    p2.alignment = PP_ALIGN.CENTER
+    p2.font.name = FONT_HEADING
+    p2.font.size = Pt(16.5)
+    p2.font.bold = True
+    p2.font.color.rgb = COLOR_NEON_EMERALD
+
+    p3 = tf_title.add_paragraph()
+    p3.text = "Giải pháp ghi chép tài chính thông minh, bảo mật an toàn và nhắc nhở chi tiêu hiệu quả"
+    p3.alignment = PP_ALIGN.CENTER
+    p3.font.name = FONT_MAIN
+    p3.font.size = Pt(11.5)
+    p3.font.color.rgb = COLOR_TEXT_LIGHT
+
+    # 3 Info Cards
+    # Card 1: Học phần & Đơn vị
+    add_card(slide, 0.8, 2.7, 3.65, 3.1, COLOR_NEON_CYAN)
+    card1_tb = slide.shapes.add_textbox(Inches(0.95), Inches(2.85), Inches(3.35), Inches(2.8))
+    tf1 = card1_tb.text_frame
     tf1.word_wrap = True
     
     p = tf1.paragraphs[0]
-    p.text = "🚨 THỰC TRẠNG & BẤT CẬP APP TRUYỀN THỐNG"
+    p.text = "[ THÔNG TIN HỌC PHẦN ]"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(12.5)
     p.font.bold = True
-    p.font.size = Pt(15)
-    p.font.color.rgb = COLOR_ROSE
-    p.space_after = Pt(14)
+    p.font.color.rgb = COLOR_NEON_CYAN
 
     items1 = [
-        ("Bùng nổ thanh toán không tiền mặt", "QR Code, MoMo, thẻ tín dụng khiến người trẻ tiêu tiền nhanh nhưng khó kiểm soát số dư ròng."),
-        ("Nhập liệu thủ công rườm rà", "Gõ từng con số, chọn danh mục mất 1-2 phút khiến 85% người dùng bỏ cuộc sau 1-2 tuần."),
-        ("Thiếu tính cố vấn thông minh", "Ứng dụng cũ chỉ đóng vai trò 'sổ ghi chép thụ động', không chỉ ra được nguyên nhân bội chi."),
-        ("Lo ngại rủi ro rò rỉ dữ liệu cá nhân", "Người dùng e ngại chia sẻ thông tin sao kê và số tài khoản ngân hàng nhạy cảm.")
+        ("Trường đào tạo:", "ĐH CNTT & Truyền Thông (ICTU)"),
+        ("Khoa chuyên môn:", "Khoa Công Nghệ Thông Tin"),
+        ("Học phần:", "Ứng Dụng Trí Tuệ Nhân Tạo"),
+        ("Thời gian thực hiện:", "Năm 2026")
     ]
-    for h_txt, d_txt in items1:
-        p_item = tf1.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True
-        p_item.font.size = Pt(13)
-        p_item.font.color.rgb = COLOR_GOLD
-        r = p_item.add_run()
-        r.text = d_txt
-        r.font.bold = False
-        r.font.size = Pt(12)
-        r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(8)
+    for label, val in items1:
+        p_l = tf1.add_paragraph()
+        p_l.text = f"• {label} "
+        p_l.font.size = Pt(10.5)
+        p_l.font.bold = True
+        p_l.font.color.rgb = COLOR_TEXT_LIGHT
+        
+        run_v = p_l.add_run()
+        run_v.text = val
+        run_v.font.bold = False
+        run_v.font.color.rgb = COLOR_TEXT_MUTED
 
-    # Cột 2: Mục tiêu & Giải pháp FinTrack AI
-    c2 = slide2.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.35), card_w, card_h)
-    set_shape_flat_color(c2, COLOR_CARD_BG, COLOR_CYAN, 1.5)
-
-    tb2 = slide2.shapes.add_textbox(Inches(7.1), Inches(1.55), card_w - Inches(0.6), card_h - Inches(0.4))
-    tf2 = tb2.text_frame
+    # Card 2: Giảng viên hướng dẫn
+    add_card(slide, 4.84, 2.7, 3.65, 3.1, COLOR_NEON_AMBER)
+    card2_tb = slide.shapes.add_textbox(Inches(4.99), Inches(2.85), Inches(3.35), Inches(2.8))
+    tf2 = card2_tb.text_frame
     tf2.word_wrap = True
-
+    
     p = tf2.paragraphs[0]
-    p.text = "🎯 GIẢI PHÁP ĐỘT PHÁ CỦA FINTRACK AI"
+    p.text = "[ GIẢNG VIÊN HƯỚNG DẪN ]"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(12.5)
     p.font.bold = True
-    p.font.size = Pt(15)
-    p.font.color.rgb = COLOR_CYAN
-    p.space_after = Pt(14)
+    p.font.color.rgb = COLOR_NEON_AMBER
 
     items2 = [
-        ("Tự động hóa ghi chép qua AI tiếng Việt", "FinTrack AI Parser bóc tách câu nói tự nhiên thành giao dịch có cấu trúc trong ~400ms."),
-        ("Cố vấn tài chính chuẩn 50/30/20", "Chẩn đoán sức khỏe dòng tiền, phân bổ quỹ thiết yếu, giải trí, tích lũy và cảnh báo vượt hạn mức."),
-        ("Bảo mật tuyệt đối Zero-PII Leakage", "Khử 100% định danh tài khoản, số thẻ trước khi đưa vào mô hình AI; từ chối truy vấn người khác."),
-        ("Gamification duy trì thói quen", "Streak chuỗi ngày kỷ luật, thanh tiến trình 6 bậc Level Road Map và 24 huy hiệu vinh danh.")
+        ("Giảng viên hướng dẫn:", "ThS. Hà Thị Thanh"),
+        ("Bộ môn:", "Trí Tuệ Nhân Tạo"),
+        ("Vai trò:", "Định hướng & Hướng dẫn đề tài"),
+        ("Đánh giá:", "Ứng dụng AI thiết thực cho sinh viên")
     ]
-    for h_txt, d_txt in items2:
-        p_item = tf2.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True
-        p_item.font.size = Pt(13)
-        p_item.font.color.rgb = COLOR_EMERALD
-        r = p_item.add_run()
-        r.text = d_txt
-        r.font.bold = False
-        r.font.size = Pt(12)
-        r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(8)
+    for label, val in items2:
+        p_l = tf2.add_paragraph()
+        p_l.text = f"• {label} "
+        p_l.font.size = Pt(10.5)
+        p_l.font.bold = True
+        p_l.font.color.rgb = COLOR_TEXT_LIGHT
+        
+        run_v = p_l.add_run()
+        run_v.text = val
+        run_v.font.bold = False
+        run_v.font.color.rgb = COLOR_TEXT_MUTED
 
-    # =========================================================================
-    # SLIDE 3: KIẾN TRÚC PHÂN TẦNG & CƠ SỞ DỮ LIỆU 9 BẢNG
-    # =========================================================================
-    slide3 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide3, w, h, "02. KIẾN TRÚC PHÂN TẦNG & THIẾT KẾ CSDL 9 BẢNG (3NF)")
-
-    # 3 Khối Card ngang
-    card_w3 = Inches(3.65)
-    card_h3 = Inches(5.6)
+    # Card 3: Nhóm sinh viên thực hiện (Nhóm 03)
+    add_card(slide, 8.88, 2.7, 3.65, 3.1, COLOR_NEON_EMERALD)
+    card3_tb = slide.shapes.add_textbox(Inches(9.03), Inches(2.85), Inches(3.35), Inches(2.8))
+    tf3 = card3_tb.text_frame
+    tf3.word_wrap = True
     
-    # Khối 1: Kiến trúc phân tầng
-    k1 = slide3.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.35), card_w3, card_h3)
-    set_shape_flat_color(k1, COLOR_CARD_BG, COLOR_CYAN, 1.5)
-    tb = slide3.shapes.add_textbox(Inches(0.95), Inches(1.5), card_w3 - Inches(0.3), card_h3 - Inches(0.3))
-    tf = tb.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = "🏛️ KIẾN TRÚC PHÂN TẦNG"
-    p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_CYAN
-    p.space_after = Pt(10)
-    
-    layers = [
-        ("Frontend Client (SPA)", "HTML5, Tailwind CSS, Dark Cyber Glassmorphism, Chart.js, ES6 Modules."),
-        ("FastAPI Backend", "Asynchronous Python 3.12, Pydantic v2, JWT Security, OAuth2, Bcrypt."),
-        ("Database Engine", "SQLite WAL Mode (Local) / PostgreSQL sẵn sàng, SQLAlchemy ORM 2.0."),
-        ("AI Micro-Engine", "Google Gemini 1.5 Pro / Flash kết hợp Rule Engine NLP tiếng Việt nội bộ.")
-    ]
-    for l_title, l_desc in layers:
-        p_l = tf.add_paragraph()
-        p_l.text = f"• {l_title}: "
-        p_l.font.bold = True; p_l.font.size = Pt(12); p_l.font.color.rgb = COLOR_GOLD
-        r = p_l.add_run(); r.text = l_desc; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_l.space_after = Pt(6)
+    p = tf3.paragraphs[0]
+    p.text = "[ NHÓM THỰC HIỆN - NHÓM 03 ]"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(12.5)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_EMERALD
 
-    # Khối 2: Kiến trúc 2-Scope Ledger
-    k2 = slide3.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(4.8), Inches(1.35), card_w3, card_h3)
-    set_shape_flat_color(k2, COLOR_CARD_BG, COLOR_PURPLE, 1.5)
-    tb = slide3.shapes.add_textbox(Inches(4.95), Inches(1.5), card_w3 - Inches(0.3), card_h3 - Inches(0.3))
-    tf = tb.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = "💳 ĐA VÍ 2 TẦNG (2-SCOPE)"
-    p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_PURPLE
-    p.space_after = Pt(10)
-
-    scopes = [
-        ("Tầng 1: Ví Kế Toán Ảo (virtual)", "Phục vụ ghi chép dòng tiền chi tiêu hàng ngày (Ví tiền mặt, MB Bank, MoMo, Techcombank). Không phát sinh tiền tệ thật."),
-        ("Tầng 2: Ví Tiền Thật (real)", "Lưu trữ số dư nạp từ cổng ngân hàng VietQR MB Bank để thanh toán / gia hạn các gói dịch vụ VIP."),
-        ("Ưu Điểm Thiết Kế", "Tách bạch 100% giữa sổ kế toán cá nhân và số dư giao dịch với nền tảng, loại bỏ nhầm lẫn dòng tiền.")
+    members = [
+        ("1. Đặng Quyết Thắng", "Trưởng Nhóm / Phát Triển Chính & AI"),
+        ("2. Nguyễn Văn Tiến", "Thành Viên / Thiết Kế Giao Diện Web"),
+        ("3. Quách Minh Hiếu", "Thành Viên / Xử Lý Dữ Liệu & Backend")
     ]
-    for s_title, s_desc in scopes:
+    for name, role in members:
+        p_m = tf3.add_paragraph()
+        p_m.text = f"✦ {name}"
+        p_m.font.size = Pt(10.5)
+        p_m.font.bold = True
+        p_m.font.color.rgb = COLOR_TEXT_WHITE
+        
+        p_r = tf3.add_paragraph()
+        p_r.text = f"   ↳ {role}"
+        p_r.font.size = Pt(9.5)
+        p_r.font.color.rgb = COLOR_NEON_EMERALD if "Trưởng" in role else COLOR_TEXT_MUTED
+
+    # Bottom Highlight Ribbon
+    pills = [
+        ("⚡ Nhập Chi Tiêu Bằng AI", COLOR_NEON_CYAN),
+        ("🛡️ Bảo Mật Xóa Dữ Liệu Nhạy Cảm", COLOR_NEON_PINK),
+        ("🩺 Cố Vấn Tiết Kiệm 50/30/20", COLOR_NEON_AMBER),
+        ("🏦 Quét Mã VietQR Tự Động", COLOR_NEON_EMERALD),
+        ("🎨 Giao Diện Đẹp Chuẩn 120 FPS", COLOR_NEON_PURPLE)
+    ]
+    total_w = 11.733
+    pill_w = total_w / len(pills) - 0.1
+    for i, (txt, col) in enumerate(pills):
+        px = 0.8 + i * (pill_w + 0.1)
+        badge = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE, Inches(px), Inches(6.05), Inches(pill_w), Inches(0.48)
+        )
+        badge.fill.solid()
+        badge.fill.fore_color.rgb = COLOR_BG_BADGE
+        badge.line.color.rgb = col
+        badge.line.width = Pt(1.2)
+        tf_b = badge.text_frame
+        p = tf_b.paragraphs[0]
+        p.text = txt
+        p.alignment = PP_ALIGN.CENTER
+        p.font.name = FONT_MAIN
+        p.font.size = Pt(9.5)
+        p.font.bold = True
+        p.font.color.rgb = COLOR_TEXT_WHITE
+
+
+def build_slide_2(prs):
+    """SLIDE 2: VÌ SAO NHÓM CHỌN ĐỀ TÀI NÀY?"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "02 // LÝ DO CHỌN ĐỀ TÀI",
+        "Vì Sao Nhóm Quyết Định Xây Dựng FinTrack AI?",
+        "Giải quyết những khó khăn thực tế của giới trẻ và sinh viên trong việc quản lý tiền bạc hàng ngày"
+    )
+
+    # 4 Cards for 4 Problems / Goals
+    cards = [
+        ("💸 1. Tiêu Tiền Không Kiểm Soát",
+         "Thói quen quét mã QR và chuyển khoản online quá tiện lợi khiến chúng ta dễ chi tiêu quá đà, cuối tháng hay bị rỗng ví mà không biết tiền đã đi đâu.",
+         COLOR_NEON_PINK),
+        ("📝 2. Lười Ghi Chép Sổ Sách",
+         "Nhập liệu bằng tay quá mất thời gian và phiền phức. Hầu hết mọi người chỉ ghi chép được vài hôm rồi bỏ cuộc vì hay quên các khoản chi nhỏ.",
+         COLOR_NEON_AMBER),
+        ("🎯 3. Không Biết Cách Chia Tiền",
+         "Thiếu kiến thức phân bổ thu nhập hợp lý (ăn uống bao nhiêu, tiết kiệm bao nhiêu), không có kế hoạch rõ ràng để dành tiền cho tương lai.",
+         COLOR_NEON_PURPLE),
+        ("💡 4. Mục Tiêu Của FinTrack AI",
+         "Tạo ra trang web giúp ghi chép siêu nhanh chỉ bằng một câu nói tự nhiên, có AI nhắc nhở và hướng dẫn quản lý tài chính thông minh 24/7.",
+         COLOR_NEON_EMERALD)
+    ]
+
+    card_w = 5.75
+    card_h = 2.25
+    coords = [
+        (0.8, 1.85), (6.78, 1.85),
+        (0.8, 4.35), (6.78, 4.35)
+    ]
+
+    for (title, desc, color), (x, y) in zip(cards, coords):
+        add_card(slide, x, y, card_w, card_h, color)
+        tb = slide.shapes.add_textbox(Inches(x + 0.2), Inches(y + 0.18), Inches(card_w - 0.4), Inches(card_h - 0.35))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        
+        p_t = tf.paragraphs[0]
+        p_t.text = title
+        p_t.font.name = FONT_HEADING
+        p_t.font.size = Pt(13)
+        p_t.font.bold = True
+        p_t.font.color.rgb = color
+
+        p_d = tf.add_paragraph()
+        p_d.text = desc
+        p_d.font.name = FONT_MAIN
+        p_d.font.size = Pt(11)
+        p_d.font.color.rgb = COLOR_TEXT_LIGHT
+
+    add_footer(slide, 2)
+
+
+def build_slide_3(prs):
+    """SLIDE 3: CÔNG NGHỆ NHÓM ĐÃ SỬ DỤNG"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "03 // CÔNG NGHỆ CÀI ĐẶT",
+        "Những Công Nghệ Chính Nhóm Đã Sử Dụng",
+        "Lựa chọn các công nghệ hiện đại, ổn định và tối ưu để xây dựng ứng dụng web chạy nhanh và mượt mà"
+    )
+
+    # 4 Tech Cards (2x2 grid)
+    techs = [
+        ("🎨 Giao Diện Web (Frontend)",
+         "HTML5, CSS Neo-Futuristic & Chart.js",
+         COLOR_NEON_CYAN,
+         [
+             "• Giao diện phong cách Neon tối giản, hiện đại và rất bắt mắt.",
+             "• Thao tác mượt mà, đổi trang ngay lập tức không cần tải lại.",
+             "• Biểu đồ tròn và biểu đồ cột trực quan, dễ nhìn cơ cấu chi tiêu."
+         ]),
+        ("⚡ Xử Lý Hệ Thống (Backend)",
+         "Ngôn ngữ Python & Khung FastAPI",
+         COLOR_NEON_EMERALD,
+         [
+             "• Sử dụng Python với FastAPI cho tốc độ xử lý siêu nhanh.",
+             "• Hệ thống chạy ổn định, an toàn và dễ dàng mở rộng.",
+             "• Đăng nhập an toàn bằng mã khóa JWT bảo vệ 24 giờ."
+         ]),
+        ("🧠 Trí Tuệ Nhân Tạo (AI Engine)",
+         "Google Gemini 1.5 Pro",
+         COLOR_NEON_PINK,
+         [
+             "• Hiểu tiếng Việt cực tốt, nhận diện từ lóng và cách viết tắt.",
+             "• Tự động phân loại chi tiêu và đưa ra lời khuyên tài chính 24/7.",
+             "• Tốc độ phản hồi cực nhanh, chỉ mất khoảng 0.5 giây."
+         ]),
+        ("🗄️ Cơ Sở Dữ Liệu (Database)",
+         "Hệ quản trị CSDL SQLite",
+         COLOR_NEON_AMBER,
+         [
+             "• Thiết kế 11 bảng dữ liệu khoa học, lưu trữ thông tin gọn gàng.",
+             "• Phân chia rõ ràng: ví ghi chép hàng ngày và ví tiền thanh toán.",
+             "• Lưu trữ dữ liệu an toàn, không bao giờ lo mất thông tin giao dịch."
+         ])
+    ]
+
+    card_w = 5.75
+    card_h = 2.25
+    coords = [
+        (0.8, 1.85), (6.78, 1.85),
+        (0.8, 4.35), (6.78, 4.35)
+    ]
+
+    for (title, sub, color, points), (x, y) in zip(techs, coords):
+        add_card(slide, x, y, card_w, card_h, color)
+        tb = slide.shapes.add_textbox(Inches(x + 0.2), Inches(y + 0.15), Inches(card_w - 0.4), Inches(card_h - 0.3))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        
+        p_t = tf.paragraphs[0]
+        p_t.text = title
+        p_t.font.name = FONT_HEADING
+        p_t.font.size = Pt(12.5)
+        p_t.font.bold = True
+        p_t.font.color.rgb = color
+
         p_s = tf.add_paragraph()
-        p_s.text = f"• {s_title}: "
-        p_s.font.bold = True; p_s.font.size = Pt(12); p_s.font.color.rgb = COLOR_PINK
-        r = p_s.add_run(); r.text = s_desc; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_s.space_after = Pt(8)
+        p_s.text = f"Công nghệ: {sub}"
+        p_s.font.name = FONT_MAIN
+        p_s.font.size = Pt(9.5)
+        p_s.font.bold = True
+        p_s.font.color.rgb = COLOR_TEXT_MUTED
 
-    # Khối 3: CSDL 9 Bảng Chuẩn 3NF
-    k3 = slide3.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.8), Inches(1.35), card_w3, card_h3)
-    set_shape_flat_color(k3, COLOR_CARD_BG, COLOR_EMERALD, 1.5)
-    tb = slide3.shapes.add_textbox(Inches(8.95), Inches(1.5), card_w3 - Inches(0.3), card_h3 - Inches(0.3))
-    tf = tb.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = "🗄️ CSDL 9 BẢNG (3NF)"
-    p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_EMERALD
-    p.space_after = Pt(10)
+        for pt in points:
+            p_p = tf.add_paragraph()
+            p_p.text = pt
+            p_p.font.name = FONT_MAIN
+            p_p.font.size = Pt(10)
+            p_p.font.color.rgb = COLOR_TEXT_LIGHT
 
-    tables = [
-        ("users", "Định danh, mật khẩu bcrypt, role, status, plan VIP."),
-        ("wallets", "Ví kế toán ảo & ví thanh toán thực tế."),
-        ("categories", "Danh mục thu/chi chuẩn hóa nhóm 50/30/20."),
-        ("transactions", "Nhật ký thu chi, hoàn tiền, flag created_by_ai."),
-        ("budgets", "Hạn mức ngân sách, ngưỡng cảnh báo 80%/100%."),
-        ("savings_goals", "Mục tiêu tích lũy tài chính, tiến độ %."),
-        ("subscription_orders", "Đơn hàng nạp VIP qua VietQR MB Bank."),
-        ("notifications", "Hộp thư thông báo biến động, cảnh báo hạn mức."),
-        ("support_tickets", "Tiếp nhận và phản hồi khiếu nại của user.")
+    add_footer(slide, 3)
+
+
+def build_slide_4(prs):
+    """SLIDE 4: TÍNH NĂNG NỔI BẬT 1 - NHẬP NHANH BẰNG CÂU NÓI VỚI AI"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "04 // TÍNH NĂNG NỔI BẬT 1",
+        "Nhập Chi Tiêu Siêu Nhanh Bằng Câu Nói Với AI",
+        "Không cần bấm chọn từng ô phức tạp - Chỉ cần gõ hoặc nói một câu tự nhiên như nhắn tin cho bạn bè"
+    )
+
+    # Left Card: Cách thức hoạt động của AI (60% width)
+    add_card(slide, 0.8, 1.85, 6.8, 4.85, COLOR_NEON_CYAN)
+    ltb = slide.shapes.add_textbox(Inches(1.05), Inches(2.0), Inches(6.3), Inches(4.5))
+    ltf = ltb.text_frame
+    ltf.word_wrap = True
+
+    p = ltf.paragraphs[0]
+    p.text = "⚡ CÁCH AI TỰ ĐỘNG HIỂU & LƯU GIAO DỊCH"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_CYAN
+
+    p_in = ltf.add_paragraph()
+    p_in.text = "💬 Ví dụ câu gõ: \"Ăn sáng bún bò 35k ví MoMo\" hoặc \"Lương tháng này 15tr vào MB Bank\""
+    p_in.font.name = FONT_MAIN
+    p_in.font.size = Pt(10.5)
+    p_in.font.bold = True
+    p_in.font.color.rgb = COLOR_NEON_EMERALD
+
+    steps = [
+        ("1. Tự Hiểu Ngôn Ngữ Tự Nhiên:",
+         "Người dùng gõ câu nói bình thường với từ viết tắt như 'k', 'tr', 'lít', 'củ'. AI vẫn hiểu chính xác 100%."),
+        ("2. Tự Động Bóc Tách Đầy Đủ 4 Thông Tin:",
+         "• Số tiền: Tự quy đổi 35k ➜ 35.000đ | 15tr ➜ 15.000.000đ.\n• Phân loại: Tự biết là Tiền Ăn Uống (Chi tiêu) hay Tiền Lương (Thu nhập).\n• Ví thanh toán: Tự gán vào ví MoMo, MB Bank hoặc Tiền mặt."),
+        ("3. Tốc Độ Phản Hồi Tức Thì:",
+         "Xong ngay chỉ sau 0.4 - 0.5 giây, giảm tới 90% thời gian so với cách nhập tay truyền thống.")
     ]
-    for t_name, t_desc in tables:
-        p_t = tf.add_paragraph()
-        p_t.text = f"• {t_name}: "
-        p_t.font.bold = True; p_t.font.size = Pt(11); p_t.font.color.rgb = COLOR_CYAN_LIGHT
-        r = p_t.add_run(); r.text = t_desc; r.font.bold = False; r.font.size = Pt(10.5); r.font.color.rgb = COLOR_WHITE
-        p_t.space_after = Pt(3)
+    for st_title, st_desc in steps:
+        p_st = ltf.add_paragraph()
+        p_st.text = st_title
+        p_st.font.name = FONT_HEADING
+        p_st.font.size = Pt(11)
+        p_st.font.bold = True
+        p_st.font.color.rgb = COLOR_TEXT_WHITE
 
-    # =========================================================================
-    # SLIDE 4 [DEMO 1]: DASHBOARD & QUẢN LÝ ĐA VÍ 2 TẦNG
-    # =========================================================================
-    add_demo_slide(
-        prs,
-        "DEMO 01",
-        "TỔNG QUAN DASHBOARD & QUẢN LÝ ĐA VÍ 2 TẦNG",
-        [
-            ("Chỉ số KPI Real-time", "Theo dõi trực quan Tổng tài sản ròng, Thu nhập tháng, Chi tiêu tháng và Tỷ lệ tiết kiệm thực tế."),
-            ("Biểu đồ Dòng tiền 6 Tháng", "Trực quan hóa xu hướng thu/chi qua Chart.js đa trục, đối chiếu biến động tài chính theo từng tháng."),
-            ("Cơ cấu Chi tiêu Donut", "Tự động phân nhóm danh mục chi tiêu, hiển thị tỷ trọng % chi tiết ngay trung tâm biểu đồ."),
-            ("Kiến trúc Đa ví Linh hoạt", "Quản lý ví tiền mặt, tài khoản ngân hàng, ví điện tử MoMo; hỗ trợ chuyển tiền nội bộ giữa các ví."),
-            ("Nạp nhanh số dư Ví", "Cập nhật tức thì số dư thực tế vào sổ kế toán chỉ với 1 thao tác.")
-        ],
-        "MÀN HÌNH DASHBOARD & QUẢN LÝ VÍ",
-        "Vị trí chèn ảnh minh họa:\n1. Màn hình Tổng quan Dashboard KPI\n2. Màn hình Danh sách Tài khoản & Ví tiền"
-    )
+        p_sd = ltf.add_paragraph()
+        p_sd.text = st_desc
+        p_sd.font.name = FONT_MAIN
+        p_sd.font.size = Pt(10)
+        p_sd.font.color.rgb = COLOR_TEXT_LIGHT
 
-    # =========================================================================
-    # SLIDE 5 [DEMO 2]: FINTRACK AI PARSER (NHẬP NHANH BẰNG AI)
-    # =========================================================================
-    add_demo_slide(
-        prs,
-        "DEMO 02",
-        "ĐIỂM NHẤN FINTRACK AI PARSER - NHẬP NHANH BẰNG AI",
-        [
-            ("Nhập liệu 1 chạm tiếng Việt", "Người dùng gõ/nói tự nhiên: 'Ăn trưa bún bò 45k MoMo', 'Lương 28 triệu vào Techcombank'."),
-            ("Bóc tách thông minh siêu tốc", "AI tự động trích xuất Loại (Thu/Chi), Số tiền, Danh mục, Ví tương ứng trong ~400ms với độ tin cậy >95%."),
-            ("Sổ Giao dịch Đa tiêu chí", "Tra cứu lịch sử thu chi theo khoảng ngày, theo ví thanh toán, theo danh mục hoặc từ khóa ghi chú."),
-            ("Badge Loại giao dịch Cyber", "Phân loại trực quan: Thu nhập (Xanh), Chi tiêu (Đỏ), Chuyển ví (Cyan) chống tràn chữ."),
-            ("Xuất Báo cáo 1-Click", "Hỗ trợ xuất dữ liệu ra file Excel (.xlsx), PDF chuyên nghiệp và CSV chuẩn UTF-8.")
-        ],
-        "MODAL AI PARSER & SỔ GIAO DỊCH",
-        "Vị trí chèn ảnh minh họa:\n1. Modal Bóc tách Giao dịch bằng AI Parser\n2. Bảng Sổ giao dịch Thu - Chi đa bộ lọc"
-    )
+    # Right Card: Bảo vệ thông tin nhạy cảm (40% width)
+    add_card(slide, 7.8, 1.85, 4.733, 4.85, COLOR_NEON_PINK)
+    rtb = slide.shapes.add_textbox(Inches(8.05), Inches(2.0), Inches(4.25), Inches(4.5))
+    rtf = rtb.text_frame
+    rtf.word_wrap = True
 
-    # =========================================================================
-    # SLIDE 6 [DEMO 3]: QUẢN TRỊ NGÂN SÁCH 50/30/20 & TRỢ LÝ AI 24/7
-    # =========================================================================
-    add_demo_slide(
-        prs,
-        "DEMO 03",
-        "QUẢN TRỊ NGÂN SÁCH 50/30/20 & TRỢ LÝ CỐ VẤN AI 24/7",
-        [
-            ("Cảnh báo Ngân sách Đa tầng", "Đổi màu thanh tiến trình trực quan: Xanh (<80% An toàn), Vàng (80-99% Cảnh báo), Đỏ (>=100% Bội chi)."),
-            ("Chẩn đoán Sức khỏe 50/30/20", "Chấm điểm Sức khỏe Tài chính (0-100), phân tích tỷ trọng Thiết yếu (50%), Mong muốn (30%), Tiết kiệm (20%)."),
-            ("Đề xuất 3 Hành động Cắt giảm", "Chỉ ra chính xác các danh mục có nguy cơ thâm hụt và đưa ra lời khuyên tối ưu chi phí thực tế."),
-            ("Trợ lý AI Financial Q&A", "Hỏi đáp ngôn ngữ tự nhiên về tài chính: 'Lương 5 triệu phân bổ thế nào?', 'Tháng này tôi đã tiêu bao nhiêu?'."),
-            ("Định dạng Markdown Chuyên nghiệp", "Câu trả lời từ AI được render bảng biểu, gạch đầu dòng và số tiền định dạng VND rõ ràng.")
-        ],
-        "HẠN MỨC NGÂN SÁCH & AI CHATBOT",
-        "Vị trí chèn ảnh minh họa:\n1. Màn hình Hạn mức Ngân sách & Cảnh báo\n2. Màn hình Trợ lý Cố vấn AI Chatbot 24/7"
-    )
+    p = rtf.paragraphs[0]
+    p.text = "🛡️ TỰ ĐỘNG XÓA DỮ LIỆU NHẠY CẢM"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_PINK
 
-    # =========================================================================
-    # SLIDE 7 [DEMO 4]: GAMIFICATION & CỔNG NẠP VIETQR MB BANK
-    # =========================================================================
-    add_demo_slide(
-        prs,
-        "DEMO 04",
-        "GAMIFICATION THÀNH TÍCH & CỔNG NẠP VIETQR MB BANK",
-        [
-            ("Level Road Map 6 Cột Mốc", "Hệ thống cấp bậc: Khởi Đầu (Lv.0) -> Đồng (Lv.1-2) -> Bạc (Lv.3-4) -> Vàng (Lv.5-6) -> Kim Cương (Lv.7-8) -> Huyền Thoại (Lv.9-10)."),
-            ("Bộ Sưu Tập 24 Huy Hiệu", "Mở khóa vinh danh theo kỷ luật tài chính, hoàn thành ngân sách và tích lũy tiết kiệm."),
-            ("Chuỗi Kỷ Luật (Streak)", "Ghi nhận số ngày duy trì ghi chép tài chính liên tục, thúc đẩy thói quen quản lý tiền bạc."),
-            ("Bảng Giá 4 Gói Dịch Vụ VIP", "Free (0đ), Pro (49k/tháng), Premium (99k/tháng) và Platinum VIP (199k/tháng)."),
-            ("Cổng Nạp VietQR MB Bank", "Sinh mã QR động theo chuẩn NAPAS 247: STK 0374617569 (DANG QUYET THANG), tự gán đúng số tiền & cú pháp đơn hàng.")
-        ],
-        "GAMIFICATION & BẢNG GIÁ VIETQR",
-        "Vị trí chèn ảnh minh họa:\n1. Màn hình Gamification Level Road Map & Huy hiệu\n2. Bảng giá 4 Gói VIP & Modal Quét VietQR MB Bank"
-    )
-
-    # =========================================================================
-    # SLIDE 8 [DEMO 5]: PHÂN HỆ QUẢN TRỊ ADMIN & MODERATOR CONSOLE
-    # =========================================================================
-    add_demo_slide(
-        prs,
-        "DEMO 05",
-        "PHÂN HỆ QUẢN TRỊ HỆ THỐNG (ADMIN & MODERATOR CONSOLE)",
-        [
-            ("Admin Control Center", "Theo dõi chỉ số DAU/MAU, tổng doanh thu nạp VIP, Server Health Check (FastAPI, SQLite WAL, Gemini Latency)."),
-            ("Giám sát AI Token Tiêu Thụ", "Quản lý lưu lượng request, token tiêu thụ trong ngày và hạn mức của từng nhóm tài khoản."),
-            ("Quản lý Người Dùng & Khóa Cứng", "Phân quyền Root Admin/Moderator, khóa tài khoản vi phạm chính sách, đặt lại mật khẩu."),
-            ("Duyệt Đơn Nạp VIP 1-Click", "Phê duyệt đối soát đơn hàng VietQR MB Bank tức thì, tự động kích hoạt hạn sử dụng VIP và gửi thông báo."),
-            ("Audit Logs & Quản trị AI", "Ghi vết mọi hành vi nhạy cảm theo IP/thời gian thực; cho phép Admin chỉnh sửa trực tiếp System Prompt AI.")
-        ],
-        "ADMIN CONTROL CENTER & AI CONSOLE",
-        "Vị trí chèn ảnh minh họa:\n1. Bảng điều khiển Admin Dashboard & Giám sát\n2. Trung tâm Quản trị AI, Duyệt đơn VIP & Audit Logs"
-    )
-
-    # =========================================================================
-    # SLIDE 9: BẢO MẬT ZERO-PII LEAKAGE & HARD LOCKOUT 2 TẦNG
-    # =========================================================================
-    slide9 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide9, w, h, "03. BẢO MẬT ZERO-PII LEAKAGE & HARD LOCKOUT 2 TẦNG")
-
-    card_w9 = Inches(3.65)
-    card_h9 = Inches(5.6)
-
-    # Cột 1: Zero-PII Leakage
-    b1 = slide9.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.35), card_w9, card_h9)
-    set_shape_flat_color(b1, COLOR_CARD_BG, COLOR_CYAN, 1.5)
-    tb = slide9.shapes.add_textbox(Inches(0.95), Inches(1.5), card_w9 - Inches(0.3), card_h9 - Inches(0.3))
-    tf = tb.text_frame; tf.word_wrap = True
-    p = tf.paragraphs[0]; p.text = "🔒 ZERO-PII LEAKAGE"; p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_CYAN
-    p.space_after = Pt(10)
+    p_sub = rtf.add_paragraph()
+    p_sub.text = "Cam kết bảo vệ quyền riêng tư tuyệt đối cho người dùng"
+    p_sub.font.name = FONT_MAIN
+    p_sub.font.size = Pt(10)
+    p_sub.font.color.rgb = COLOR_TEXT_MUTED
 
     pii_items = [
-        ("Khử dữ liệu nhạy cảm", "Tự động làm sạch số tài khoản ngân hàng (****1234), email, số điện thoại trước khi chuyển vào Prompt AI."),
-        ("Zero-PII Guardrail", "Khi người dùng hỏi về dữ liệu của người khác, AI bắt buộc từ chối 100% theo tiêu chuẩn bảo mật dữ liệu riêng tư."),
-        ("Không lưu trữ thông tin thẻ", "Không lưu CVV/mật khẩu thanh toán, bảo vệ quyền riêng tư tuyệt đối.")
+        ("Nỗi Lo Của Người Dùng:",
+         "Sợ bị lộ số tài khoản ngân hàng, số thẻ ngân hàng hoặc tên thật khi gửi dữ liệu lên AI."),
+        ("Cách Xử Lý Của FinTrack AI:",
+         "• Hệ thống tự động quét và che đi mọi số tài khoản ngân hàng, số thẻ trước khi gửi sang máy chủ AI.\n• Chỉ gửi nội dung chi tiêu thuần túy để AI phân tích."),
+        ("Hiệu Quả Bảo Vệ:",
+         "Thông tin cá nhân được giữ an toàn 100% trên máy của người dùng, không bao giờ bị rò rỉ ra ngoài.")
     ]
-    for h_txt, d_txt in pii_items:
-        p_item = tf.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True; p_item.font.size = Pt(12); p_item.font.color.rgb = COLOR_GOLD
-        r = p_item.add_run(); r.text = d_txt; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(8)
+    for p_title, p_desc in pii_items:
+        p_pt = rtf.add_paragraph()
+        p_pt.text = p_title
+        p_pt.font.name = FONT_HEADING
+        p_pt.font.size = Pt(11)
+        p_pt.font.bold = True
+        p_pt.font.color.rgb = COLOR_TEXT_WHITE
 
-    # Cột 2: Hard Lockout 2 Tầng
-    b2 = slide9.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(4.8), Inches(1.35), card_w9, card_h9)
-    set_shape_flat_color(b2, COLOR_CARD_BG, COLOR_ROSE, 1.5)
-    tb = slide9.shapes.add_textbox(Inches(4.95), Inches(1.5), card_w9 - Inches(0.3), card_h9 - Inches(0.3))
-    tf = tb.text_frame; tf.word_wrap = True
-    p = tf.paragraphs[0]; p.text = "🚫 HARD LOCKOUT 2 TẦNG"; p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_ROSE
-    p.space_after = Pt(10)
+        p_pd = rtf.add_paragraph()
+        p_pd.text = p_desc
+        p_pd.font.name = FONT_MAIN
+        p_pd.font.size = Pt(9.8)
+        p_pd.font.color.rgb = COLOR_TEXT_LIGHT
 
-    lock_items = [
-        ("Tầng 1: Backend FastAPI Dependency", "Khi tài khoản ở trạng thái LOCKED, API get_current_user chặn đứng ngay với mã lỗi HTTP 403 Forbidden."),
-        ("Tầng 2: Frontend Client Interceptor", "Bắt sự kiện lỗi 403, tự động xóa sạch LocalStorage token và cưỡng chế đá ra màn hình Đăng nhập."),
-        ("Chặn Đăng Nhập", "API /login từ chối cấp phát JWT token đối với mọi tài khoản đang bị vô hiệu hóa.")
+    add_footer(slide, 4)
+
+
+def build_slide_5(prs):
+    """SLIDE 5: TÍNH NĂNG NỔI BẬT 2 - CỐ VẤN TÀI CHÍNH 50/30/20 & RÈN LUYỆN THÓI QUEN"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "05 // TÍNH NĂNG NỔI BẬT 2",
+        "Trợ Lý Cố Vấn 50/30/20 & Rèn Luyện Thói Quen Tiết Kiệm",
+        "Hướng dẫn chia tiền khoa học và biến việc ghi chép sổ sách thành trò chơi thú vị mỗi ngày"
+    )
+
+    # Left Card: Cố Vấn 50/30/20 (50% width)
+    add_card(slide, 0.8, 1.85, 5.75, 4.85, COLOR_NEON_AMBER)
+    ltb = slide.shapes.add_textbox(Inches(1.0), Inches(2.0), Inches(5.35), Inches(4.5))
+    ltf = ltb.text_frame
+    ltf.word_wrap = True
+
+    p = ltf.paragraphs[0]
+    p.text = "🩺 TRỢ LÝ CỐ VẤN TÀI CHÍNH 50/30/20"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_AMBER
+
+    items_advisor = [
+        ("Quy Tắc Vàng 50/30/20 Rất Dễ Áp Dụng:",
+         "• 50% Nhu cầu thiết yếu: Tiền ăn uống, tiền nhà, tiền xăng xe, điện nước.\n• 30% Sở thích cá nhân: Mua sắm quần áo, đi xem phim, cà phê bạn bè.\n• 20% Tiết kiệm & Tích lũy: Để dành cho trường hợp khẩn cấp hoặc tương lai."),
+        ("AI Tự Động Phân Tích & Cảnh Báo:",
+         "• Tổng kết thu chi hàng tuần, hàng tháng xem người dùng tiêu đúng tỷ lệ chưa.\n• Phát chuông cảnh báo khi tiền ăn chơi, mua sắm vượt quá 30% thu nhập."),
+        ("Đưa Ra Lời Khuyên Cụ Thể:",
+         "Gợi ý chi tiết các khoản nên cắt giảm để tháng sau không bị thâm hụt ngân sách.")
     ]
-    for h_txt, d_txt in lock_items:
-        p_item = tf.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True; p_item.font.size = Pt(12); p_item.font.color.rgb = COLOR_PINK
-        r = p_item.add_run(); r.text = d_txt; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(8)
+    for a_title, a_desc in items_advisor:
+        p_t = ltf.add_paragraph()
+        p_t.text = a_title
+        p_t.font.name = FONT_HEADING
+        p_t.font.size = Pt(11)
+        p_t.font.bold = True
+        p_t.font.color.rgb = COLOR_TEXT_WHITE
 
-    # Cột 3: Audit Logs & Quyền riêng tư
-    b3 = slide9.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.8), Inches(1.35), card_w9, card_h9)
-    set_shape_flat_color(b3, COLOR_CARD_BG, COLOR_PURPLE, 1.5)
-    tb = slide9.shapes.add_textbox(Inches(8.95), Inches(1.5), card_w9 - Inches(0.3), card_h9 - Inches(0.3))
-    tf = tb.text_frame; tf.word_wrap = True
-    p = tf.paragraphs[0]; p.text = "🛡️ AUDIT LOGS & AN TOÀN"; p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_PURPLE
-    p.space_after = Pt(10)
+        p_d = ltf.add_paragraph()
+        p_d.text = a_desc
+        p_d.font.name = FONT_MAIN
+        p_d.font.size = Pt(10)
+        p_d.font.color.rgb = COLOR_TEXT_LIGHT
 
-    audit_items = [
-        ("Ghi vết hoạt động toàn diện", "Audit Logs ghi nhận mọi thao tác: Đăng nhập, Duyệt đơn VIP, Khóa user, Sửa Prompt AI kèm IP & mốc thời gian."),
-        ("Mã hóa mật khẩu an toàn", "Sử dụng thuật toán Bcrypt Salt rounds tiêu chuẩn cao cho toàn bộ tài khoản."),
-        ("Session Timeout 7 ngày", "Access Token JWT có thời hạn định kỳ, tự động thu hồi khi hết hạn hoặc khi user đăng xuất.")
+    # Right Card: Hệ thống rèn luyện thói quen (50% width)
+    add_card(slide, 6.78, 1.85, 5.75, 4.85, COLOR_NEON_EMERALD)
+    rtb = slide.shapes.add_textbox(Inches(6.98), Inches(2.0), Inches(5.35), Inches(4.5))
+    rtf = rtb.text_frame
+    rtf.word_wrap = True
+
+    p = rtf.paragraphs[0]
+    p.text = "🎮 RÈN LUYỆN THÓI QUEN NHƯ CHƠI GAME"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_EMERALD
+
+    items_game = [
+        ("🔥 Chuỗi Ngày Chăm Chỉ (Streak):",
+         "Đếm số ngày liên tục người dùng ghi chép chi tiêu. Càng ghi đều đặn, ngọn lửa chuỗi ngày càng cháy to để tạo động lực duy trì thói quen."),
+        ("⭐ Tích Lũy Điểm Thưởng & Lên Cấp:",
+         "Mỗi lần ghi chép hoặc tiết kiệm thành công được cộng điểm kinh nghiệm (XP), thăng hạng từ 'Tập Sự' lên 'Bậc Thầy Tiết Kiệm'."),
+        ("🏆 Bộ 24 Huy Hiệu Thành Tích Đẹp Mắt:",
+         "• Huy hiệu 'Chiến Thần Tiết Kiệm': Đạt mục tiêu tiết kiệm 3 tháng liền.\n• Huy hiệu 'Người Tiêu Dùng Thông Thái': Không bao giờ bội chi.\n• Mở khóa các huy hiệu tạo cảm giác tự hào và thích thú.")
     ]
-    for h_txt, d_txt in audit_items:
-        p_item = tf.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True; p_item.font.size = Pt(12); p_item.font.color.rgb = COLOR_EMERALD
-        r = p_item.add_run(); r.text = d_txt; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(8)
+    for g_title, g_desc in items_game:
+        p_t = rtf.add_paragraph()
+        p_t.text = g_title
+        p_t.font.name = FONT_HEADING
+        p_t.font.size = Pt(11)
+        p_t.font.bold = True
+        p_t.font.color.rgb = COLOR_TEXT_WHITE
 
-    # =========================================================================
-    # SLIDE 10: KẾ HOẠCH & KẾT QUẢ KIỂM THỬ HỆ THỐNG
-    # =========================================================================
-    slide10 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide10, w, h, "04. KẾ HOẠCH & KẾT QUẢ KIỂM THỬ HỆ THỐNG (TEST CASES)")
+        p_d = rtf.add_paragraph()
+        p_d.text = g_desc
+        p_d.font.name = FONT_MAIN
+        p_d.font.size = Pt(10)
+        p_d.font.color.rgb = COLOR_TEXT_LIGHT
 
-    # Bảng 15 Ca kiểm thử trọng tâm & Kết quả
-    table_card = slide10.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.35), w - Inches(1.6), Inches(5.6))
-    set_shape_flat_color(table_card, COLOR_CARD_BG, COLOR_CARD_BORDER, 1.5)
+    add_footer(slide, 5)
 
-    tb = slide10.shapes.add_textbox(Inches(1.1), Inches(1.5), w - Inches(2.2), Inches(5.2))
-    tf = tb.text_frame; tf.word_wrap = True
 
-    p = tf.paragraphs[0]
-    p.text = "🧪 KẾT QUẢ THỰC NGHIỆM 15 CA KIỂM THỬ TRỌNG TÂM (BLACK-BOX & UNIT TESTS)"
-    p.font.bold = True; p.font.size = Pt(15); p.font.color.rgb = COLOR_CYAN
-    p.space_after = Pt(10)
+def build_slide_6(prs):
+    """SLIDE 6: TÍNH NĂNG NỔI BẬT 3 - HỆ THỐNG 2 LOẠI VÍ TIỀN RÕ RÀNG"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "06 // TÍNH NĂNG NỔI BẬT 3",
+        "Mô Hình 2 Loại Ví Tiền: Ví Ảo Ghi Chép & Ví Tiền Thật Mua Gói",
+        "Phân chia rành mạch để người dùng vừa ghi chép thoải mái, vừa nạp tiền mua dịch vụ an toàn"
+    )
+
+    # 2 Big Side-by-Side Cards
+    # Card 1: Ví Kế Toán (Ví Ảo)
+    add_card(slide, 0.8, 1.85, 5.75, 4.25, COLOR_NEON_CYAN)
+    ltb = slide.shapes.add_textbox(Inches(1.0), Inches(2.0), Inches(5.35), Inches(3.95))
+    ltf = ltb.text_frame
+    ltf.word_wrap = True
+
+    p = ltf.paragraphs[0]
+    p.text = "🌐 1. VÍ KẾ TOÁN (VÍ ẢO GHI CHÉP THU CHI)"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(12.5)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_CYAN
+
+    items_v1 = [
+        ("Mục đích:", "Dùng để theo dõi tiền tiêu hàng ngày của người dùng."),
+        ("Các ví tự tạo:", "Ví MB Bank, Ví MoMo, Ví Tiền Mặt, Thẻ Ngân Hàng..."),
+        ("Đặc điểm:", "Số dư ảo do người dùng tự nhập và sửa theo ý muốn. Có thể tạo thêm ví mới hoặc chuyển tiền qua lại giữa các ví ảo."),
+        ("Ý nghĩa:", "Hoàn toàn không liên quan đến tiền thật, người dùng thoải mái thử nghiệm ghi chép mà không lo mất tiền.")
+    ]
+    for label, val in items_v1:
+        p_l = ltf.add_paragraph()
+        p_l.text = f"• {label} "
+        p_l.font.size = Pt(10.5)
+        p_l.font.bold = True
+        p_l.font.color.rgb = COLOR_TEXT_WHITE
+        
+        run_v = p_l.add_run()
+        run_v.text = val
+        run_v.font.bold = False
+        run_v.font.color.rgb = COLOR_TEXT_LIGHT
+
+    # Card 2: Ví Tiền Thật
+    add_card(slide, 6.78, 1.85, 5.75, 4.25, COLOR_NEON_AMBER)
+    rtb = slide.shapes.add_textbox(Inches(6.98), Inches(2.0), Inches(5.35), Inches(3.95))
+    rtf = rtb.text_frame
+    rtf.word_wrap = True
+
+    p = rtf.paragraphs[0]
+    p.text = "💎 2. VÍ TIỀN THẬT (DÙNG ĐỂ MUA GÓI NÂNG CAO)"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(12.5)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_AMBER
+
+    items_v2 = [
+        ("Mục đích:", "Dùng để thanh toán khi người dùng muốn nâng cấp gói Pro, VIP."),
+        ("Cách nạp tiền:", "Chuyển khoản thật qua mã VietQR ngân hàng."),
+        ("Đặc điểm:", "Số dư tiền thật được bảo mật tuyệt đối, có hóa đơn điện tử và lịch sử nạp rõ ràng từng đồng."),
+        ("Ý nghĩa:", "Đảm bảo tính minh bạch, người dùng nạp bao nhiêu tiền sẽ hiển thị chính xác bấy nhiêu để mua các gói cước.")
+    ]
+    for label, val in items_v2:
+        p_l = rtf.add_paragraph()
+        p_l.text = f"• {label} "
+        p_l.font.size = Pt(10.5)
+        p_l.font.bold = True
+        p_l.font.color.rgb = COLOR_TEXT_WHITE
+        
+        run_v = p_l.add_run()
+        run_v.text = val
+        run_v.font.bold = False
+        run_v.font.color.rgb = COLOR_TEXT_LIGHT
+
+    # Bottom Summary Bar
+    bot_card = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.22), Inches(11.733), Inches(0.55)
+    )
+    bot_card.fill.solid()
+    bot_card.fill.fore_color.rgb = COLOR_BG_BADGE
+    bot_card.line.color.rgb = COLOR_NEON_EMERALD
+    bot_card.line.width = Pt(1.2)
+    tf_b = bot_card.text_frame
+    p_b = tf_b.paragraphs[0]
+    p_b.text = "✦ TÓM LẠI: Tách riêng 2 loại ví giúp dữ liệu ghi chép cá nhân không bị lẫn lộn với tiền nạp mua gói, đảm bảo an toàn tuyệt đối."
+    p_b.alignment = PP_ALIGN.CENTER
+    p_b.font.name = FONT_MAIN
+    p_b.font.size = Pt(10)
+    p_b.font.bold = True
+    p_b.font.color.rgb = COLOR_TEXT_WHITE
+
+    add_footer(slide, 6)
+
+
+def build_slide_7(prs):
+    """SLIDE 7: TÍNH NĂNG NỔI BẬT 4 - NÂNG CẤP & GIA HẠN GÓI CƯỚC TỰ ĐỘNG"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "07 // TÍNH NĂNG NỔI BẬT 4",
+        "Nâng Cấp & Gia Hạn Gói Cước Tự Động Trong 3 Giây",
+        "4 cấp độ gói cước phù hợp mọi nhu cầu và 2 cách thanh toán linh hoạt, tiện lợi"
+    )
+
+    # Top 4 Mini Cards for 4 Plans
+    plans = [
+        ("GÓI MIỄN PHÍ", "0đ", "(Free)", COLOR_TEXT_MUTED, [
+            "• 30 lượt AI / tháng",
+            "• 1 ví ghi chép cơ bản",
+            "• Báo cáo thu chi chuẩn",
+            "• Dành cho người mới"
+        ]),
+        ("GÓI PRO", "49.000đ", "/ tháng", COLOR_NEON_CYAN, [
+            "• 200 lượt AI / tháng",
+            "• Mở nhiều ví thoải mái",
+            "• Cố vấn tài chính 50/30/20",
+            "• Biểu đồ phân tích chi tiết"
+        ]),
+        ("GÓI PREMIUM", "99.000đ", "/ tháng", COLOR_NEON_PURPLE, [
+            "• Dùng AI không giới hạn",
+            "• Dự báo chi tiêu tương lai",
+            "• Xuất file Excel / PDF",
+            "• Hỗ trợ ưu tiên 24/7"
+        ]),
+        ("PLATINUM VIP", "199.000đ", "/ tháng", COLOR_NEON_AMBER, [
+            "• Trọn bộ tính năng cao nhất",
+            "• Trợ lý AI chuyên sâu",
+            "• Giao diện Neon Gold VIP",
+            "• Giảm 20% khi mua gói năm"
+        ])
+    ]
+
+    card_w = 2.76
+    spacing = 0.23
+    for i, (name, price, period, col, feats) in enumerate(plans):
+        cx = 0.8 + i * (card_w + spacing)
+        add_card(slide, cx, 1.85, card_w, 2.3, col)
+        
+        tb = slide.shapes.add_textbox(Inches(cx + 0.1), Inches(1.95), Inches(card_w - 0.2), Inches(2.1))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        
+        p_n = tf.paragraphs[0]
+        p_n.text = name
+        p_n.alignment = PP_ALIGN.CENTER
+        p_n.font.name = FONT_HEADING
+        p_n.font.size = Pt(11.5)
+        p_n.font.bold = True
+        p_n.font.color.rgb = col
+
+        p_p = tf.add_paragraph()
+        p_p.text = f"{price} {period}"
+        p_p.alignment = PP_ALIGN.CENTER
+        p_p.font.name = FONT_HEADING
+        p_p.font.size = Pt(12.5)
+        p_p.font.bold = True
+        p_p.font.color.rgb = COLOR_TEXT_WHITE
+
+        for feat in feats:
+            p_f = tf.add_paragraph()
+            p_f.text = feat
+            p_f.font.name = FONT_MAIN
+            p_f.font.size = Pt(9)
+            p_f.font.color.rgb = COLOR_TEXT_LIGHT
+
+    # Bottom Section: 2 Cách Thanh Toán Linh Hoạt
+    add_card(slide, 0.8, 4.3, 11.733, 2.4, COLOR_NEON_EMERALD, COLOR_BG_CARD_LIGHT)
+    btb = slide.shapes.add_textbox(Inches(1.0), Inches(4.45), Inches(11.333), Inches(2.1))
+    btf = btb.text_frame
+    btf.word_wrap = True
+
+    p_bt = btf.paragraphs[0]
+    p_bt.text = "💳 2 CÁCH GIA HẠN GÓI SIÊU TIỆN LỢI"
+    p_bt.font.name = FONT_HEADING
+    p_bt.font.size = Pt(12.5)
+    p_bt.font.bold = True
+    p_bt.font.color.rgb = COLOR_NEON_EMERALD
+
+    ways = [
+        ("👉 Cách 1: Trừ trực tiếp số dư Ví Tiền Thật:",
+         "Nếu trong ví đã có sẵn tiền nạp, chỉ cần bấm 'Gia Hạn', tài khoản được nâng cấp ngay lập tức trong 0.1 giây."),
+        ("👉 Cách 2: Quét mã VietQR ngân hàng (Tự động nhận diện sau 3 giây):",
+         "Chỉ cần mở app ngân hàng quét mã QR, hệ thống tự nhận tiền và tự nâng cấp tài khoản ngay trên màn hình mà KHÔNG CẦN TẢI LẠI TRANG.")
+    ]
+    for w_title, w_desc in ways:
+        p_wt = btf.add_paragraph()
+        p_wt.text = w_title
+        p_wt.font.name = FONT_HEADING
+        p_wt.font.size = Pt(11)
+        p_wt.font.bold = True
+        p_wt.font.color.rgb = COLOR_TEXT_WHITE
+
+        p_wd = btf.add_paragraph()
+        p_wd.text = f"   {w_desc}"
+        p_wd.font.name = FONT_MAIN
+        p_wd.font.size = Pt(10)
+        p_wd.font.color.rgb = COLOR_TEXT_LIGHT
+
+    add_footer(slide, 7)
+
+
+def build_slide_8(prs):
+    """SLIDE 8: TRANG QUẢN TRỊ DÀNH CHO ADMIN"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "08 // TRANG QUẢN TRỊ ADMIN",
+        "Trang Quản Trị Hệ Thống Dành Cho Admin",
+        "Theo dõi toàn bộ hoạt động của trang web, quản lý người dùng và doanh thu một cách dễ dàng"
+    )
+
+    # 3 Admin Function Cards
+    cards = [
+        ("📊 1. Theo Dõi Tổng Quan",
+         COLOR_NEON_CYAN,
+         [
+             ("Doanh thu thực tế:", "Thống kê chính xác số tiền thu được từ các đơn nạp tiền đã thanh toán thành công."),
+             ("Số lượng tài khoản:", "Biết được có bao nhiêu người dùng đang hoạt động và tỷ lệ người dùng gói VIP."),
+             ("Mức dùng AI:", "Theo dõi số câu hỏi AI được gửi lên để kiểm soát tài nguyên hệ thống.")
+         ]),
+        ("⚡ 2. Quản Lý Người Dùng & Đơn Nạp",
+         COLOR_NEON_EMERALD,
+         [
+             ("Khóa tài khoản 1-Click:", "Khóa ngay tài khoản vi phạm hoặc có dấu hiệu gian lận chỉ bằng một nút bấm."),
+             ("Duyệt đơn nạp nhanh:", "Xem lại toàn bộ lịch sử quét mã VietQR và trạng thái cộng tiền của từng tài khoản."),
+             ("Lịch sử minh bạch:", "Lưu rõ ràng ngày giờ nạp tiền để dễ dàng đối chiếu khi cần thiết.")
+         ]),
+        ("⚙️ 3. Tùy Chỉnh Lời Nhắc AI",
+         COLOR_NEON_AMBER,
+         [
+             ("Đổi câu lệnh cho AI:", "Trực tiếp sửa hướng dẫn cho trợ lý AI ngay trên web mà không cần khởi động lại máy chủ."),
+             ("Nhật ký bảo mật:", "Ghi lại mọi thao tác quan trọng của Admin như đổi mật khẩu hay duyệt tiền."),
+             ("An tâm vận hành:", "Đảm bảo trang web luôn hoạt động trơn tru và an toàn 24/7.")
+         ])
+    ]
+
+    card_w = 3.65
+    spacing = 0.39
+    for i, (title, color, items) in enumerate(cards):
+        cx = 0.8 + i * (card_w + spacing)
+        add_card(slide, cx, 1.85, card_w, 4.85, color)
+        
+        tb = slide.shapes.add_textbox(Inches(cx + 0.15), Inches(2.0), Inches(card_w - 0.3), Inches(4.5))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        
+        p = tf.paragraphs[0]
+        p.text = title
+        p.font.name = FONT_HEADING
+        p.font.size = Pt(12)
+        p.font.bold = True
+        p.font.color.rgb = color
+
+        for item_title, item_desc in items:
+            p_it = tf.add_paragraph()
+            p_it.text = f"✦ {item_title}"
+            p_it.font.name = FONT_HEADING
+            p_it.font.size = Pt(10.5)
+            p_it.font.bold = True
+            p_it.font.color.rgb = COLOR_TEXT_WHITE
+
+            p_id = tf.add_paragraph()
+            p_id.text = item_desc
+            p_id.font.name = FONT_MAIN
+            p_id.font.size = Pt(9.8)
+            p_id.font.color.rgb = COLOR_TEXT_LIGHT
+
+    add_footer(slide, 8)
+
+
+def build_slide_9(prs):
+    """SLIDE 9: KẾT QUẢ KIỂM THỬ ỨNG DỤNG"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "09 // KẾT QUẢ KIỂM THỬ",
+        "Kết Quả Kiểm Thử Thực Tế & Tốc Độ Ứng Dụng",
+        "Đã kiểm tra kỹ lưỡng toàn bộ tính năng và đảm bảo trang web hoạt động hoàn hảo 100%"
+    )
+
+    # Left Column: 16 Kịch Bản Kiểm Thử (50% width)
+    add_card(slide, 0.8, 1.85, 5.75, 4.85, COLOR_NEON_EMERALD)
+    ltb = slide.shapes.add_textbox(Inches(1.0), Inches(2.0), Inches(5.35), Inches(4.5))
+    ltf = ltb.text_frame
+    ltf.word_wrap = True
+
+    p = ltf.paragraphs[0]
+    p.text = "🧪 16 KỊCH BẢN KIỂM THỬ THỰC TẾ"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_EMERALD
 
     test_groups = [
-        ("Phân hệ Xác thực & Phân quyền (TC01 - TC03)", "Đăng ký, Đăng nhập JWT, Phân quyền Role-based (User / Mod / Admin), Khóa cứng tài khoản (Hard Lockout) -> KẾT QUẢ: PASS 100%"),
-        ("Quản lý Ví & Sổ Giao dịch (TC04 - TC07)", "Tạo ví, nạp số dư, chuyển ví nội bộ, ghi thu/chi, bộ lọc đa tiêu chí, hoàn tiền tự động khi xóa giao dịch -> KẾT QUẢ: PASS 100%"),
-        ("Hạn mức Ngân sách & Gamification (TC08 - TC10)", "Cảnh báo đổi màu ngưỡng 80% (Warning) & 100% (Overspent), tính điểm XP, cập nhật Level Road Map 6 bậc -> KẾT QUẢ: PASS 100%"),
-        ("AI NLP Parser & Cố vấn 50/30/20 (TC11 - TC13)", "Bóc tách câu nói tự nhiên tiếng Việt, chẩn đoán sức khỏe dòng tiền, Zero-PII Guardrail từ chối xem dữ liệu người khác -> KẾT QUẢ: PASS 100%"),
-        ("Cổng Nạp VietQR & Admin Control (TC14 - TC15)", "Sinh mã VietQR MB Bank chuẩn NAPAS 247, duyệt đơn VIP 1-Click, quản trị System Prompt và xuất CSV -> KẾT QUẢ: PASS 100%")
+        ("1. Đăng Ký & Đăng Nhập:",
+         "Đăng ký tài khoản mới, lưu mật khẩu an toàn, đăng nhập nhận mã bảo mật đúng quy trình."),
+        ("2. Ghi Chép Bằng Câu Nói AI:",
+         "Nhập thử nhiều câu nói tiếng Việt phức tạp, AI đều hiểu đúng và lưu chuẩn xác vào danh mục."),
+        ("3. Cảnh Báo Tiêu Quá Tay & 50/30/20:",
+         "Thử nhập chi tiêu vượt ngân sách, hệ thống lập tức phát cảnh báo đỏ nhắc nhở kịp thời."),
+        ("4. Nạp Tiền & Gia Hạn Gói Tự Động:",
+         "Quét mã QR chuyển khoản thử, hệ thống tự động cộng tiền và nâng cấp VIP sau 3 giây.")
     ]
-
     for g_title, g_desc in test_groups:
-        p_g = tf.add_paragraph()
-        p_g.text = f"✅ {g_title}\n"
-        p_g.font.bold = True; p_g.font.size = Pt(12.5); p_g.font.color.rgb = COLOR_EMERALD
-        r = p_g.add_run(); r.text = f"   Chi tiết: {g_desc}"
-        r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_g.space_after = Pt(6)
+        p_gt = ltf.add_paragraph()
+        p_gt.text = g_title
+        p_gt.font.name = FONT_HEADING
+        p_gt.font.size = Pt(10.5)
+        p_gt.font.bold = True
+        p_gt.font.color.rgb = COLOR_TEXT_WHITE
 
-    # Thống kê tổng hợp
-    p_sum = tf.add_paragraph()
-    p_sum.text = "📊 TỔNG HỢP: 15/15 Kịch Bản Kiểm Thử & 46/46 Bài Test Pytest Tự Động ĐẠT 100% PASS (0 Lỗi Nghiệp Vụ, Độ Trễ AI ~400ms - 600ms)."
-    p_sum.font.bold = True; p_sum.font.size = Pt(12.5); p_sum.font.color.rgb = COLOR_GOLD
+        p_gd = ltf.add_paragraph()
+        p_gd.text = g_desc
+        p_gd.font.name = FONT_MAIN
+        p_gd.font.size = Pt(9.5)
+        p_gd.font.color.rgb = COLOR_TEXT_LIGHT
 
-    # =========================================================================
-    # SLIDE 11: TỔNG KẾT, HƯỚNG PHÁT TRIỂN & LỜI CẢM ƠN
-    # =========================================================================
-    slide11 = prs.slides.add_slide(prs.slide_layouts[6])
-    create_background_decor(slide11, w, h, "05. TỔNG KẾT, HƯỚNG PHÁT TRIỂN & LỜI CẢM ƠN")
+    # Right Column: Kết Quả & Tốc Độ (50% width)
+    add_card(slide, 6.78, 1.85, 5.75, 4.85, COLOR_NEON_CYAN)
+    rtb = slide.shapes.add_textbox(Inches(6.98), Inches(2.0), Inches(5.35), Inches(4.5))
+    rtf = rtb.text_frame
+    rtf.word_wrap = True
 
-    card_w11 = Inches(5.6)
-    card_h11 = Inches(5.6)
+    p = rtf.paragraphs[0]
+    p.text = "🚀 KẾT QUẢ ĐẠT ĐƯỢC & HIỆU NĂNG"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_CYAN
 
-    # Cột 1: Kết quả & Hướng phát triển
-    c1 = slide11.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.35), card_w11, card_h11)
-    set_shape_flat_color(c1, COLOR_CARD_BG, COLOR_CYAN, 1.5)
-    tb1 = slide11.shapes.add_textbox(Inches(1.1), Inches(1.55), card_w11 - Inches(0.6), card_h11 - Inches(0.4))
-    tf1 = tb1.text_frame; tf1.word_wrap = True
-
-    p = tf1.paragraphs[0]; p.text = "🏆 KẾT QUẢ ĐẠT ĐƯỢC & HƯỚNG MỞ RỘNG"; p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_CYAN
-    p.space_after = Pt(12)
-
-    conclusions = [
-        ("Hoàn thành sản phẩm toàn diện", "Xây dựng thành công hệ thống Single Page Dark Cyber hiện đại, tích hợp trọn vẹn AI Google Gemini 1.5 Pro và kiến trúc Đa ví 2 tầng."),
-        ("Giải quyết bài toán thực tế", "Giúp người dùng ghi chép chi tiêu trong vài giây, duy trì kỷ luật qua Gamification và được cố vấn dòng tiền 50/30/20."),
-        ("Đóng gói ứng dụng Mobile (Flutter / React Native)", "Phát triển phiên bản di động hỗ trợ đồng bộ dữ liệu thời gian thực và thông báo đẩy Push Notification."),
-        ("Tích hợp Vision AI (OCR Hóa Đơn)", "Tự động chụp và bóc tách hóa đơn VAT/siêu thị bằng mô hình Gemini Vision."),
-        ("Kết nối Open Banking API Tự Động", "Tự động đồng bộ lịch sử giao dịch ngân hàng theo chuẩn Open Banking Việt Nam.")
+    perf_items = [
+        ("🏆 KẾT QUẢ KIỂM THỬ TỰ ĐỘNG:", 
+         "100% CÁC BÀI TEST ĐẠT KẾT QUẢ CHÍNH XÁC (PASSED)", 
+         COLOR_NEON_EMERALD),
+        ("⚡ TỐC ĐỘ AI NHẬN DIỆN TIẾNG VIỆT:", 
+         "Chỉ mất khoảng 0.4 - 0.5 giây để bóc tách xong một câu nói.", 
+         COLOR_NEON_CYAN),
+        ("⏱️ TỐC ĐỘ TẢI TRANG WEB:", 
+         "Dưới 0.1 giây nhờ công nghệ FastAPI hiện đại.", 
+         COLOR_NEON_AMBER),
+        ("🎨 TRẢI NGHIỆM HÌNH ẢNH MƯỢT MÀ:", 
+         "Hiệu ứng viền phát sáng Neon chạy mượt mà đạt chuẩn 120 khung hình/giây, không bị giật lag.", 
+         COLOR_NEON_PURPLE)
     ]
-    for h_txt, d_txt in conclusions:
-        p_item = tf1.add_paragraph()
-        p_item.text = f"• {h_txt}: "
-        p_item.font.bold = True; p_item.font.size = Pt(12); p_item.font.color.rgb = COLOR_GOLD
-        r = p_item.add_run(); r.text = d_txt; r.font.bold = False; r.font.size = Pt(11.5); r.font.color.rgb = COLOR_WHITE
-        p_item.space_after = Pt(6)
+    for title, val, col in perf_items:
+        p_t = rtf.add_paragraph()
+        p_t.text = title
+        p_t.font.name = FONT_HEADING
+        p_t.font.size = Pt(10.5)
+        p_t.font.bold = True
+        p_t.font.color.rgb = COLOR_TEXT_WHITE
 
-    # Cột 2: Lời Cảm Ơn & Q&A
-    c2 = slide11.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.35), card_w11, card_h11)
-    set_shape_flat_color(c2, COLOR_CARD_BG, COLOR_PURPLE, 1.5)
-    tb2 = slide11.shapes.add_textbox(Inches(7.1), Inches(1.55), card_w11 - Inches(0.6), card_h11 - Inches(0.4))
-    tf2 = tb2.text_frame; tf2.word_wrap = True
+        p_v = rtf.add_paragraph()
+        p_v.text = f"✦ {val}"
+        p_v.font.name = FONT_MAIN
+        p_v.font.size = Pt(9.5)
+        p_v.font.bold = True
+        p_v.font.color.rgb = col
 
-    p = tf2.paragraphs[0]; p.text = "💖 LỜI CẢM ƠN TỪ NHÓM 03"; p.font.bold = True; p.font.size = Pt(14); p.font.color.rgb = COLOR_PURPLE
-    p.space_after = Pt(12)
+    add_footer(slide, 9)
 
-    p_body = tf2.add_paragraph()
-    p_body.text = "Nhóm 03 xin gửi lời cảm ơn chân thành và sâu sắc nhất đến:\n\n"
-    p_body.font.size = Pt(12.5); p_body.font.color.rgb = COLOR_WHITE
 
-    p_gv = tf2.add_paragraph()
-    p_gv.text = "👩‍🏫 ThS. Hà Thị Thanh"
-    p_gv.font.bold = True; p_gv.font.size = Pt(14); p_gv.font.color.rgb = COLOR_GOLD
-    p_gv_sub = tf2.add_paragraph()
-    p_gv_sub.text = "Giảng viên hướng dẫn học phần Ứng dụng Trí tuệ Nhân tạo, đã tận tình chỉ dẫn và định hướng chuyên môn quý báu cho nhóm trong suốt quá trình nghiên cứu và thực hiện đồ án."
-    p_gv_sub.font.size = Pt(12); p_gv_sub.font.color.rgb = COLOR_GRAY
-    p_gv_sub.space_after = Pt(16)
+def build_slide_10(prs):
+    """SLIDE 10: ĐÁNH GIÁ & HƯỚNG PHÁT TRIỂN"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+    add_header(
+        slide,
+        "10 // ĐÁNH GIÁ & PHÁT TRIỂN",
+        "Đánh Giá Kết Quả Đạt Được & Hướng Phát Triển Tiếp Theo",
+        "Nhìn lại những gì nhóm đã làm được và các tính năng dự định mở rộng trong tương lai"
+    )
 
-    p_qa = tf2.add_paragraph()
-    p_qa.alignment = PP_ALIGN.CENTER
-    p_qa.text = "🎉 XIN TRÂN TRỌNG CẢM ƠN!\nCHÚNG EM XIN SẴN SÀNG NHẬN CÂU HỎI & GÓP Ý TỪ HỘI ĐỒNG"
-    p_qa.font.bold = True; p_qa.font.size = Pt(13.5); p_qa.font.color.rgb = COLOR_CYAN
+    # Left Card: Ưu điểm đã làm được (50% width)
+    add_card(slide, 0.8, 1.85, 5.75, 4.85, COLOR_NEON_EMERALD)
+    ltb = slide.shapes.add_textbox(Inches(1.0), Inches(2.0), Inches(5.35), Inches(4.5))
+    ltf = ltb.text_frame
+    ltf.word_wrap = True
 
-    # Lưu file
+    p = ltf.paragraphs[0]
+    p.text = "⭐ KẾT QUẢ NỔI BẬT ĐÃ ĐẠT ĐƯỢC"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_EMERALD
+
+    strengths = [
+        ("✦ Hoàn Thiện Một Trang Web Đầy Đủ:",
+         "Ứng dụng chạy thực tế rất mượt mà, đầy đủ các chức năng từ ghi chép, biểu đồ đến nạp tiền tự động."),
+        ("✦ AI Hiểu Tiếng Việt Cực Tốt:",
+         "Nhập liệu bằng câu nói tự nhiên rất nhanh và chính xác, tự động xóa số tài khoản ngân hàng để bảo mật."),
+        ("✦ Mô Hình 2 Ví Tiền Rõ Ràng:",
+         "Tách riêng ví ghi chép ảo và ví nạp tiền thật, không bị lẫn lộn dữ liệu."),
+        ("✦ Quét Mã QR Tự Động Hóa 100%:",
+         "Tự nhận tiền chuyển khoản sau 3 giây và tự nâng cấp gói VIP mà không cần làm thủ công.")
+    ]
+    for s_title, s_desc in strengths:
+        p_st = ltf.add_paragraph()
+        p_st.text = s_title
+        p_st.font.name = FONT_HEADING
+        p_st.font.size = Pt(11)
+        p_st.font.bold = True
+        p_st.font.color.rgb = COLOR_TEXT_WHITE
+
+        p_sd = ltf.add_paragraph()
+        p_sd.text = s_desc
+        p_sd.font.name = FONT_MAIN
+        p_sd.font.size = Pt(9.8)
+        p_sd.font.color.rgb = COLOR_TEXT_LIGHT
+
+    # Right Card: Hướng phát triển tương lai (50% width)
+    add_card(slide, 6.78, 1.85, 5.75, 4.85, COLOR_NEON_AMBER)
+    rtb = slide.shapes.add_textbox(Inches(6.98), Inches(2.0), Inches(5.35), Inches(4.5))
+    rtf = rtb.text_frame
+    rtf.word_wrap = True
+
+    p = rtf.paragraphs[0]
+    p.text = "🚀 HƯỚNG PHÁT TRIỂN TIẾP THEO"
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_AMBER
+
+    roadmap = [
+        ("🔮 1. Làm Ứng Dụng Trên Điện Thoại (App Mobile):",
+         "Phát triển thêm phiên bản app cho điện thoại Android và iPhone để người dùng ghi chép mọi lúc mọi nơi tiện lợi hơn."),
+        ("🔮 2. Chụp Ảnh Hóa Đơn Tự Động Lưu Sổ (OCR):",
+         "Chỉ cần giơ máy ảnh chụp hóa đơn ăn uống, đi siêu thị, AI sẽ tự đọc từng món hàng và lưu vào sổ chi tiêu."),
+        ("🔮 3. Kết Nối Trực Tiếp Với Ngân Hàng:",
+         "Tự động nhận thông báo biến động số dư từ tài khoản ngân hàng để không bao giờ quên ghi chép.")
+    ]
+    for r_title, r_desc in roadmap:
+        p_rt = rtf.add_paragraph()
+        p_rt.text = r_title
+        p_rt.font.name = FONT_HEADING
+        p_rt.font.size = Pt(11)
+        p_rt.font.bold = True
+        p_rt.font.color.rgb = COLOR_TEXT_WHITE
+
+        p_rd = rtf.add_paragraph()
+        p_rd.text = r_desc
+        p_rd.font.name = FONT_MAIN
+        p_rd.font.size = Pt(9.8)
+        p_rd.font.color.rgb = COLOR_TEXT_LIGHT
+
+    add_footer(slide, 10)
+
+
+def build_slide_11(prs):
+    """SLIDE 11: LỜI CẢM ƠN & PHẦN HỎI ĐÁP (Q&A)"""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_background(slide)
+
+    # Top Tag
+    top_badge = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(3.4), Inches(0.55), Inches(6.533), Inches(0.4)
+    )
+    top_badge.fill.solid()
+    top_badge.fill.fore_color.rgb = COLOR_BG_BADGE
+    top_badge.line.color.rgb = COLOR_NEON_EMERALD
+    top_badge.line.width = Pt(1)
+    tf_badge = top_badge.text_frame
+    p_b = tf_badge.paragraphs[0]
+    p_b.text = "✦ BÁO CÁO KẾT THÚC ĐỀ TÀI HỌC PHẦN AI ✦"
+    p_b.alignment = PP_ALIGN.CENTER
+    p_b.font.name = FONT_MAIN
+    p_b.font.size = Pt(11)
+    p_b.font.bold = True
+    p_b.font.color.rgb = COLOR_NEON_EMERALD
+
+    # Big Q&A Title
+    title_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.05), Inches(11.733), Inches(1.25))
+    tf_t = title_box.text_frame
+    tf_t.word_wrap = True
+
+    p1 = tf_t.paragraphs[0]
+    p1.text = "XIN TRÂN TRỌNG CẢM ƠN CÔ GIÁO & CÁC BẠN!"
+    p1.alignment = PP_ALIGN.CENTER
+    p1.font.name = FONT_HEADING
+    p1.font.size = Pt(27)
+    p1.font.bold = True
+    p1.font.color.rgb = COLOR_TEXT_WHITE
+
+    p2 = tf_t.add_paragraph()
+    p2.text = "PHIÊN HỎI ĐÁP & GÓP Ý ĐỀ TÀI (Q&A SESSION)"
+    p2.alignment = PP_ALIGN.CENTER
+    p2.font.name = FONT_HEADING
+    p2.font.size = Pt(17)
+    p2.font.bold = True
+    p2.font.color.rgb = COLOR_NEON_CYAN
+
+    # 3 Member Contact Cards
+    members = [
+        ("✦ Đặng Quyết Thắng", "Trưởng Nhóm / Phát Triển AI & Web", "dangquyetthang@ictu.edu.vn", COLOR_NEON_CYAN),
+        ("✦ Nguyễn Văn Tiến", "Thành Viên / Thiết Kế Giao Diện Web", "nguyenvantien@ictu.edu.vn", COLOR_NEON_EMERALD),
+        ("✦ Quách Minh Hiếu", "Thành Viên / Xử Lý CSDL & Backend", "quachminhhieu@ictu.edu.vn", COLOR_NEON_PURPLE)
+    ]
+    card_w = 3.65
+    spacing = 0.39
+    for i, (name, role, email, col) in enumerate(members):
+        cx = 0.8 + i * (card_w + spacing)
+        add_card(slide, cx, 2.45, card_w, 2.2, col)
+        
+        tb = slide.shapes.add_textbox(Inches(cx + 0.15), Inches(2.6), Inches(card_w - 0.3), Inches(1.9))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        
+        p = tf.paragraphs[0]
+        p.text = name
+        p.alignment = PP_ALIGN.CENTER
+        p.font.name = FONT_HEADING
+        p.font.size = Pt(13)
+        p.font.bold = True
+        p.font.color.rgb = COLOR_TEXT_WHITE
+
+        p_r = tf.add_paragraph()
+        p_r.text = role
+        p_r.alignment = PP_ALIGN.CENTER
+        p_r.font.name = FONT_MAIN
+        p_r.font.size = Pt(10)
+        p_r.font.bold = True
+        p_r.font.color.rgb = col
+
+        p_e = tf.add_paragraph()
+        p_e.text = f"Email: {email}"
+        p_e.alignment = PP_ALIGN.CENTER
+        p_e.font.name = FONT_MAIN
+        p_e.font.size = Pt(9.5)
+        p_e.font.color.rgb = COLOR_TEXT_MUTED
+
+    # Bottom Live Demo Banner Card
+    bot_card = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(4.85), Inches(11.733), Inches(1.8)
+    )
+    bot_card.fill.solid()
+    bot_card.fill.fore_color.rgb = COLOR_BG_CARD_LIGHT
+    bot_card.line.color.rgb = COLOR_NEON_AMBER
+    bot_card.line.width = Pt(1.5)
+    
+    btb = slide.shapes.add_textbox(Inches(1.0), Inches(5.0), Inches(11.333), Inches(1.5))
+    btf = btb.text_frame
+    btf.word_wrap = True
+
+    p = btf.paragraphs[0]
+    p.text = "✦ NHÓM ĐÃ SẴN SÀNG CHẠY THỬ ỨNG DỤNG TRỰC TIẾP (LIVE DEMO) ✦"
+    p.alignment = PP_ALIGN.CENTER
+    p.font.name = FONT_HEADING
+    p.font.size = Pt(13.5)
+    p.font.bold = True
+    p.font.color.rgb = COLOR_NEON_AMBER
+
+    p_d1 = btf.add_paragraph()
+    p_d1.text = "• Trình diễn Gõ một câu nói tự nhiên để AI tự lưu giao dịch siêu tốc trong 0.5 giây."
+    p_d1.alignment = PP_ALIGN.CENTER
+    p_d1.font.name = FONT_MAIN
+    p_d1.font.size = Pt(10.5)
+    p_d1.font.color.rgb = COLOR_TEXT_LIGHT
+
+    p_d2 = btf.add_paragraph()
+    p_d2.text = "• Trình diễn Quét mã VietQR chuyển khoản thật và tự động nâng cấp VIP sau 3 giây."
+    p_d2.alignment = PP_ALIGN.CENTER
+    p_d2.font.name = FONT_MAIN
+    p_d2.font.size = Pt(10.5)
+    p_d2.font.color.rgb = COLOR_TEXT_LIGHT
+
+    p_d3 = btf.add_paragraph()
+    p_d3.text = "Kính mời Cô giáo và các bạn đặt câu hỏi thảo luận cùng nhóm!"
+    p_d3.alignment = PP_ALIGN.CENTER
+    p_d3.font.name = FONT_MAIN
+    p_d3.font.size = Pt(11)
+    p_d3.font.bold = True
+    p_d3.font.color.rgb = COLOR_NEON_CYAN
+
+    # Footer for Slide 11
+    add_footer(slide, 11, total_slides=11, accent_color=COLOR_NEON_EMERALD)
+
+
+# ==============================================================================
+# HÀM CHÍNH KHỞI TẠO VÀ XUẤT FILE PPTX
+# ==============================================================================
+
+def main():
+    print("[INFO] Đang khởi tạo bản thuyết trình FinTrack AI phiên bản tiếng Việt tự nhiên...")
+    prs = create_presentation()
+
+    print("[INFO] Đang tạo Slide 1: Trang Bìa...")
+    build_slide_1(prs)
+
+    print("[INFO] Đang tạo Slide 2: Vì Sao Nhóm Chọn Đề Tài Này?...")
+    build_slide_2(prs)
+
+    print("[INFO] Đang tạo Slide 3: Công Nghệ Nhóm Đã Sử Dụng...")
+    build_slide_3(prs)
+
+    print("[INFO] Đang tạo Slide 4: Tính Năng 1 - Nhập Nhanh Bằng Câu Nói Với AI...")
+    build_slide_4(prs)
+
+    print("[INFO] Đang tạo Slide 5: Tính Năng 2 - Cố Vấn Tài Chính 50/30/20 & Rèn Luyện Thói Quen...")
+    build_slide_5(prs)
+
+    print("[INFO] Đang tạo Slide 6: Tính Năng 3 - Hệ Thống 2 Loại Ví Tiền Rõ Ràng...")
+    build_slide_6(prs)
+
+    print("[INFO] Đang tạo Slide 7: Tính Năng 4 - Nâng Cấp & Gia Hạn Gói Cước Tự Động...")
+    build_slide_7(prs)
+
+    print("[INFO] Đang tạo Slide 8: Trang Quản Trị Dành Cho Admin...")
+    build_slide_8(prs)
+
+    print("[INFO] Đang tạo Slide 9: Kết Quả Kiểm Thử Ứng Dụng...")
+    build_slide_9(prs)
+
+    print("[INFO] Đang tạo Slide 10: Đánh Giá & Hướng Phát Triển...")
+    build_slide_10(prs)
+
+    print("[INFO] Đang tạo Slide 11: Lời Cảm Ơn & Phần Hỏi Đáp (Q&A)...")
+    build_slide_11(prs)
+
     output_filename = "BaoCao_FinTrackAI_Demo.pptx"
-    prs.save(output_filename)
-    print(f"\n[FinTrack AI] ✅ ĐÃ TẠO THÀNH CÔNG FILE SLIDE THUYẾT TRÌNH: {output_filename}")
-    print(f"Tổng số Slide: {len(prs.slides)} slides.")
+    output_path = os.path.abspath(output_filename)
+
+    try:
+        prs.save(output_path)
+        print(f"[SUCCESS] XUẤT THÀNH CÔNG! File báo cáo đã được lưu tại: {output_path}")
+    except PermissionError:
+        fallback_filename = "BaoCao_FinTrackAI_ThuyetTrinh_Moi.pptx"
+        fallback_path = os.path.abspath(fallback_filename)
+        prs.save(fallback_path)
+        print(f"[WARNING] File '{output_filename}' đang được mở trong PowerPoint!")
+        print(f"[SUCCESS] Đã lưu bản thuyết trình mới tại: {fallback_path}")
+        print(f"[TIP] Vui lòng đóng PowerPoint hoặc mở file '{fallback_filename}' để xem.")
+
+    print(f"[SUCCESS] Tổng số slide đã tạo: {len(prs.slides)}")
 
 if __name__ == "__main__":
-    build_presentation()
+    main()

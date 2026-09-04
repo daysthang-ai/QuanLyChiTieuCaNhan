@@ -3,7 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends, UploadFile, File, Response, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, Wallet, Category, Transaction, Budget, SavingGoal
 from backend.app.routers.auth import get_current_user
 
@@ -24,7 +24,7 @@ def export_database_json(
     backup_payload = {
         "version": "1.0.0",
         "app": "FinTrack AI",
-        "exported_at": datetime.datetime.utcnow().isoformat(),
+        "exported_at": get_utc_now().isoformat(),
         "user": {
             "email": current_user.email,
             "full_name": current_user.full_name,

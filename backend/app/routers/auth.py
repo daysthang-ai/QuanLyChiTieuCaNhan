@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from backend.app.database import get_db
+from backend.app.database import get_db, get_utc_now
 from backend.app.models import User, Category, Wallet, Transaction, Notification
 from backend.app.schemas import (
     UserCreate, UserLogin, UserOut, UserProfileUpdate,
@@ -210,10 +210,13 @@ def get_me(
     """Lấy thông tin tài khoản người dùng hiện tại kèm trạng thái và thời hạn gói cước."""
     # Check if subscription has expired
     if current_user.plan != "FREE" and current_user.plan_expires_at:
-        if current_user.plan_expires_at < datetime.datetime.utcnow():
+        if current_user.plan_expires_at < get_utc_now():
             current_user.is_plan_active = False
-            db.commit()
-            db.refresh(current_user)
+            try:
+                db.commit()
+                db.refresh(current_user)
+            except Exception:
+                db.rollback()
     return current_user
 
 @router.put("/profile", response_model=UserOut)
@@ -230,10 +233,14 @@ def update_profile(
     if profile_in.avatar_url is not None:
         current_user.avatar_url = profile_in.avatar_url
     
-    current_user.updated_at = datetime.datetime.utcnow()
-    db.commit()
-    db.refresh(current_user)
-    return current_user
+    current_user.updated_at = get_utc_now()
+    try:
+        db.commit()
+        db.refresh(current_user)
+        return current_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi cập nhật hồ sơ: {str(e)}")
 
 @router.post("/change-password")
 def change_password(
@@ -254,9 +261,13 @@ def change_password(
         )
 
     current_user.hashed_password = get_password_hash(pwd_in.new_password)
-    current_user.updated_at = datetime.datetime.utcnow()
-    db.commit()
-    return {"message": "Đổi mật khẩu thành công!"}
+    current_user.updated_at = get_utc_now()
+    try:
+        db.commit()
+        return {"message": "Đổi mật khẩu thành công!"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Lỗi đổi mật khẩu: {str(e)}")
 
 @router.get("/plans")
 def get_available_plans():
@@ -500,14 +511,14 @@ def upgrade_plan(
                 category_id=cat.id,
                 type="EXPENSE",
                 amount=price,
-                transaction_date=datetime.datetime.utcnow(),
+                transaction_date=get_utc_now(),
                 note=tx_note,
                 created_by_ai="SUBSCRIPTION"
             )
             db.add(tx)
 
     # Automatic plan and expiration date calculation
-    now = datetime.datetime.utcnow()
+    now = get_utc_now()
     if new_plan == "FREE":
         current_user.plan = "FREE"
         current_user.plan_tier = "Free"

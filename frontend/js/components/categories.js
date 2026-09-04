@@ -9,7 +9,7 @@ export class CategoriesComponent {
 
   async render(container) {
     container.innerHTML = `
-      <div id="tab-categories" class="user-tab-pane space-y-6 animate-in fade-in duration-300">
+      <div id="view-categories" data-tab-id="categories" class="content-section user-tab-pane space-y-6 animate-in fade-in duration-300">
         
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

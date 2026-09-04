@@ -4,7 +4,8 @@
 
 export function formatVND(amount) {
   if (amount === undefined || amount === null) return '0 ₫';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const num = typeof amount === 'string' ? parseFloat(amount) : Number(amount);
+  if (isNaN(num) || !isFinite(num)) return '0 ₫';
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
 }
 

@@ -1,6 +1,11 @@
+import datetime
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, declarative_base
 from backend.app.config import settings
+
+def get_utc_now() -> datetime.datetime:
+    """Returns timezone-naive UTC datetime compatible with SQLite without Python 3.12 deprecation warnings."""
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
 
 # For SQLite, ensure check_same_thread is False and set timeout for concurrent multi-threaded workers
 is_sqlite = settings.DATABASE_URL.startswith("sqlite")
