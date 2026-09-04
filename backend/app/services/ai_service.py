@@ -68,6 +68,9 @@ class AIService:
                             parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
                             if parts and "text" in parts[0]:
                                 return parts[0]["text"]
+                        elif resp.status_code in [400, 401, 403]:
+                            print(f"[AIService] Gemini API Auth/Key error HTTP {resp.status_code}: {resp.text[:150]}")
+                            break
                         elif resp.status_code == 404:
                             # Model not found, try next candidate model
                             continue
@@ -75,7 +78,7 @@ class AIService:
                             print(f"[AIService] Gemini API HTTP {resp.status_code} on model {model_name}: {resp.text[:150]}")
                 except Exception as e:
                     print(f"[AIService] Gemini API error with model {model_name}: {e}")
-                    continue
+                    break
 
         # 2. OpenAI API
         if provider == "openai" and settings.OPENAI_API_KEY:
@@ -249,8 +252,16 @@ class AIService:
 
         # 1. Determine Type
         tx_type = "EXPENSE"
-        income_keywords = ["lương", "thưởng", "nhận", "thu", "bán", "được cho", "tiền vào", "lãi", "cộng tiền"]
-        transfer_keywords = ["chuyển sang", "chuyển khoản sang", "nạp vào", "rút từ"]
+        income_keywords = [
+            "lương", "salary", "thưởng", "bonus", "thưởng tết", "hoa hồng", "kpi", "commission",
+            "phụ cấp", "trợ cấp", "tiền tip", "tip", "lì xì", "thu nhập", "nhận", "được nhận",
+            "tiền vào", "cộng tiền", "bán", "bán đồ", "thanh lý", "được cho", "lãi", "hoàn tiền",
+            "cashback", "đòi nợ", "hoàn trả"
+        ]
+        transfer_keywords = [
+            "chuyển sang", "chuyển khoản sang", "chuyển tiền sang", "chuyển vào", "chuyển qua",
+            "nạp vào", "rút từ", "rút về", "bắn sang", "bắn qua", "chuyển từ"
+        ]
 
         if any(kw in lower for kw in transfer_keywords):
             tx_type = "TRANSFER"
@@ -259,11 +270,12 @@ class AIService:
 
         # 2. Extract Amount
         amount = 0.0
-        # Check patterns like: 45k, 45.5k, 1.5tr, 1tr5, 25 triệu, 25 trieu, 500 nghin, 500000, 2 củ, 1 lít, 1 chai
+        # Check patterns like: 45k, 45.5k, 1.5tr, 1tr5, 2 củ rưỡi, 25 triệu, 25 trieu, 500 nghin, 500000, 2 củ, 1 lít, 1 chai
         amount_patterns = [
-            (r'(\d+[\.,]?\d*)\s*(?:triệu|trieu|tr)\s*(\d+)?', 'million_split'),
-            (r'(\d+[\.,]?\d*)\s*(?:củ|cu|chai)', 'million'),
-            (r'(\d+[\.,]?\d*)\s*(?:triệu|trieu|tr)\b', 'million'),
+            (r'(\d+)\s*(?:củ|cu|triệu|trieu|tr)\s*(?:rưỡi|ruoi)\b', 'million_half'),
+            (r'(?:nửa|nua)\s*(?:củ|cu|triệu|trieu|tr)\b', 'half_million'),
+            (r'(\d+[\.,]?\d*)\s*(?:triệu|trieu|tr|củ|cu)\s*(\d+)', 'million_split'),
+            (r'(\d+[\.,]?\d*)\s*(?:triệu|trieu|tr|củ|cu|chai)\b', 'million'),
             (r'(\d+[\.,]?\d*)\s*(?:lít|lit|lốp|lop)\b', 'hundred_k'),
             (r'(\d+[\.,]?\d*)\s*(?:k|nghìn|nghin|ngàn|ngan)\b', 'thousand'),
             (r'(\d{1,3}(?:[.,]\d{3})+)\b', 'formatted_num'),
@@ -273,10 +285,25 @@ class AIService:
         for pat, pat_type in amount_patterns:
             m = re.search(pat, lower)
             if m:
-                if pat_type == 'million_split':
+                if pat_type == 'million_half':
+                    val = float(m.group(1))
+                    amount = (val + 0.5) * 1_000_000
+                elif pat_type == 'half_million':
+                    amount = 500_000.0
+                elif pat_type == 'million_split':
                     base = float(m.group(1).replace(',', '.'))
-                    extra = float(m.group(2)) if m.group(2) else 0
-                    amount = base * 1_000_000 + (extra * 100_000 if extra < 10 else extra * 10_000)
+                    extra_str = m.group(2)
+                    if extra_str:
+                        if len(extra_str) == 1:
+                            amount = base * 1_000_000 + float(extra_str) * 100_000
+                        elif len(extra_str) == 2:
+                            amount = base * 1_000_000 + float(extra_str) * 10_000
+                        elif len(extra_str) == 3:
+                            amount = base * 1_000_000 + float(extra_str) * 1_000
+                        else:
+                            amount = base * 1_000_000 + float(extra_str)
+                    else:
+                        amount = base * 1_000_000
                 elif pat_type == 'million':
                     val = float(m.group(1).replace(',', '.'))
                     amount = val * 1_000_000
@@ -293,7 +320,7 @@ class AIService:
                     val = float(m.group(1))
                     if val >= 1000:
                         amount = val
-                    elif val <= 500: # e.g. "45" might mean 45k
+                    elif val <= 500:
                         amount = val * 1000
                 if amount > 0:
                     break
@@ -301,44 +328,170 @@ class AIService:
         if amount == 0.0:
             amount = 50000.0
 
-        # 3. Match Wallet
+        # 3. Match Wallet & Destination Wallet (for TRANSFER)
+        wallet_alias_map = {
+            "momo": ["momo", "ví momo"],
+            "zalopay": ["zalopay", "zalo pay", "ví zalo", "zalo"],
+            "vietcombank": ["vietcombank", "vcb", "vietcom"],
+            "techcombank": ["techcombank", "tcb", "techcom"],
+            "mb": ["mb bank", "mbbank", "mb", "ngân hàng quân đội", "quân đội"],
+            "tiền mặt": ["tiền mặt", "tien mat", "cash", "tiền túi", "vi tien mat"],
+            "viettel": ["viettelpay", "viettel pay", "viettel money", "viettel"],
+            "vnpay": ["vnpay", "vn pay"],
+            "shopeepay": ["shopeepay", "shopee pay"],
+            "bidv": ["bidv"],
+            "agribank": ["agribank", "nông nghiệp"],
+            "acb": ["acb", "á châu"],
+            "tpbank": ["tpbank", "tp bank", "tiên phong"],
+            "vpbank": ["vpbank", "vp bank", "thịnh vượng"]
+        }
+
+        def find_wallet_in_text(target_text: str, exclude_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
+            t_low = target_text.lower()
+            # 1. Exact or substring match on wallet name
+            for w in available_wallets:
+                if exclude_id and w.get("id") == exclude_id:
+                    continue
+                w_name = w["name"].lower()
+                if w_name in t_low:
+                    return w
+            # 2. Alias group match
+            for group_key, aliases in wallet_alias_map.items():
+                for alias in aliases:
+                    is_match = False
+                    if len(alias) <= 4:
+                        if re.search(r'\b' + re.escape(alias) + r'\b', t_low):
+                            is_match = True
+                    else:
+                        if alias in t_low:
+                            is_match = True
+                    if is_match:
+                        for w in available_wallets:
+                            if exclude_id and w.get("id") == exclude_id:
+                                continue
+                            w_name = w["name"].lower()
+                            if group_key in w_name or any(a in w_name for a in aliases):
+                                return w
+            return None
+
         matched_wallet = None
-        for w in available_wallets:
-            w_name = w["name"].lower()
-            if w_name in lower or ("momo" in w_name and "momo" in lower) or ("techcom" in w_name and ("techcom" in lower or "tcb" in lower)) or ("tiền mặt" in w_name and ("tiền mặt" in lower or "tien mat" in lower or "cash" in lower)):
-                matched_wallet = w
-                break
+        matched_to_wallet = None
+
+        if tx_type == "TRANSFER":
+            transfer_split = re.search(r'(?:từ\s+)(.+?)(?:\s+(?:sang|vào|qua|đến)\s+)(.+)', lower)
+            if transfer_split:
+                source_part = transfer_split.group(1)
+                dest_part = transfer_split.group(2)
+                matched_wallet = find_wallet_in_text(source_part)
+                matched_to_wallet = find_wallet_in_text(dest_part, exclude_id=matched_wallet.get("id") if matched_wallet else None)
+            else:
+                split_kw = re.search(r'(?:\s+(?:sang|vào|qua|đến)\s+)', lower)
+                if split_kw:
+                    source_part = lower[:split_kw.start()]
+                    dest_part = lower[split_kw.end():]
+                    matched_wallet = find_wallet_in_text(source_part)
+                    matched_to_wallet = find_wallet_in_text(dest_part, exclude_id=matched_wallet.get("id") if matched_wallet else None)
+
+        if not matched_wallet:
+            matched_wallet = find_wallet_in_text(lower)
+
         if not matched_wallet and available_wallets:
             matched_wallet = available_wallets[0]
 
         # 4. Match Category
         matched_cat = None
         category_semantic_map = {
-            "Ăn uống & Thực phẩm": ["ăn", "uống", "cơm", "bún", "phở", "bánh mì", "trà sữa", "cà phê", "cafe", "nhậu", "lẩu", "buffet", "siêu thị", "chợ", "bò", "gà", "thịt", "tạp hóa"],
-            "Đi lại & Xăng xe": ["xăng", "xe", "grab", "be", "gojek", "gửi xe", "bảo dưỡng", "rửa xe", "taxi", "vé xe", "xe buýt"],
-            "Nhà ở & Tiền thuê": ["tiền nhà", "tiền phòng", "tiền trọ", "thuê nhà", "chung cư", "phí dịch vụ"],
-            "Hóa đơn & Tiện ích": ["điện", "nước", "internet", "wifi", "rác", "nạp thẻ", "điện thoại", "hóa đơn"],
-            "Mua sắm cá nhân": ["mua", "shopee", "lazada", "tiki", "quần áo", "giày", "dép", "váy", "mỹ phẩm", "son", "túi"],
-            "Giải trí & Thư giãn": ["xem phim", "cinema", "netflix", "spotify", "du lịch", "game", "chơi", "karaoke"],
-            "Y tế & Sức khỏe": ["thuốc", "khám", "bác sĩ", "bệnh viện", "gym", "tập gym", "thể thao", "nha khoa"],
-            "Lương chính thức": ["lương", "salary", "công ty trả lương"],
-            "Thưởng & Hoa hồng": ["thưởng", "bonus", "hoa hồng", "kpi"],
-            "Thu nhập phụ & Freelance": ["freelance", "dự án ngoài", "kinh doanh", "bán hàng", "viết bài"],
-            "Tiết kiệm & Đầu tư": ["tiết kiệm", "đầu tư", "chứng khoán", "vàng", "gửi bank"]
+            "Ăn uống & Thực phẩm": [
+                "ăn", "uống", "cơm", "bún", "phở", "bánh mì", "trà sữa", "cà phê", "cafe", "highland",
+                "starbucks", "phúc long", "nhậu", "lẩu", "buffet", "bbq", "kfc", "lotteria", "siêu thị thực phẩm",
+                "chợ", "bò", "gà", "thịt", "hải sản", "hủ tiếu", "gỏi", "nem", "bánh bao", "bánh tráng",
+                "đồ ăn", "nước ngọt", "bia", "rượu", "ăn sáng", "ăn trưa", "ăn tối", "winmart", "coopmart",
+                "bách hóa xanh", "tạp hóa"
+            ],
+            "Đi lại & Xăng xe": [
+                "xăng", "đổ xăng", "xe", "grab", "grab bike", "grab car", "be", "be bike", "be car",
+                "gojek", "xanh sm", "taxi", "vé xe", "xe buýt", "xe bus", "tàu", "vé tàu", "vé máy bay",
+                "gửi xe", "vé gửi xe", "bảo dưỡng xe", "rửa xe", "thay nhớt", "sửa xe", "vá xe", "vá lốp",
+                "phí cầu đường", "vé cầu đường", "bot", "qua trạm"
+            ],
+            "Mua sắm cá nhân": [
+                "mua", "shopping", "shopee", "lazada", "tiki", "tiktok shop", "sendo", "quần áo", "áo",
+                "quần", "váy", "giày", "dép", "mỹ phẩm", "son", "kem chống nắng", "nước hoa", "túi",
+                "túi xách", "balo", "đồng hồ", "tai nghe", "điện thoại", "phụ kiện", "laptop", "chuột",
+                "bàn phím", "đồ gia dụng"
+            ],
+            "Hóa đơn & Tiện ích": [
+                "tiền điện", "điện", "điện lực", "evn", "tiền nước", "nước", "sawaco", "internet", "wifi",
+                "mạng", "fpt", "viettel internet", "vnpt", "cước", "tiền net", "tiền rác", "rác", "nạp thẻ",
+                "thẻ cào", "tiền điện thoại", "4g", "hóa đơn", "cáp", "truyền hình", "netflix", "spotify",
+                "phí chung cư", "phí dịch vụ"
+            ],
+            "Nhà ở & Tiền thuê": [
+                "tiền nhà", "tiền phòng", "tiền trọ", "thuê nhà", "thuê phòng", "chung cư", "đặt cọc"
+            ],
+            "Giải trí & Thư giãn": [
+                "xem phim", "cinema", "cgv", "bhd", "lotte cinema", "du lịch", "vé máy bay du lịch",
+                "khách sạn", "resort", "game", "nạp game", "chơi", "karaoke", "hát hò", "sách", "truyện"
+            ],
+            "Y tế & Sức khỏe": [
+                "thuốc", "tiệm thuốc", "mua thuốc", "khám bệnh", "khám", "bác sĩ", "bệnh viện", "phòng khám",
+                "gym", "tập gym", "yoga", "thể thao", "nha khoa", "nhổ răng", "khám răng", "vitamin"
+            ],
+            "Lương chính thức": [
+                "lương", "salary", "tiền lương", "công ty trả lương", "nhận lương", "tạm ứng lương", "ting ting lương"
+            ],
+            "Thưởng & Phụ cấp": [
+                "thưởng", "thưởng tết", "bonus", "hoa hồng", "kpi", "commission", "phụ cấp", "trợ cấp",
+                "tiền tip", "tip", "lì xì", "tiền thưởng"
+            ],
+            "Thu nhập phụ & Freelance": [
+                "freelance", "dự án ngoài", "kinh doanh", "bán hàng", "bán đồ", "thanh lý", "viết bài",
+                "làm thêm", "part-time", "hoàn tiền", "cashback"
+            ],
+            "Tiết kiệm & Đầu tư": [
+                "tiết kiệm", "gửi tiết kiệm", "đầu tư", "chứng khoán", "cổ phiếu", "vàng", "mua vàng",
+                "gửi bank", "tiền lãi", "lãi suất"
+            ]
         }
 
-        for cat_name, keywords in category_semantic_map.items():
-            if any(kw in lower for kw in keywords):
-                # Find in available_categories
+        canonical_aliases = {
+            "Ăn uống & Thực phẩm": ["ăn", "uống", "thực phẩm", "food"],
+            "Đi lại & Xăng xe": ["đi lại", "xăng", "xe", "di chuyển", "transport"],
+            "Mua sắm cá nhân": ["mua sắm", "shopping"],
+            "Hóa đơn & Tiện ích": ["hóa đơn", "tiện ích", "điện", "nước", "bills", "utilities"],
+            "Nhà ở & Tiền thuê": ["nhà ở", "tiền thuê", "nhà", "trọ", "housing"],
+            "Giải trí & Thư giãn": ["giải trí", "thư giãn", "entertainment"],
+            "Y tế & Sức khỏe": ["y tế", "sức khỏe", "health"],
+            "Lương chính thức": ["lương", "salary"],
+            "Thưởng & Phụ cấp": ["thưởng", "phụ cấp", "hoa hồng", "bonus"],
+            "Thu nhập phụ & Freelance": ["thu nhập phụ", "freelance", "kinh doanh"],
+            "Tiết kiệm & Đầu tư": ["tiết kiệm", "đầu tư", "saving", "investment"]
+        }
+
+        for cat_group_name, keywords in category_semantic_map.items():
+            sorted_kws = sorted(keywords, key=len, reverse=True)
+            matched_kw = None
+            for kw in sorted_kws:
+                if len(kw) <= 3:
+                    if re.search(r'\b' + re.escape(kw) + r'\b', lower):
+                        matched_kw = kw
+                        break
+                else:
+                    if kw in lower:
+                        matched_kw = kw
+                        break
+
+            if matched_kw:
+                aliases = canonical_aliases.get(cat_group_name, [])
                 for c in available_categories:
-                    if c["name"].lower() == cat_name.lower() or cat_name.lower() in c["name"].lower():
+                    c_name_low = c["name"].lower()
+                    if cat_group_name.lower() in c_name_low or c_name_low in cat_group_name.lower() or any(a in c_name_low for a in aliases):
                         matched_cat = c
                         break
                 if matched_cat:
                     break
 
         if not matched_cat:
-            # Fallback by type
             for c in available_categories:
                 if c["type"] == tx_type:
                     matched_cat = c
@@ -359,7 +512,6 @@ class AIService:
 
         # 6. Extract Note
         note = text
-        # Remove wallet keywords and amount phrases to clean up note if possible
         if len(note) > 100:
             note = note[:97] + "..."
 
@@ -367,11 +519,11 @@ class AIService:
             "type": tx_type,
             "amount": amount,
             "category_id": matched_cat["id"] if matched_cat else None,
-            "category_name": matched_cat["name"] if matched_cat else "Chi tiêu chung",
+            "category_name": matched_cat["name"] if matched_cat else ("Thu nhập chung" if tx_type == "INCOME" else "Chi tiêu chung"),
             "wallet_id": matched_wallet["id"] if matched_wallet else None,
             "wallet_name": matched_wallet["name"] if matched_wallet else "Tiền mặt",
-            "to_wallet_id": None,
-            "to_wallet_name": None,
+            "to_wallet_id": matched_to_wallet["id"] if matched_to_wallet else None,
+            "to_wallet_name": matched_to_wallet["name"] if matched_to_wallet else None,
             "transaction_date": tx_date,
             "note": note,
             "confidence": 0.96,
@@ -543,6 +695,8 @@ class AIService:
 - Tổng thu nhập tháng: {format_currency_vnd(financial_context.get('total_income', 0))}
 - Tổng chi tiêu tháng: {format_currency_vnd(financial_context.get('total_expense', 0))}
 - Tiết kiệm ròng: {format_currency_vnd(financial_context.get('net_savings', 0))} ({financial_context.get('savings_rate', 0)}%)
+- Chi tiết số dư các ví khả dụng:
+{financial_context.get('wallets_summary', 'Chưa có thông tin ví')}
 - Chi tiêu theo danh mục tháng:
 {financial_context.get('category_summary', 'Chưa có dữ liệu')}
 - Tình trạng Hạn mức Ngân sách:
@@ -567,98 +721,525 @@ class AIService:
         llm_reply = await self._call_llm(system_prompt, user_prompt)
         elapsed_ms = int((time.time() - start_time) * 1000)
 
+        extracted_amt = self._extract_monetary_amount(clean_query)
+
         if llm_reply and len(llm_reply.strip()) > 10:
+            followups = self._generate_context_followups(clean_query, extracted_amt)
             return {
                 "query": query,
                 "response_markdown": llm_reply.strip(),
-                "suggested_followups": [
-                    "Tôi có đang vượt ngân sách danh mục nào không?",
-                    "Đánh giá sức khỏe tài chính tháng này",
-                    "Gợi ý kế hoạch tiết kiệm 3 tháng tới"
-                ],
+                "suggested_followups": followups,
                 "generated_by": settings.AI_PROVIDER,
                 "response_time_ms": elapsed_ms
             }
 
         # Smart Vietnamese Fallback Q&A Engine
-        fallback_reply = self._smart_rule_financial_qa(clean_query, financial_context, recent_transactions)
+        fallback_reply, followups = self._smart_rule_financial_qa(clean_query, financial_context, recent_transactions, extracted_amt)
         return {
             "query": query,
             "response_markdown": fallback_reply,
-            "suggested_followups": [
-                "Đánh giá sức khỏe tài chính 50/30/20",
-                "Tôi đã tiêu bao nhiêu cho việc ăn ngoài?",
-                "Cách tiết kiệm thêm 2 triệu tháng này"
-            ],
+            "suggested_followups": followups,
             "generated_by": "smart_nlp_engine",
             "response_time_ms": elapsed_ms
         }
+
+    def _extract_monetary_amount(self, text: str) -> Optional[float]:
+        """
+        Trích xuất số tiền linh hoạt từ câu hỏi tiếng Việt:
+        Ví dụ: 'ngân sách 3 triệu', '3 triệu một tháng', 'lương 10tr', 'chi tiêu 500k', 'có 2 củ', '3.5 triệu', '1tr5', '2 củ rưỡi'
+        """
+        clean = text.lower()
+
+        # 0. Nửa củ / nửa triệu
+        if re.search(r'(?:nửa|nua)\s*(?:củ|cu|triệu|trieu|tr)\b', clean):
+            return 500_000.0
+
+        # 1. Triệu kèm rưỡi (e.g. 2 củ rưỡi, 1 triệu rưỡi, 3tr rưỡi)
+        m_half = re.search(r'(\d+)\s*(?:củ|cu|triệu|trieu|tr)\s*(?:rưỡi|ruoi)\b', clean)
+        if m_half:
+            try:
+                val = float(m_half.group(1))
+                return (val + 0.5) * 1_000_000.0
+            except ValueError:
+                pass
+
+        # 2. Triệu split: 1tr5, 2tr2, 3 củ 5
+        m_split = re.search(r'(\d+)\s*(?:triệu|trieu|tr|củ|cu)\s*(\d+)\b', clean)
+        if m_split:
+            try:
+                base = float(m_split.group(1))
+                extra = m_split.group(2)
+                if len(extra) == 1:
+                    return base * 1_000_000.0 + float(extra) * 100_000.0
+                elif len(extra) == 2:
+                    return base * 1_000_000.0 + float(extra) * 10_000.0
+                elif len(extra) == 3:
+                    return base * 1_000_000.0 + float(extra) * 1_000.0
+                else:
+                    return base * 1_000_000.0 + float(extra)
+            except ValueError:
+                pass
+
+        # 3. Triệu / Tr / Củ / Chai (e.g. 3.5 triệu, 3,5tr, 3 củ, 2 chai)
+        m1 = re.search(r'(\d+(?:[\.,]\d+)?)\s*(?:triệu|trieu|tr|củ|cu|chai)\b', clean)
+        if m1:
+            try:
+                val = float(m1.group(1).replace(',', '.'))
+                return val * 1_000_000.0
+            except ValueError:
+                pass
+
+        # 4. Lít / Lốp (e.g. 2 lít, 5 lốp)
+        m_lit = re.search(r'(\d+(?:[\.,]\d+)?)\s*(?:lít|lit|lốp|lop)\b', clean)
+        if m_lit:
+            try:
+                val = float(m_lit.group(1).replace(',', '.'))
+                return val * 100_000.0
+            except ValueError:
+                pass
+
+        # 5. Nghìn / K / Ngàn (e.g. 500k, 500 nghìn, 500 ngàn)
+        m2 = re.search(r'(\d+(?:[\.,]\d+)?)\s*(?:k|nghìn|ngàn)\b', clean)
+        if m2:
+            try:
+                val = float(m2.group(1).replace(',', '.'))
+                return val * 1_000.0
+            except ValueError:
+                pass
+
+        # 6. Chuỗi số đầy đủ dạng 3.000.000 hoặc 3000000
+        m3 = re.search(r'(\d{1,3}(?:\.\d{3}){1,3}|\d{5,11})\s*(?:đồng|đ|vnd)?\b', clean)
+        if m3:
+            try:
+                clean_num = m3.group(1).replace('.', '')
+                return float(clean_num)
+            except ValueError:
+                pass
+
+        # 7. Ngân sách / Lương / Tiền đi kèm số nguyên nhỏ (e.g. "ngân sách 3", "lương 10", "có 3 chi tiêu sao")
+        m4 = re.search(r'(?:ngân sách|lương|thu nhập|hạn mức|quỹ|chi tiêu|tiêu|có|tầm|khoảng)\s*(\d+(?:[\.,]\d+)?)\b', clean)
+        if m4:
+            try:
+                val = float(m4.group(1).replace(',', '.'))
+                if 0 < val <= 200:
+                    return val * 1_000_000.0
+                return val
+            except ValueError:
+                pass
+
+        return None
+
+    def _generate_context_followups(self, query: str, amt: Optional[float] = None) -> List[str]:
+        """Tạo danh sách câu hỏi gợi ý tiếp theo bám sát ngữ cảnh câu hỏi người dùng."""
+        q = query.lower()
+        if any(w in q for w in ["chào", "hello", "hi", "alo", "bạn là ai", "hôm nay thế nào"]):
+            return [
+                "Tư vấn phân bổ ngân sách 3 triệu",
+                "Tháng này tôi đã tiêu bao nhiêu cho ăn uống?",
+                "Tôi có đang vượt hạn mức ngân sách nào không?"
+            ]
+        if any(w in q for w in ["50/30/20", "50 30 20", "quy tắc 50", "chia lương"]):
+            return [
+                "Tôi có đang vượt hạn mức ngân sách nào không?",
+                "Tháng này tôi đã chi bao nhiêu cho ăn uống?",
+                "Tra cứu số dư các ví và tài sản ròng"
+            ]
+        if any(w in q for w in ["ví", "số dư", "tài sản", "còn bao nhiêu"]):
+            return [
+                "Tôi có đang vượt hạn mức ngân sách nào không?",
+                "Tư vấn phân bổ lương theo chuẩn 50/30/20",
+                "Tổng chi tiêu tháng này của tôi"
+            ]
+        if amt is not None and amt > 0:
+            amt_str = format_currency_vnd(amt)
+            if any(w in q for w in ["ăn", "uống", "cơm", "thực phẩm"]):
+                return [
+                    f"Gợi ý thực đơn tiết kiệm dưới {format_currency_vnd(round(amt / 30, -3))}/ngày",
+                    "Tháng này tôi đã chi bao nhiêu cho ăn uống?",
+                    "Cách cắt giảm 20% chi phí ăn ngoài"
+                ]
+            if amt <= 6_000_000:
+                return [
+                    f"Cách chia thực đơn ăn uống với ngân sách {amt_str}",
+                    f"Làm sao trích lập được {format_currency_vnd(amt * 0.15)} tiết kiệm?",
+                    "Kiểm tra sức khỏe tài chính tháng này"
+                ]
+            else:
+                return [
+                    f"Kế hoạch tiết kiệm {format_currency_vnd(amt * 0.2)} mỗi tháng",
+                    "Tôi có đang vượt hạn mức ngân sách nào không?",
+                    "Đánh giá sức khỏe tài chính tổng quát"
+                ]
+        if any(w in q for w in ["ăn", "uống", "cơm", "thực phẩm"]):
+            return [
+                "Lập ngân sách 2 triệu cho việc ăn uống",
+                "Tổng chi tiêu tháng này của tôi",
+                "Cách tiết kiệm chi phí ăn ngoài"
+            ]
+        if any(w in q for w in ["ngân sách", "hạn mức", "vượt"]):
+            return [
+                "Tư vấn phân bổ ngân sách 3 triệu",
+                "Tháng này tôi đã tiêu bao nhiêu tiền?",
+                "Gợi ý cách phân bổ lương theo chuẩn 50/30/20"
+            ]
+        if any(w in q for w in ["tiết kiệm", "tích lũy"]):
+            return [
+                "Làm sao để tiết kiệm thêm 2 triệu mỗi tháng?",
+                "Đánh giá sức khỏe tài chính 50/30/20",
+                "Tổng chi tiêu tháng này của tôi"
+            ]
+        return [
+            "Tư vấn phân bổ ngân sách 3 triệu",
+            "Đánh giá sức khỏe tài chính 50/30/20",
+            "Tháng này tôi đã chi tiêu bao nhiêu tiền?"
+        ]
 
     def _smart_rule_financial_qa(
         self,
         query: str,
         context: Dict[str, Any],
-        recent_tx: List[Dict[str, Any]]
-    ) -> str:
-        """Data-driven rule answers when offline or without external API."""
+        recent_tx: List[Dict[str, Any]],
+        extracted_amt: Optional[float] = None
+    ) -> Tuple[str, List[str]]:
+        """Data-driven rule answers when offline or without external API with a warm, friendly companion tone."""
         q = query.lower()
         income = context.get('total_income', 0)
         expense = context.get('total_expense', 0)
         net = context.get('net_savings', 0)
         rate = context.get('savings_rate', 0)
+        net_worth = context.get('total_net_worth', 0)
 
         # 0. Privacy & Cross-User Guardrail (Zero-PII)
         if self._is_cross_user_pii_query(q):
-            return """🔒 **Bảo Mật Dữ Liệu Tài Chính (Zero-PII)**
+            return (
+                "🔒 **Bảo Mật Dữ Liệu Tài Chính (Zero-PII)**\n\n"
+                "FinTrack AI cam kết bảo mật 100% dữ liệu tài chính riêng tư của từng cá nhân. "
+                "Mình không thể cung cấp hoặc truy cập thông tin thu/chi của bất kỳ người dùng nào khác trên hệ thống đâu nè.\n\n"
+                "Nếu bạn cần xem hoặc phân tích báo cáo tài chính của chính mình, mình luôn sẵn sàng đồng hành hỗ trợ bạn bất cứ lúc nào! ✨",
+                [
+                    "Tổng chi tiêu tháng này của tôi là bao nhiêu?",
+                    "Tôi có đang vượt ngân sách danh mục nào không?",
+                    "Gợi ý cách phân bổ lương theo quy tắc 50/30/20"
+                ]
+            )
 
-FinTrack AI cam kết bảo mật 100% dữ liệu tài chính riêng tư của từng cá nhân. Tôi không thể cung cấp hoặc truy cập thông tin thu/chi của bất kỳ người dùng nào khác trên hệ thống.
+        # 0.1 Small Talk, Greetings & Identity
+        is_thanks = any(w in q for w in ["cảm ơn", "cam on", "thanks", "thank you", "cám ơn"])
+        if is_thanks:
+            return (
+                "Không có chi đâu nè! 💚 Đồng hành cùng bạn quản lý chi tiêu và giữ cho chiếc ví luôn khỏe mạnh "
+                "là niềm vui lớn nhất của mình. Cứ thoải mái nhắn cho mình bất cứ khi nào bạn cần tính toán ngân sách hay lên kế hoạch tài chính nhé! ✨",
+                [
+                    "Tư vấn phân bổ ngân sách 3 triệu",
+                    "Tháng này tôi đã chi bao nhiêu tiền?",
+                    "Đánh giá sức khỏe tài chính 50/30/20"
+                ]
+            )
 
-Nếu bạn cần xem hoặc phân tích báo cáo tài chính của chính mình, tôi luôn sẵn sàng hỗ trợ bạn bất cứ lúc nào!"""
+        is_identity = any(w in q for w in ["bạn là ai", "bạn tên gì", "giới thiệu bản thân", "mày là ai", "bot là ai"])
+        if is_identity:
+            return (
+                "Chào bạn! Mình là **FinTrack AI** – người bạn đồng hành tài chính cá nhân thân thiết của bạn đây! ✨\n\n"
+                "Mình ở đây để cùng bạn:\n"
+                "- 💡 **Tư vấn & lập ngân sách**: Phân bổ tiền thông minh (dù là ngân sách 3 triệu, 5 triệu hay lương 10 - 20 triệu).\n"
+                "- 📊 **Theo dõi chi tiêu**: Báo cáo thu chi, cảnh báo khi sắp chạm hạn mức và kiểm tra sức khỏe tài chính.\n"
+                "- ⚡ **Ghi chép giao dịch**: Nhận diện chi tiêu siêu tốc bằng ngôn ngữ tự nhiên.\n\n"
+                "Hôm nay bạn muốn chúng mình cùng bắt đầu từ mục nào nè?",
+                [
+                    "Tư vấn phân bổ ngân sách 3 triệu",
+                    "Tháng này tôi đã chi bao nhiêu tiền?",
+                    "Đánh giá sức khỏe tài chính 50/30/20"
+                ]
+            )
 
-        # 1. Asking about Salary Allocation & Budgeting for specific Salary amounts
-        salary_match = re.search(r'(?:lương|thu nhập|lương tháng)\s*(?:là|khoảng|được)?\s*(\d+[\.,]?\d*)\s*(triệu|trieu|tr|k|nghìn|ngàn|củ)?', q)
-        if salary_match or any(kw in q for kw in ["50/30/20", "50 30 20", "6 hũ", "phân bổ lương", "chia lương", "quản lý lương"]):
-            sal_amt = 0.0
-            if salary_match:
-                val = float(salary_match.group(1).replace(',', '.'))
-                unit = (salary_match.group(2) or '').lower()
-                if unit in ['k', 'nghìn', 'ngàn']:
-                    sal_amt = val * 1000
-                elif val < 1000:  # e.g. 5, 10, 15, 20
-                    sal_amt = val * 1_000_000
+        is_health_check = any(w in q for w in ["hôm nay thế nào", "khỏe không", "dạo này thế nào", "ổn không"])
+        if is_health_check:
+            return (
+                "Mình luôn tràn đầy năng lượng và sẵn sàng hỗ trợ bạn 24/7 nè! 🌟 "
+                "Tình hình tài chính hôm nay của bạn vẫn ổn định chứ? Cần mình soi nhanh tình hình ví hay kiểm tra xem hôm nay đã tiêu bao nhiêu thì cứ bảo mình nha!",
+                [
+                    "Tổng chi tiêu tháng này của tôi",
+                    "Tư vấn phân bổ ngân sách 3 triệu",
+                    "Kiểm tra sức khỏe tài chính tháng này"
+                ]
+            )
+
+        is_greeting = any(w in q for w in ["chào", "chao", "hello", "hi ", "hi!", "alo", "hé lô", "hey"]) or q.strip() in ["hi", "hello", "chào", "chao"]
+        if is_greeting and not any(kw in q for kw in ["triệu", "tr", "chi", "tiêu", "ngân sách", "ăn"]):
+            return (
+                "Chào bạn nhé! Rất vui được gặp bạn hôm nay. 🌟 Mình là FinTrack AI - người bạn đồng hành tài chính của bạn đây. "
+                "Hôm nay bạn cần mình hỗ trợ kiểm tra chi tiêu, tính toán ngân sách hay lên kế hoạch tiết kiệm nào không nè? ✨",
+                [
+                    "Tư vấn phân bổ ngân sách 3 triệu",
+                    "Tháng này tôi đã tiêu bao nhiêu cho ăn uống?",
+                    "Tôi có đang vượt hạn mức ngân sách nào không?"
+                ]
+            )
+
+        amt = extracted_amt if extracted_amt is not None else self._extract_monetary_amount(query)
+
+        # 0.2 Natural Language Transaction Logging statement in Chat
+        # e.g. "Ăn trưa bún bò 45k momo", "Vừa đổ xăng 50k", "Mua cà phê 35k tiền mặt"
+        is_question = any(w in q for w in [
+            "thế nào", "sao", "làm sao", "như thế nào", "tư vấn", "kế hoạch", 
+            "phân bổ", "hạn mức", "chia", "quản lý", "sống", "có nên", "cách", 
+            "gợi ý", "?", "được không", "hỏi", "chi tiêu thế nào", "tiêu sao", "sống sao", "bao nhiêu"
+        ])
+        if amt is not None and amt > 0 and not is_question:
+            is_logging = any(w in q for w in [
+                "vừa", "mới", "hôm nay", "sáng nay", "trưa nay", "chi", "trả", "mua", 
+                "uống", "ăn", "nạp", "đổ xăng", "tiền mặt", "momo", "chuyển", "nhận", 
+                "bún", "phở", "cơm", "cà phê", "cafe"
+            ])
+            if is_logging:
+                return (
+                    f"Mình đã nắm được khoản giao dịch này của bạn rồi nè! 📝\n\n"
+                    f"- 💰 **Số tiền**: **{format_currency_vnd(amt)}**\n"
+                    f"- 📌 **Nội dung**: *{query.strip()}*\n\n"
+                    f"💡 **Mách nhỏ**: Bạn có thể dùng tính năng **'Nhập Nhanh AI'** ở góc trên "
+                    f"để hệ thống tự động bóc tách danh mục, ví và lưu thẳng vào Sổ Giao Dịch chỉ trong 1 giây mà không cần điền tay nha! "
+                    f"Bạn ghi chép rất kỷ luật rồi đấy, tiếp tục phát huy nhé! ✨",
+                    [
+                        "Tháng này tôi đã chi bao nhiêu cho ăn uống?",
+                        "Tổng chi tiêu hôm nay của tôi",
+                        "Tôi có đang vượt hạn mức ngân sách nào không?"
+                    ]
+                )
+
+        # 0.3 Specialized Advisory: 50/30/20 Rule & Salary Allocation
+        is_503020 = any(kw in q for kw in ["50/30/20", "50 30 20", "quy tắc 50", "mô hình 50", "chia lương", "phân bổ lương"])
+        if is_503020:
+            sal_amt = amt if (amt and amt > 0) else (income if income > 0 else 10_000_000.0)
+            needs = sal_amt * 0.50
+            wants = sal_amt * 0.30
+            savings = sal_amt * 0.20
+            daily_budget = round(sal_amt / 30, -3)
+            weekly_wants = round(wants / 4, -3)
+
+            source_desc = f"dựa trên thu nhập thực tế **{format_currency_vnd(income)}** tháng này của bạn" if (not amt and income > 0) else f"với mức ngân sách / thu nhập **{format_currency_vnd(sal_amt)}/tháng**"
+
+            reply = f"""Chào bạn nhé! Áp dụng mô hình chuẩn **50/30/20** {source_desc} là phương pháp kinh điển giúp bạn vừa tận hưởng cuộc sống vừa tự do tài chính bền vững:
+
+🏠 **1. Nhu Cầu Thiết Yếu - 50% ({format_currency_vnd(needs)})**:
+- **Nhà ở & tiện ích** (tiền thuê, điện, nước, internet): ~**{format_currency_vnd(sal_amt * 0.25)}**
+- **Ăn uống & sinh hoạt dinh dưỡng**: ~**{format_currency_vnd(sal_amt * 0.20)}** (~**{format_currency_vnd(round(sal_amt * 0.20 / 30, -3))}/ngày**)
+- **Xăng xe & di chuyển**: ~**{format_currency_vnd(sal_amt * 0.05)}**
+
+☕ **2. Mong Muốn & Tận Hưởng - 30% ({format_currency_vnd(wants)})**:
+- Cà phê giao lưu, mua sắm online, xem phim, du lịch, sở thích cá nhân.
+- 🎯 *Định mức an toàn theo tuần*: Giữ khoản này trong khoảng **~{format_currency_vnd(weekly_wants)}/tuần** để không bao giờ bị vượt ngưỡng nhé!
+
+💰 **3. Tích Lũy & Đầu Tư Tương Lai - 20% ({format_currency_vnd(savings)})**:
+- **Quỹ khẩn cấp**: Ưu tiên xây dựng quỹ dự phòng tương đương 3 - 6 tháng chi phí sinh hoạt.
+- **Tích lũy sinh lời**: Đều đặn gửi tiết kiệm hoặc đầu tư mỗi tháng **{format_currency_vnd(savings)}**.
+
+💡 **Bí quyết thành công từ FinTrack AI**:
+- **Nguyên tắc 'Trả cho mình trước' (Pay yourself first)**: Khi nhận lương/thu nhập, hãy trích ngay **{format_currency_vnd(savings)}** sang ví tích lũy trước rồi mới bắt đầu chi tiêu phần còn lại.
+- Hạn mức chi tiêu tối đa mỗi ngày khuyến nghị là **~{format_currency_vnd(daily_budget)}/ngày**.
+
+Bạn thấy kế hoạch phân bổ này đã vừa vặn với thói quen hiện tại của mình chưa nè? ✨"""
+            return (reply, [
+                "Tôi có đang vượt hạn mức ngân sách nào không?",
+                "Tháng này tôi đã chi bao nhiêu cho ăn uống?",
+                "Tra cứu số dư các ví và tài sản ròng"
+            ])
+
+        # 0.4 Specialized Inquiry: Wallets, Balance & Net Worth Check
+        is_wallet_inquiry = any(kw in q for kw in [
+            "số dư", "tài sản", "còn bao nhiêu tiền", "tiền trong ví", "tra cứu số dư", "tổng tài sản"
+        ]) or ("ví" in q and any(w in q for w in ["còn", "bao nhiêu", "kiểm tra", "tra cứu", "số dư", "xem", "tất cả", "danh sách"]))
+        if is_wallet_inquiry:
+            wallets_detail = context.get('wallets_summary', '')
+            wallets_text = wallets_detail if wallets_detail else "Chưa có danh sách ví chi tiết."
+            reply = f"""Tài sản và số dư khả dụng thực tế của bạn đây nè: 💰
+
+- 💎 **Tổng tài sản ròng**: **{format_currency_vnd(net_worth)}**
+- 📊 **Dòng tiền tháng này**: Thu **{format_currency_vnd(income)}** | Chi **{format_currency_vnd(expense)}** -> Tích lũy ròng: **{format_currency_vnd(net)}** (Tỷ lệ: **{rate}%**)
+
+💳 **Chi tiết số dư từng tài khoản / ví khả dụng**:
+{wallets_text}
+
+💡 **Lời khuyên tài chính**:
+- Hãy duy trì số dư ví tiền mặt hoặc ví thanh toán hàng ngày đủ dùng cho khoảng 1 - 2 tuần chi phí sinh hoạt để luôn chủ động.
+- Các khoản tiền nhàn rỗi lớn nên phân bổ vào ví tích lũy để sinh lời tối ưu nhé!"""
+            return (reply, [
+                "Tôi có đang vượt hạn mức ngân sách nào không?",
+                "Tư vấn phân bổ lương theo chuẩn 50/30/20",
+                "Tháng này tôi đã chi tiêu bao nhiêu tiền?"
+            ])
+
+        # 0.5 Specialized Inquiry: Budget Status & Overspending Check (without simulation amount)
+        is_budget_status = any(kw in q for kw in [
+            "hạn mức", "vượt hạn mức", "bội chi", "vượt ngân sách", "tình trạng ngân sách", 
+            "kiểm tra ngân sách", "ngân sách còn lại"
+        ]) or (any(kw in q for kw in ["ngân sách", "vượt"]) and (amt is None or amt == 0))
+        if is_budget_status:
+            bdg_summary = context.get('budget_summary', '')
+            bdg_detail = bdg_summary if (bdg_summary and bdg_summary != "Chưa đặt hạn mức") else "Hiện tại bạn chưa thiết lập hạn mức chi tiêu cho các danh mục tháng này."
+            reply = f"""Mình vừa rà soát chi tiết tình trạng các hạn mức ngân sách của bạn nè: 🎯
+
+{bdg_detail}
+
+📊 **Hướng dẫn kiểm soát ngân sách theo 3 vùng cảnh báo**:
+- 🟢 **Vùng an toàn (< 80%)**: Chi tiêu đang trong tầm kiểm soát rất tốt, hãy duy trì nhịp độ kỷ luật này!
+- 🟡 **Vùng cảnh báo (80% - 100%)**: Sắp chạm trần hạn mức! Cần siết lại các khoản chi mua sắm, ăn ngoài phát sinh.
+- 🔴 **Vượt hạn mức (> 100%)**: Đã bội chi! Cần tạm dừng ngay các khoản chi không thiết yếu ở danh mục này.
+
+💡 **Chiến lược điều phối ngân sách theo tuần**:
+- Hãy lấy số hạn mức còn lại chia đều cho số tuần còn lại trong tháng. Việc chia nhỏ hạn mức theo tuần giúp bạn không bao giờ bị 'cháy túi' vào những ngày cuối tháng!"""
+            return (reply, [
+                "Tư vấn phân bổ ngân sách 3 triệu",
+                "Gợi ý cách phân bổ lương theo chuẩn 50/30/20",
+                "Tháng này tôi đã chi tiêu bao nhiêu tiền?"
+            ])
+
+        # 1. Budgeting or spending advice for a specific category with amount
+        if amt is not None and amt > 0:
+            is_food = any(kw in q for kw in ["ăn", "uống", "cơm", "thực phẩm", "ăn ngoài", "nhậu", "cà phê"])
+            is_transport = any(kw in q for kw in ["đi lại", "xăng", "xe", "grab", "xe máy", "bus", "xe buýt"])
+
+            if is_food:
+                daily_food = round(amt / 30, -3)
+                weekly_food = round(amt / 4, -3)
+                sang = round(daily_food * 0.25, -3)
+                trua = round(daily_food * 0.38, -3)
+                toi = round(daily_food * 0.37, -3)
+                reply = f"""Chào bạn nhé! Với mức ngân sách ăn uống **{format_currency_vnd(amt)}/tháng**, việc chia nhỏ theo từng bữa sẽ giúp bạn ăn ngon đủ chất mà chiếc ví vẫn an toàn:
+
+🍲 **Định Mức Chi Tiêu Tham Khảo**:
+- **Hạn mức trung bình mỗi ngày**: **~{format_currency_vnd(daily_food)}/ngày** (hoặc **~{format_currency_vnd(weekly_food)}/tuần**).
+- **Gợi ý chia 3 bữa**:
+  - Bữa sáng: ~**{format_currency_vnd(sang)}** (Bánh mì, xôi, ngũ cốc hoặc đồ ăn sáng tự nấu nhanh).
+  - Bữa trưa: ~**{format_currency_vnd(trua)}** (Cơm văn phòng bình dân hoặc mang cơm hộp tự chuẩn bị).
+  - Bữa tối: ~**{format_currency_vnd(toi)}** (Tự nấu ăn tại nhà để vừa đủ chất vừa tiết kiệm).
+
+💡 **Bí quyết ăn ngon mà vẫn dư dả**:
+1. **Đi chợ / Siêu thị theo tuần**: Mua và sơ chế thực phẩm sẵn cho cả tuần giúp bạn tiết kiệm 20% - 30% so với mua lẻ từng ngày.
+2. **Giảm bớt đặt đồ qua App giao hàng**: Phí ship và giá món trên app thường cao hơn đáng kể.
+3. **Ghi nhận ngay trên FinTrack AI**: Mỗi lần ăn uống xong, bạn bấm 'Nhập Nhanh AI' ghi lại ngay để không bao giờ vượt ngưỡng {format_currency_vnd(amt)} nha! ✨"""
+                return (reply, [
+                    f"Cách tiết kiệm thêm 500k tiền ăn uống",
+                    "Tháng này tôi đã chi bao nhiêu cho ăn uống?",
+                    "Tư vấn phân bổ ngân sách 3 triệu"
+                ])
+
+            if is_transport:
+                daily_trans = round(amt / 30, -3)
+                weekly_trans = round(amt / 4, -3)
+                reply = f"""Chào bạn! Với khoản ngân sách đi lại & xăng xe **{format_currency_vnd(amt)}/tháng**, tính ra mỗi ngày bạn sẽ có khoảng **~{format_currency_vnd(daily_trans)}/ngày** (tầm **~{format_currency_vnd(weekly_trans)}/tuần**).
+
+💡 **Vài mẹo nhỏ để tiết kiệm chi phí di chuyển nè**:
+1. **Bảo dưỡng xe định kỳ**: Kiểm tra áp suất lốp và thay nhớt đúng hạn giúp máy êm và giảm 5% - 10% mức tiêu hao xăng.
+2. **Kết hợp cung đường**: Gom các chuyến đi gần nhau để tránh việc di chuyển lòng vòng nhiều lần trong ngày.
+3. **Tận dụng ưu đãi**: Nếu đi xe công nghệ, nhớ kiểm tra mã khuyến mãi theo khung giờ hoặc mua gói di chuyển tháng nha.
+
+Cần mình hỗ trợ thêm về các khoản chi khác trong tháng thì cứ bảo mình nha! 🛵"""
+                return (reply, [
+                    "Tổng chi tiêu tháng này của tôi",
+                    "Tư vấn phân bổ ngân sách 3 triệu",
+                    "Cách tiết kiệm 1 triệu mỗi tháng"
+                ])
+
+            # 2. General Budgeting / Salary / Living Cost with specific Amount
+            is_budget_query = any(kw in q for kw in [
+                "ngân sách", "lương", "thu nhập", "chi tiêu", "quản lý", "phân bổ", "sống", 
+                "kế hoạch", "có", "chia", "50/30/20", "50 30 20", "6 hũ", "1 tháng", "mỗi tháng", "hạn mức"
+            ]) or ("triệu" in q or "tr" in q or "củ" in q)
+
+            if is_budget_query:
+                sal_amt = amt
+                daily_budget = round(sal_amt / 30, -3)
+                weekly_budget = round(sal_amt / 4, -3)
+
+                if sal_amt <= 6_000_000:
+                    needs = sal_amt * 0.65
+                    wants = sal_amt * 0.20
+                    savings = sal_amt * 0.15
+                    rent_part = sal_amt * 0.25
+                    food_part = sal_amt * 0.35
+                    trans_part = sal_amt * 0.05
+                    daily_food_allowance = round(food_part / 30, -3)
+
+                    reply = f"""Chào bạn nhé! Với mức ngân sách **{format_currency_vnd(sal_amt)}/tháng**, việc cân đối tài chính khéo léo sẽ giúp bạn hoàn toàn làm chủ cuộc sống mà không phải lo lắng chuyện 'cháy túi' cuối tháng đâu nè.
+
+Tính nhanh thì mỗi ngày bạn sẽ có hạn mức an toàn là **~{format_currency_vnd(daily_budget)}/ngày** (tương đương **~{format_currency_vnd(weekly_budget)}/tuần**). Đây là phương án phân bổ thông minh và thực tế nhất mình gợi ý cho bạn:
+
+🏠 **1. Nhu Cầu Thiết Yếu - 65% ({format_currency_vnd(needs)})**:
+- **Tiền phòng trọ / nhà ở + điện nước**: ~**{format_currency_vnd(rent_part)}** (nên ở ghép hoặc chọn phòng có chi phí hợp lý).
+- **Ăn uống & sinh hoạt**: ~**{format_currency_vnd(food_part)}** (khoảng **~{format_currency_vnd(daily_food_allowance)}/ngày**, tự nấu ăn là giải pháp số một nhé).
+- **Xăng xe & đi lại**: ~**{format_currency_vnd(trans_part)}**.
+
+☕ **2. Chi Tiêu Cá Nhân & Linh Hoạt - 20% ({format_currency_vnd(wants)})**:
+- Cà phê giao lưu, nạp thẻ điện thoại, internet, đồ dùng cá nhân tối thiểu.
+- *Nguyên tắc vàng*: Bạn giữ khoản này trong ngưỡng **~{format_currency_vnd(round(wants / 4, -3))}/tuần** nhé.
+
+💰 **3. Tích Lũy Dự Phòng Khẩn Cấp - 15% ({format_currency_vnd(savings)})**:
+- **'Bỏ ống heo' ngay đầu tháng**: Vừa có tiền về là trích riêng ngay **{format_currency_vnd(savings)}** vào một tài khoản tiết kiệm riêng biệt, tuyệt đối không dùng đến trừ khi có việc ốm đau/khẩn cấp.
+
+💡 **Bí kíp nhỏ từ người bạn đồng hành**:
+1. Tuân thủ hạn mức ngày (**~{format_currency_vnd(daily_budget)}/ngày**): Hôm nay lỡ tiêu vượt nhẹ thì mai tự động nấu ăn bù lại nhé.
+2. Tự nấu ăn tại nhà: Giúp bạn tiết kiệm ít nhất **{format_currency_vnd(sal_amt * 0.2)}/tháng** so với ăn hàng.
+3. Quy tắc 48 giờ: Trước khi mua một món đồ không thiết yếu, hãy chờ 48 tiếng để xem mình có thực sự cần nó không.
+4. Ghi chép trên FinTrack AI: Mỗi khi phát sinh khoản chi 10k, 20k cũng nhớ ghi lại để ví luôn trong tầm kiểm soát!
+
+Bạn thấy cách phân bổ này thế nào, cần mình tinh chỉnh thêm mục nào không nè? ✨"""
+
+                    return (reply, [
+                        f"Cách chia thực đơn ăn uống với {format_currency_vnd(food_part)}",
+                        f"Làm sao tiết kiệm được {format_currency_vnd(savings)} đầu tháng?",
+                        "Kiểm tra sức khỏe tài chính tháng này"
+                    ])
                 else:
-                    sal_amt = val
-            elif income > 0:
-                sal_amt = income
-            else:
-                sal_amt = 5_000_000.0  # Default demo salary
+                    needs = sal_amt * 0.50
+                    wants = sal_amt * 0.30
+                    savings = sal_amt * 0.20
 
-            needs = sal_amt * 0.5
-            wants = sal_amt * 0.3
-            savings = sal_amt * 0.2
+                    reply = f"""Chào bạn nhé! Với mức ngân sách **{format_currency_vnd(sal_amt)}/tháng**, bạn đã có một nền tảng tài chính khá thoải mái. Mình gợi ý bạn áp dụng quy tắc vàng **50/30/20** để vừa tận hưởng cuộc sống vừa xây dựng tài sản vững chắc:
 
-            return f"""🎯 **Kế Hoạch Phân Bổ Chi Tiêu & Tiết Kiệm Theo Quy Tắc 50/30/20:**
-*(Áp dụng cho mức thu nhập: **{format_currency_vnd(sal_amt)}/tháng**)*
+🏠 **1. Nhu Cầu Thiết Yếu - 50% ({format_currency_vnd(needs)})**:
+- Tiền nhà ở & tiện ích (điện, nước, net): ~**{format_currency_vnd(sal_amt * 0.25)}**.
+- Ăn uống & thực phẩm: ~**{format_currency_vnd(sal_amt * 0.20)}** (khoảng **~{format_currency_vnd(round(sal_amt * 0.2 / 30, -3))}/ngày**).
+- Đi lại & sinh hoạt cơ bản: ~**{format_currency_vnd(sal_amt * 0.05)}**.
 
----
+☕ **2. Chi Tiêu Cá Nhân & Tận Hưởng - 30% ({format_currency_vnd(wants)})**:
+- Mua sắm, giải trí, cà phê bạn bè, du lịch, học thêm kỹ năng mới.
+- Hạn mức khuyến nghị: Không vượt quá **~{format_currency_vnd(round(wants / 4, -3))}/tuần**.
 
-### 1. 🏠 Nhu Cầu Thiết Yếu - 50% (**{format_currency_vnd(needs)}**)
-- **Tiền trọ / Nhà ở + Điện nước**: Ưu tiên giữ dưới 25-30% thu nhập (~**{format_currency_vnd(sal_amt * 0.25)}**).
-- **Ăn uống & Nhu yếu phẩm cơ bản**: ~**{format_currency_vnd(sal_amt * 0.2)}** (tự nấu ăn tại nhà để tối ưu chi phí).
-- **Xăng xe & Đi lại**: ~**{format_currency_vnd(sal_amt * 0.05)}**.
+💰 **3. Tích Lũy & Đầu Tư Tương Lai - 20% ({format_currency_vnd(savings)})**:
+- **Quỹ khẩn cấp**: Ưu tiên tích lũy đủ 3 - 6 tháng sinh hoạt cơ bản trước.
+- **Đầu tư sinh lời**: Chuyển phần tích lũy hàng tháng (**{format_currency_vnd(savings)}**) vào các kênh an toàn như tích lũy sinh lời hoặc chứng chỉ quỹ.
 
-### 2. ☕ Chi Tiêu Cá Nhân & Linh Hoạt - 30% (**{format_currency_vnd(wants)}**)
-- Mua sắm đồ dùng cá nhân, cà phê gặp gỡ bạn bè, giải trí.
-- **Mẹo tối ưu**: Áp dụng quy tắc trì hoãn 48 giờ trước khi mua một món đồ không thực sự cần thiết.
+💡 **Định mức chi tiêu hàng ngày khuyến nghị**: Khoảng **~{format_currency_vnd(daily_budget)}/ngày** (bao gồm cả ăn uống và chi tiêu cá nhân). Bạn thấy tỷ lệ này đã vừa vặn với thói quen hiện tại của mình chưa? ✨"""
 
-### 3. 💰 Tiết Kiệm & Quỹ Dự Phòng - 20% (**{format_currency_vnd(savings)}**)
-- **Quỹ khẩn cấp**: Trích ngay **{format_currency_vnd(savings)}** vào ngày nhận lương vào tài khoản tích lũy riêng.
-- Khi tích lũy đủ 3 - 6 tháng chi phí sinh hoạt, bạn có thể chuyển một phần sang đầu tư gia tăng tài sản.
+                    return (reply, [
+                        f"Kế hoạch tiết kiệm {format_currency_vnd(savings)} mỗi tháng",
+                        "Tôi có đang vượt hạn mức ngân sách nào không?",
+                        "Đánh giá sức khỏe tài chính tổng quát"
+                    ])
 
----
-💡 **Lời khuyên thực tế từ FinTrack AI**: *"Tiết kiệm trước - Chi tiêu sau"* là chìa khóa vàng giúp bạn luôn làm chủ tài chính và không rơi vào cảnh cạn túi cuối tháng!"""
+            # 3. Saving goal with amount
+            if any(kw in q for kw in ["tiết kiệm", "tích lũy", "quỹ"]):
+                daily_save = round(amt / 30, -3)
+                weekly_save = round(amt / 4, -3)
+                reply = f"""Mục tiêu tiết kiệm **{format_currency_vnd(amt)}/tháng** này rất tuyệt vời luôn, mình rất ủng hộ bạn! 🎯
 
-        # 2. Asking about Food / Dining / Eating out
+Để đạt được con số này nhẹ nhàng nhất mà không thấy bị gò bó, chúng mình cùng chia nhỏ mục tiêu ra nhé:
+- Mỗi ngày bạn chỉ cần tích lũy khoảng **~{format_currency_vnd(daily_save)}/ngày**
+- Hoặc mỗi tuần giữ lại tầm **~{format_currency_vnd(weekly_save)}/tuần**
+
+💡 **3 bước đơn giản giúp bạn về đích chắc chắn**:
+1. **Trả cho mình trước (Pay yourself first)**: Ngay ngày nhận thu nhập, hãy chuyển ngay **{format_currency_vnd(amt)}** sang ví tích lũy trước khi bắt đầu chi tiêu.
+2. **Cắt giảm vi mô (Micro-savings)**: Bớt 1 ly trà sữa hay bữa ăn ngoài không cần thiết là bạn đã chạm được 1/2 chỉ tiêu của ngày rồi!
+3. **Quy tắc 48h**: Trước khi bấm 'Mua ngay' một món đồ yêu thích, hãy chờ 2 ngày. Nếu sau 2 ngày bạn vẫn thấy nó thật sự cần, lúc đó hãy mua.
+
+Mình tin bạn hoàn toàn làm được. Cố lên nhé! Cần mình đồng hành theo dõi tiến độ cùng bạn không? 💪"""
+                return (reply, [
+                    "Gợi ý kế hoạch ngân sách cho tháng tới",
+                    "Tháng này tôi đã chi tiêu bao nhiêu?",
+                    "Đánh giá sức khỏe tài chính 50/30/20"
+                ])
+
+        # 4. Asking about Food / Dining without amount
         if any(kw in q for kw in ["ăn", "uống", "ăn ngoài", "ăn uống", "cơm", "bún", "nhậu", "cà phê"]):
             food_total = 0.0
             for t in recent_tx:
@@ -667,63 +1248,84 @@ Nếu bạn cần xem hoặc phân tích báo cáo tài chính của chính mìn
                     food_total += float(t.get("amount", 0))
             if food_total > 0:
                 pct = round((food_total / expense * 100), 1) if expense > 0 else 0
-                return f"""📊 **Chi tiêu cho Danh mục Ăn uống & Thực phẩm:**
-- Tổng số tiền đã ghi nhận gần đây: **{format_currency_vnd(food_total)}** (chiếm khoảng **{pct}%** tổng chi tiêu).
-- **Nhận xét**: Chi tiêu ăn uống chiếm tỷ trọng lớn trong ngân sách sinh hoạt. Bạn nên đặt hạn mức tuần và tăng cường tự nấu ăn tại nhà để tiết kiệm thêm 20-30% chi phí."""
-            return f"""📊 **Chi tiêu Ăn uống**: Trong tháng này, tổng chi tiêu của bạn là **{format_currency_vnd(expense)}**. Bạn có thể xem chi tiết biểu đồ cơ cấu chi tiêu trên Dashboard."""
+                reply = f"""Mình vừa kiểm tra nhanh sổ giao dịch của bạn nè! 🍜
 
-        # 3. Asking about Total Expense / Income / Net Flow
+Tháng này bạn đã dành khoảng **{format_currency_vnd(food_total)}** cho việc ăn uống (chiếm tầm **{pct}%** tổng chi tiêu).
+
+Ăn uống ngon miệng là để nạp năng lượng, nhưng đây cũng là khoản dễ bị phát sinh đột biến nhất. Nếu bạn muốn tối ưu thêm, thử đặt mục tiêu nấu ăn tại nhà thêm 2 - 3 bữa mỗi tuần xem sao nhé, ví sẽ cảm ơn bạn nhiều lắm đấy! 🍲"""
+            else:
+                reply = f"""Trong tháng này, tổng chi tiêu được ghi nhận của bạn là **{format_currency_vnd(expense)}** và chưa có khoản chi ăn uống cụ thể nào được phân loại riêng. 
+
+Bạn có thể nhập nhanh giao dịch ăn uống hôm nay bằng nút **'Nhập Nhanh AI'** ở thanh trên để mình theo dõi giúp bạn nhé! ✨"""
+            return (reply, [
+                "Lập ngân sách ăn uống 2 triệu",
+                "Tôi có đang vượt hạn mức ngân sách nào không?",
+                "3 cách giảm chi tiêu ăn ngoài hiệu quả"
+            ])
+
+        # 5. Asking about Total Expense / Income / Net Flow without amount
         if any(kw in q for kw in ["tổng chi", "đã tiêu bao nhiêu", "chi bao nhiêu", "hết bao nhiêu", "tiêu gì"]):
-            return f"""💸 **Tổng kết chi tiêu tháng này của bạn:**
-- **Tổng số tiền đã chi**: **{format_currency_vnd(expense)}**
-- **Tổng thu nhập**: **{format_currency_vnd(income)}**
-- **Số dư ròng còn lại**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm: **{rate}%**)
+            reply = f"""Mình gửi bạn tổng kết chi tiêu tháng này nha: 💸
 
-Bạn có thể vào mục **Sổ Giao Dịch** để xem chi tiết từng hóa đơn hoặc đặt câu hỏi về danh mục cụ thể!"""
+- 📤 **Tổng số tiền đã chi**: **{format_currency_vnd(expense)}**
+- 📥 **Tổng thu nhập**: **{format_currency_vnd(income)}**
+- 💰 **Số dư ròng còn lại**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm hiện tại: **{rate}%**)
+
+Nhìn chung dòng tiền của bạn vẫn đang được kiểm soát khá ổn định! Bạn có thể vào mục **Sổ Giao Dịch** để xem chi tiết từng hóa đơn, hoặc nhắn mình để cùng rà soát các danh mục nhé! ✨"""
+            return (reply, [
+                "Tôi đã tiêu bao nhiêu cho việc ăn uống?",
+                "Tôi có đang vượt ngân sách danh mục nào không?",
+                "Gợi ý cách tiết kiệm thêm tháng này"
+            ])
 
         if any(kw in q for kw in ["tổng thu", "thu nhập", "kiếm được bao nhiêu", "nhận bao nhiêu", "lương"]):
-            return f"""📥 **Tổng kết thu nhập tháng này:**
-- **Tổng thu nhập**: **{format_currency_vnd(income)}**
-- **Đã chi tiêu**: **{format_currency_vnd(expense)}**
-- **Số tiền đã tích lũy**: **{format_currency_vnd(net)}** (Tỷ lệ tiết kiệm: **{rate}%**)"""
+            reply = f"""Tình hình thu nhập tháng này của bạn đây nè: 📥
 
-        # 4. Asking about Budgets / Overspending
-        if any(kw in q for kw in ["ngân sách", "vượt hạn mức", "bội chi", "hạn mức", "vượt"]):
-            return f"""🎯 **Tình trạng Ngân sách & Hạn mức tháng này:**
-{context.get('budget_summary', 'Bạn chưa thiết lập hạn mức cho các danh mục.')}
+- 💵 **Tổng thu nhập ghi nhận**: **{format_currency_vnd(income)}**
+- 📤 **Đã chi tiêu**: **{format_currency_vnd(expense)}**
+- 🎯 **Số tiền tích lũy được**: **{format_currency_vnd(net)}** (Đạt tỷ lệ tiết kiệm: **{rate}%**)
 
-💡 **Lời khuyên**: Hãy luôn duy trì mức chi tiêu các danh mục dưới ngưỡng 80% hạn mức để đảm bảo an toàn tài chính."""
-
-        # 5. Asking about Wallets / Balances / Net Worth
-        if any(kw in q for kw in ["ví", "tài sản", "còn bao nhiêu tiền", "số dư"]):
-            return f"""💰 **Tài sản & Số dư khả dụng của bạn:**
-- **Tổng tài sản ròng**: **{format_currency_vnd(context.get('total_net_worth', 0))}**
-- **Dòng tiền ròng tháng này**: **{format_currency_vnd(net)}** (Thu: {format_currency_vnd(income)} | Chi: {format_currency_vnd(expense)})
-
-Bạn có thể quản lý chi tiết từng tài khoản tại mục **Quản Lý Ví**."""
+Bạn đang duy trì tỷ lệ tích lũy rất tốt! Bạn có muốn mình tư vấn cách phân bổ khoản thu nhập này theo chuẩn 50/30/20 không nè?"""
+            return (reply, [
+                "Tư vấn phân bổ thu nhập theo chuẩn 50/30/20",
+                "Tôi đã chi tiêu bao nhiêu tiền tháng này?",
+                "Kế hoạch tiết kiệm 3 tháng tới"
+            ])
 
         # 6. Asking about Savings / How to save money
         if any(kw in q for kw in ["tiết kiệm", "cách tiết kiệm", "làm sao để tiết kiệm", "tối ưu chi phí", "tiết kiệm tiền"]):
             base_inc = income if income > 0 else 10_000_000.0
             save_20 = base_inc * 0.2
-            return f"""💡 **Chiến lược tối ưu hóa và tăng tốc tiết kiệm cho bạn:**
-1. **Trích lập 20% thu nhập ({format_currency_vnd(save_20)})**: Ngay khi có thu nhập về tài khoản, hãy tự động nạp vào Quỹ tiết kiệm hoặc tài khoản tích lũy sinh lời.
-2. **Quy tắc 50/30/20**: Giữ nhu cầu thiết yếu dưới 50% ({format_currency_vnd(base_inc * 0.5)}) và hạn chế mua sắm ngẫu hứng.
-3. **Cắt giảm vi mô (Micro-savings)**: Cắt bớt 1 cốc cà phê ngoài hàng/ngày (~35.000 đ) giúp bạn tiết kiệm thêm hơn **1.000.000 đ/tháng**.
-4. **Theo dõi chi tiêu hàng ngày**: Ghi nhận ngay các giao dịch nhỏ lẻ vào FinTrack AI để không bị thất thoát ngân sách."""
+            reply = f"""Để tiết kiệm hiệu quả mà không cảm thấy gò bó hay áp lực, mình chia sẻ với bạn 4 nguyên tắc đơn giản mà cực kỳ hiệu quả này nha: 💡
+
+1. **Nguyên tắc 'Trả cho mình trước'**: Ngay khi có thu nhập về, trích ngay 15% - 20% (**{format_currency_vnd(save_20)}**) vào tài khoản tiết kiệm riêng biệt rồi mới chi tiêu phần còn lại.
+2. **Quy tắc 50/30/20**: Giữ nhu cầu thiết yếu dưới 50% (**{format_currency_vnd(base_inc * 0.5)}**) và kiểm soát các khoản mua sắm ngẫu hứng.
+3. **Cắt giảm vi mô (Micro-savings)**: Bớt 1 ly cà phê ngoài hàng/ngày (~35.000 đ) là cuối tháng bạn đã có thêm hơn **1.000.000 đ** trong ví rồi đó!
+4. **Ghi chép đều tay**: Thường xuyên ghi lại các khoản chi trên FinTrack AI để luôn nắm rõ dòng tiền đang chảy về đâu.
+
+Bạn muốn thử thách bản thân tiết kiệm bao nhiêu trong tháng tới nào? Nhắn mình để chúng mình cùng lên kế hoạch nhé! 🎯"""
+            return (reply, [
+                "Tư vấn ngân sách 3 triệu",
+                "Đánh giá sức khỏe tài chính 50/30/20",
+                "Tôi có đang vượt ngân sách không?"
+            ])
 
         # Default Helpful Intelligent Advisory Response
-        return f"""👋 Xin chào! Tôi là **FinTrack AI Advisor** - Cố vấn tài chính thông minh của bạn.
+        reply = f"""Chào bạn nha! Mình là **FinTrack AI** - người bạn đồng hành tài chính của bạn đây. 🌟
 
-Dưới đây là tóm tắt nhanh tình hình tài chính của bạn:
-- 💰 **Tổng tài sản khả dụng**: **{format_currency_vnd(context.get('total_net_worth', 0))}**
-- 📥 **Thu nhập tháng**: **{format_currency_vnd(income)}** | 📤 **Chi tiêu**: **{format_currency_vnd(expense)}**
-- 🎯 **Tỷ lệ tiết kiệm**: **{rate}%**
+Hiện tại tổng tài sản khả dụng của bạn là **{format_currency_vnd(net_worth)}**, và tháng này bạn đã tích lũy được **{format_currency_vnd(net)}** (tỷ lệ tiết kiệm đạt **{rate}%**).
 
-Bạn có thể hỏi tôi bất kỳ câu hỏi nào như:
-- *"Lương 5 triệu thì nên chi tiêu và tiết kiệm thế nào?"*
-- *"Tôi đã tiêu bao nhiêu cho việc ăn uống tháng này?"*
-- *"Tôi có đang vượt ngân sách danh mục nào không?"*
-- *"Gợi ý 3 cách cắt giảm chi tiêu không thiết yếu?"*"""
+Bạn muốn mình cùng bạn làm gì hôm nay nào? Mình có thể giúp bạn:
+- 💡 Tính toán và phân bổ ngân sách (ví dụ: *'Ngân sách 3 triệu thì chi tiêu thế nào?'*)
+- 📊 Soi lại chi tiêu danh mục (ví dụ: *'Tháng này tôi đã tiêu bao nhiêu cho ăn uống?'*)
+- 🎯 Lên kế hoạch tiết kiệm tiền thực tế và hiệu quả
+
+Cứ thoải mái trò chuyện cùng mình nhé! ✨"""
+        return (reply, [
+            "Tư vấn ngân sách 3 triệu",
+            "Tôi đã tiêu bao nhiêu cho ăn uống?",
+            "Tôi có đang vượt ngân sách không?",
+            "Đánh giá sức khỏe tài chính 50/30/20"
+        ])
 
 ai_service = AIService()

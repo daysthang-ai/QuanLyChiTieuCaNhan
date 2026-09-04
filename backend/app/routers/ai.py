@@ -283,6 +283,14 @@ async def chat_with_ai(
             "note": t.note or ""
         })
 
+    # Wallets & Net worth breakdown
+    user_wallets = db.query(Wallet).filter(
+        Wallet.user_id == current_user.id,
+        Wallet.is_active == True
+    ).all()
+    wallet_lines = [f"• {w.name}: {format_currency_vnd(w.balance)}" for w in user_wallets]
+    wallets_summary_str = "\n".join(wallet_lines) if wallet_lines else "Chưa có ví hoạt động"
+
     financial_context = {
         "total_net_worth": net_worth,
         "total_income": income,
@@ -290,7 +298,8 @@ async def chat_with_ai(
         "net_savings": net,
         "savings_rate": rate,
         "category_summary": "\n".join(spending_summary_lines) if spending_summary_lines else "Chưa có chi tiêu",
-        "budget_summary": "\n".join(budget_lines) if budget_lines else "Chưa đặt hạn mức"
+        "budget_summary": "\n".join(budget_lines) if budget_lines else "Chưa đặt hạn mức",
+        "wallets_summary": wallets_summary_str
     }
 
     res = await ai_service.chat_financial_assistant(

@@ -26,10 +26,24 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="/static/css/style.css?v=20260904_11">
 
+  <!-- Immediate Anti-Flicker & Session Check Script in Head -->
+  <script>
+    (function() {
+      try {
+        var token = localStorage.getItem('fintrack_token') || localStorage.getItem('token');
+        if (token) {
+          var style = document.createElement('style');
+          style.id = 'fintrack-anti-flicker';
+          style.innerHTML = '#landing-page-container { display: none !important; } #app-workspace-container { display: flex !important; }';
+          document.head.appendChild(style);
+        }
+      } catch (_) {}
+    })();
+  </script>
+
   <!-- Immediate Global Functions in Head -->
   <script>
     window.openAuthModal = function(mode) {
-      console.log("[FinTrack] Kích hoạt mở modal:", mode);
       const modal = document.getElementById('auth-modal');
       if (modal) {
         modal.classList.remove('hidden', 'pointer-events-none');
@@ -1158,7 +1172,7 @@
   <div id="filter-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Application Module Script -->
-  <script type="module" src="/static/js/app.js?v=20260904_13"></script>
+  <script type="module" src="/static/js/app.js?v=20260904_14"></script>
 
   <!-- ==========================================================================
        AUTH MODAL (Đăng Nhập / Đăng Ký)
@@ -1379,7 +1393,6 @@
 
     window.openAuthModal = function(mode = 'login') {
       try {
-        console.log("Kích hoạt mở Auth Modal:", mode);
         const modal = document.getElementById('auth-modal');
         if (!modal) {
           console.error("Lỗi: Không tìm thấy thẻ #auth-modal trong HTML!");
@@ -1615,6 +1628,39 @@
       if (generic && !generic.classList.contains('hidden')) {
         window.closeModalById('generic-modal');
         generic.innerHTML = '';
+      }
+    };
+
+    window.closeAllModals = function() {
+      try {
+        const allModalIds = [
+          'auth-modal', 'ai-input-modal', 'quick-ai-modal',
+          'transaction-modal', 'add-tx-modal',
+          'wallet-modal', 'add-wallet-modal', 'transfer-modal',
+          'deposit-modal', 'real-deposit-modal', 'modal-deposit-wallet',
+          'subscription-modal', 'vip-modal', 'upgrade-modal', 'upgradeModal', 'vipModal',
+          'generic-modal', 'export-modal', 'filter-modal'
+        ];
+        allModalIds.forEach(id => {
+          window.closeModalById(id);
+        });
+        const generic = document.getElementById('generic-modal');
+        if (generic && !generic.classList.contains('hidden')) {
+          window.closeModalById('generic-modal');
+          generic.innerHTML = '';
+        }
+        document.querySelectorAll('.modal-backdrop, .overlay-backdrop').forEach(el => {
+          if (el && typeof el.remove === 'function') el.remove();
+        });
+        const overlay = document.getElementById('sidebarOverlay');
+        if (overlay) {
+          overlay.classList.add('hidden');
+          overlay.style.setProperty('display', 'none', 'important');
+        }
+        document.body.style.overflow = '';
+        document.body.classList.remove('overflow-hidden');
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi closeAllModals:", err);
       }
     };
   </script>

@@ -1,19 +1,19 @@
-import { api } from './api.js?v=20260904_10';
-import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=20260904_10';
-import { AuthComponent } from './components/auth.js?v=20260904_10';
-import { DashboardComponent } from './components/dashboard.js?v=20260904_11';
-import { TransactionsComponent } from './components/transactions.js?v=20260904_10';
-import { WalletsComponent } from './components/wallets.js?v=20260904_10';
-import { CategoriesComponent } from './components/categories.js?v=20260904_10';
-import { BudgetsComponent } from './components/budgets.js?v=20260904_11';
-import { SavingsComponent } from './components/savings.js?v=20260904_10';
-import { AnalyticsComponent } from './components/analytics.js?v=20260904_10';
-import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_10';
-import { BadgesComponent } from './components/badges.js?v=20260904_10';
-import { AdminComponent } from './components/admin.js?v=20260904_13';
-import { SubscriptionComponent } from './components/subscription.js?v=20260904_10';
-import { NotificationsComponent } from './components/notifications.js?v=20260904_10';
-import { SupportComponent } from './components/support.js?v=20260904_10';
+import { api } from './api.js?v=20260904_14';
+import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=20260904_14';
+import { AuthComponent } from './components/auth.js?v=20260904_14';
+import { DashboardComponent } from './components/dashboard.js?v=20260904_14';
+import { TransactionsComponent } from './components/transactions.js?v=20260904_14';
+import { WalletsComponent } from './components/wallets.js?v=20260904_14';
+import { CategoriesComponent } from './components/categories.js?v=20260904_14';
+import { BudgetsComponent } from './components/budgets.js?v=20260904_14';
+import { SavingsComponent } from './components/savings.js?v=20260904_14';
+import { AnalyticsComponent } from './components/analytics.js?v=20260904_14';
+import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_14';
+import { BadgesComponent } from './components/badges.js?v=20260904_14';
+import { AdminComponent } from './components/admin.js?v=20260904_14';
+import { SubscriptionComponent } from './components/subscription.js?v=20260904_14';
+import { NotificationsComponent } from './components/notifications.js?v=20260904_14';
+import { SupportComponent } from './components/support.js?v=20260904_14';
 
 // 1. Auth Modal
 window.openAuthModal = function(mode = 'login') {
@@ -328,6 +328,31 @@ window.closeSubscriptionModal = function() {
   }
 };
 
+window.closeAllModals = function() {
+  try {
+    const allModalIds = [
+      'auth-modal', 'ai-input-modal', 'quick-ai-modal',
+      'transaction-modal', 'add-tx-modal',
+      'wallet-modal', 'add-wallet-modal', 'transfer-modal',
+      'deposit-modal', 'real-deposit-modal', 'modal-deposit-wallet',
+      'subscription-modal', 'vip-modal', 'upgrade-modal', 'upgradeModal', 'vipModal',
+      'generic-modal', 'export-modal', 'filter-modal'
+    ];
+    allModalIds.forEach(id => {
+      window.closeModalById(id);
+    });
+    const generic = document.getElementById('generic-modal');
+    if (generic) generic.innerHTML = '';
+
+    document.querySelectorAll('.modal-backdrop, .overlay-backdrop').forEach(el => {
+      if (el && typeof el.remove === 'function') el.remove();
+    });
+    forceResetOverlay();
+  } catch (err) {
+    console.warn('[FinTrack] Lỗi closeAllModals:', err);
+  }
+};
+
 let resizeAnimFrameId = null;
 export const triggerRealtimeChartResize = (durationMs = 350) => {
   if (resizeAnimFrameId) {
@@ -414,21 +439,26 @@ class App {
     window.showLandingPage = (tab = 'home') => this.showLandingPage(tab);
     window.switchLandingTab = (tab = 'home') => this.switchLandingTab(tab);
     window.enterDashboard = () => this.enterDashboard();
-    window.openAuthModal = function(mode) {
+    window.openAuthModal = (mode = 'login') => {
       const modal = document.getElementById('auth-modal');
       if (modal) {
+        modal.classList.remove('hidden', 'pointer-events-none');
+        modal.classList.add('flex', 'pointer-events-auto');
         modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '999999', 'important');
+        modal.style.setProperty('pointer-events', 'auto', 'important');
         if (mode && typeof window.switchAuthMode === 'function') {
           window.switchAuthMode(mode);
         }
-      } else {
-        console.error("Lỗi: Không tìm thấy #auth-modal trong HTML!");
       }
     };
-    window.closeAuthModal = function() {
+    window.closeAuthModal = () => {
       const modal = document.getElementById('auth-modal');
       if (modal) {
+        modal.classList.add('hidden', 'pointer-events-none');
+        modal.classList.remove('flex', 'pointer-events-auto');
         modal.style.setProperty('display', 'none', 'important');
+        modal.style.setProperty('pointer-events', 'none', 'important');
       }
     };
     window.switchAuthMode = (mode = 'login') => {
@@ -475,25 +505,52 @@ class App {
   }
 
   showLandingPage(tab = 'home') {
+    const antiFlicker = document.getElementById('fintrack-anti-flicker');
+    if (antiFlicker) {
+      antiFlicker.remove();
+    }
+
+    if (typeof window.closeAllModals === 'function') {
+      window.closeAllModals();
+    }
+
     const landing = document.getElementById('landing-page-container') || document.getElementById('view-landing');
     const workspace = document.getElementById('app-workspace-container');
     const header = document.getElementById('top-glass-header');
     const appContainer = document.getElementById('app-layout-container');
     if (landing) {
-      landing.classList.remove('hidden');
+      landing.classList.remove('hidden', 'pointer-events-none');
+      landing.classList.add('pointer-events-auto');
       landing.style.removeProperty('display');
+      landing.style.setProperty('display', 'block', 'important');
+      landing.style.setProperty('pointer-events', 'auto', 'important');
     }
     if (workspace) {
-      workspace.classList.add('hidden');
+      workspace.classList.add('hidden', 'pointer-events-none');
+      workspace.classList.remove('pointer-events-auto');
       workspace.style.setProperty('display', 'none', 'important');
+      workspace.style.setProperty('pointer-events', 'none', 'important');
     }
-    if (header) header.classList.add('hidden');
-    if (appContainer) appContainer.classList.add('hidden');
+    if (header) {
+      header.classList.add('hidden', 'pointer-events-none');
+      header.classList.remove('pointer-events-auto');
+      header.style.setProperty('display', 'none', 'important');
+    }
+    if (appContainer) {
+      appContainer.classList.add('hidden', 'pointer-events-none');
+      appContainer.classList.remove('pointer-events-auto');
+      appContainer.style.setProperty('display', 'none', 'important');
+    }
     this.switchLandingTab(tab);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   enterDashboard() {
+    const antiFlicker = document.getElementById('fintrack-anti-flicker');
+    if (antiFlicker) {
+      antiFlicker.remove();
+    }
+
     const landing = document.getElementById('landing-page-container') || document.getElementById('view-landing');
     const workspace = document.getElementById('app-workspace-container') || document.getElementById('view-app');
     const header = document.getElementById('top-glass-header');
@@ -514,10 +571,14 @@ class App {
     if (header) {
       header.classList.remove('hidden', 'pointer-events-none');
       header.classList.add('pointer-events-auto');
+      header.style.removeProperty('display');
+      header.style.setProperty('pointer-events', 'auto', 'important');
     }
     if (appContainer) {
       appContainer.classList.remove('hidden', 'pointer-events-none');
       appContainer.classList.add('pointer-events-auto');
+      appContainer.style.removeProperty('display');
+      appContainer.style.setProperty('pointer-events', 'auto', 'important');
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
     triggerRealtimeChartResize(400);
@@ -550,19 +611,29 @@ class App {
     try {
       window.addEventListener('fintrack:unauthorized', () => {
         this.currentUser = null;
+        if (typeof window.closeAllModals === 'function') {
+          window.closeAllModals();
+        }
         this.showLandingPage();
         if (this.auth?.renderAuthModal) {
           this.auth.renderAuthModal(false);
+        } else if (typeof window.openAuthModal === 'function') {
+          window.openAuthModal('login');
         }
       });
 
       window.addEventListener('fintrack:account_locked', (e) => {
         this.currentUser = null;
+        if (typeof window.closeAllModals === 'function') {
+          window.closeAllModals();
+        }
         const msg = e.detail?.message || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.';
         this.showToast(msg, 'error');
         this.showLandingPage();
         if (this.auth?.renderAuthModal) {
           this.auth.renderAuthModal(false);
+        } else if (typeof window.openAuthModal === 'function') {
+          window.openAuthModal('login');
         }
       });
     } catch (eventErr) {
@@ -597,6 +668,8 @@ class App {
         localStorage.removeItem('fintrack_token');
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
         this.currentUser = null;
         this.showToast('Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên.', 'error');
         this.showLandingPage();
@@ -610,6 +683,8 @@ class App {
       localStorage.removeItem('fintrack_token');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.clear();
       this.currentUser = null;
       this.showLandingPage();
     }
@@ -1094,6 +1169,9 @@ class App {
   }
 
   bindNavigation() {
+    if (this._navigationBound) return;
+    this._navigationBound = true;
+
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 
     window.toggleSidebar = function() {
@@ -1188,24 +1266,7 @@ class App {
       }
     });
 
-    // Single event listener for all navigation buttons & delegated clicks
-    const handleNavClick = (btn, e) => {
-      e?.preventDefault();
-      e?.stopPropagation();
-      const tab = btn.getAttribute('data-tab');
-      if (tab) {
-        this.navigate(tab);
-        if (window.innerWidth < 1024) {
-          closeSidebar();
-        }
-      }
-    };
-
-    document.querySelectorAll('.nav-btn, .nav-item, .sidebar-link, [data-tab]').forEach(btn => {
-      btn.addEventListener('click', (e) => handleNavClick(btn, e));
-    });
-
-    // Document-level fallback delegation for any dynamic data-tab element
+    // Delegated click handler for all navigation buttons & dynamic links
     document.addEventListener('click', (e) => {
       const navBtn = e.target.closest('.nav-btn, .nav-item, .sidebar-link, .btn-goto-tab, [data-tab]');
       if (navBtn && !navBtn.classList.contains('filter-tab-btn') && !navBtn.classList.contains('tx-type-tab') && !navBtn.classList.contains('dash-period-pill')) {
@@ -1214,31 +1275,51 @@ class App {
           e.preventDefault();
           this.navigate(tab);
           if (window.innerWidth < 1024) {
-            closeSidebar();
+            window.closeSidebar();
           }
         }
       }
     });
 
-    document.getElementById('btn-logout')?.addEventListener('click', () => {
-      this.auth.logout();
+    document.getElementById('btn-logout')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (this.auth?.logout) {
+        this.auth.logout();
+      } else {
+        api.setToken('');
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        this.currentUser = null;
+        if (typeof window.closeAllModals === 'function') {
+          window.closeAllModals();
+        }
+        this.showToast('Đã đăng xuất tài khoản', 'info');
+        this.showLandingPage();
+      }
     });
 
     // Quick AI Button in header
-    document.getElementById('header-quick-ai-btn')?.addEventListener('click', () => {
-      this.openQuickAIModal();
+    document.getElementById('header-quick-ai-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.openQuickAiModal();
     });
 
     // Admin Portal button in header
-    document.getElementById('header-admin-portal-btn')?.addEventListener('click', () => {
+    document.getElementById('header-admin-portal-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
       this.navigate('admin_dashboard');
     });
 
     // Exit Admin Portal buttons
-    document.getElementById('header-exit-admin-btn')?.addEventListener('click', () => {
+    document.getElementById('header-exit-admin-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
       this.navigate('dashboard');
     });
-    document.getElementById('btn-sidebar-exit-admin')?.addEventListener('click', () => {
+    document.getElementById('btn-sidebar-exit-admin')?.addEventListener('click', (e) => {
+      e.preventDefault();
       this.navigate('dashboard');
     });
   }

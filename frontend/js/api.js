@@ -49,6 +49,7 @@ class APIClient {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('fintrack_token');
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.dispatchEvent(new CustomEvent('fintrack:unauthorized'));
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
       }
@@ -59,14 +60,15 @@ class APIClient {
           errData = await response.clone().json();
         } catch (_) {}
         const detail = (errData && (errData.detail || errData.message)) || '';
-        if (detail.toLowerCase().includes('khóa') || detail.toLowerCase().includes('banned') || detail.toLowerCase().includes('locked')) {
-          this.setToken('');
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('fintrack_token');
-          localStorage.removeItem('token');
-          window.dispatchEvent(new CustomEvent('fintrack:account_locked', { detail: { message: detail } }));
-          throw new Error(detail || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.');
-        }
+        this.setToken('');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('fintrack_token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new CustomEvent('fintrack:account_locked', { 
+          detail: { message: detail || 'Tài khoản của bạn đã bị khóa hoặc không có quyền truy cập.' } 
+        }));
+        throw new Error(detail || 'Tài khoản của bạn đã bị vô hiệu hóa bởi Quản trị viên.');
       }
 
       // Handle download responses (blob)
@@ -361,9 +363,10 @@ class APIClient {
   }
 
   chatWithAI(query) {
+    const queryText = typeof query === 'string' ? query.trim() : (query?.query ? String(query.query).trim() : String(query || '').trim());
     return this.request('/ai/chat', {
       method: 'POST',
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query: queryText })
     });
   }
 

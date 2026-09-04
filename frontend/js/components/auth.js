@@ -287,6 +287,7 @@ export class AuthComponent {
       localStorage.removeItem('fintrack_token');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       sessionStorage.clear();
       this.app.currentUser = null;
       this.app._seenNotifIds = new Set();
@@ -305,6 +306,8 @@ export class AuthComponent {
         localStorage.removeItem('fintrack_token');
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
         throw new Error('Tài khoản của bạn đã bị khóa do vi phạm chính sách hoặc theo yêu cầu quản trị viên. Vui lòng liên hệ hỗ trợ.');
       }
 
@@ -328,10 +331,14 @@ export class AuthComponent {
     localStorage.removeItem('fintrack_token');
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     sessionStorage.clear();
     this.app.currentUser = null;
     this.app._seenNotifIds = new Set();
     this.app._hasInitNotifs = false;
+    if (typeof window.closeAllModals === 'function') {
+      window.closeAllModals();
+    }
     this.app.showToast('Đã đăng xuất tài khoản', 'info');
     this.app.showLandingPage();
   }

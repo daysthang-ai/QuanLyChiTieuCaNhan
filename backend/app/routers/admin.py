@@ -994,6 +994,8 @@ def get_admin_notifications_list(
         for n in notifs:
             recipient_info = "Toàn sàn (Tất cả)"
             target_type = str(getattr(n, "target_type", "ALL") or "ALL").upper()
+            u_name = None
+            u_email = None
             if target_type == "FREE":
                 recipient_info = "Nhóm người dùng Gói Free"
             elif target_type == "PRO":
@@ -1002,6 +1004,9 @@ def get_admin_notifications_list(
                 recipient_info = "Nhóm người dùng VIP Premium"
             elif getattr(n, "user_id", None):
                 u = user_map.get(n.user_id)
+                if u:
+                    u_name = u.full_name
+                    u_email = u.email
                 recipient_info = f"Riêng: {u.full_name} ({u.email})" if u else f"User ID #{n.user_id}"
 
             created_by = getattr(n, "created_by_role", "ADMIN") or "ADMIN"
@@ -1014,6 +1019,8 @@ def get_admin_notifications_list(
                 "type": getattr(n, "type", "INFO") or "INFO",
                 "target_type": target_type,
                 "user_id": getattr(n, "user_id", None),
+                "user_full_name": u_name,
+                "user_email": u_email,
                 "recipient_info": recipient_info,
                 "link_tab": getattr(n, "link_tab", None),
                 "icon": getattr(n, "icon", "bell") or "bell",

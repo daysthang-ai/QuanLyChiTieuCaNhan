@@ -1,5 +1,5 @@
-import { api } from '../api.js';
-import { formatVND } from '../utils/formatters.js';
+import { api } from '../api.js?v=20260904_14';
+import { formatVND } from '../utils/formatters.js?v=20260904_14';
 
 export class AdminComponent {
   constructor(app) {
@@ -2808,74 +2808,21 @@ export class AdminComponent {
         return;
       }
 
-      container.innerHTML = `
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px] font-mono">
-              <th class="pb-2.5 font-bold">ID</th>
-              <th class="pb-2.5 font-bold">Tiêu Đề & Nội Dung</th>
-              <th class="pb-2.5 font-bold">Loại</th>
-              <th class="pb-2.5 font-bold">Đối Tượng Nhận</th>
-              <th class="pb-2.5 font-bold">Lượt Đọc</th>
-              <th class="pb-2.5 font-bold">Thời Gian</th>
-              <th class="pb-2.5 font-bold text-right">Thao Tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60 font-sans text-xs">
-            ${notifs.map(n => {
-              const isProtected = isModerator && (n.created_by_role === 'ADMIN' || ['CRITICAL', 'SECURITY', 'SYSTEM_CRITICAL', 'MAINTENANCE', 'WARNING'].includes(n.type));
-
-              return `
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 font-mono text-slate-500">#${n.id}</td>
-                <td class="py-3 max-w-xs">
-                  <div class="font-extrabold text-slate-100">${n.title}</div>
-                  <div class="text-[11px] text-slate-400 truncate max-w-sm mt-0.5">${n.message}</div>
-                  ${n.link_tab ? `<span class="inline-block mt-1 text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">➔ ${n.link_tab}</span>` : ''}
-                </td>
-                <td class="py-3">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${n.type === 'PROMOTION' ? 'bg-amber-500/20 text-amber-300' : n.type === 'WARNING' ? 'bg-rose-500/20 text-rose-300' : n.type === 'SUCCESS' ? 'bg-emerald-500/20 text-emerald-300' : n.type === 'MAINTENANCE' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}">
-                    ${n.type}
-                  </span>
-                </td>
-                <td class="py-3">
-                  <span class="font-bold text-slate-200 text-xs">${n.recipient_info}</span>
-                </td>
-                <td class="py-3 font-mono font-bold text-cyan-300">
-                  ${n.reads_count}
-                </td>
-                <td class="py-3 text-slate-400 font-mono text-[11px] whitespace-nowrap">
-                  ${n.created_at}
-                </td>
-                <td class="py-3 text-right">
-                  ${isProtected ? `
-                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 text-slate-500 border border-slate-700 font-mono inline-flex items-center gap-1" title="Thông báo do Root Admin phát hành - Không thể xóa">
-                      <i class="fa-solid fa-lock text-[9px] text-amber-400"></i> Admin gốc
-                    </span>
-                  ` : `
-                    <button type="button" class="btn-admin-del-notif px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-400 text-xs font-bold border border-red-800/40 active:scale-95 transition" data-id="${n.id}" title="Xóa thông báo này">
-                      <i class="fa-solid fa-trash-can text-[10px]"></i> Xóa
-                    </button>
-                  `}
-                </td>
-              </tr>
-            `;
-            }).join('')}
-          </tbody>
-        </table>
-      `;
+      container.innerHTML = this.renderNotificationsTableHtml(notifs, isModerator, 'btn-admin-del-notif');
 
       container.querySelectorAll('.btn-admin-del-notif').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', () => {
           const id = parseInt(btn.getAttribute('data-id'));
-          if (!confirm(`Bạn có chắc chắn muốn xóa thông báo #${id} khỏi hệ thống không?`)) return;
-          try {
-            await api.deleteAdminNotification(id);
-            this.app.showToast('Đã xóa thông báo khỏi hệ thống', 'success');
-            await this.loadAdminNotificationsHistory();
-          } catch (err) {
-            this.app.showToast(err.message || 'Lỗi khi xóa', 'error');
-          }
+          const title = btn.getAttribute('data-title') || `Thông báo #${id}`;
+          this.showAdminConfirmDeleteNotifModal(id, title, async () => {
+            try {
+              await api.deleteAdminNotification(id);
+              this.app.showToast(`Đã xóa thông báo #${id} thành công!`, 'success');
+              await this.loadAdminNotificationsHistory();
+            } catch (err) {
+              this.app.showToast(err.message || 'Lỗi khi xóa thông báo', 'error');
+            }
+          });
         });
       });
     } catch (err) {
@@ -3159,74 +3106,21 @@ export class AdminComponent {
         return;
       }
 
-      tableContainer.innerHTML = `
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px] font-mono">
-              <th class="pb-2.5 font-bold">ID</th>
-              <th class="pb-2.5 font-bold">Tiêu Đề & Nội Dung</th>
-              <th class="pb-2.5 font-bold">Loại</th>
-              <th class="pb-2.5 font-bold">Người Nhận</th>
-              <th class="pb-2.5 font-bold">Lượt Đọc</th>
-              <th class="pb-2.5 font-bold">Thời Gian</th>
-              <th class="pb-2.5 font-bold text-right">Thao Tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60 font-sans text-xs">
-            ${notifs.map(n => {
-              const isProtected = isModerator && (n.created_by_role === 'ADMIN' || ['CRITICAL', 'SECURITY', 'SYSTEM_CRITICAL', 'MAINTENANCE', 'WARNING'].includes(n.type));
-
-              return `
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 font-mono text-slate-500">#${n.id}</td>
-                <td class="py-3 max-w-[200px]">
-                  <div class="font-extrabold text-slate-100 truncate">${n.title}</div>
-                  <div class="text-[11px] text-slate-400 truncate mt-0.5">${n.message}</div>
-                  ${n.link_tab ? `<span class="inline-block mt-1 text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">➔ ${n.link_tab}</span>` : ''}
-                </td>
-                <td class="py-3">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${n.type === 'PROMOTION' ? 'bg-amber-500/20 text-amber-300' : n.type === 'WARNING' ? 'bg-rose-500/20 text-rose-300' : n.type === 'SUCCESS' ? 'bg-emerald-500/20 text-emerald-300' : n.type === 'MAINTENANCE' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}">
-                    ${n.type}
-                  </span>
-                </td>
-                <td class="py-3">
-                  <span class="font-bold text-slate-200 text-xs block">${n.recipient_info}</span>
-                </td>
-                <td class="py-3 font-mono font-bold text-cyan-300">
-                  ${n.reads_count}
-                </td>
-                <td class="py-3 text-slate-400 font-mono text-[11px] whitespace-nowrap">
-                  ${n.created_at}
-                </td>
-                <td class="py-3 text-right">
-                  ${isProtected ? `
-                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800 text-slate-500 border border-slate-700 font-mono inline-flex items-center gap-1" title="Thông báo do Root Admin phát hành - Không thể xóa">
-                      <i class="fa-solid fa-lock text-[9px] text-amber-400"></i> Admin gốc
-                    </span>
-                  ` : `
-                    <button type="button" class="btn-admin-tab-del-notif p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-400 text-xs font-bold border border-red-800/40 active:scale-95 transition" data-id="${n.id}" title="Xóa thông báo này">
-                      <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                  `}
-                </td>
-              </tr>
-            `;
-            }).join('')}
-          </tbody>
-        </table>
-      `;
+      tableContainer.innerHTML = this.renderNotificationsTableHtml(notifs, isModerator, 'btn-admin-tab-del-notif');
 
       tableContainer.querySelectorAll('.btn-admin-tab-del-notif').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', () => {
           const id = parseInt(btn.getAttribute('data-id'));
-          if (!confirm(`Bạn có chắc chắn muốn xóa thông báo #${id} khỏi hệ thống không?`)) return;
-          try {
-            await api.deleteAdminNotification(id);
-            this.app.showToast('Đã xóa thông báo khỏi hệ thống', 'success');
-            await this.loadAdminTabNotifications();
-          } catch (err) {
-            this.app.showToast(err.message || 'Lỗi khi xóa', 'error');
-          }
+          const title = btn.getAttribute('data-title') || `Thông báo #${id}`;
+          this.showAdminConfirmDeleteNotifModal(id, title, async () => {
+            try {
+              await api.deleteAdminNotification(id);
+              this.app.showToast(`Đã xóa thông báo #${id} thành công!`, 'success');
+              await this.loadAdminTabNotifications();
+            } catch (err) {
+              this.app.showToast(err.message || 'Lỗi khi xóa thông báo', 'error');
+            }
+          });
         });
       });
 
@@ -3238,6 +3132,250 @@ export class AdminComponent {
         </div>
       `;
     }
+  }
+
+  escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  showAdminConfirmDeleteNotifModal(notifId, notifTitle, onConfirm) {
+    document.getElementById('modal-admin-delete-notif-confirm')?.remove();
+
+    const safeTitle = this.escapeHtml(notifTitle || `Thông báo #${notifId}`);
+    const modalHtml = `
+      <div id="modal-admin-delete-notif-confirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div class="relative w-full max-w-sm glass-card bg-slate-900/95 border border-rose-500/40 rounded-3xl p-6 shadow-2xl shadow-rose-500/10 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-xl border border-rose-500/30 shrink-0">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-extrabold text-slate-100">Xác Nhận Xóa Thông Báo</h4>
+              <p class="text-[11px] text-slate-400">Hành động này không thể hoàn tác</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+            <div class="font-mono text-[10px] text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ID #${notifId}
+            </div>
+            <div class="font-semibold text-slate-200 text-xs truncate leading-relaxed" title="${safeTitle}">
+              ${safeTitle}
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Bạn có chắc chắn muốn gỡ bỏ thông báo này khỏi hệ thống không? Toàn bộ dữ liệu phân phối và lượt đọc liên quan cũng sẽ bị xóa.
+          </p>
+
+          <div class="flex items-center gap-2.5 pt-1">
+            <button type="button" id="btn-cancel-del-notif" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95">
+              Hủy bỏ
+            </button>
+            <button type="button" id="btn-confirm-del-notif" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 active:scale-95 transition flex items-center justify-center gap-1.5">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+              <span>Xóa vĩnh viễn</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    const modalEl = document.getElementById('modal-admin-delete-notif-confirm');
+    const closeBtn = document.getElementById('btn-cancel-del-notif');
+    const confirmBtn = document.getElementById('btn-confirm-del-notif');
+
+    const closeModal = () => modalEl?.remove();
+
+    closeBtn?.addEventListener('click', closeModal);
+    modalEl?.addEventListener('click', (e) => {
+      if (e.target === modalEl) closeModal();
+    });
+
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    confirmBtn?.addEventListener('click', async () => {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Đang xóa...</span>`;
+      closeModal();
+      document.removeEventListener('keydown', escHandler);
+      if (typeof onConfirm === 'function') {
+        await onConfirm();
+      }
+    });
+  }
+
+  renderNotificationsTableHtml(notifs, isModerator, delBtnClass = 'btn-admin-tab-del-notif') {
+    return `
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="text-slate-400 border-b border-slate-800/80 uppercase tracking-wider text-[10px] font-mono bg-slate-900/40">
+            <th class="py-3 px-3.5 font-bold w-14 text-center">ID</th>
+            <th class="py-3 px-3.5 font-bold min-w-[220px] max-w-[300px]">Tiêu Đề & Nội Dung</th>
+            <th class="py-3 px-3.5 font-bold min-w-[150px] max-w-[190px]">Người Nhận</th>
+            <th class="py-3 px-3.5 font-bold text-center w-28">Lượt Đọc</th>
+            <th class="py-3 px-3.5 font-bold text-center w-36">Thời Gian</th>
+            <th class="py-3 px-3.5 font-bold text-center w-20">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-sans text-xs">
+          ${notifs.map(n => {
+            const isProtected = isModerator && (n.created_by_role === 'ADMIN' || ['CRITICAL', 'SECURITY', 'SYSTEM_CRITICAL', 'MAINTENANCE', 'WARNING'].includes(n.type));
+
+            // 1. Type badge
+            let typeBadgeHtml = '';
+            const t = (n.type || 'INFO').toUpperCase();
+            if (t === 'SUCCESS') {
+              typeBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm shadow-emerald-500/5"><i class="fa-solid fa-circle-check text-[9px]"></i> SUCCESS</span>`;
+            } else if (t === 'WARNING') {
+              typeBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 shadow-sm shadow-rose-500/5"><i class="fa-solid fa-triangle-exclamation text-[9px]"></i> WARNING</span>`;
+            } else if (t === 'PROMOTION') {
+              typeBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm shadow-amber-500/5"><i class="fa-solid fa-crown text-[9px]"></i> PROMOTION</span>`;
+            } else if (t === 'MAINTENANCE') {
+              typeBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 shadow-sm shadow-purple-500/5"><i class="fa-solid fa-screwdriver-wrench text-[9px]"></i> MAINTENANCE</span>`;
+            } else {
+              typeBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-sm shadow-sky-500/5"><i class="fa-solid fa-circle-info text-[9px]"></i> INFO</span>`;
+            }
+
+            // 2. Link tab badge
+            const linkBadgeHtml = n.link_tab ? `
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/30" title="Điều hướng đến tab: ${this.escapeHtml(n.link_tab)}">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i> ${this.escapeHtml(n.link_tab)}
+              </span>
+            ` : '';
+
+            // 3. Recipient HTML
+            let recipientHtml = '';
+            const targetType = (n.target_type || 'ALL').toUpperCase();
+
+            if (targetType === 'ALL' && !n.user_id) {
+              recipientHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20 text-[11px] font-bold whitespace-nowrap shadow-sm shadow-sky-500/5">
+                  <i class="fa-solid fa-globe text-[10px] text-sky-400"></i> Toàn bộ người dùng
+                </span>
+              `;
+            } else if (targetType === 'FREE' && !n.user_id) {
+              recipientHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-850 bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-bold whitespace-nowrap">
+                  <i class="fa-solid fa-user text-[10px] text-slate-400"></i> Gói Free
+                </span>
+              `;
+            } else if (targetType === 'PRO' && !n.user_id) {
+              recipientHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/25 text-[11px] font-bold whitespace-nowrap shadow-sm shadow-amber-500/5">
+                  <i class="fa-solid fa-star text-[10px] text-amber-400"></i> Gói Pro
+                </span>
+              `;
+            } else if (targetType === 'PREMIUM' && !n.user_id) {
+              recipientHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/25 text-[11px] font-bold whitespace-nowrap shadow-sm shadow-emerald-500/5">
+                  <i class="fa-solid fa-crown text-[10px] text-emerald-400"></i> VIP Premium
+                </span>
+              `;
+            } else if (targetType === 'PLATINUM' && !n.user_id) {
+              recipientHtml = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/25 text-[11px] font-bold whitespace-nowrap shadow-sm shadow-purple-500/5">
+                  <i class="fa-solid fa-gem text-[10px] text-purple-400"></i> Platinum VIP
+                </span>
+              `;
+            } else {
+              const rawInfo = n.recipient_info || (n.user_id ? `User ID #${n.user_id}` : 'Toàn sàn');
+              let uName = n.user_full_name || rawInfo;
+              let uEmail = n.user_email || '';
+
+              if (!uEmail && rawInfo.includes('(') && rawInfo.includes(')')) {
+                const match = rawInfo.match(/^(?:Riêng:\s*)?(.*?)\s*\((.*?)\)$/);
+                if (match) {
+                  uName = match[1].trim();
+                  uEmail = match[2].trim();
+                }
+              } else if (!uEmail && rawInfo.startsWith('Riêng:')) {
+                uName = rawInfo.replace('Riêng:', '').trim();
+              }
+
+              recipientHtml = `
+                <div class="flex flex-col max-w-[160px] min-w-0">
+                  <div class="flex items-center gap-1.5 text-slate-200 font-bold text-xs truncate" title="${this.escapeHtml(uName)}">
+                    <i class="fa-solid fa-user-tag text-purple-400 text-[10px] shrink-0"></i>
+                    <span class="truncate">${this.escapeHtml(uName)}</span>
+                  </div>
+                  ${uEmail ? `
+                    <span class="text-[10px] text-slate-400 font-mono truncate pl-3.5 mt-0.5" title="${this.escapeHtml(uEmail)}">
+                      ${this.escapeHtml(uEmail)}
+                    </span>
+                  ` : ''}
+                </div>
+              `;
+            }
+
+            return `
+              <tr class="hover:bg-slate-800/40 transition-colors duration-150">
+                <td class="py-3.5 px-3.5 text-center align-middle font-mono">
+                  <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 text-[11px] font-bold">#${n.id}</span>
+                </td>
+                <td class="py-3.5 px-3.5 align-middle max-w-[300px]">
+                  <div class="space-y-1">
+                    <div class="font-bold text-slate-100 text-xs truncate leading-snug" title="${this.escapeHtml(n.title)}">
+                      ${this.escapeHtml(n.title)}
+                    </div>
+                    <p class="text-[11px] text-slate-400 truncate leading-relaxed" title="${this.escapeHtml(n.message)}">
+                      ${this.escapeHtml(n.message)}
+                    </p>
+                    <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      ${typeBadgeHtml}
+                      ${linkBadgeHtml}
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-3.5 align-middle">
+                  ${recipientHtml}
+                </td>
+                <td class="py-3.5 px-3.5 text-center align-middle">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono text-xs font-bold shadow-sm shadow-cyan-500/10" title="${n.reads_count || 0} lượt người đọc">
+                    <i class="fa-regular fa-eye text-[11px] text-cyan-400"></i>
+                    <span>${n.reads_count || 0}</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-3.5 text-center align-middle whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-400 font-mono text-[11px]">
+                    <i class="fa-regular fa-clock text-[10px] text-slate-500"></i>
+                    <span>${this.escapeHtml(n.created_at || '---')}</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-3.5 text-center align-middle">
+                  ${isProtected ? `
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-800/80 text-slate-500 border border-slate-700/60 font-mono" title="Thông báo do Root Admin phát hành - Không thể xóa">
+                      <i class="fa-solid fa-lock text-[9px] text-amber-400"></i> Khóa
+                    </span>
+                  ` : `
+                    <button type="button" class="${delBtnClass} inline-flex items-center justify-center w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 hover:text-rose-300 border border-rose-500/25 hover:border-rose-500/40 active:scale-90 transition-all duration-200 shadow-sm shadow-rose-500/5 hover:shadow-rose-500/20" 
+                      data-id="${n.id}" 
+                      data-title="${this.escapeHtml(n.title)}" 
+                      title="Xóa thông báo #${n.id}">
+                      <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                  `}
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
   }
 
   applyNotificationsFilter(filterId) {

@@ -1,5 +1,5 @@
-import { api } from '../api.js?v=20260904_01';
-import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_01';
+import { api } from '../api.js?v=20260904_14';
+import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_14';
 
 export class AIAssistantComponent {
   constructor(app) {
@@ -58,16 +58,22 @@ export class AIAssistantComponent {
               <span class="text-[11px] text-slate-400 font-semibold block mb-1.5">Gợi ý câu mẫu:</span>
               <div class="flex flex-wrap gap-1.5">
                 <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Ăn trưa bún bò 45k trả qua MoMo hôm qua">
-                  🍲 Ăn trưa bún bò 45k MoMo
+                  🍲 Bún bò 45k MoMo
+                </button>
+                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Mua áo Shopee 250k bằng ZaloPay">
+                  🛒 Shopee 250k ZaloPay
+                </button>
+                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Thanh toán tiền điện 450k qua Vietcombank">
+                  ⚡ Tiền điện 450k VCB
+                </button>
+                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Đổ xăng xe máy 70k qua MB Bank">
+                  🛵 Đổ xăng 70k MB
                 </button>
                 <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Nhận lương công ty 28 triệu vào Techcombank">
-                  💵 Lương 28tr vào Techcombank
+                  💵 Lương 28tr Techcombank
                 </button>
-                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Đổ xăng xe máy 90k tiền mặt">
-                  🛵 Đổ xăng 90k tiền mặt
-                </button>
-                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Mua cà phê Highland 45k MoMo sáng nay">
-                  ☕ Cà phê Highland 45k
+                <button type="button" class="quick-chip text-[11px] px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700 font-medium text-slate-300 transition" data-text="Nhận phụ cấp ăn trưa 1tr5 tiền mặt">
+                  🎁 Phụ cấp 1tr5 Tiền mặt
                 </button>
               </div>
             </div>
@@ -252,30 +258,34 @@ export class AIAssistantComponent {
         <!-- Prompt Suggestions Pills -->
         <div class="p-2.5 bg-slate-900/90 border-t border-slate-800 flex items-center gap-2 overflow-x-auto">
           <span class="text-[11px] font-bold text-slate-400 whitespace-nowrap pl-2">Gợi ý nhanh:</span>
-          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95"
-            data-query="Đánh giá sức khỏe tài chính tháng này theo chuẩn 50/30/20?">
-            🩺 Đánh giá sức khỏe 50/30/20
+          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95 cursor-pointer"
+            data-query="Tra cứu số dư các ví và tổng tài sản hiện tại">
+            💳 Tra cứu số dư các ví
           </button>
-          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95"
-            data-query="Tháng này tôi đã chi tiêu bao nhiêu tiền cho ăn uống và đi lại?">
-            🍕 Chi tiêu ăn uống & đi lại
+          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95 cursor-pointer"
+            data-query="Gợi ý cách phân bổ lương theo chuẩn 50/30/20">
+            🩺 Phân bổ lương 50/30/20
           </button>
-          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95"
+          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95 cursor-pointer"
             data-query="Tôi có đang vượt hạn mức ngân sách danh mục nào không?">
-            🚨 Kiểm tra vượt ngân sách
+            🚨 Kiểm tra hạn mức ngân sách
           </button>
-          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95"
-            data-query="Gợi ý cho tôi 3 hành động cụ thể để tiết kiệm thêm 2 triệu tháng tới?">
-            💡 3 cách tiết kiệm 2 triệu
+          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95 cursor-pointer"
+            data-query="Ngân sách 3 triệu thì nên chi tiêu và phân bổ thế nào?">
+            💵 Ngân sách 3 triệu
+          </button>
+          <button class="chat-prompt-pill text-[11px] px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-indigo-950/80 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium whitespace-nowrap transition active:scale-95 cursor-pointer"
+            data-query="Tháng này tôi đã chi tiêu bao nhiêu tiền cho ăn uống?">
+            🍕 Chi tiêu ăn uống
           </button>
         </div>
 
         <!-- Input Bar -->
         <div class="p-3.5 bg-slate-900 border-t border-slate-800">
           <form id="ai-chat-form" class="flex items-center gap-2">
-            <input type="text" id="ai-chat-input" placeholder="Hỏi AI về chi tiêu, ngân sách, cách tiết kiệm..." 
+            <input type="text" id="ai-chat-input" placeholder="Hỏi AI về ngân sách 3 triệu, chi tiêu, cách tiết kiệm..." 
               class="flex-1 px-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-medium" />
-            <button type="submit" id="btn-send-chat" class="px-5 py-2.5 rounded-xl gradient-indigo text-white font-bold text-xs shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition flex items-center gap-1.5">
+            <button type="submit" id="btn-send-chat" class="px-5 py-2.5 rounded-xl gradient-indigo text-white font-bold text-xs shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition flex items-center gap-1.5 cursor-pointer">
               <span>Gửi</span>
               <i class="fa-solid fa-paper-plane text-[10px]"></i>
             </button>
@@ -287,8 +297,13 @@ export class AIAssistantComponent {
 
     this.scrollToBottom();
 
-    // Event listeners
-    document.getElementById('ai-chat-form')?.addEventListener('submit', (e) => this.handleSendMessage(e));
+    // Event listeners with robust delegation
+    document.getElementById('ai-chat-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      this.sendMessage(input?.value);
+    });
+
     document.getElementById('btn-clear-chat')?.addEventListener('click', () => {
       this.chatHistory = [{
         role: 'assistant',
@@ -298,13 +313,15 @@ export class AIAssistantComponent {
       if (thread) thread.innerHTML = this.renderChatMessages();
     });
 
-    document.querySelectorAll('.chat-prompt-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const query = btn.getAttribute('data-query');
-        const input = document.getElementById('ai-chat-input');
-        if (input) input.value = query;
-        document.getElementById('ai-chat-form')?.dispatchEvent(new Event('submit'));
-      });
+    // Delegated click listener for all prompt pills & followup buttons
+    container.addEventListener('click', (e) => {
+      const pill = e.target.closest('.chat-prompt-pill, .chat-followup-pill');
+      if (pill) {
+        const query = pill.getAttribute('data-query');
+        if (query) {
+          this.sendMessage(query);
+        }
+      }
     });
   }
 
@@ -324,13 +341,43 @@ export class AIAssistantComponent {
         `;
       } else {
         const html = this.renderMarkdownSimple(m.text);
+        const hasFollowups = Array.isArray(m.followups) && m.followups.length > 0;
+        const providerName = m.generatedBy === 'gemini' 
+          ? 'Google Gemini AI' 
+          : (m.generatedBy === 'openai' ? 'OpenAI GPT' : 'FinTrack AI NLP Engine');
+
         return `
           <div class="flex justify-start gap-3 chat-bubble-anim">
             <div class="w-8 h-8 rounded-2xl gradient-indigo text-white flex items-center justify-center text-xs flex-shrink-0 shadow-md shadow-indigo-500/30 float-ai">
               <i class="fa-solid fa-robot"></i>
             </div>
-            <div class="bg-slate-900/90 p-4 rounded-2xl rounded-tl-none border border-slate-700/60 text-xs text-slate-200 max-w-2xl shadow-md leading-relaxed space-y-2">
-              ${html}
+            <div class="bg-slate-900/90 p-4 rounded-2xl rounded-tl-none border border-slate-700/60 text-xs text-slate-200 max-w-2xl shadow-md leading-relaxed space-y-2.5">
+              <div>${html}</div>
+
+              ${hasFollowups ? `
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80">
+                  <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb text-amber-400 text-[11px]"></i>
+                    <span>Gợi ý câu hỏi liên quan:</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${m.followups.map(f => `
+                      <button type="button" class="chat-followup-pill text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/90 hover:bg-indigo-950 hover:text-indigo-300 hover:border-indigo-500/40 border border-slate-700/80 text-slate-300 font-medium transition active:scale-95 cursor-pointer flex items-center gap-1.5" data-query="${f.replace(/"/g, '&quot;')}">
+                        <span>💬</span>
+                        <span>${f}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              ${m.generatedBy ? `
+                <div class="pt-1 flex items-center justify-end text-[9px] text-slate-500 font-mono gap-1.5">
+                  <i class="fa-solid fa-bolt text-[8px] text-amber-400"></i>
+                  <span>${providerName}</span>
+                  ${m.responseTimeMs ? `<span>• ${m.responseTimeMs}ms</span>` : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -338,15 +385,22 @@ export class AIAssistantComponent {
     }).join('');
   }
 
-  async handleSendMessage(e) {
-    e.preventDefault();
-    const input = document.getElementById('ai-chat-input');
-    const query = input?.value?.trim();
+  async sendMessage(queryText) {
+    const query = typeof queryText === 'string' ? queryText.trim() : '';
     if (!query) return;
+
+    const input = document.getElementById('ai-chat-input');
+    const sendBtn = document.getElementById('btn-send-chat');
 
     // Add user message
     this.chatHistory.push({ role: 'user', text: query });
-    if (input) input.value = '';
+    if (input) {
+      input.value = '';
+      input.disabled = true;
+    }
+    if (sendBtn) {
+      sendBtn.disabled = true;
+    }
 
     const thread = document.getElementById('ai-chat-thread');
     if (thread) {
@@ -359,27 +413,48 @@ export class AIAssistantComponent {
             <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
             <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style="animation-delay: 0.15s"></span>
             <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style="animation-delay: 0.3s"></span>
-            <span class="ml-1 text-[11px] text-slate-300 font-mono">FinTrack AI đang xử lý dữ liệu...</span>
+            <span class="ml-1 text-[11px] text-slate-300 font-mono">FinTrack AI đang tính toán & phân tích...</span>
           </div>
         </div>
       `;
     }
     this.scrollToBottom();
 
-    const sendBtn = document.getElementById('btn-send-chat');
-    if (sendBtn) sendBtn.disabled = true;
-
     try {
+      // Send actual user text payload { query } to backend
       const res = await api.chatWithAI(query);
-      const reply = res.response_markdown || res.reply || res.message || 'Đã nhận được thông tin từ bạn!';
-      this.chatHistory.push({ role: 'assistant', text: reply });
+      const reply = res?.response_markdown || res?.reply || res?.message || (typeof res === 'string' ? res : 'Đã nhận được thông tin từ bạn!');
+      const followups = Array.isArray(res?.suggested_followups) ? res.suggested_followups : [];
+
+      this.chatHistory.push({
+        role: 'assistant',
+        text: reply,
+        followups: followups,
+        generatedBy: res?.generated_by || '',
+        responseTimeMs: res?.response_time_ms || 0
+      });
+
       if (thread) thread.innerHTML = this.renderChatMessages();
       this.scrollToBottom();
     } catch (err) {
-      this.chatHistory.push({ role: 'assistant', text: `⚠️ Đã có lỗi xảy ra: ${err.message}` });
+      this.chatHistory.push({
+        role: 'assistant',
+        text: `⚠️ Không thể xử lý câu hỏi: ${err.message || 'Lỗi kết nối API AI'}`,
+        followups: [
+          "Tư vấn ngân sách 3 triệu",
+          "Đánh giá sức khỏe tài chính 50/30/20",
+          "Tháng này tôi đã chi bao nhiêu?"
+        ]
+      });
       if (thread) thread.innerHTML = this.renderChatMessages();
     } finally {
-      if (sendBtn) sendBtn.disabled = false;
+      if (input) {
+        input.disabled = false;
+        input.focus();
+      }
+      if (sendBtn) {
+        sendBtn.disabled = false;
+      }
     }
   }
 
