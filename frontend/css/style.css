@@ -925,13 +925,14 @@ html, body {
 .app-main-layout {
   position: relative;
   z-index: 10;
-  margin: 0 auto 24px auto !important;
-  padding-top: 76px !important;
-  max-width: 98% !important;
-  width: 1750px !important;
-  min-height: calc(100vh - 100px);
-  display: flex;
-  align-items: flex-start;
+  margin: 0 auto 16px auto !important;
+  padding-top: 72px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  min-height: calc(100vh - 84px);
+  display: flex !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
 }
 
 #main-glass-wrapper, #master-glass-wrapper {
@@ -962,7 +963,8 @@ html, body {
 
 @media (min-width: 768px) {
   .app-main-layout {
-    max-width: 96% !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
 
@@ -1556,8 +1558,8 @@ button.bg-gradient-to-r[class*="from-amber-400"] {
 #sidebar {
   position: -webkit-sticky !important;
   position: sticky !important;
-  top: 76px !important;
-  height: calc(100vh - 88px) !important;
+  top: 72px !important;
+  height: calc(100vh - 84px) !important;
   display: flex !important;
   flex-direction: column !important;
   visibility: visible;
@@ -1624,16 +1626,27 @@ button.bg-gradient-to-r[class*="from-amber-400"] {
 .app-main-layout {
   display: flex !important;
   align-items: flex-start !important;
-  gap: 1.5rem !important;
+  gap: 1.25rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
   will-change: width;
+}
+
+@media (min-width: 1024px) {
+  .app-main-layout {
+    gap: 1.5rem !important;
+  }
 }
 
 #main-glass-wrapper {
   flex: 1 1 0% !important;
   min-width: 0 !important;
   width: 100% !important;
+  max-width: 100% !important;
   overflow: visible !important;
+  box-sizing: border-box !important;
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
   will-change: width;
 }
@@ -1644,7 +1657,10 @@ main {
   width: 100% !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
+  max-width: 100% !important;
   overflow-y: visible !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
   will-change: width;
 }
@@ -1797,3 +1813,670 @@ table tbody tr td .btn:hover {
   border-color: rgba(244, 63, 94, 0.65) !important;
   box-shadow: 0 0 16px rgba(244, 63, 94, 0.2) !important;
 }
+
+/* ==========================================================================
+   SAAS DARK CYBER NEON LANDING PAGE STYLES & SPACING UTILITIES
+   ========================================================================== */
+.py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+.py-20 { padding-top: 5rem; padding-bottom: 5rem; }
+.py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+.pt-16 { padding-top: 4rem; }
+.pt-20 { padding-top: 5rem; }
+.pt-24 { padding-top: 6rem; }
+.pb-16 { padding-bottom: 4rem; }
+.pb-20 { padding-bottom: 5rem; }
+.pb-24 { padding-bottom: 6rem; }
+.pb-28 { padding-bottom: 7rem; }
+.pb-32 { padding-bottom: 8rem; }
+.mt-14 { margin-top: 3.5rem; }
+.mt-16 { margin-top: 4rem; }
+.mt-20 { margin-top: 5rem; }
+.mt-24 { margin-top: 6rem; }
+.mt-28 { margin-top: 7rem; }
+.mb-14 { margin-bottom: 3.5rem; }
+.mb-16 { margin-bottom: 4rem; }
+.mb-20 { margin-bottom: 5rem; }
+.mb-24 { margin-bottom: 6rem; }
+.mb-28 { margin-bottom: 7rem; }
+.my-16 { margin-top: 4rem; margin-bottom: 4rem; }
+.my-20 { margin-top: 5rem; margin-bottom: 5rem; }
+.my-24 { margin-top: 6rem; margin-bottom: 6rem; }
+
+@media (min-width: 640px) {
+  .sm\:pt-20 { padding-top: 5rem !important; }
+  .sm\:pb-28 { padding-bottom: 7rem !important; }
+  .sm\:pb-32 { padding-bottom: 8rem !important; }
+  .sm\:mt-20 { margin-top: 5rem !important; }
+  .sm\:mt-24 { margin-top: 6rem !important; }
+  .sm\:mt-28 { margin-top: 7rem !important; }
+  .sm\:mb-16 { margin-bottom: 4rem !important; }
+  .sm\:mb-20 { margin-bottom: 5rem !important; }
+  .sm\:mb-28 { margin-bottom: 7rem !important; }
+  .sm\:my-24 { margin-top: 6rem !important; margin-bottom: 6rem !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:pt-24 { padding-top: 6rem !important; }
+  .lg\:pb-32 { padding-bottom: 8rem !important; }
+}
+
+/* Cyber Neon Centerpiece Box & Glows */
+.cyber-centerpiece-wrapper {
+  position: relative;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.45) 0%, rgba(30, 41, 59, 0.3) 50%, rgba(16, 185, 129, 0.4) 100%);
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.22), 0 0 100px rgba(16, 185, 129, 0.14);
+  border-radius: 32px;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.cyber-centerpiece-wrapper:hover {
+  box-shadow: 0 0 80px rgba(6, 182, 212, 0.32), 0 0 130px rgba(16, 185, 129, 0.22);
+}
+
+.cyber-centerpiece-inner {
+  background: rgba(8, 13, 26, 0.96) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  border-radius: 28px;
+}
+
+/* Cyber Neon Metric Cards inside Simulation */
+.neon-card-cyan {
+  background: linear-gradient(180deg, rgba(8, 51, 68, 0.4) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+  border: 1px solid rgba(6, 182, 212, 0.38) !important;
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neon-card-cyan:hover {
+  border-color: rgba(34, 211, 238, 0.8) !important;
+  box-shadow: 0 0 35px rgba(6, 182, 212, 0.32);
+  transform: translateY(-3px);
+}
+
+.neon-card-emerald {
+  background: linear-gradient(180deg, rgba(2, 44, 34, 0.4) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.38) !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neon-card-emerald:hover {
+  border-color: rgba(52, 211, 153, 0.8) !important;
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.32);
+  transform: translateY(-3px);
+}
+
+.neon-card-rose {
+  background: linear-gradient(180deg, rgba(76, 5, 25, 0.4) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+  border: 1px solid rgba(244, 63, 94, 0.38) !important;
+  box-shadow: 0 0 24px rgba(244, 63, 94, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neon-card-rose:hover {
+  border-color: rgba(251, 113, 133, 0.8) !important;
+  box-shadow: 0 0 35px rgba(244, 63, 94, 0.32);
+  transform: translateY(-3px);
+}
+
+.neon-card-amber {
+  background: linear-gradient(180deg, rgba(69, 26, 3, 0.4) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.38) !important;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neon-card-amber:hover {
+  border-color: rgba(251, 191, 36, 0.8) !important;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.32);
+  transform: translateY(-3px);
+}
+
+/* Core Values Interactive Cards */
+.cyber-pillar-card {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cyber-pillar-card:hover {
+  transform: translateY(-5px);
+}
+.cyber-pillar-card.pillar-cyan:hover {
+  border-color: rgba(6, 182, 212, 0.7);
+  box-shadow: 0 16px 40px -10px rgba(6, 182, 212, 0.3);
+}
+.cyber-pillar-card.pillar-emerald:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 16px 40px -10px rgba(16, 185, 129, 0.3);
+}
+.cyber-pillar-card.pillar-indigo:hover {
+  border-color: rgba(99, 102, 241, 0.7);
+  box-shadow: 0 16px 40px -10px rgba(99, 102, 241, 0.3);
+}
+
+/* Pricing & 4-Column Responsive Grid Utilities */
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Pricing Cards Enhanced Styles */
+.pricing-card-featured {
+  position: relative;
+  background: linear-gradient(180deg, rgba(37, 16, 72, 0.95) 0%, rgba(15, 23, 42, 0.96) 50%, rgba(2, 6, 23, 0.98) 100%) !important;
+  border: 2px solid rgba(168, 85, 247, 0.7) !important;
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.35), 0 0 70px rgba(168, 85, 247, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pricing-card-featured:hover {
+  border-color: rgba(192, 132, 252, 0.9) !important;
+  box-shadow: 0 0 45px rgba(168, 85, 247, 0.5), 0 0 90px rgba(168, 85, 247, 0.25) !important;
+  transform: translateY(-6px) !important;
+}
+
+.pricing-badge-popular {
+  position: absolute;
+  top: -12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 14px !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pricing-badge-platinum {
+  position: absolute;
+  top: -12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: linear-gradient(135deg, #fbbf24 0%, #2dd4bf 50%, #3b82f6 100%) !important;
+  color: #020617 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 14px !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6), 0 0 35px rgba(6, 182, 212, 0.4), 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Dynamic Subscription Plan Theme Classes */
+/* 1. Platinum VIP: Exclusive Multi-Color Gradient */
+.badge-vip-toi-cao,
+.badge-platinum-vip,
+.badge-active-platinum {
+  background: linear-gradient(135deg, #fbbf24 0%, #2dd4bf 50%, #3b82f6 100%) !important;
+  color: #020617 !important;
+  font-weight: 900 !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.5), 0 0 25px rgba(45, 212, 191, 0.35) !important;
+}
+
+.platinum-icon-box,
+.icon-box-platinum-vip {
+  background: linear-gradient(135deg, #fbbf24 0%, #2dd4bf 50%, #3b82f6 100%) !important;
+  color: #020617 !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 30px rgba(45, 212, 191, 0.35) !important;
+}
+
+/* 2. FinTrack VIP: Rich Purple / Indigo Tone */
+.badge-fintrack-vip,
+.badge-active-vip {
+  background: rgba(168, 85, 247, 0.2) !important;
+  color: #d8b4fe !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3) !important;
+}
+
+.vip-icon-box,
+.icon-box-fintrack-vip {
+  background: linear-gradient(135deg, #9333ea 0%, #6366f1 50%, #ec4899 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(192, 132, 252, 0.5) !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4) !important;
+}
+
+/* 3. VIP Pro: Vivid Cyan / Blue Tone */
+.badge-vip-pro,
+.badge-active-pro {
+  background: rgba(6, 182, 212, 0.2) !important;
+  color: #67e8f9 !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.3) !important;
+}
+
+.pro-icon-box,
+.icon-box-vip-pro {
+  background: linear-gradient(135deg, #0891b2 0%, #0284c7 50%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(103, 232, 249, 0.5) !important;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4) !important;
+}
+
+/* 4. FinTrack Free: Slate / Gray Professional Tone */
+.badge-fintrack-free,
+.badge-active-free {
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(71, 85, 105, 0.6) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.free-icon-box,
+.icon-box-fintrack-free {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(71, 85, 105, 0.7) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 5. Wallet Deposit / Real Wallet Topup: Emerald / Green Default Tone */
+.badge-wallet-deposit {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* FAQ Accordion Styling */
+details[open] summary .faq-chevron {
+  transform: rotate(180deg);
+  color: #22d3ee !important;
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Feature Comparison Table */
+.comparison-table-wrapper {
+  overflow-x: auto;
+  border-radius: 24px;
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.comparison-table th {
+  padding: 16px 20px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+}
+.comparison-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.7);
+  transition: background-color 0.2s ease;
+}
+.comparison-table tr:hover td {
+  background: rgba(30, 41, 59, 0.45);
+}
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================================================================
+   DEDICATED VIP PRICING CARDS & DISTINCT HOVER GLOWS (NEON LINE & HOVER GLOW)
+   ========================================================================== */
+
+/* 1. TOP NEON LINE ACCENTS (DẢI LINE SÁNG ĐỘC QUYỀN CHO TỪNG GÓI) */
+.pricing-card-free::before,
+.pricing-card-pro::before,
+.pricing-card-vip::before,
+.pricing-card-platinum::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2.5px;
+  border-radius: 9999px;
+  opacity: 0.35;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.pricing-card-free::before {
+  background: linear-gradient(90deg, transparent, #64748b, transparent);
+}
+.pricing-card-free:hover::before {
+  left: 8%;
+  right: 8%;
+  opacity: 1;
+  box-shadow: 0 0 15px #64748b, 0 0 25px rgba(100, 116, 139, 0.5);
+}
+
+.pricing-card-pro::before {
+  background: linear-gradient(90deg, transparent, #06b6d4, #22d3ee, transparent);
+}
+.pricing-card-pro:hover::before {
+  left: 8%;
+  right: 8%;
+  opacity: 1;
+  box-shadow: 0 0 18px #06b6d4, 0 0 30px rgba(6, 182, 212, 0.6);
+}
+
+.pricing-card-vip::before {
+  background: linear-gradient(90deg, transparent, #6366f1, #ec4899, #f59e0b, transparent) !important;
+  opacity: 0.8 !important;
+}
+.pricing-card-vip:hover::before {
+  left: 6%;
+  right: 6%;
+  opacity: 1;
+  box-shadow: 0 0 20px #ec4899, 0 0 35px rgba(236, 72, 153, 0.7);
+}
+
+.pricing-card-platinum::before {
+  background: linear-gradient(90deg, transparent, #fbbf24, #ec4899, #6366f1, transparent) !important;
+  opacity: 0.8 !important;
+}
+.pricing-card-platinum:hover::before {
+  left: 6% !important;
+  right: 6% !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 20px #fbbf24, 0 0 30px #ec4899 !important;
+}
+
+/* 2. CARD CONTAINERS & DISTINCT HOVER GLOWS */
+.pricing-card-free {
+  position: relative;
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.pricing-card-free:hover {
+  border-color: #334155 !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.15), 0 20px 40px -10px rgba(0, 0, 0, 0.7) !important;
+  transform: translateY(-0.375rem); /* hover:-translate-y-1.5 */
+}
+
+.pricing-card-pro {
+  position: relative;
+  background: linear-gradient(180deg, rgba(30, 27, 75, 0.35) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border: 1px solid rgba(99, 102, 241, 0.45) !important;
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.2), 0 20px 40px -15px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.pricing-card-pro:hover {
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 35px rgba(99, 102, 241, 0.4), 0 20px 40px -10px rgba(0, 0, 0, 0.7) !important;
+  transform: translateY(-0.375rem); /* hover:-translate-y-1.5 */
+}
+
+.pricing-card-vip {
+  position: relative;
+  overflow: visible !important;
+  background: linear-gradient(180deg, rgba(26, 16, 60, 0.95) 0%, rgba(15, 23, 42, 0.98) 60%, rgba(2, 6, 23, 0.98) 100%) padding-box,
+              linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%) border-box !important;
+  border: 2px solid transparent !important;
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: 0 0 35px rgba(236, 72, 153, 0.35), 0 0 20px rgba(99, 102, 241, 0.25), 0 20px 45px -8px rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.pricing-card-vip:hover {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 50px rgba(236, 72, 153, 0.55), 0 0 30px rgba(245, 158, 11, 0.35), 0 25px 50px -8px rgba(0, 0, 0, 0.8) !important;
+  transform: translateY(-0.5rem); /* hover:-translate-y-2 */
+}
+
+.pricing-card-platinum {
+  position: relative;
+  overflow: visible !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.98) 100%) padding-box,
+              linear-gradient(135deg, #fbbf24 0%, #ec4899 45%, #6366f1 100%) border-box !important;
+  border: 2px solid transparent !important;
+  border-radius: 1.5rem !important; /* rounded-3xl */
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.35), 0 0 25px rgba(236, 72, 153, 0.25), 0 20px 45px -8px rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pricing-card-platinum:hover {
+  border: 2px solid transparent !important;
+  box-shadow: 0 0 55px rgba(245, 158, 11, 0.55), 0 0 35px rgba(236, 72, 153, 0.4), 0 25px 50px -8px rgba(0, 0, 0, 0.8) !important;
+  transform: translateY(-0.5rem) !important; /* hover:-translate-y-2 */
+}
+
+/* 3. TAILWIND HOVER TRANSLATE & SHADOW UTILITIES */
+.hover\:-translate-y-1\.5:hover {
+  transform: translateY(-0.375rem) !important;
+}
+.hover\:-translate-y-2:hover {
+  transform: translateY(-0.5rem) !important;
+}
+.hover\:shadow-\[0_10px_30px_rgba\(0\,0\,0\,0\.5\)\]:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+.shadow-\[0_0_25px_rgba\(6\,182\,212\,0\.35\)\] {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35) !important;
+}
+.shadow-\[0_0_25px_rgba\(168\,85\,247\,0\.35\)\] {
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.35) !important;
+}
+.shadow-\[0_0_25px_rgba\(16\,185\,129\,0\.35\)\] {
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* ==========================================================================
+   4. BRAND GRADIENT TEXT & BULLETPROOF VISIBILITY UTILITIES
+   ========================================================================== */
+.bg-clip-text {
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.brand-gradient-cyan-indigo,
+.text-gradient-cyan-indigo {
+  background: linear-gradient(135deg, #22d3ee 0%, #38bdf8 45%, #6366f1 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: #22d3ee;
+  display: inline-block;
+  filter: drop-shadow(0 0 25px rgba(6, 182, 212, 0.45));
+}
+
+.brand-gradient-hero,
+.text-gradient-hero {
+  background: linear-gradient(135deg, #22d3ee 0%, #34d399 50%, #fbbf24 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: #22d3ee;
+  display: inline-block;
+  filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.45));
+}
+
+.brand-gradient-gold,
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: #fbbf24;
+  display: inline-block;
+  filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.45));
+}
+
+.brand-gradient-cyber-neon {
+  background: linear-gradient(135deg, #22d3ee 0%, #38bdf8 30%, #a5f3fc 65%, #ffffff 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: #22d3ee;
+  display: inline-block;
+  filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.5));
+}
+
+/* Tailwind Gradient Color Stops Polyfill (Guarantees no transparent text on missing Tailwind classes) */
+.from-white { --tw-gradient-from: #ffffff var(--tw-gradient-from-position); --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-cyan-400 { --tw-gradient-from: #22d3ee var(--tw-gradient-from-position); --tw-gradient-to: rgb(34 211 238 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-purple-400 { --tw-gradient-from: #c084fc var(--tw-gradient-from-position); --tw-gradient-to: rgb(192 132 252 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-rose-400 { --tw-gradient-from: #fb7185 var(--tw-gradient-from-position); --tw-gradient-to: rgb(251 113 133 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-pink-400 { --tw-gradient-from: #f472b6 var(--tw-gradient-from-position); --tw-gradient-to: rgb(244 114 182 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-amber-200 { --tw-gradient-from: #fde68a var(--tw-gradient-from-position); --tw-gradient-to: rgb(253 230 138 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-amber-300 { --tw-gradient-from: #fcd34d var(--tw-gradient-from-position); --tw-gradient-to: rgb(252 211 77 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.from-emerald-300 { --tw-gradient-from: #6ee7b7 var(--tw-gradient-from-position); --tw-gradient-to: rgb(110 231 183 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
+.via-cyan-200 { --tw-gradient-to: rgb(165 243 252 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #a5f3fc var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-sky-200 { --tw-gradient-to: rgb(186 230 253 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #bae6fd var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-sky-300 { --tw-gradient-to: rgb(125 211 252 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #7dd3fc var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-teal-200 { --tw-gradient-to: rgb(153 246 228 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #99f6e4 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-teal-300 { --tw-gradient-to: rgb(94 234 212 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #5eead4 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-emerald-300 { --tw-gradient-to: rgb(110 231 183 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #6ee7b7 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-yellow-300 { --tw-gradient-to: rgb(253 224 71 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #fde047 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-pink-400 { --tw-gradient-to: rgb(244 114 182 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #f472b6 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.via-amber-300 { --tw-gradient-to: rgb(252 211 77 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), #fcd34d var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.to-white { --tw-gradient-to: #ffffff var(--tw-gradient-to-position) !important; }
+.to-indigo-300 { --tw-gradient-to: #a5b4fc var(--tw-gradient-to-position) !important; }
+.to-indigo-500 { --tw-gradient-to: #6366f1 var(--tw-gradient-to-position) !important; }
+.to-cyan-300 { --tw-gradient-to: #67e8f9 var(--tw-gradient-to-position) !important; }
+.to-emerald-300 { --tw-gradient-to: #6ee7b7 var(--tw-gradient-to-position) !important; }
+.to-emerald-400 { --tw-gradient-to: #34d399 var(--tw-gradient-to-position) !important; }
+.to-amber-300 { --tw-gradient-to: #fcd34d var(--tw-gradient-to-position) !important; }
+.to-amber-400 { --tw-gradient-to: #fbbf24 var(--tw-gradient-to-position) !important; }
+.to-amber-500 { --tw-gradient-to: #f59e0b var(--tw-gradient-to-position) !important; }
+
+/* Hero Typography Hierarchy Utilities */
+.text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+.text-5xl { font-size: 3rem !important; line-height: 1.15 !important; }
+.text-6xl { font-size: 3.75rem !important; line-height: 1.1 !important; }
+.text-7xl { font-size: 4.5rem !important; line-height: 1.05 !important; }
+@media (min-width: 768px) {
+  .md\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+  .md\:text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+  .md\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+  .md\:text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+  .md\:text-5xl { font-size: 3rem !important; line-height: 1.15 !important; }
+  .md\:text-6xl { font-size: 3.75rem !important; line-height: 1.1 !important; }
+  .md\:text-7xl { font-size: 4.5rem !important; line-height: 1.05 !important; }
+}
+
+/* Pulsing Dot Size Utilities */
+.h-2\.5 { height: 0.625rem !important; }
+.w-2\.5 { width: 0.625rem !important; }
+
+.border-cyan-800\/50 { border-color: rgba(21, 94, 117, 0.5) !important; }
+.bg-cyan-950\/40 { background-color: rgba(8, 51, 68, 0.4) !important; }
+.border-indigo-800\/50 { border-color: rgba(55, 48, 163, 0.5) !important; }
+.bg-indigo-950\/40 { background-color: rgba(30, 27, 75, 0.4) !important; }
+.border-amber-800\/50 { border-color: rgba(146, 64, 14, 0.5) !important; }
+.bg-amber-950\/40 { background-color: rgba(69, 26, 3, 0.4) !important; }
+.border-emerald-800\/50 { border-color: rgba(6, 95, 70, 0.5) !important; }
+.border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3) !important; }
+.bg-emerald-950\/40 { background-color: rgba(6, 78, 59, 0.4) !important; }
+.drop-shadow-\[0_0_35px_rgba\(6\,182\,212\,0\.35\)\],
+.drop-shadow-\[0_0_35px_rgba\(6\,182\,212\,0\.45\)\] {
+  filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.45));
+}
+
+/* Glassmorphism Security Cards in Tab 5 */
+.glass-security-card {
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-security-card:hover {
+  transform: translateY(-6px) !important;
+}
+.glass-security-cyan {
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.glass-security-cyan:hover {
+  border-color: rgba(34, 211, 238, 0.85) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 35px rgba(6, 182, 212, 0.45) !important;
+}
+.glass-security-emerald {
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.glass-security-emerald:hover {
+  border-color: rgba(52, 211, 153, 0.85) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 35px rgba(16, 185, 129, 0.45) !important;
+}
+.glass-security-amber {
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.glass-security-amber:hover {
+  border-color: rgba(251, 191, 36, 0.85) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 35px rgba(245, 158, 11, 0.45) !important;
+}
+.glass-security-indigo {
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.glass-security-indigo:hover {
+  border-color: rgba(129, 140, 248, 0.85) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 35px rgba(99, 102, 241, 0.45) !important;
+}
+
+/* ==========================================================================
+   PAGINATION ACTIVE PAGE BUTTON - MIX NEON GRADIENT & CYAN GLOW EFFECT
+   ========================================================================== */
+button[aria-current="page"],
+.pagination-active-btn,
+.btn-pagination-active,
+#user-orders-pagination-bar button[aria-current="page"] {
+  background: linear-gradient(135deg, #ec4899 0%, #06b6d4 50%, #10b981 100%) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  border: 1px solid rgba(103, 232, 249, 0.9) !important;
+  outline: 2px solid rgba(34, 211, 238, 0.55) !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.65), 0 0 8px rgba(236, 72, 153, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  cursor: default !important;
+}
+
+
+
+
+
+
+
+
+
+

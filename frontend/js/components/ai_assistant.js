@@ -314,7 +314,8 @@ export class AIAssistantComponent {
     });
 
     // Delegated click listener for all prompt pills & followup buttons
-    container.addEventListener('click', (e) => {
+    const chatPane = document.getElementById('tab-ai_assistant');
+    chatPane?.addEventListener('click', (e) => {
       const pill = e.target.closest('.chat-prompt-pill, .chat-followup-pill');
       if (pill) {
         const query = pill.getAttribute('data-query');

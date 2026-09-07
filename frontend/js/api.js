@@ -6,6 +6,7 @@ const API_BASE = '/api/v1';
 
 class APIClient {
   constructor() {
+    this.baseUrl = API_BASE;
     this.token = localStorage.getItem('fintrack_token') || '';
   }
 

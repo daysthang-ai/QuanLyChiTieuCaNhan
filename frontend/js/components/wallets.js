@@ -1,5 +1,6 @@
 import { api } from '../api.js?v=20260904_01';
 import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_01';
+import { getPlanTheme } from '../theme_mapping.js?v=20260906_01';
 
 export class WalletsComponent {
   constructor(app) {
@@ -106,6 +107,7 @@ export class WalletsComponent {
       const user = this.app.currentUser || {};
       const planTier = user.plan_tier || user.plan || 'Free';
       const daysRemaining = user.days_remaining !== undefined ? user.days_remaining : 0;
+      const planTheme = getPlanTheme(planTier);
 
       realSection.innerHTML = `
         <div class="relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-amber-500/40 bg-gradient-to-br from-slate-900 via-slate-950 to-amber-950/40 shadow-2xl group transition-all duration-300">
@@ -153,7 +155,7 @@ export class WalletsComponent {
                 </div>
                 <div class="flex items-center gap-1.5">
                   <i class="fa-solid fa-id-card text-amber-400"></i>
-                  <span>Gói hiện tại: <strong class="text-amber-300 font-sans font-bold">${planTier} (${daysRemaining} ngày)</strong></span>
+                  <span id="real-wallet-current-plan">Gói hiện tại: <strong class="${planTheme.accentTextColor} font-sans font-bold">${planTheme.name} (${daysRemaining} ngày)</strong></span>
                 </div>
               </div>
             </div>

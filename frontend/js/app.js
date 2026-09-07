@@ -1,7 +1,7 @@
 import { api } from './api.js?v=20260904_14';
 import { formatDateTimeVN, formatDateVN } from './utils/formatters.js?v=20260904_14';
-import { AuthComponent } from './components/auth.js?v=20260904_14';
-import { DashboardComponent } from './components/dashboard.js?v=20260904_14';
+import { AuthComponent } from './components/auth.js?v=20260905_01';
+import { DashboardComponent } from './components/dashboard.js?v=20260905_03';
 import { TransactionsComponent } from './components/transactions.js?v=20260904_14';
 import { WalletsComponent } from './components/wallets.js?v=20260904_14';
 import { CategoriesComponent } from './components/categories.js?v=20260904_14';
@@ -11,9 +11,10 @@ import { AnalyticsComponent } from './components/analytics.js?v=20260904_14';
 import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_14';
 import { BadgesComponent } from './components/badges.js?v=20260904_14';
 import { AdminComponent } from './components/admin.js?v=20260904_14';
-import { SubscriptionComponent } from './components/subscription.js?v=20260904_14';
+import { SubscriptionComponent } from './components/subscription.js?v=20260907_01';
 import { NotificationsComponent } from './components/notifications.js?v=20260904_14';
 import { SupportComponent } from './components/support.js?v=20260904_14';
+import { syncDynamicPlanTheme, getPlanTheme, normalizePlanTier, PLAN_THEMES } from './theme_mapping.js?v=20260906_01';
 
 // 1. Auth Modal
 window.openAuthModal = function(mode = 'login') {
@@ -485,8 +486,12 @@ class App {
         if (tab === activeTab) {
           container.classList.remove('hidden');
           container.style.removeProperty('display');
+          container.classList.remove('tab-content-active');
+          void container.offsetWidth; // Trigger reflow for smooth re-animation
+          container.classList.add('tab-content-active');
         } else {
           container.classList.add('hidden');
+          container.classList.remove('tab-content-active');
           container.style.setProperty('display', 'none', 'important');
         }
       }
@@ -501,6 +506,12 @@ class App {
       }
     });
 
+    if (typeof window.updateLandingNavActiveTab === 'function') {
+      window.updateLandingNavActiveTab(activeTab);
+    } else if (typeof window.updateLandingSidebarActiveTab === 'function') {
+      window.updateLandingSidebarActiveTab(activeTab);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -508,6 +519,12 @@ class App {
     const antiFlicker = document.getElementById('fintrack-anti-flicker');
     if (antiFlicker) {
       antiFlicker.remove();
+    }
+
+    if (typeof window.closeLandingNavMenu === 'function') {
+      window.closeLandingNavMenu();
+    } else if (typeof window.closeLandingSidebar === 'function') {
+      window.closeLandingSidebar();
     }
 
     if (typeof window.closeAllModals === 'function') {
@@ -663,6 +680,7 @@ class App {
     // 5. Fetch current user & start application
     try {
       this.currentUser = await api.getMe();
+      try { localStorage.setItem('currentUser', JSON.stringify(this.currentUser)); } catch (_) {}
       if (!this.currentUser || this.currentUser.status === 'LOCKED' || this.currentUser.is_active === false) {
         api.setToken('');
         localStorage.removeItem('fintrack_token');
@@ -1020,113 +1038,10 @@ class App {
         avatarEl.src = this.currentUser.avatar_url;
       }
 
-      // Render User Plan Badge with remaining days / expiration
+      // Render User Plan Badge with dynamic theme mapping across all UI components
+      syncDynamicPlanTheme(this.currentUser);
       if (planEl) {
-        const plan = (this.currentUser.plan || 'FREE').toUpperCase();
-        const days = this.currentUser.days_remaining;
-        const isExpiringSoon = days !== null && days !== undefined && days <= 5;
-
-        if (plan === 'PLATINUM') {
-          const daysText = days !== null && days !== undefined 
-            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-emerald-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
-            : '';
-          planEl.innerHTML = `<i class="fa-solid fa-gem text-[10px] text-emerald-300"></i> <span>PLATINUM VIP</span> ${daysText}`;
-          planEl.title = `Gói FinTrack Platinum VIP ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
-          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-md shadow-emerald-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
-        } else if (plan === 'PREMIUM') {
-          const daysText = days !== null && days !== undefined 
-            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-amber-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
-            : '';
-          planEl.innerHTML = `<i class="fa-solid fa-crown text-[10px] text-amber-400"></i> <span>PREMIUM</span> ${daysText}`;
-          planEl.title = `Gói FinTrack Premium ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
-          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-md shadow-amber-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
-        } else if (plan === 'PRO') {
-          const daysText = days !== null && days !== undefined 
-            ? (days === 0 ? '<span class="text-rose-400 font-bold">(Hết hạn)</span>' : `<span class="text-purple-200">(${days > 0 ? `Còn ${days} ngày` : 'Hết hạn'})</span>`)
-            : '';
-          planEl.innerHTML = `<i class="fa-solid fa-bolt text-[10px] text-purple-300"></i> <span>VIP PRO</span> ${daysText}`;
-          planEl.title = `Gói FinTrack VIP Pro ${this.currentUser.plan_expires_at ? `- Hạn dùng đến ${formatDateTimeVN(this.currentUser.plan_expires_at)}` : ''} (Nhấn để quản lý)`;
-          planEl.className = `px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isExpiringSoon ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-pulse' : 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-md shadow-purple-500/20'} border cursor-pointer hover:scale-105 transition inline-flex items-center gap-1.5`;
-        } else {
-          planEl.innerHTML = `<i class="fa-solid fa-seedling text-[10px] text-emerald-400"></i> <span>FREE</span> <span class="text-[8px] text-slate-400 font-normal lowercase">(vĩnh viễn)</span>`;
-          planEl.title = 'Gói Miễn Phí (Vĩnh viễn) - Nhấn để nâng cấp VIP';
-          planEl.className = 'px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 cursor-pointer hover:border-amber-500/50 hover:text-amber-300 transition inline-flex items-center gap-1.5';
-        }
-
         planEl.onclick = () => this.navigate('subscription');
-      }
-
-      // Update Sidebar Subscription Menu Badge
-      const subSidebarBtn = document.querySelector('.nav-btn[data-tab="subscription"]');
-      if (subSidebarBtn) {
-        const plan = (this.currentUser.plan_tier || this.currentUser.plan || 'FREE').toUpperCase();
-        const subBadge = subSidebarBtn.querySelector('#sidebar-subscription-badge') || subSidebarBtn.querySelector('span:last-child');
-        if (subBadge) {
-          if (plan === 'PLATINUM') {
-            subBadge.innerHTML = '💎 PLATINUM';
-            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 whitespace-nowrap';
-          } else if (plan === 'PREMIUM' || plan === 'VIP') {
-            subBadge.innerHTML = '👑 PREMIUM';
-            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap';
-          } else if (plan === 'PRO') {
-            subBadge.innerHTML = '⚡ PRO';
-            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 whitespace-nowrap';
-          } else {
-            subBadge.innerHTML = '👑 Nâng Cấp';
-            subBadge.className = 'shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap';
-          }
-        }
-      }
-
-      // Update Sidebar Footer Card with Live Subscription Status
-      const sidebarUserFooter = document.getElementById('sidebar-user-footer');
-      if (sidebarUserFooter) {
-        const plan = (this.currentUser.plan || 'FREE').toUpperCase();
-        const days = this.currentUser.days_remaining;
-        const isExpiringSoon = days !== null && days !== undefined && days <= 5;
-        const isPaid = plan === 'PRO' || plan === 'PREMIUM' || plan === 'PLATINUM';
-
-        if (isPaid) {
-          const isPlatinum = plan === 'PLATINUM';
-          const isPremium = plan === 'PREMIUM';
-          sidebarUserFooter.className = `p-2.5 rounded-xl bg-slate-900/90 border ${isExpiringSoon ? 'border-rose-500/40 shadow-rose-500/10' : isPlatinum ? 'border-emerald-500/50 shadow-emerald-500/20' : isPremium ? 'border-amber-500/40 shadow-amber-500/10' : 'border-purple-500/40 shadow-purple-500/10'} shadow-md text-xs space-y-1`;
-          sidebarUserFooter.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-[11px] flex items-center gap-1.5 ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-300' : 'text-purple-300'}">
-                <i class="fa-solid ${isPlatinum ? 'fa-gem' : isPremium ? 'fa-crown' : 'fa-bolt'} text-[10px]"></i>
-                <span>${isPlatinum ? 'Platinum VIP' : isPremium ? 'FinTrack Premium' : 'FinTrack VIP Pro'}</span>
-              </span>
-              <span class="text-[9px] font-mono font-bold ${isExpiringSoon ? 'text-rose-400 animate-pulse' : isPlatinum ? 'text-emerald-300' : 'text-emerald-400'}">
-                ${days !== null && days !== undefined ? (days > 0 ? `Còn ${days} ngày` : 'Đã hết hạn') : 'Đang hoạt động'}
-              </span>
-            </div>
-            <p class="text-[10px] text-slate-400">
-              ${this.currentUser.plan_expires_at ? `Hạn dùng: <b class="text-slate-300 font-mono">${formatDateVN(this.currentUser.plan_expires_at)}</b>` : 'Gói thành viên VIP'}
-            </p>
-            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold transition flex items-center justify-center gap-1 border border-slate-700 shadow-sm active:scale-95">
-              <i class="fa-solid fa-clock-rotate-left text-[9px] ${isPlatinum ? 'text-emerald-300' : isPremium ? 'text-amber-400' : 'text-purple-300'}"></i>
-              <span>${isExpiringSoon ? 'Gia hạn gói ngay' : 'Quản lý thời hạn'}</span>
-            </button>
-          `;
-        } else {
-          sidebarUserFooter.className = 'p-2.5 rounded-xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-md text-xs space-y-1';
-          sidebarUserFooter.innerHTML = `
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5 font-bold text-[11px] text-slate-200">
-                <i class="fa-solid fa-seedling text-emerald-400 text-[10px]"></i>
-                <span>Gói Miễn Phí</span>
-              </div>
-              <span class="text-[9px] text-slate-400 font-mono">Vĩnh viễn</span>
-            </div>
-            <p class="text-[10px] text-slate-400 leading-tight">
-              Mở khóa AI không giới hạn & Cố vấn 50/30/20.
-            </p>
-            <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="w-full py-1 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white text-[10px] font-black shadow-sm hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1">
-              <i class="fa-solid fa-crown text-[9px]"></i>
-              <span>Nâng Cấp VIP Ngay</span>
-            </button>
-          `;
-        }
       }
 
       if (avatarEl) {

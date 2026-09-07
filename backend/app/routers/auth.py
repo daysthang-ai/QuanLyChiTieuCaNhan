@@ -294,63 +294,62 @@ def get_available_plans():
         },
         {
             "id": "PRO",
-            "name": "FinTrack Pro",
+            "name": "VIP Pro",
             "tagline": "Tối ưu cho người đi làm & quản lý tài chính chủ động",
             "price": 49000,
             "billing_cycle": "49.000 ₫ / tháng (hoặc 490k/năm)",
-            "ai_limits": 100,
-            "ai_limits_text": "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
-            "badge": "⭐ POPULAR",
-            "badge_color": "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+            "ai_limits": 50,
+            "ai_limits_text": "50 lượt gọi AI / ngày (1.500 lượt/tháng)",
+            "badge": "TIẾT KIỆM",
+            "badge_color": "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
             "highlight": False,
             "max_wallets": 5,
             "features": [
-                "100 lượt gọi AI / ngày (3.000 lượt/tháng)",
-                "Quản lý tối đa 5 ví tài chính",
-                "Cố vấn tài chính 50/30/20 chuyên sâu",
-                "Xuất báo cáo Excel/PDF cơ bản",
-                "Không giới hạn hạn mức ngân sách"
+                "Quản lý tối đa 5 ví đa nguồn",
+                "Bóc tách NLP không giới hạn",
+                "Cố vấn AI 50 lượt / ngày",
+                "Hạn mức ngân sách 50/30/20",
+                "Nạp VietQR / SePay 24/7"
             ]
         },
         {
             "id": "PREMIUM",
-            "name": "FinTrack Premium",
-            "tagline": "Dành cho cá nhân & gia đình quản lý tài chính nâng cao",
+            "name": "FinTrack VIP",
+            "tagline": "Gói phổ biến nhất, mở khóa toàn bộ sức mạnh AI",
             "price": 99000,
             "billing_cycle": "99.000 ₫ / tháng (hoặc 990k/năm)",
             "ai_limits": 300,
-            "ai_limits_text": "1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
-            "badge": "⭐ BEST SELLER",
-            "badge_color": "bg-amber-500/20 text-amber-300 border-amber-500/40",
+            "ai_limits_text": "Trợ lý AI 24/7 không giới hạn",
+            "badge": "⭐ PHỔ BIẾN NHẤT",
+            "badge_color": "bg-purple-500/20 text-purple-300 border-purple-500/40",
             "highlight": True,
-            "max_wallets": 10,
+            "max_wallets": -1,
             "features": [
-                "Hạn mức 1.000 Token AI / tháng (300 lượt gọi AI cao cấp/tháng)",
-                "Quản lý tối đa 10 ví tài chính",
-                "Bóc tách hóa đơn & Dự báo dòng tiền thông minh",
-                "Xuất báo cáo chi tiết & Phân tích chuyên sâu",
-                "Hỗ trợ kỹ thuật ưu tiên qua Ticket (phản hồi trong 24h)"
+                "Không giới hạn ví & thẻ",
+                "Trợ lý AI 24/7 không giới hạn",
+                "Phân bổ chuẩn 50/30/20",
+                "Bóc tách hóa đơn OCR / SMS",
+                "Xuất báo cáo Excel & PDF"
             ]
         },
         {
             "id": "PLATINUM",
-            "name": "FinTrack Platinum VIP",
+            "name": "Platinum VIP",
             "tagline": "Trải nghiệm đỉnh cao không giới hạn toàn diện cho nhà đầu tư",
             "price": 199000,
             "billing_cycle": "199.000 ₫ / tháng (hoặc 1.990k/năm)",
             "ai_limits": -1,
-            "ai_limits_text": "VIP Unlimited (Không giới hạn Token / Lượt gọi AI)",
-            "badge": "👑💎 PLATINUM VIP",
-            "badge_color": "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+            "ai_limits_text": "VIP Unlimited AI (Băng thông ưu tiên tối cao)",
+            "badge": "👑 VIP TỐI CAO",
+            "badge_color": "badge-vip-toi-cao bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-sm",
             "highlight": False,
             "max_wallets": -1,
             "features": [
-                "KHÔNG GIỚI HẠN Token / Lượt gọi AI (VIP Unlimited AI)",
-                "Quản lý Không giới hạn số lượng ví & tài khoản ngân hàng",
-                "Ưu tiên xử lý AI Engine tốc độ cao nhất (Fast Response)",
-                "Trợ lý AI phân tích danh mục đầu tư & cảnh báo rủi ro 24/7",
-                "Tự động sao lưu dữ liệu đám mây (Cloud Snapshot)",
-                "Huy hiệu Platinum độc quyền & Hỗ trợ kỹ thuật 1-1 riêng biệt"
+                "Toàn bộ quyền lợi FinTrack VIP",
+                "Băng thông AI ưu tiên cao cấp",
+                "Dự báo tài chính tương lai",
+                "Hỗ trợ CSKH 1-1 riêng biệt 24/7",
+                "Huy hiệu Platinum độc quyền"
             ]
         }
     ]

@@ -27,6 +27,21 @@ window.closeAuthModal = function() {
   }
 };
 
+window.toggleAuthPasswordVisibility = function(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  const icon = btnEl ? btnEl.querySelector('i') : null;
+  if (icon) {
+    if (isPassword) {
+      icon.className = 'fa-regular fa-eye-slash text-xs text-cyan-400';
+    } else {
+      icon.className = 'fa-regular fa-eye text-xs text-slate-400';
+    }
+  }
+};
+
 export class AuthComponent {
   constructor(app) {
     this.app = app;
@@ -38,7 +53,11 @@ export class AuthComponent {
     const form = document.getElementById('auth-form');
     if (form && !form._bound) {
       form._bound = true;
-      form.addEventListener('submit', (e) => this.handleAuthSubmit(e, false));
+      form.addEventListener('submit', (e) => {
+        const fullnameGroup = document.getElementById('auth-fullname-group');
+        const isRegister = fullnameGroup && !fullnameGroup.classList.contains('hidden');
+        this.handleAuthSubmit(e, isRegister);
+      });
     }
     const btnUser = document.getElementById('btn-demo-user');
     if (btnUser) {
@@ -116,14 +135,14 @@ export class AuthComponent {
         <!-- Auth Form -->
         <form id="auth-form" class="space-y-4">
           ${isRegister ? `
-            <div>
+            <div id="auth-fullname-group">
               <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Họ và Tên</label>
               <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 pointer-events-none">
                   <i class="fa-regular fa-user text-xs"></i>
                 </span>
                 <input type="text" id="auth-fullname" required placeholder="Nguyễn Văn A" 
-                  class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                  class="auth-input font-medium" />
               </div>
             </div>
           ` : ''}
@@ -131,28 +150,55 @@ export class AuthComponent {
           <div>
             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 pointer-events-none">
                 <i class="fa-regular fa-envelope text-xs"></i>
               </span>
               <input type="email" id="auth-email" required placeholder="email@domain.com"
-                class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono" />
+                class="auth-input font-mono" />
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Mật khẩu</label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 pointer-events-none">
                 <i class="fa-solid fa-lock text-xs"></i>
               </span>
               <input type="password" id="auth-password" required placeholder="••••••••"
-                class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-700 bg-slate-950 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono" />
+                class="auth-input font-mono" />
+              <button type="button" tabindex="-1" class="auth-toggle-pwd" onclick="window.toggleAuthPasswordVisibility('auth-password', this)" title="Hiện/Ẩn mật khẩu">
+                <i class="fa-regular fa-eye text-xs text-slate-400"></i>
+              </button>
             </div>
           </div>
 
+          ${isRegister ? `
+            <div id="auth-confirm-password-group">
+              <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Xác nhận Mật khẩu</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500 pointer-events-none">
+                  <i class="fa-solid fa-lock text-xs"></i>
+                </span>
+                <input type="password" id="auth-confirm-password" required placeholder="••••••••"
+                  class="auth-input font-mono" />
+                <button type="button" tabindex="-1" class="auth-toggle-pwd" onclick="window.toggleAuthPasswordVisibility('auth-confirm-password', this)" title="Hiện/Ẩn mật khẩu">
+                  <i class="fa-regular fa-eye text-xs text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Checkbox Đồng Ý Điều Khoản (Register Mode) -->
+            <div id="auth-terms-group" class="pt-1">
+              <label class="flex items-start gap-2.5 cursor-pointer select-none text-[11px] text-slate-400 leading-snug">
+                <input type="checkbox" id="auth-terms-checkbox" checked class="mt-0.5 rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500/50 cursor-pointer accent-emerald-500 w-4 h-4 shrink-0" />
+                <span>Tôi đồng ý với <a href="javascript:void(0)" onclick="window.switchLandingTab('about'); window.closeAuthModal();" class="text-cyan-400 hover:underline">Điều khoản dịch vụ</a> &amp; <a href="javascript:void(0)" onclick="window.switchLandingTab('about'); window.closeAuthModal();" class="text-cyan-400 hover:underline">Chính sách bảo mật dữ liệu</a> của FinTrack AI.</span>
+              </label>
+            </div>
+          ` : ''}
+
           <!-- Submit Button -->
           <button type="submit" id="auth-submit-btn" 
-            class="w-full py-3 px-4 rounded-xl gradient-emerald text-white font-bold text-xs shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-5 cursor-pointer">
+            class="auth-btn-submit w-full py-3 px-4 rounded-xl gradient-emerald text-white font-bold text-xs shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition flex items-center justify-center gap-2 mt-5 cursor-pointer">
             <span>${isRegister ? 'Đăng Ký Tài Khoản' : 'Đăng Nhập'}</span>
             <i class="fa-solid fa-arrow-right text-xs"></i>
           </button>
@@ -256,6 +302,7 @@ export class AuthComponent {
       const res = await api.login(email, password);
       api.setToken(res.access_token);
       this.app.currentUser = res.user;
+      try { localStorage.setItem('currentUser', JSON.stringify(res.user)); } catch (_) {}
 
       // Close modal
       this.closeAuthModal();
@@ -275,12 +322,32 @@ export class AuthComponent {
     e.preventDefault();
     const btn = document.getElementById('auth-submit-btn');
     const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang xử lý...`;
 
     try {
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value;
+
+      let fullName = '';
+      if (isRegister) {
+        fullName = document.getElementById('auth-fullname')?.value.trim() || '';
+        if (!fullName) {
+          throw new Error('Vui lòng nhập họ và tên của bạn.');
+        }
+
+        const confirmPasswordInput = document.getElementById('auth-confirm-password');
+        const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
+        if (password !== confirmPassword) {
+          throw new Error('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
+        }
+
+        const termsCheckbox = document.getElementById('auth-terms-checkbox');
+        if (termsCheckbox && !termsCheckbox.checked) {
+          throw new Error('Vui lòng đồng ý với Điều khoản dịch vụ & Chính sách bảo mật dữ liệu để tiếp tục đăng ký.');
+        }
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang xử lý...`;
 
       // Purge old state
       api.setToken('');
@@ -295,7 +362,6 @@ export class AuthComponent {
 
       let res;
       if (isRegister) {
-        const fullName = document.getElementById('auth-fullname').value.trim();
         res = await api.register({ email, password, full_name: fullName, currency: 'VND' });
       } else {
         res = await api.login(email, password);
@@ -313,6 +379,7 @@ export class AuthComponent {
 
       api.setToken(res.access_token);
       this.app.currentUser = res.user;
+      try { localStorage.setItem('currentUser', JSON.stringify(res.user)); } catch (_) {}
 
       // Close modal
       this.closeAuthModal();

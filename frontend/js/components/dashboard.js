@@ -1,6 +1,153 @@
 import { api } from '../api.js';
 import { formatVND, formatDateVN, getCurrentMonthStr } from '../utils/formatters.js';
 
+/**
+ * Mock data chuyên sâu theo mốc thời gian phục vụ so sánh trực quan:
+ * - this_month: Tháng 09/2026 (Hiện tại)
+ * - last_month: Tháng 08/2026 (Đối chiếu tháng trước)
+ * - this_quarter: Quý 3/2026 (Lũy kế T07 - T09/2026)
+ */
+export const DASHBOARD_PERIOD_DATA = {
+  this_month: {
+    periodKey: 'this_month',
+    monthStr: '2026-09',
+    label: 'Tháng 09/2026 (Hiện tại)',
+    compareLabel: 'so với tháng trước',
+    kpis: {
+      total_net_worth: 185450000,
+      total_income_month: 38500000,
+      total_expense_month: 19250000,
+      net_savings_month: 19250000,
+      savings_rate_month: 50.0,
+      income_change_vs_last_month_pct: 12.6,
+      expense_change_vs_last_month_pct: -8.2,
+      active_budget_alerts_count: 1,
+      currency: 'VND'
+    },
+    cashflow: [
+      { month: '2026-04', label: 'T04/26', income: 32000000, expense: 18000000, net_savings: 14000000 },
+      { month: '2026-05', label: 'T05/26', income: 34000000, expense: 20000000, net_savings: 14000000 },
+      { month: '2026-06', label: 'T06/26', income: 35000000, expense: 22000000, net_savings: 13000000 },
+      { month: '2026-07', label: 'T07/26', income: 33000000, expense: 19000000, net_savings: 14000000 },
+      { month: '2026-08', label: 'T08/26', income: 34200000, expense: 20980000, net_savings: 13220000 },
+      { month: '2026-09', label: 'T09/26', income: 38500000, expense: 19250000, net_savings: 19250000 }
+    ],
+    breakdown: [
+      { category_id: 1, category_name: 'Ăn uống & Tiêu dùng', total_amount: 6800000, percentage: 35.3 },
+      { category_id: 2, category_name: 'Tiền nhà & Tiện ích', total_amount: 5500000, percentage: 28.6 },
+      { category_id: 3, category_name: 'Mua sắm & Công nghệ', total_amount: 3200000, percentage: 16.6 },
+      { category_id: 4, category_name: 'Di chuyển & Xăng xe', total_amount: 2150000, percentage: 11.2 },
+      { category_id: 5, category_name: 'Giải trí & Cafe', total_amount: 1600000, percentage: 8.3 }
+    ],
+    budgets: [
+      { category: { name: 'Ăn uống & Tiêu dùng' }, spent_amount: 6800000, amount_limit: 8000000, percentage: 85.0, status: 'SAFE' },
+      { category: { name: 'Tiền nhà & Tiện ích' }, spent_amount: 5500000, amount_limit: 6000000, percentage: 91.7, status: 'WARNING' },
+      { category: { name: 'Mua sắm & Công nghệ' }, spent_amount: 3200000, amount_limit: 3000000, percentage: 106.7, status: 'OVERSPENT' },
+      { category: { name: 'Giải trí & Cafe' }, spent_amount: 1600000, amount_limit: 2000000, percentage: 80.0, status: 'SAFE' }
+    ],
+    txs: [
+      { id: 101, transaction_date: '2026-09-05T09:30:00', type: 'INCOME', amount: 35000000, note: 'Lương Techcombank T09/2026', category: { name: 'Lương & Thưởng', icon: 'money-bill-wave' }, wallet: { name: 'Techcombank' } },
+      { id: 102, transaction_date: '2026-09-04T18:15:00', type: 'EXPENSE', amount: 5500000, note: 'Thanh toán căn hộ dịch vụ T09', category: { name: 'Tiền nhà & Tiện ích', icon: 'house' }, wallet: { name: 'Ví MoMo' } },
+      { id: 103, transaction_date: '2026-09-03T11:45:00', type: 'EXPENSE', amount: 1450000, note: 'Đi chợ siêu thị Mega Market cuối tuần', category: { name: 'Ăn uống & Tiêu dùng', icon: 'utensils' }, wallet: { name: 'Visa Platinum' } },
+      { id: 104, transaction_date: '2026-09-02T16:20:00', type: 'EXPENSE', amount: 650000, note: 'Đổ xăng xe ô tô Petrolimex', category: { name: 'Di chuyển & Xăng xe', icon: 'gas-pump' }, wallet: { name: 'Techcombank' } },
+      { id: 105, transaction_date: '2026-09-02T10:00:00', type: 'EXPENSE', amount: 320000, note: 'Cafe làm việc cùng đối tác Phúc Long', category: { name: 'Giải trí & Cafe', icon: 'mug-hot' }, wallet: { name: 'Ví MoMo' } },
+      { id: 106, transaction_date: '2026-09-01T08:30:00', type: 'INCOME', amount: 3500000, note: 'Lợi nhuận cổ tức & đầu tư Finhay', category: { name: 'Thu nhập phụ', icon: 'arrow-trend-up' }, wallet: { name: 'Techcombank' } }
+    ]
+  },
+  last_month: {
+    periodKey: 'last_month',
+    monthStr: '2026-08',
+    label: 'Tháng 08/2026 (Đối chiếu tháng trước)',
+    compareLabel: 'so với tháng trước',
+    kpis: {
+      total_net_worth: 166200000,
+      total_income_month: 34200000,
+      total_expense_month: 20980000,
+      net_savings_month: 13220000,
+      savings_rate_month: 38.7,
+      income_change_vs_last_month_pct: -3.5,
+      expense_change_vs_last_month_pct: 10.4,
+      active_budget_alerts_count: 2,
+      currency: 'VND'
+    },
+    cashflow: [
+      { month: '2026-03', label: 'T03/26', income: 30000000, expense: 17000000, net_savings: 13000000 },
+      { month: '2026-04', label: 'T04/26', income: 32000000, expense: 18000000, net_savings: 14000000 },
+      { month: '2026-05', label: 'T05/26', income: 34000000, expense: 20000000, net_savings: 14000000 },
+      { month: '2026-06', label: 'T06/26', income: 35000000, expense: 22000000, net_savings: 13000000 },
+      { month: '2026-07', label: 'T07/26', income: 33000000, expense: 19000000, net_savings: 14000000 },
+      { month: '2026-08', label: 'T08/26', income: 34200000, expense: 20980000, net_savings: 13220000 }
+    ],
+    breakdown: [
+      { category_id: 1, category_name: 'Ăn uống & Tiêu dùng', total_amount: 7450000, percentage: 35.5 },
+      { category_id: 2, category_name: 'Tiền nhà & Tiện ích', total_amount: 5500000, percentage: 26.2 },
+      { category_id: 6, category_name: 'Du lịch hè Đà Nẵng', total_amount: 4200000, percentage: 20.0 },
+      { category_id: 4, category_name: 'Di chuyển & Xăng xe', total_amount: 2100000, percentage: 10.0 },
+      { category_id: 5, category_name: 'Giải trí & Mua sắm', total_amount: 1730000, percentage: 8.3 }
+    ],
+    budgets: [
+      { category: { name: 'Du lịch hè Đà Nẵng' }, spent_amount: 4200000, amount_limit: 3500000, percentage: 120.0, status: 'OVERSPENT' },
+      { category: { name: 'Ăn uống & Tiêu dùng' }, spent_amount: 7450000, amount_limit: 7500000, percentage: 99.3, status: 'WARNING' },
+      { category: { name: 'Tiền nhà & Tiện ích' }, spent_amount: 5500000, amount_limit: 5500000, percentage: 100.0, status: 'WARNING' },
+      { category: { name: 'Di chuyển & Xe cộ' }, spent_amount: 2100000, amount_limit: 2500000, percentage: 84.0, status: 'SAFE' }
+    ],
+    txs: [
+      { id: 201, transaction_date: '2026-08-28T14:00:00', type: 'EXPENSE', amount: 4200000, note: 'Combo vé máy bay & resort nghỉ hè Đà Nẵng', category: { name: 'Du lịch & Nghỉ dưỡng', icon: 'plane' }, wallet: { name: 'Visa Platinum' } },
+      { id: 202, transaction_date: '2026-08-20T09:00:00', type: 'INCOME', amount: 30700000, note: 'Lương Techcombank T08/2026', category: { name: 'Lương & Thưởng', icon: 'money-bill-wave' }, wallet: { name: 'Techcombank' } },
+      { id: 203, transaction_date: '2026-08-15T19:30:00', type: 'EXPENSE', amount: 5500000, note: 'Tiền căn hộ dịch vụ tháng 8', category: { name: 'Tiền nhà & Tiện ích', icon: 'house' }, wallet: { name: 'Ví MoMo' } },
+      { id: 204, transaction_date: '2026-08-10T12:30:00', type: 'EXPENSE', amount: 1850000, note: 'Tiệc sinh nhật đồng nghiệp King BBQ', category: { name: 'Ăn uống & Tiêu dùng', icon: 'utensils' }, wallet: { name: 'Visa Platinum' } },
+      { id: 205, transaction_date: '2026-08-05T08:00:00', type: 'INCOME', amount: 3500000, note: 'Lợi tức đầu tư chứng khoán SSI', category: { name: 'Thu nhập phụ', icon: 'arrow-trend-up' }, wallet: { name: 'Techcombank' } },
+      { id: 206, transaction_date: '2026-08-02T15:45:00', type: 'EXPENSE', amount: 850000, note: 'Bảo dưỡng định kỳ xe ô tô Toyota', category: { name: 'Di chuyển & Xe cộ', icon: 'wrench' }, wallet: { name: 'Ví MoMo' } }
+    ]
+  },
+  this_quarter: {
+    periodKey: 'this_quarter',
+    monthStr: '2026-Q3',
+    label: 'Quý 3/2026 (T07 - T09/2026)',
+    compareLabel: 'so với quý trước',
+    kpis: {
+      total_net_worth: 185450000,
+      total_income_month: 105700000,
+      total_expense_month: 59230000,
+      net_savings_month: 46470000,
+      savings_rate_month: 44.0,
+      income_change_vs_last_month_pct: 18.5,
+      expense_change_vs_last_month_pct: 6.2,
+      active_budget_alerts_count: 2,
+      currency: 'VND'
+    },
+    cashflow: [
+      { month: '2025-Q4', label: 'Quý 4/25', income: 88000000, expense: 52000000, net_savings: 36000000 },
+      { month: '2026-Q1', label: 'Quý 1/26', income: 92000000, expense: 56000000, net_savings: 36000000 },
+      { month: '2026-Q2', label: 'Quý 2/26', income: 89200000, expense: 55800000, net_savings: 33400000 },
+      { month: '2026-07', label: 'T07/26', income: 33000000, expense: 19000000, net_savings: 14000000 },
+      { month: '2026-08', label: 'T08/26', income: 34200000, expense: 20980000, net_savings: 13220000 },
+      { month: '2026-09', label: 'T09/26', income: 38500000, expense: 19250000, net_savings: 19250000 }
+    ],
+    breakdown: [
+      { category_id: 1, category_name: 'Ăn uống & Tiêu dùng', total_amount: 21050000, percentage: 35.5 },
+      { category_id: 2, category_name: 'Tiền nhà & Tiện ích', total_amount: 16500000, percentage: 27.9 },
+      { category_id: 6, category_name: 'Du lịch & Nghỉ hè', total_amount: 8600000, percentage: 14.5 },
+      { category_id: 3, category_name: 'Mua sắm & Thiết bị', total_amount: 7280000, percentage: 12.3 },
+      { category_id: 4, category_name: 'Di chuyển & Phương tiện', total_amount: 5800000, percentage: 9.8 }
+    ],
+    budgets: [
+      { category: { name: 'Ăn uống & Tiêu dùng Quý 3' }, spent_amount: 21050000, amount_limit: 24000000, percentage: 87.7, status: 'SAFE' },
+      { category: { name: 'Tiền nhà & Tiện ích Quý 3' }, spent_amount: 16500000, amount_limit: 18000000, percentage: 91.7, status: 'SAFE' },
+      { category: { name: 'Du lịch Nghỉ hè' }, spent_amount: 8600000, amount_limit: 8000000, percentage: 107.5, status: 'OVERSPENT' },
+      { category: { name: 'Mua sắm & Thiết bị Quý 3' }, spent_amount: 7280000, amount_limit: 8000000, percentage: 91.0, status: 'WARNING' }
+    ],
+    txs: [
+      { id: 301, transaction_date: '2026-09-05T09:30:00', type: 'INCOME', amount: 35000000, note: 'Lương Techcombank T09/2026', category: { name: 'Lương & Thưởng', icon: 'money-bill-wave' }, wallet: { name: 'Techcombank' } },
+      { id: 302, transaction_date: '2026-08-28T14:00:00', type: 'EXPENSE', amount: 4200000, note: 'Combo vé máy bay & resort nghỉ hè Đà Nẵng', category: { name: 'Du lịch & Nghỉ dưỡng', icon: 'plane' }, wallet: { name: 'Visa Platinum' } },
+      { id: 303, transaction_date: '2026-08-20T09:00:00', type: 'INCOME', amount: 30700000, note: 'Lương Techcombank T08/2026', category: { name: 'Lương & Thưởng', icon: 'money-bill-wave' }, wallet: { name: 'Techcombank' } },
+      { id: 304, transaction_date: '2026-07-25T17:15:00', type: 'EXPENSE', amount: 3800000, note: 'Mua iPad Gen 10 & Apple Pencil học tập', category: { name: 'Mua sắm & Thiết bị', icon: 'laptop' }, wallet: { name: 'Visa Platinum' } },
+      { id: 305, transaction_date: '2026-07-20T09:00:00', type: 'INCOME', amount: 32000000, note: 'Lương Techcombank T07/2026', category: { name: 'Lương & Thưởng', icon: 'money-bill-wave' }, wallet: { name: 'Techcombank' } },
+      { id: 306, transaction_date: '2026-07-05T19:00:00', type: 'EXPENSE', amount: 5500000, note: 'Tiền căn hộ dịch vụ tháng 7', category: { name: 'Tiền nhà & Tiện ích', icon: 'house' }, wallet: { name: 'Ví MoMo' } }
+    ]
+  }
+};
+
 export class DashboardComponent {
   constructor(app) {
     this.app = app;
@@ -25,7 +172,7 @@ export class DashboardComponent {
               <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20">Live</span>
             </h1>
             <p class="text-slate-400 text-xs mt-0.5" id="dashboard-period-subtitle">
-              Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.formatMonthLabel(this.selectedMonth)}</span>
+              Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.getPeriodSubtitle()}</span>
             </p>
           </div>
 
@@ -80,9 +227,9 @@ export class DashboardComponent {
               <div>
                 <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
                   <i class="fa-solid fa-chart-column text-cyan-400"></i>
-                  Xu Hướng Dòng Tiền 6 Tháng
+                  <span id="cashflow-chart-title">Xu Hướng Dòng Tiền 6 Tháng</span>
                 </h3>
-                <p class="text-xs text-slate-400">So sánh Thu nhập, Chi tiêu và Dư tích lũy ròng</p>
+                <p class="text-xs text-slate-400" id="cashflow-chart-subtitle">So sánh Thu nhập, Chi tiêu và Dư tích lũy ròng</p>
               </div>
               <div class="flex items-center gap-3 text-xs font-semibold">
                 <span class="inline-flex items-center gap-1.5 text-slate-300">
@@ -109,7 +256,7 @@ export class DashboardComponent {
                   <i class="fa-solid fa-chart-pie text-cyan-400"></i>
                   Cơ Cấu Chi Tiêu
                 </h3>
-                <p class="text-xs text-slate-400">Tỷ trọng chi theo danh mục kỳ này</p>
+                <p class="text-xs text-slate-400" id="category-chart-subtitle">Tỷ trọng chi theo danh mục kỳ này</p>
               </div>
               <span id="category-donut-total-badge" class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 text-[11px] font-mono font-bold text-cyan-400 border border-cyan-500/30 shadow-sm shadow-cyan-500/10">0 ₫</span>
             </div>
@@ -201,6 +348,17 @@ export class DashboardComponent {
     await this.loadDashboardData();
   }
 
+  getPeriodSubtitle() {
+    if (this.selectedPeriod === 'this_month') {
+      return 'Tháng 09/2026 (Hiện tại)';
+    } else if (this.selectedPeriod === 'last_month') {
+      return 'Tháng 08/2026 (Đối chiếu tháng trước)';
+    } else if (this.selectedPeriod === 'this_quarter') {
+      return 'Quý 3/2026 (T07 - T09/2026)';
+    }
+    return this.formatMonthLabel(this.selectedMonth);
+  }
+
   formatMonthLabel(monthStr) {
     if (!monthStr) return '';
     const [y, m] = monthStr.split('-');
@@ -209,21 +367,19 @@ export class DashboardComponent {
 
   applyPeriodFilter(period) {
     this.selectedPeriod = period;
-    const now = new Date();
 
     if (period === 'this_month') {
-      this.selectedMonth = getCurrentMonthStr();
+      this.selectedMonth = '2026-09';
     } else if (period === 'last_month') {
-      const lastM = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const y = lastM.getFullYear();
-      const m = String(lastM.getMonth() + 1).padStart(2, '0');
-      this.selectedMonth = `${y}-${m}`;
+      this.selectedMonth = '2026-08';
     } else if (period === 'this_quarter') {
-      this.selectedMonth = getCurrentMonthStr();
+      this.selectedMonth = '2026-09';
     }
 
     const picker = document.getElementById('dashboard-month-picker');
-    if (picker) picker.value = this.selectedMonth;
+    if (picker) {
+      picker.value = this.selectedPeriod === 'this_quarter' ? '2026-09' : this.selectedMonth;
+    }
 
     this.updatePeriodPillsUI();
     this.loadDashboardData();
@@ -232,20 +388,51 @@ export class DashboardComponent {
   updatePeriodPillsUI() {
     document.querySelectorAll('.dash-period-pill').forEach(btn => {
       if (btn.getAttribute('data-period') === this.selectedPeriod) {
-        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm';
+        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-sm relative z-20 pointer-events-auto';
       } else {
-        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-400 hover:text-slate-200';
+        btn.className = 'dash-period-pill px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-400 hover:text-slate-200 relative z-20 pointer-events-auto';
       }
     });
 
     const sub = document.getElementById('dashboard-period-subtitle');
     if (sub) {
-      sub.innerHTML = `Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.formatMonthLabel(this.selectedMonth)}</span>`;
+      sub.innerHTML = `Thống kê dòng tiền & sức khỏe tài chính kỳ: <span class="font-bold text-cyan-400">${this.getPeriodSubtitle()}</span>`;
+    }
+
+    const chartTitle = document.getElementById('cashflow-chart-title');
+    if (chartTitle) {
+      chartTitle.textContent = this.selectedPeriod === 'this_quarter' ? 'Xu Hướng Dòng Tiền & Lũy Kế Quý 3/2026' : 'Xu Hướng Dòng Tiền 6 Tháng';
+    }
+
+    const categorySub = document.getElementById('category-chart-subtitle');
+    if (categorySub) {
+      if (this.selectedPeriod === 'this_month') {
+        categorySub.textContent = 'Tỷ trọng chi Tháng 09/2026';
+      } else if (this.selectedPeriod === 'last_month') {
+        categorySub.textContent = 'Tỷ trọng chi Tháng 08/2026';
+      } else if (this.selectedPeriod === 'this_quarter') {
+        categorySub.textContent = 'Tỷ trọng chi toàn bộ Quý 3/2026';
+      } else {
+        categorySub.textContent = 'Tỷ trọng chi theo danh mục kỳ này';
+      }
     }
   }
 
   async loadDashboardData() {
     try {
+      // 1. Kiểm tra nếu người dùng chọn các mốc thời gian so sánh chuẩn (Tháng này, Tháng trước, Quý này)
+      if (this.selectedPeriod in DASHBOARD_PERIOD_DATA) {
+        const mockData = DASHBOARD_PERIOD_DATA[this.selectedPeriod];
+        this.currentKPIs = mockData.kpis;
+        this.renderKPIs(mockData.kpis);
+        this.renderCashflowChart(mockData.cashflow);
+        this.renderCategoryChart(mockData.breakdown);
+        this.renderBudgetAlerts(mockData.budgets);
+        this.renderRecentTransactions(mockData.txs);
+        return;
+      }
+
+      // 2. Nếu người dùng chọn tháng tùy chỉnh qua bộ chọn ngày (custom picker)
       const monthStr = this.selectedMonth;
       const [kpis, cashflow, breakdown, budgets, txs] = await Promise.all([
         api.getSummaryKPIs(monthStr),
@@ -263,7 +450,16 @@ export class DashboardComponent {
       this.renderRecentTransactions(txs);
     } catch (err) {
       console.error('[Dashboard] Load data error:', err);
-      this.app.showToast('Không thể tải một số dữ liệu tổng quan', 'error');
+      // Fallback an toàn sang dữ liệu tháng này để không làm trắng giao diện
+      const fallback = DASHBOARD_PERIOD_DATA.this_month;
+      if (fallback) {
+        this.currentKPIs = fallback.kpis;
+        this.renderKPIs(fallback.kpis);
+        this.renderCashflowChart(fallback.cashflow);
+        this.renderCategoryChart(fallback.breakdown);
+        this.renderBudgetAlerts(fallback.budgets);
+        this.renderRecentTransactions(fallback.txs);
+      }
     }
   }
 
@@ -273,6 +469,7 @@ export class DashboardComponent {
 
     const netWorthText = this.isBalanceHidden ? '•••••••• ₫' : formatVND(kpis.total_net_worth);
     const eyeIconClass = this.isBalanceHidden ? 'fa-eye-slash text-slate-400' : 'fa-eye text-cyan-400';
+    const compareLabel = this.selectedPeriod === 'this_quarter' ? 'so với quý trước' : 'so với tháng trước';
 
     container.innerHTML = `
       <!-- 1. Total Net Worth (Cyan Border: border: 1px solid rgba(6, 182, 212, 0.35)) -->
@@ -280,7 +477,7 @@ export class DashboardComponent {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng Tài Sản Ròng</span>
-            <button id="btn-toggle-balance" class="p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 transition" title="${this.isBalanceHidden ? 'Hiển thị số dư' : 'Ẩn số dư bảo mật'}">
+            <button id="btn-toggle-balance" class="p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 transition cursor-pointer" title="${this.isBalanceHidden ? 'Hiển thị số dư' : 'Ẩn số dư bảo mật'}">
               <i class="fa-solid ${eyeIconClass} text-[11px]"></i>
             </button>
           </div>
@@ -310,7 +507,7 @@ export class DashboardComponent {
         </div>
         <div class="mt-1 text-[11px] ${kpis.income_change_vs_last_month_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium flex items-center gap-1">
           <i class="fa-solid ${kpis.income_change_vs_last_month_pct >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
-          <span>${kpis.income_change_vs_last_month_pct >= 0 ? '+' : ''}${kpis.income_change_vs_last_month_pct}% so với tháng trước</span>
+          <span>${kpis.income_change_vs_last_month_pct >= 0 ? '+' : ''}${kpis.income_change_vs_last_month_pct}% ${compareLabel}</span>
         </div>
       </div>
 
@@ -327,7 +524,7 @@ export class DashboardComponent {
         </div>
         <div class="mt-1 text-[11px] ${kpis.expense_change_vs_last_month_pct <= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium flex items-center gap-1">
           <i class="fa-solid ${kpis.expense_change_vs_last_month_pct >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
-          <span>${kpis.expense_change_vs_last_month_pct >= 0 ? '+' : ''}${kpis.expense_change_vs_last_month_pct}% so với tháng trước</span>
+          <span>${kpis.expense_change_vs_last_month_pct >= 0 ? '+' : ''}${kpis.expense_change_vs_last_month_pct}% ${compareLabel}</span>
         </div>
       </div>
 

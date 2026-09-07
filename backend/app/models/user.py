@@ -71,9 +71,9 @@ class User(Base):
     def plan_name(self) -> str:
         p = (self.plan or "FREE").upper()
         if p == "PLATINUM":
-            return "FinTrack Platinum VIP"
-        elif p == "PREMIUM":
-            return "FinTrack Premium"
+            return "Platinum VIP"
+        elif p in ("PREMIUM", "VIP"):
+            return "FinTrack VIP"
         elif p == "PRO":
-            return "FinTrack Pro"
-        return "FinTrack Free (Miễn phí)"
+            return "VIP Pro"
+        return "FinTrack Free"

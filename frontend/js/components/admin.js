@@ -1,5 +1,6 @@
 import { api } from '../api.js?v=20260904_14';
 import { formatVND } from '../utils/formatters.js?v=20260904_14';
+import { getSubscriptionPlanBadgeHtml } from '../theme_mapping.js?v=20260906_01';
 
 export class AdminComponent {
   constructor(app) {
@@ -3192,18 +3193,22 @@ export class AdminComponent {
     const modalEl = document.getElementById('modal-admin-delete-notif-confirm');
     const closeBtn = document.getElementById('btn-cancel-del-notif');
     const confirmBtn = document.getElementById('btn-confirm-del-notif');
-
-    const closeModal = () => modalEl?.remove();
+    let escHandler = null;
+    const closeModal = () => {
+      if (escHandler) {
+        document.removeEventListener('keydown', escHandler);
+      }
+      modalEl?.remove();
+    };
 
     closeBtn?.addEventListener('click', closeModal);
     modalEl?.addEventListener('click', (e) => {
       if (e.target === modalEl) closeModal();
     });
 
-    const escHandler = (e) => {
+    escHandler = (e) => {
       if (e.key === 'Escape') {
         closeModal();
-        document.removeEventListener('keydown', escHandler);
       }
     };
     document.addEventListener('keydown', escHandler);
@@ -3592,9 +3597,8 @@ export class AdminComponent {
                     <div class="text-[10px] text-slate-400 font-mono">${o.user_email}</div>
                   </td>
                   <td class="py-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${o.plan_code === 'PLATINUM' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : o.plan_code === 'PREMIUM' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'}">
-                      ${o.plan_code === 'PLATINUM' ? '👑💎 Platinum VIP' : o.plan_code === 'PREMIUM' ? '👑 Premium' : '⭐ FinTrack VIP'} (${o.plan_duration_days} ngày)
-                    </span>
+                    ${getSubscriptionPlanBadgeHtml(o).html}
+                    ${o.plan_duration_days && !getSubscriptionPlanBadgeHtml(o).isWalletDeposit ? `<span class="text-[10px] text-slate-400 font-mono block mt-0.5">(${o.plan_duration_days} ngày)</span>` : ''}
                     <div class="font-mono font-bold text-slate-200 mt-1">${formatVND(o.amount)}</div>
                   </td>
                   <td class="py-3 font-mono text-[11px]">
@@ -3786,7 +3790,11 @@ export class AdminComponent {
 
   applyOrdersFilter(subtabId) {
     if (subtabId === 'orders_export_csv') {
-      api.downloadAdminExport('subscriptions');
+      try {
+        api.downloadAdminExport('subscriptions');
+      } catch (err) {
+        this.app?.showToast?.(err.message || 'Lỗi xuất dữ liệu đơn hàng', 'error');
+      }
       return;
     }
     this.activeOrdersFilter = subtabId;
@@ -4443,7 +4451,9 @@ export class AdminComponent {
     }
 
     document.getElementById('btn-download-db')?.addEventListener('click', () => {
-      window.location.href = api.baseUrl + '/admin/db/download?token=' + localStorage.getItem('token');
+      const token = api.getToken() || localStorage.getItem('token') || '';
+      const base = api.baseUrl || '/api/v1';
+      window.location.href = `${base}/admin/db/download?token=${encodeURIComponent(token)}`;
     });
 
     const fileInput = document.getElementById('db-upload');
@@ -4466,9 +4476,11 @@ export class AdminComponent {
       formData.append('file', fileInput.files[0]);
 
       try {
-        const response = await fetch(api.baseUrl + '/admin/db/restore', {
+        const token = api.getToken() || localStorage.getItem('token') || '';
+        const base = api.baseUrl || '/api/v1';
+        const response = await fetch(`${base}/admin/db/restore`, {
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+          headers: { 'Authorization': `Bearer ${token}` },
           body: formData
         });
         const res = await response.json();
