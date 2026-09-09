@@ -130,15 +130,16 @@
       var headerThumbIcon = document.getElementById('header-theme-thumb-icon');
       var headerLabel = document.getElementById('header-theme-label');
       if (headerThumb) {
+        headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 transition-transform duration-300 ease-out flex items-center justify-center text-[10px] font-black pointer-events-none';
+        headerThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+        headerThumb.style.boxShadow = '0 0 14px rgba(6, 182, 212, 0.85)';
         if (isLight) {
           headerThumb.style.transform = 'translateX(34px)';
-          headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-rose-400 shadow-[0_0_14px_rgba(251,191,36,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
-          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-sun';
+          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-sun text-white';
           if (headerLabel) headerLabel.textContent = 'Sáng Neon';
         } else {
           headerThumb.style.transform = 'translateX(0px)';
-          headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_14px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
-          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-moon';
+          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-moon text-white';
           if (headerLabel) headerLabel.textContent = 'Tối Neon';
         }
       }
@@ -147,14 +148,15 @@
       var landingThumb = document.getElementById('landing-theme-thumb');
       var landingThumbIcon = document.getElementById('landing-theme-thumb-icon');
       if (landingThumb) {
+        landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 transition-transform duration-300 ease-out flex items-center justify-center text-[10px] font-black pointer-events-none';
+        landingThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+        landingThumb.style.boxShadow = '0 0 14px rgba(6, 182, 212, 0.85)';
         if (isLight) {
           landingThumb.style.transform = 'translateX(28px)';
-          landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-rose-400 shadow-[0_0_14px_rgba(251,191,36,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
-          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-sun';
+          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-sun text-white';
         } else {
           landingThumb.style.transform = 'translateX(0px)';
-          landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_14px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
-          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-moon';
+          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-moon text-white';
         }
       }
 
@@ -165,46 +167,50 @@
       var labelLight = document.getElementById('sidebar-pill-label-light');
 
       if (sidebarThumb) {
+        sidebarThumb.className = 'sidebar-theme-slider-thumb absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 pointer-events-none z-0 flex items-center justify-center';
+        sidebarThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+        sidebarThumb.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.75), 0 0 25px rgba(16, 185, 129, 0.35)';
+
         if (isLight) {
           sidebarThumb.style.transform = 'translateX(100%)';
-          sidebarThumb.style.background = 'linear-gradient(135deg, #f59e0b 0%, #ec4899 100%)';
-          sidebarThumb.style.boxShadow = '0 0 18px rgba(245, 158, 11, 0.75), 0 0 30px rgba(236, 72, 153, 0.4)';
           if (sidebarPillBtn) {
             sidebarPillBtn.style.background = '#ffffff';
-            sidebarPillBtn.style.borderColor = 'rgba(245, 158, 11, 0.55)';
-            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.05)';
+            sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.45)';
+            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05)';
           }
           if (labelLight) {
             labelLight.style.color = '#ffffff';
             labelLight.style.fontWeight = '900';
             labelLight.style.opacity = '1';
-            labelLight.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.45)';
+            labelLight.style.background = 'transparent';
+            labelLight.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
           }
           if (labelDark) {
             labelDark.style.color = '#64748b';
-            labelDark.style.fontWeight = '600';
+            labelDark.style.fontWeight = '700';
             labelDark.style.opacity = '0.75';
+            labelDark.style.background = 'transparent';
             labelDark.style.textShadow = 'none';
           }
         } else {
           sidebarThumb.style.transform = 'translateX(0%)';
-          sidebarThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
-          sidebarThumb.style.boxShadow = '0 0 18px rgba(6, 182, 212, 0.75), 0 0 30px rgba(16, 185, 129, 0.35)';
           if (sidebarPillBtn) {
             sidebarPillBtn.style.background = 'rgba(11, 15, 25, 0.95)';
             sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.45)';
             sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5)';
           }
           if (labelDark) {
-            labelDark.style.color = '#020617';
+            labelDark.style.color = '#ffffff';
             labelDark.style.fontWeight = '900';
             labelDark.style.opacity = '1';
-            labelDark.style.textShadow = 'none';
+            labelDark.style.background = 'transparent';
+            labelDark.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
           }
           if (labelLight) {
             labelLight.style.color = '#94a3b8';
-            labelLight.style.fontWeight = '600';
+            labelLight.style.fontWeight = '700';
             labelLight.style.opacity = '0.75';
+            labelLight.style.background = 'transparent';
             labelLight.style.textShadow = 'none';
           }
         }
@@ -1204,7 +1210,7 @@
 
     <!-- Backdrop Overlay below Header (click outside to close) -->
     <div id="landing-nav-backdrop" onclick="window.closeLandingNavMenu()" 
-      class="fixed inset-0 top-[68px] bg-black/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out" 
+      class="modal-backdrop-blur fixed inset-0 top-[68px] bg-black/40 backdrop-blur-md z-40 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out" 
       aria-hidden="true"></div>
 
     <!-- MAIN TAB CONTENTS CONTAINER -->
@@ -2879,7 +2885,7 @@
           <div id="sidebar-theme-slider-thumb" class="sidebar-theme-slider-thumb absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out shadow-lg pointer-events-none z-0 flex items-center justify-center" style="background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%); box-shadow: 0 0 18px rgba(6, 182, 212, 0.75), 0 0 30px rgba(16, 185, 129, 0.35);"></div>
 
           <!-- Dark State Segment (Left) -->
-          <span id="sidebar-pill-label-dark" onclick="event.stopPropagation(); window.setFinTrackTheme('dark')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-black transition-all duration-300 cursor-pointer text-slate-950">
+          <span id="sidebar-pill-label-dark" onclick="event.stopPropagation(); window.setFinTrackTheme('dark')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-black transition-all duration-300 cursor-pointer text-white drop-shadow">
             <i class="fa-solid fa-moon text-xs"></i>
             <span>Tối Neon</span>
           </span>
@@ -3136,36 +3142,36 @@
        ========================================================================== -->
 
   <!-- Generic Modal (Dynamic Component Modal) -->
-  <div id="generic-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="generic-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Deposit Wallet Modal Container -->
-  <div id="modal-deposit-wallet" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="modal-deposit-wallet" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Upgrade & VIP Modals -->
-  <div id="upgradeModal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="vipModal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="subscription-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="vip-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="service-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="upgrade-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="upgradeModal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="vipModal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="subscription-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="vip-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="service-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="upgrade-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Transaction Modal (Ghi Thu - Chi) -->
-  <div id="transaction-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="transaction-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Transfer Modal (Chuyển tiền giữa các ví) -->
-  <div id="transfer-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="transfer-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Wallet Modal / Add Wallet Modal (Thêm / Sửa ví ảo) -->
-  <div id="wallet-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="add-wallet-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="wallet-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="add-wallet-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Deposit Modal / Real Deposit Modal (Nạp tiền thật VietQR) -->
-  <div id="deposit-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="real-deposit-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="deposit-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="real-deposit-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Export & Filter Modals -->
-  <div id="export-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
-  <div id="filter-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="export-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
+  <div id="filter-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;"></div>
 
   <!-- Theme Mapping & Application Module Scripts -->
   <script type="module" src="/static/js/theme_mapping.js?v=20260906_01"></script>
@@ -3175,7 +3181,7 @@
        AUTH MODAL (Đăng Nhập / Đăng Ký)
        Đặt ngoài cùng độc lập, ngay trước thẻ đóng </body>
        ========================================================================== -->
-  <div id="auth-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeAuthModal()">
+  <div id="auth-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeAuthModal()">
     <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden border border-slate-800 text-slate-100 mx-4" onclick="event.stopPropagation()">
       
       <!-- Close Button -->
@@ -3301,7 +3307,7 @@
        AI INPUT MODAL (#ai-input-modal / #quick-ai-modal)
        Đặt ngoài cùng độc lập, ngay trước thẻ đóng </body>
        ========================================================================== -->
-  <div id="ai-input-modal" class="fixed inset-0 z-[999999] hidden items-center justify-center bg-black/80 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeQuickAiModal()">
+  <div id="ai-input-modal" class="modal-backdrop-blur fixed inset-0 z-[999999] hidden items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none" style="display: none !important;" onclick="if(event.target===this) window.closeQuickAiModal()">
     <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-200 text-slate-100 mx-4 pointer-events-auto" onclick="event.stopPropagation()">
       
       <!-- Modal Header -->

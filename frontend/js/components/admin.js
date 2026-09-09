@@ -50,7 +50,7 @@ export class AdminComponent {
       <div class="space-y-5 animate-in fade-in duration-300">
         
         <!-- Admin Cyber Command Header / Cockpit Bar -->
-        <div class="relative rounded-3xl p-6 overflow-hidden border ${isRootAdmin ? 'border-rose-500/30' : 'border-purple-500/30'} shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#120818]">
+        <div id="admin-cockpit-banner" class="admin-cockpit-banner relative rounded-3xl p-6 overflow-hidden border ${isRootAdmin ? 'border-rose-500/30' : 'border-purple-500/30'} shadow-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#120818]">
           <!-- High-tech backdrop grid & glow circles -->
           <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full ${isRootAdmin ? 'bg-rose-600/15' : 'bg-purple-600/15'} blur-3xl pointer-events-none"></div>
           <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none"></div>
@@ -621,7 +621,7 @@ export class AdminComponent {
       <div class="space-y-6 admin-subtab-content-anim">
         
         <!-- Active Cycle Banner -->
-        <div class="flex items-center justify-between px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-mono">
+        <div id="admin-cycle-banner" class="admin-cycle-banner flex items-center justify-between px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-mono">
           <div class="flex items-center gap-2 text-rose-400 font-bold">
             <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
             <span>${cycleBadge}</span>
@@ -909,7 +909,7 @@ export class AdminComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-rose-500/30 animate-in fade-in zoom-in duration-200">
           <button id="admin-export-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>
@@ -1377,7 +1377,7 @@ export class AdminComponent {
     }
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-2xl p-6 relative overflow-hidden border border-slate-800 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
           
           <button id="admin-user-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
@@ -1679,7 +1679,7 @@ export class AdminComponent {
     const isModerator = role === 'MODERATOR';
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-purple-500/30 animate-in fade-in zoom-in duration-150">
           
           <button id="admin-send-notif-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
@@ -2127,7 +2127,7 @@ export class AdminComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-800 animate-in fade-in zoom-in duration-200">
           <button id="master-cat-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
             <i class="fa-solid fa-xmark text-sm"></i>
@@ -3150,7 +3150,7 @@ export class AdminComponent {
 
     const safeTitle = this.escapeHtml(notifTitle || `Thông báo #${notifId}`);
     const modalHtml = `
-      <div id="modal-admin-delete-notif-confirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div id="modal-admin-delete-notif-confirm" class="modal-backdrop-blur fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
         <div class="relative w-full max-w-sm glass-card bg-slate-900/95 border border-rose-500/40 rounded-3xl p-6 shadow-2xl shadow-rose-500/10 space-y-4">
           <div class="flex items-center gap-3">
             <div class="w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-400 flex items-center justify-center text-xl border border-rose-500/30 shrink-0">
@@ -4026,7 +4026,7 @@ export class AdminComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-teal-500/40 animate-in fade-in zoom-in duration-200 space-y-4">
           <button id="reply-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>

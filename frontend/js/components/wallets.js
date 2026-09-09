@@ -314,7 +314,7 @@ export class WalletsComponent {
     let selectedAmount = 500000;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-emerald-500/40 animate-in fade-in zoom-in duration-200">
           
           <!-- Background Cyber Glow -->
@@ -849,7 +849,7 @@ export class WalletsComponent {
     const isAdmin = this.app.currentUser?.role === 'ADMIN';
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150">
           
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -1028,7 +1028,7 @@ export class WalletsComponent {
     modalEl.style.setProperty('pointer-events', 'auto', 'important');
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150">
           
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">

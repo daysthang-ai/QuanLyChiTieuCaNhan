@@ -676,9 +676,9 @@ tbody tr:hover {
 
 .toast-msg {
   animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-  background: #111827 !important;
-  border: 1px solid #334155 !important;
-  color: #f8fafc !important;
+  background: #111827;
+  border: 1px solid #334155;
+  color: #f8fafc;
 }
 
 .toast-msg.toast-exit {
@@ -1021,6 +1021,33 @@ html, body {
 .logo-neon-glow-wrapper:hover, .neon-border-sync:hover {
   transform: scale(1.08) translateZ(0);
   box-shadow: 0 6px 24px -2px rgba(236, 72, 153, 0.55), 0 0 16px rgba(245, 158, 11, 0.45);
+}
+
+.logo-neon-inner {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-neon-inner i {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-neon-glow-wrapper::before, .neon-border-sync::before {
+    animation: none !important;
+    background: linear-gradient(
+      135deg,
+      #8b5cf6 0%,
+      #ec4899 50%,
+      #f59e0b 100%
+    ) !important;
+  }
 }
 
 .logo-neon-inner {
@@ -2591,22 +2618,23 @@ button[aria-current="page"],
 }
 
 #sidebar-pill-label-dark {
-  color: #020617;
+  color: #ffffff;
   font-weight: 900;
   opacity: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   background: transparent !important;
 }
 
 #sidebar-pill-label-light {
   color: #94a3b8;
-  font-weight: 600;
+  font-weight: 700;
   opacity: 0.75;
   background: transparent !important;
 }
 
 #sidebar-pill-label-light:hover {
   opacity: 1;
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 /* 2. Top Header & Landing Theme Switch Slider */
@@ -2755,24 +2783,25 @@ html.light-theme .sidebar-theme-pill,
 html.light-theme #sidebar-theme-pill-btn,
 [data-theme="light"] #sidebar-theme-pill-btn {
   background: #ffffff !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.55) !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
 html.light-theme .sidebar-theme-pill:hover,
 [data-theme="light"] .sidebar-theme-pill:hover,
 html.light-theme #sidebar-theme-pill-btn:hover,
 [data-theme="light"] #sidebar-theme-pill-btn:hover {
-  border-color: rgba(245, 158, 11, 0.85) !important;
-  box-shadow: 0 0 22px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(6, 182, 212, 0.75) !important;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
+/* Active Theme Toggle Thumb: Gradient Mix 2 Màu Xanh Neon */
 html.light-theme .sidebar-theme-slider-thumb,
-[data-theme="light"] .sidebar-theme-slider-thumb,
 html.light-theme #sidebar-theme-slider-thumb,
+[data-theme="light"] .sidebar-theme-slider-thumb,
 [data-theme="light"] #sidebar-theme-slider-thumb {
-  background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%) !important;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.75), 0 0 30px rgba(236, 72, 153, 0.4) !important;
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.5), 0 0 22px rgba(16, 185, 129, 0.35) !important;
   transform: translateX(100%) !important;
 }
 
@@ -2781,14 +2810,14 @@ html.light-theme #sidebar-pill-label-light,
   color: #ffffff !important;
   font-weight: 900 !important;
   opacity: 1 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
   background: transparent !important;
 }
 
 html.light-theme #sidebar-pill-label-dark,
 [data-theme="light"] #sidebar-pill-label-dark {
   color: #64748b !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   opacity: 0.75 !important;
   text-shadow: none !important;
   background: transparent !important;
@@ -2805,35 +2834,405 @@ html.light-theme #header-theme-toggle-track,
 html.light-theme #landing-theme-toggle-btn,
 [data-theme="light"] #landing-theme-toggle-btn {
   background: #ffffff !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 12px rgba(245, 158, 11, 0.25) !important;
+  border-color: rgba(6, 182, 212, 0.45) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 12px rgba(6, 182, 212, 0.25) !important;
 }
 
-/* Sidebar Navigation Items in Light Mode */
+html.light-theme #header-theme-thumb,
+html.light-theme #landing-theme-thumb,
+[data-theme="light"] #header-theme-thumb,
+[data-theme="light"] #landing-theme-thumb {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.75), 0 0 20px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* ==========================================================================
+   HEADER & SIDEBAR LIGHT THEME SYSTEM (NO SIZE/LAYOUT SHIFT - 100% IDENTICAL)
+   Tri-Color Neon Aura: Cyan (#06b6d4), Emerald (#10b981), White (#ffffff)
+   ========================================================================== */
+
+/* 1. Fixed Header in Light Mode - Exact 68px height, 1px border matching Dark Mode */
+html.light-theme #top-glass-header,
+[data-theme="light"] #top-glass-header {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 0 16px rgba(6, 182, 212, 0.12) !important;
+}
+
+/* 2. Logo FinTrack AI Transformation in Light Mode - Exact 36px x 36px */
+html.light-theme .logo-neon-glow-wrapper,
+html.light-theme .neon-border-sync,
+[data-theme="light"] .logo-neon-glow-wrapper,
+[data-theme="light"] .neon-border-sync {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4), 0 0 18px rgba(16, 185, 129, 0.25), 0 0 3px rgba(255, 255, 255, 0.8) !important;
+}
+
+html.light-theme .logo-neon-glow-wrapper::before,
+html.light-theme .neon-border-sync::before,
+[data-theme="light"] .logo-neon-glow-wrapper::before,
+[data-theme="light"] .neon-border-sync::before {
+  border-radius: 12px !important;
+  background: conic-gradient(
+    from var(--logo-angle, 0deg),
+    #06b6d4,
+    #ffffff,
+    #10b981,
+    #ffffff,
+    #06b6d4
+  ) !important;
+}
+
+html.light-theme .logo-neon-inner,
+[data-theme="light"] .logo-neon-inner {
+  background: #ffffff !important;
+}
+
+html.light-theme .logo-neon-inner i,
+[data-theme="light"] .logo-neon-inner i {
+  color: #d97706 !important;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6)) !important;
+}
+
+/* Brand Text Next to Logo */
+html.light-theme #top-glass-header a.group span.font-sans,
+html.light-theme #landing-page-container header a.group span.font-sans,
+html.light-theme a.group span.font-sans,
+[data-theme="light"] #top-glass-header a.group span.font-sans,
+[data-theme="light"] #landing-page-container header a.group span.font-sans,
+[data-theme="light"] a.group span.font-sans {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #top-glass-header a.group span.text-slate-300,
+html.light-theme #landing-page-container header a.group span.text-slate-300,
+html.light-theme a.group span.text-slate-300,
+[data-theme="light"] #top-glass-header a.group span.text-slate-300,
+[data-theme="light"] #landing-page-container header a.group span.text-slate-300,
+[data-theme="light"] a.group span.text-slate-300 {
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #sidebar-mobile-subtitle,
+[data-theme="light"] #sidebar-mobile-subtitle {
+  background: rgba(6, 182, 212, 0.12) !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+}
+
+/* 3. Header Action Buttons & Profile in Light Mode - Exact Dimensions (0px shift) */
+html.light-theme #mobile-menu-btn,
+html.light-theme #header-notification-btn,
+[data-theme="light"] #mobile-menu-btn,
+[data-theme="light"] #header-notification-btn {
+  width: 36px !important;
+  height: 36px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(6, 182, 212, 0.4) !important;
+  color: #0891b2 !important;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.25), 0 0 12px rgba(16, 185, 129, 0.15), 0 0 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+html.light-theme #mobile-menu-btn:hover,
+html.light-theme #header-notification-btn:hover,
+[data-theme="light"] #mobile-menu-btn:hover,
+[data-theme="light"] #header-notification-btn:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #06b6d4 !important;
+  color: #0e7490 !important;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4), 0 0 16px rgba(16, 185, 129, 0.3), 0 0 4px #ffffff !important;
+}
+
+html.light-theme #header-exit-admin-btn,
+[data-theme="light"] #header-exit-admin-btn {
+  background: #ffffff !important;
+  border: 1px solid #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2) !important;
+}
+
+html.light-theme #header-exit-admin-btn:hover,
+[data-theme="light"] #header-exit-admin-btn:hover {
+  background: rgba(236, 253, 245, 0.95) !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.35) !important;
+}
+
+html.light-theme #btn-logout,
+[data-theme="light"] #btn-logout {
+  width: 32px !important;
+  height: 32px !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-theme #btn-logout:hover,
+[data-theme="light"] #btn-logout:hover {
+  background: rgba(254, 242, 242, 0.9) !important;
+  border-color: #f43f5e !important;
+  color: #e11d48 !important;
+}
+
+html.light-theme #user-display-name,
+[data-theme="light"] #user-display-name {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #user-display-email,
+[data-theme="light"] #user-display-email {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme #user-display-avatar,
+[data-theme="light"] #user-display-avatar {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* 4. Sidebar Container in Light Mode - Exact 280px width, 1px border matching Dark Mode */
+html.light-theme #sidebar,
+[data-theme="light"] #sidebar {
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #sidebar > div:first-child,
+[data-theme="light"] #sidebar > div:first-child {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light-theme #sidebar > div:first-child span,
+[data-theme="light"] #sidebar > div:first-child span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #sidebar span.uppercase,
+[data-theme="light"] #sidebar span.uppercase {
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+/* 5. Sidebar Navigation Items & Menu Icons (100% Zero Layout Shift, w-5 h-5 / 20px x 20px) */
 html.light-theme #sidebar a,
 [data-theme="light"] #sidebar a {
   color: #334155 !important;
   font-weight: 600 !important;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 html.light-theme #sidebar a:hover,
 [data-theme="light"] #sidebar a:hover {
-  background: rgba(236, 254, 255, 0.9) !important;
+  background: rgba(236, 254, 255, 0.85) !important;
   color: #0891b2 !important;
 }
 
-html.light-theme #sidebar a.sidebar-nav-active,
-[data-theme="light"] #sidebar a.sidebar-nav-active {
-  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.4) !important;
+/* Sidebar Icon Frames in Light Mode: Exactly 20px x 20px (w-5 h-5) with Neon Glow */
+html.light-theme #sidebar a .shrink-0.w-5.h-5,
+html.light-theme #sidebar a i.shrink-0,
+[data-theme="light"] #sidebar a .shrink-0.w-5.h-5,
+[data-theme="light"] #sidebar a i.shrink-0 {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.45), 0 0 6px rgba(6, 182, 212, 0.3), 0 0 10px rgba(16, 185, 129, 0.25), 0 0 2px #ffffff !important;
+  transition: box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease !important;
 }
 
-html.light-theme #sidebar a.sidebar-nav-active i,
-html.light-theme #sidebar a.sidebar-nav-active span,
-[data-theme="light"] #sidebar a.sidebar-nav-active i,
-[data-theme="light"] #sidebar a.sidebar-nav-active span {
+/* Individual High-Contrast Icon Colors per Tab */
+html.light-theme #sidebar a[data-tab="dashboard"] i,
+[data-theme="light"] #sidebar a[data-tab="dashboard"] i {
+  color: #059669 !important;
+}
+
+html.light-theme #sidebar a[data-tab="transactions"] i,
+[data-theme="light"] #sidebar a[data-tab="transactions"] i {
+  color: #0891b2 !important;
+}
+
+html.light-theme #sidebar a[data-tab="wallets"] i,
+[data-theme="light"] #sidebar a[data-tab="wallets"] i {
+  color: #4f46e5 !important;
+}
+
+html.light-theme #sidebar a[data-tab="budgets"] i,
+[data-theme="light"] #sidebar a[data-tab="budgets"] i {
+  color: #d97706 !important;
+}
+
+html.light-theme #sidebar a[data-tab="savings"] i,
+[data-theme="light"] #sidebar a[data-tab="savings"] i {
+  color: #0d9488 !important;
+}
+
+html.light-theme #sidebar a[data-tab="categories"] i,
+[data-theme="light"] #sidebar a[data-tab="categories"] i {
+  color: #e11d48 !important;
+}
+
+html.light-theme #sidebar a[data-tab="analytics"] i,
+[data-theme="light"] #sidebar a[data-tab="analytics"] i {
+  color: #7c3aed !important;
+}
+
+html.light-theme #sidebar a[data-tab="badges"] i,
+[data-theme="light"] #sidebar a[data-tab="badges"] i {
+  color: #d97706 !important;
+}
+
+html.light-theme #sidebar a[data-tab="subscription"] i,
+[data-theme="light"] #sidebar a[data-tab="subscription"] i {
+  color: #d97706 !important;
+}
+
+html.light-theme #sidebar a[data-tab="ai_assistant"] i,
+[data-theme="light"] #sidebar a[data-tab="ai_assistant"] i {
+  color: #4f46e5 !important;
+}
+
+html.light-theme #sidebar a[data-tab="notifications"] i,
+[data-theme="light"] #sidebar a[data-tab="notifications"] i {
+  color: #db2777 !important;
+}
+
+html.light-theme #sidebar a[data-tab="support"] i,
+[data-theme="light"] #sidebar a[data-tab="support"] i {
+  color: #059669 !important;
+}
+
+html.light-theme #sidebar a[data-tab="settings"] i,
+[data-theme="light"] #sidebar a[data-tab="settings"] i {
+  color: #475569 !important;
+}
+
+html.light-theme #sidebar a[data-tab="admin_dashboard"] i,
+[data-theme="light"] #sidebar a[data-tab="admin_dashboard"] i {
+  color: #e11d48 !important;
+}
+
+/* Hover Tri-Color Neon Bloom in Light Mode - No Scale to Prevent Shift */
+html.light-theme #sidebar a:hover .shrink-0.w-5.h-5,
+html.light-theme #sidebar a:hover i.shrink-0,
+[data-theme="light"] #sidebar a:hover .shrink-0.w-5.h-5,
+[data-theme="light"] #sidebar a:hover i.shrink-0 {
+  box-shadow: 0 0 0 1px #06b6d4, 0 0 8px rgba(6, 182, 212, 0.55), 0 0 14px rgba(16, 185, 129, 0.4), 0 0 4px #ffffff !important;
+  transform: none !important;
+}
+
+/* Active State Tri-Color Neon Bloom - No Scale */
+html.light-theme #sidebar a.sidebar-nav-active,
+html.light-theme #sidebar a.active,
+[data-theme="light"] #sidebar a.sidebar-nav-active,
+[data-theme="light"] #sidebar a.active {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.35), 0 0 20px rgba(16, 185, 129, 0.2) !important;
+}
+
+html.light-theme #sidebar a.sidebar-nav-active span,
+html.light-theme #sidebar a.active span,
+[data-theme="light"] #sidebar a.sidebar-nav-active span,
+[data-theme="light"] #sidebar a.active span {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #sidebar a.sidebar-nav-active .shrink-0.w-5.h-5,
+html.light-theme #sidebar a.sidebar-nav-active i.shrink-0,
+html.light-theme #sidebar a.active .shrink-0.w-5.h-5,
+html.light-theme #sidebar a.active i.shrink-0,
+[data-theme="light"] #sidebar a.sidebar-nav-active .shrink-0.w-5.h-5,
+[data-theme="light"] #sidebar a.sidebar-nav-active i.shrink-0,
+[data-theme="light"] #sidebar a.active .shrink-0.w-5.h-5,
+[data-theme="light"] #sidebar a.active i.shrink-0 {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 1px #ffffff, 0 0 10px rgba(255, 255, 255, 0.9), 0 0 16px rgba(6, 182, 212, 0.6), 0 0 22px rgba(16, 185, 129, 0.4) !important;
+  transform: none !important;
+}
+
+/* 6. Sidebar Badges & Footers */
+html.light-theme #sidebar-subscription-badge,
+[data-theme="light"] #sidebar-subscription-badge {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+html.light-theme #sidebar-notification-badge,
+[data-theme="light"] #sidebar-notification-badge {
+  background: rgba(244, 63, 94, 0.15) !important;
+  color: #e11d48 !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+
+html.light-theme #sidebar-user-footer,
+[data-theme="light"] #sidebar-user-footer {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(240, 253, 250, 0.95) 100%) !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 4px 15px -2px rgba(6, 182, 212, 0.15), 0 0 10px rgba(16, 185, 129, 0.08) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #sidebar-user-footer span,
+html.light-theme #sidebar-user-footer i,
+[data-theme="light"] #sidebar-user-footer span,
+[data-theme="light"] #sidebar-user-footer i {
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #sidebar-user-footer p,
+[data-theme="light"] #sidebar-user-footer p {
+  color: #475569 !important;
+}
+
+html.light-theme #sidebar-admin-footer,
+[data-theme="light"] #sidebar-admin-footer {
+  background: #ffffff !important;
+  border: 1px solid rgba(244, 63, 94, 0.45) !important;
+  box-shadow: 0 4px 15px -2px rgba(244, 63, 94, 0.12) !important;
+}
+
+html.light-theme #btn-sidebar-exit-admin,
+[data-theme="light"] #btn-sidebar-exit-admin {
+  background: #ffffff !important;
+  border: 1px solid #10b981 !important;
+  color: #059669 !important;
+}
+
+html.light-theme #admin-nav-section a,
+[data-theme="light"] #admin-nav-section a {
+  background: #ffffff !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+html.light-theme #admin-portal-nav-text,
+[data-theme="light"] #admin-portal-nav-text {
+  color: #e11d48 !important;
 }
 
 /* Master Glass Content Container in Light Mode */
@@ -3211,38 +3610,59 @@ html.light-theme .text-slate-500:not(.badge-vip-toi-cao):not(.keep-white),
 
 /* Light Mode Accent Sharpening (Non-glare, high contrast) */
 html.light-theme .text-cyan-400,
-[data-theme="light"] .text-cyan-400 {
+html.light-theme .text-cyan-300,
+[data-theme="light"] .text-cyan-400,
+[data-theme="light"] .text-cyan-300 {
   color: #0891b2 !important;
 }
 
 html.light-theme .text-emerald-400,
-[data-theme="light"] .text-emerald-400 {
+html.light-theme .text-emerald-300,
+[data-theme="light"] .text-emerald-400,
+[data-theme="light"] .text-emerald-300 {
   color: #059669 !important;
 }
 
 html.light-theme .text-rose-400,
-[data-theme="light"] .text-rose-400 {
+html.light-theme .text-rose-300,
+[data-theme="light"] .text-rose-400,
+[data-theme="light"] .text-rose-300 {
   color: #e11d48 !important;
 }
 
 html.light-theme .text-amber-400,
-[data-theme="light"] .text-amber-400 {
+html.light-theme .text-amber-300,
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-amber-300 {
   color: #d97706 !important;
 }
 
 html.light-theme .text-purple-400,
-[data-theme="light"] .text-purple-400 {
+html.light-theme .text-purple-300,
+[data-theme="light"] .text-purple-400,
+[data-theme="light"] .text-purple-300 {
   color: #7c3aed !important;
 }
 
 html.light-theme .text-indigo-400,
-[data-theme="light"] .text-indigo-400 {
+html.light-theme .text-indigo-300,
+[data-theme="light"] .text-indigo-400,
+[data-theme="light"] .text-indigo-300 {
   color: #4f46e5 !important;
 }
 
 html.light-theme .text-pink-400,
-[data-theme="light"] .text-pink-400 {
+html.light-theme .text-pink-300,
+[data-theme="light"] .text-pink-400,
+[data-theme="light"] .text-pink-300 {
   color: #db2777 !important;
+}
+
+html.light-theme .text-teal-400,
+html.light-theme .text-teal-300,
+[data-theme="light"] .text-teal-400,
+[data-theme="light"] .text-teal-300 {
+  color: #0d9488 !important;
 }
 
 /* Icon Containers in Light Mode (Crisp, High Contrast & Subtle Neon Bloom) */
@@ -3367,17 +3787,681 @@ html.light-theme tbody tr:hover,
   background-color: rgba(241, 245, 249, 0.9) !important;
 }
 
-/* Modals & Popovers in Light Mode */
-html.light-theme #generic-modal > div,
+/* ==========================================================================
+   UNIFIED MODAL BACKDROP BLUR SYSTEM (STANDARD FOR ALL MODALS & POPUPS)
+   - Dark Mode: bg-black/40 backdrop-blur-md (rgba(0,0,0,0.4) + blur(12px))
+   - Light Mode: bg-slate-900/20 backdrop-blur-md (rgba(15,23,42,0.2) + blur(12px))
+   ========================================================================== */
+.modal-backdrop-blur,
+.fixed.inset-0.bg-black\/80,
+.fixed.inset-0.bg-black\/70,
+.fixed.inset-0.bg-black\/60,
+.fixed.inset-0.bg-black\/50,
+.fixed.inset-0.bg-black\/40,
+#generic-modal > div.fixed,
+#auth-modal,
+#ai-input-modal,
+#upgradeModal,
+#vipModal,
+#subscription-modal,
+#vip-modal,
+#service-modal,
+#upgrade-modal,
+#transaction-modal,
+#transfer-modal,
+#wallet-modal,
+#add-wallet-modal,
+#deposit-modal,
+#real-deposit-modal,
+#export-modal,
+#filter-modal,
+#landing-nav-backdrop {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+#generic-modal {
+  background-color: transparent !important;
+}
+
+html.light-theme .modal-backdrop-blur,
+html.light-theme .fixed.inset-0.bg-black\/80,
+html.light-theme .fixed.inset-0.bg-black\/70,
+html.light-theme .fixed.inset-0.bg-black\/60,
+html.light-theme .fixed.inset-0.bg-black\/50,
+html.light-theme .fixed.inset-0.bg-black\/40,
+html.light-theme #generic-modal > div.fixed,
+html.light-theme #auth-modal,
+html.light-theme #ai-input-modal,
+html.light-theme #upgradeModal,
+html.light-theme #vipModal,
+html.light-theme #subscription-modal,
+html.light-theme #vip-modal,
+html.light-theme #service-modal,
+html.light-theme #upgrade-modal,
+html.light-theme #transaction-modal,
+html.light-theme #transfer-modal,
+html.light-theme #wallet-modal,
+html.light-theme #add-wallet-modal,
+html.light-theme #deposit-modal,
+html.light-theme #real-deposit-modal,
+html.light-theme #export-modal,
+html.light-theme #filter-modal,
+html.light-theme #landing-nav-backdrop,
+[data-theme="light"] .modal-backdrop-blur,
+[data-theme="light"] .fixed.inset-0.bg-black\/80,
+[data-theme="light"] .fixed.inset-0.bg-black\/70,
+[data-theme="light"] .fixed.inset-0.bg-black\/60,
+[data-theme="light"] .fixed.inset-0.bg-black\/50,
+[data-theme="light"] .fixed.inset-0.bg-black\/40,
+[data-theme="light"] #generic-modal > div.fixed,
+[data-theme="light"] #auth-modal,
+[data-theme="light"] #ai-input-modal,
+[data-theme="light"] #upgradeModal,
+[data-theme="light"] #vipModal,
+[data-theme="light"] #subscription-modal,
+[data-theme="light"] #vip-modal,
+[data-theme="light"] #service-modal,
+[data-theme="light"] #upgrade-modal,
+[data-theme="light"] #transaction-modal,
+[data-theme="light"] #transfer-modal,
+[data-theme="light"] #wallet-modal,
+[data-theme="light"] #add-wallet-modal,
+[data-theme="light"] #deposit-modal,
+[data-theme="light"] #real-deposit-modal,
+[data-theme="light"] #export-modal,
+[data-theme="light"] #filter-modal,
+[data-theme="light"] #landing-nav-backdrop {
+  background-color: rgba(15, 23, 42, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* ==========================================================================
+   MODAL INNER CARDS IN LIGHT MODE (ELEVATED, PRISTINE WHITE, DUAL-NEON ACCENT)
+   ========================================================================== */
+html.light-theme #auth-modal > div,
+html.light-theme #ai-input-modal > div,
+html.light-theme #generic-modal > div > div,
+html.light-theme #generic-modal .bg-slate-900,
+html.light-theme [id$="-modal"] > div.bg-slate-900,
+html.light-theme [id$="-modal"] > div:not(.fixed),
+html.light-theme [id$="Modal"] > div.bg-slate-900,
+html.light-theme [id$="Modal"] > div:not(.fixed),
 html.light-theme .modal-content,
-html.light-theme [id$="-modal"] .glass-card,
-[data-theme="light"] #generic-modal > div,
-[data-theme="light"] .modal-content,
-[data-theme="light"] [id$="-modal"] .glass-card {
+[data-theme="light"] #auth-modal > div,
+[data-theme="light"] #ai-input-modal > div,
+[data-theme="light"] #generic-modal > div > div,
+[data-theme="light"] #generic-modal .bg-slate-900,
+[data-theme="light"] [id$="-modal"] > div.bg-slate-900,
+[data-theme="light"] [id$="-modal"] > div:not(.fixed),
+[data-theme="light"] [id$="Modal"] > div.bg-slate-900,
+[data-theme="light"] [id$="Modal"] > div:not(.fixed),
+[data-theme="light"] .modal-content {
   background: #ffffff !important;
   color: #0f172a !important;
   border: 1.5px solid #06b6d4 !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 35px rgba(6, 182, 212, 0.2) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2), 0 0 35px rgba(6, 182, 212, 0.25), 0 0 50px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Modal Inner Close Buttons in Light Mode */
+html.light-theme #btn-close-auth-modal,
+html.light-theme #auth-modal button[onclick*="close"],
+html.light-theme #ai-input-modal button[onclick*="close"],
+html.light-theme [id$="-modal"] button[onclick*="close"],
+html.light-theme [id$="Modal"] button[onclick*="close"],
+[data-theme="light"] #btn-close-auth-modal,
+[data-theme="light"] #auth-modal button[onclick*="close"],
+[data-theme="light"] #ai-input-modal button[onclick*="close"],
+[data-theme="light"] [id$="-modal"] button[onclick*="close"],
+[data-theme="light"] [id$="Modal"] button[onclick*="close"] {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme #btn-close-auth-modal:hover,
+html.light-theme #auth-modal button[onclick*="close"]:hover,
+html.light-theme #ai-input-modal button[onclick*="close"]:hover,
+html.light-theme [id$="-modal"] button[onclick*="close"]:hover,
+html.light-theme [id$="Modal"] button[onclick*="close"]:hover,
+[data-theme="light"] #btn-close-auth-modal:hover,
+[data-theme="light"] #auth-modal button[onclick*="close"]:hover,
+[data-theme="light"] #ai-input-modal button[onclick*="close"]:hover,
+[data-theme="light"] [id$="-modal"] button[onclick*="close"]:hover,
+[data-theme="light"] [id$="Modal"] button[onclick*="close"]:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Modal Subtitles & Labels in Light Mode */
+html.light-theme #auth-modal-subtitle,
+[data-theme="light"] #auth-modal-subtitle {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme #auth-modal label,
+html.light-theme #ai-input-modal label,
+html.light-theme [id$="-modal"] label,
+html.light-theme [id$="Modal"] label,
+[data-theme="light"] #auth-modal label,
+[data-theme="light"] #ai-input-modal label,
+[data-theme="light"] [id$="-modal"] label,
+[data-theme="light"] [id$="Modal"] label {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+}
+
+/* Modal Inner Rows & Chips in Light Mode */
+html.light-theme #auth-modal .bg-slate-950\/80,
+html.light-theme #auth-modal .bg-slate-800,
+html.light-theme #ai-input-modal .bg-slate-950,
+html.light-theme #ai-input-modal .bg-slate-800,
+html.light-theme [id$="-modal"] .bg-slate-950,
+html.light-theme [id$="-modal"] .bg-slate-900,
+html.light-theme [id$="-modal"] .bg-slate-800,
+[data-theme="light"] #auth-modal .bg-slate-950\/80,
+[data-theme="light"] #auth-modal .bg-slate-800,
+[data-theme="light"] #ai-input-modal .bg-slate-950,
+[data-theme="light"] #ai-input-modal .bg-slate-800,
+[data-theme="light"] [id$="-modal"] .bg-slate-950,
+[data-theme="light"] [id$="-modal"] .bg-slate-900,
+[data-theme="light"] [id$="-modal"] .bg-slate-800 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html.light-theme #ai-input-modal button[onclick*="ai-input-text-static"],
+[data-theme="light"] #ai-input-modal button[onclick*="ai-input-text-static"] {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme #ai-input-modal button[onclick*="ai-input-text-static"]:hover,
+[data-theme="light"] #ai-input-modal button[onclick*="ai-input-text-static"]:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+/* ==========================================================================
+   LANDING PAGE DUAL-NEON LIGHT THEME (CYAN #06b6d4 & EMERALD #10b981)
+   ========================================================================== */
+
+/* 1. Landing Header & Dropdown */
+html.light-theme #landing-page-container header,
+[data-theme="light"] #landing-page-container header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #landing-sidebar-toggle-btn,
+[data-theme="light"] #landing-sidebar-toggle-btn {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #landing-sidebar-toggle-btn:hover,
+[data-theme="light"] #landing-sidebar-toggle-btn:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0e7490 !important;
+}
+
+html.light-theme #landing-nav-dropdown,
+[data-theme="light"] #landing-nav-dropdown {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12), 0 0 30px rgba(6, 182, 212, 0.2), 0 0 50px rgba(16, 185, 129, 0.1) !important;
+}
+
+html.light-theme #landing-nav-dropdown .bg-slate-900\/40,
+[data-theme="light"] #landing-nav-dropdown .bg-slate-900\/40 {
+  background: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light-theme #landing-nav-dropdown h3,
+[data-theme="light"] #landing-nav-dropdown h3 {
+  color: #0f172a !important;
+}
+
+html.light-theme .landing-nav-item,
+[data-theme="light"] .landing-nav-item {
+  color: #334155 !important;
+}
+
+html.light-theme .landing-nav-item:hover,
+[data-theme="light"] .landing-nav-item:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .landing-nav-item.active,
+[data-theme="light"] .landing-nav-item.active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%) !important;
+  border: 1px solid #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+/* 2. Marquee Banner */
+html.light-theme .marquee-cyber-banner,
+[data-theme="light"] .marquee-cyber-banner {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 8px 25px -4px rgba(15, 23, 42, 0.05), 0 0 20px rgba(6, 182, 212, 0.2), 0 0 35px rgba(16, 185, 129, 0.1) !important;
+}
+
+html.light-theme .marquee-cyber-banner .bg-slate-900\/90,
+[data-theme="light"] .marquee-cyber-banner .bg-slate-900\/90 {
+  background: #ffffff !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-theme .marquee-cyber-banner .from-slate-950,
+[data-theme="light"] .marquee-cyber-banner .from-slate-950 {
+  --tw-gradient-from: #f8fafc var(--tw-gradient-from-position) !important;
+}
+
+html.light-theme .marquee-cyber-banner marquee,
+html.light-theme .marquee-cyber-banner marquee span.text-slate-100,
+[data-theme="light"] .marquee-cyber-banner marquee,
+[data-theme="light"] .marquee-cyber-banner marquee span.text-slate-100 {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+/* 3. Centerpiece Hero Simulation Box */
+html.light-theme .cyber-centerpiece-wrapper,
+[data-theme="light"] .cyber-centerpiece-wrapper {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.6) 0%, rgba(16, 185, 129, 0.4) 100%) !important;
+  box-shadow: 0 20px 60px -10px rgba(15, 23, 42, 0.1), 0 0 45px rgba(6, 182, 212, 0.25), 0 0 70px rgba(16, 185, 129, 0.15) !important;
+}
+
+html.light-theme .cyber-centerpiece-inner,
+[data-theme="light"] .cyber-centerpiece-inner {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-theme .cyber-centerpiece-inner .border-slate-800\/80,
+html.light-theme .cyber-centerpiece-inner .border-slate-800,
+[data-theme="light"] .cyber-centerpiece-inner .border-slate-800\/80,
+[data-theme="light"] .cyber-centerpiece-inner .border-slate-800 {
+  border-color: #e2e8f0 !important;
+}
+
+html.light-theme .cyber-centerpiece-inner .bg-slate-900\/90,
+html.light-theme .cyber-centerpiece-inner .bg-slate-900\/80,
+[data-theme="light"] .cyber-centerpiece-inner .bg-slate-900\/90,
+[data-theme="light"] .cyber-centerpiece-inner .bg-slate-900\/80 {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+/* 4 KPI Cards inside Simulation in Light Mode */
+html.light-theme .neon-card-cyan,
+[data-theme="light"] .neon-card-cyan {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.05), 0 0 18px rgba(6, 182, 212, 0.22) !important;
+}
+html.light-theme .neon-card-cyan:hover,
+[data-theme="light"] .neon-card-cyan:hover {
+  border-color: #0891b2 !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 0 28px rgba(6, 182, 212, 0.35) !important;
+}
+
+html.light-theme .neon-card-emerald,
+[data-theme="light"] .neon-card-emerald {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.05), 0 0 18px rgba(16, 185, 129, 0.22) !important;
+}
+html.light-theme .neon-card-emerald:hover,
+[data-theme="light"] .neon-card-emerald:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 0 28px rgba(16, 185, 129, 0.35) !important;
+}
+
+html.light-theme .neon-card-rose,
+[data-theme="light"] .neon-card-rose {
+  background: #ffffff !important;
+  border: 1.5px solid #f43f5e !important;
+  box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.05), 0 0 18px rgba(244, 63, 94, 0.22) !important;
+}
+html.light-theme .neon-card-rose:hover,
+[data-theme="light"] .neon-card-rose:hover {
+  border-color: #e11d48 !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 0 28px rgba(244, 63, 94, 0.35) !important;
+}
+
+html.light-theme .neon-card-amber,
+[data-theme="light"] .neon-card-amber {
+  background: #ffffff !important;
+  border: 1.5px solid #f59e0b !important;
+  box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.05), 0 0 18px rgba(245, 158, 11, 0.22) !important;
+}
+html.light-theme .neon-card-amber:hover,
+[data-theme="light"] .neon-card-amber:hover {
+  border-color: #d97706 !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 0 28px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* AI Advisor & Live NLP Boxes in Simulation */
+html.light-theme .cyber-centerpiece-inner .from-indigo-950\/80,
+[data-theme="light"] .cyber-centerpiece-inner .from-indigo-950\/80 {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.95) 100%) !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 8px 30px -5px rgba(6, 182, 212, 0.2), 0 0 25px rgba(16, 185, 129, 0.12) !important;
+}
+
+html.light-theme .cyber-centerpiece-inner .lg\:col-span-5.bg-slate-900\/90,
+[data-theme="light"] .cyber-centerpiece-inner .lg\:col-span-5.bg-slate-900\/90 {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 8px 30px -5px rgba(16, 185, 129, 0.2), 0 0 25px rgba(6, 182, 212, 0.12) !important;
+}
+
+html.light-theme .cyber-centerpiece-inner .bg-slate-950\/80,
+[data-theme="light"] .cyber-centerpiece-inner .bg-slate-950\/80 {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* 4. Core Values 3 Pillars */
+html.light-theme .cyber-pillar-card,
+[data-theme="light"] .cyber-pillar-card {
+  background: #ffffff !important;
+  box-shadow: 0 8px 30px -5px rgba(15, 23, 42, 0.06), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .cyber-pillar-card.pillar-cyan,
+[data-theme="light"] .cyber-pillar-card.pillar-cyan {
+  border: 1.5px solid #06b6d4 !important;
+}
+
+html.light-theme .cyber-pillar-card.pillar-emerald,
+[data-theme="light"] .cyber-pillar-card.pillar-emerald {
+  border: 1.5px solid #10b981 !important;
+}
+
+html.light-theme .cyber-pillar-card.pillar-indigo,
+[data-theme="light"] .cyber-pillar-card.pillar-indigo {
+  border: 1.5px solid #06b6d4 !important;
+}
+
+html.light-theme .cyber-pillar-card:hover,
+[data-theme="light"] .cyber-pillar-card:hover {
+  transform: translateY(-5px) !important;
+}
+html.light-theme .cyber-pillar-card.pillar-cyan:hover,
+[data-theme="light"] .cyber-pillar-card.pillar-cyan:hover {
+  border-color: #0891b2 !important;
+  box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.12), 0 0 35px rgba(6, 182, 212, 0.35) !important;
+}
+html.light-theme .cyber-pillar-card.pillar-emerald:hover,
+[data-theme="light"] .cyber-pillar-card.pillar-emerald:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.12), 0 0 35px rgba(16, 185, 129, 0.35) !important;
+}
+html.light-theme .cyber-pillar-card.pillar-indigo:hover,
+[data-theme="light"] .cyber-pillar-card.pillar-indigo:hover {
+  border-color: #0891b2 !important;
+  box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.12), 0 0 35px rgba(6, 182, 212, 0.35) !important;
+}
+
+/* 5. Feature Cards & Advisor Step Cards */
+html.light-theme .cyber-feature-card,
+[data-theme="light"] .cyber-feature-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 8px 25px -5px rgba(15, 23, 42, 0.05), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .cyber-feature-card:hover,
+[data-theme="light"] .cyber-feature-card:hover {
+  border-color: #10b981 !important;
+  box-shadow: 0 16px 35px -8px rgba(15, 23, 42, 0.1), 0 0 30px rgba(16, 185, 129, 0.35) !important;
+  transform: translateY(-4px) !important;
+}
+
+html.light-theme .cyber-step-card,
+[data-theme="light"] .cyber-step-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 8px 25px -5px rgba(15, 23, 42, 0.05), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .cyber-step-card:hover,
+[data-theme="light"] .cyber-step-card:hover {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 16px 35px -8px rgba(15, 23, 42, 0.1), 0 0 30px rgba(6, 182, 212, 0.35) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* 6. Pricing Cards & Comparison Table in Light Mode */
+html.light-theme .pricing-card-free,
+[data-theme="light"] .pricing-card-free {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 20px rgba(6, 182, 212, 0.12) !important;
+}
+html.light-theme .pricing-card-free:hover,
+[data-theme="light"] .pricing-card-free:hover {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 18px 40px -10px rgba(15, 23, 42, 0.1), 0 0 30px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme .pricing-card-pro,
+[data-theme="light"] .pricing-card-pro {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 25px rgba(6, 182, 212, 0.25) !important;
+}
+html.light-theme .pricing-card-pro:hover,
+[data-theme="light"] .pricing-card-pro:hover {
+  border-color: #0891b2 !important;
+  box-shadow: 0 18px 40px -10px rgba(15, 23, 42, 0.1), 0 0 35px rgba(6, 182, 212, 0.4) !important;
+}
+
+html.light-theme .pricing-card-vip,
+html.light-theme .pricing-card-featured,
+[data-theme="light"] .pricing-card-vip,
+[data-theme="light"] .pricing-card-featured {
+  background: #ffffff !important;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.08), 0 0 28px rgba(16, 185, 129, 0.3) !important;
+}
+html.light-theme .pricing-card-vip:hover,
+html.light-theme .pricing-card-featured:hover,
+[data-theme="light"] .pricing-card-vip:hover,
+[data-theme="light"] .pricing-card-featured:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.12), 0 0 40px rgba(16, 185, 129, 0.45) !important;
+}
+
+html.light-theme .pricing-card-platinum,
+[data-theme="light"] .pricing-card-platinum {
+  background: #ffffff !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.08), 0 0 28px rgba(6, 182, 212, 0.35), 0 0 45px rgba(16, 185, 129, 0.2) !important;
+}
+html.light-theme .pricing-card-platinum:hover,
+[data-theme="light"] .pricing-card-platinum:hover {
+  box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.12), 0 0 45px rgba(6, 182, 212, 0.5), 0 0 60px rgba(16, 185, 129, 0.3) !important;
+}
+
+html.light-theme .comparison-table-wrapper,
+[data-theme="light"] .comparison-table-wrapper {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 15px 40px -10px rgba(15, 23, 42, 0.08), 0 0 25px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .comparison-table th,
+[data-theme="light"] .comparison-table th {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+html.light-theme .comparison-table td,
+[data-theme="light"] .comparison-table td {
+  color: #334155 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+html.light-theme .comparison-table tr:hover td,
+[data-theme="light"] .comparison-table tr:hover td {
+  background: rgba(236, 254, 255, 0.55) !important;
+}
+
+/* 7. About Tab & Security Cards */
+html.light-theme .glass-security-card,
+[data-theme="light"] .glass-security-card {
+  background: #ffffff !important;
+  box-shadow: 0 8px 30px -5px rgba(15, 23, 42, 0.06), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .glass-security-cyan,
+[data-theme="light"] .glass-security-cyan {
+  border: 1.5px solid #06b6d4 !important;
+}
+
+html.light-theme .glass-security-emerald,
+[data-theme="light"] .glass-security-emerald {
+  border: 1.5px solid #10b981 !important;
+}
+
+html.light-theme .glass-security-amber,
+[data-theme="light"] .glass-security-amber {
+  border: 1.5px solid #06b6d4 !important;
+}
+
+html.light-theme .glass-security-indigo,
+[data-theme="light"] .glass-security-indigo {
+  border: 1.5px solid #10b981 !important;
+}
+
+html.light-theme details.group,
+[data-theme="light"] details.group {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 0 12px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme details.group:hover,
+[data-theme="light"] details.group:hover {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 8px 24px -4px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme details.group summary,
+[data-theme="light"] details.group summary {
+  color: #0f172a !important;
+}
+
+html.light-theme details.group .faq-content,
+[data-theme="light"] details.group .faq-content {
+  color: #334155 !important;
+  border-top-color: #e2e8f0 !important;
+}
+
+/* 8. Landing Footer */
+html.light-theme #landing-page-container footer,
+html.light-theme footer,
+[data-theme="light"] #landing-page-container footer,
+[data-theme="light"] footer {
+  background: #ffffff !important;
+  border-top: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 -10px 30px -5px rgba(6, 182, 212, 0.12), 0 0 40px rgba(16, 185, 129, 0.08) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme footer h4,
+[data-theme="light"] footer h4 {
+  color: #0f172a !important;
+}
+
+html.light-theme footer a,
+html.light-theme footer p,
+html.light-theme footer span,
+[data-theme="light"] footer a,
+[data-theme="light"] footer p,
+[data-theme="light"] footer span {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme footer a:hover,
+[data-theme="light"] footer a:hover {
+  color: #0891b2 !important;
+}
+
+/* 9. Interactive Mock Chat Box Demo in Advisor Tab */
+html.light-theme #tab-landing-advisor .border-2.border-indigo-500\/40,
+[data-theme="light"] #tab-landing-advisor .border-2.border-indigo-500\/40 {
+  background: #ffffff !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 15px 40px -10px rgba(15, 23, 42, 0.08), 0 0 30px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme #tab-landing-advisor .bg-emerald-950\/50,
+[data-theme="light"] #tab-landing-advisor .bg-emerald-950\/50 {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #064e3b !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme #tab-landing-advisor .bg-slate-900\/90,
+[data-theme="light"] #tab-landing-advisor .bg-slate-900\/90 {
+  background: rgba(236, 254, 255, 0.75) !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-landing-advisor .grid .bg-slate-900\/80,
+[data-theme="light"] #tab-landing-advisor .grid .bg-slate-900\/80 {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-theme #tab-landing-advisor .grid .bg-slate-900\/80:hover,
+[data-theme="light"] #tab-landing-advisor .grid .bg-slate-900\/80:hover {
+  border-color: #10b981 !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* 10. Home Bottom CTA Banner */
+html.light-theme #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40,
+[data-theme="light"] #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40 {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.98) 0%, rgba(255, 255, 255, 0.99) 50%, rgba(236, 253, 245, 0.98) 100%) !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 15px 40px -10px rgba(6, 182, 212, 0.2), 0 0 35px rgba(16, 185, 129, 0.15) !important;
+}
+
+html.light-theme #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40 h3,
+[data-theme="light"] #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40 h3 {
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40 p,
+[data-theme="light"] #tab-landing-home .bg-gradient-to-r.from-cyan-950\/40 p {
+  color: #334155 !important;
 }
 
 html.light-theme #header-notif-dropdown,
@@ -3428,4 +4512,1043 @@ html.light-theme .custom-scrollbar::-webkit-scrollbar-thumb:hover,
 button[aria-current="page"],
 .ai-pulse-btn {
   color: #ffffff !important;
+}
+
+/* ==========================================================================
+   GLOBAL BUTTONS & BADGES LIGHT THEME SYNCHRONIZATION SYSTEM
+   Dual-Neon Palette: Cyan (#06b6d4) & Emerald (#10b981)
+   No dark/black buttons, cards, tags, or pills in Light Mode.
+   ========================================================================== */
+
+/* 1. Global Buttons with Dark Tailwind Backgrounds -> Crisp White with Cyan/Emerald Bloom */
+html.light-theme button.bg-slate-800,
+html.light-theme button.bg-slate-800\/90,
+html.light-theme button.bg-slate-800\/80,
+html.light-theme button.bg-slate-800\/70,
+html.light-theme button.bg-slate-900,
+html.light-theme button.bg-slate-900\/90,
+html.light-theme button.bg-slate-900\/80,
+html.light-theme button.bg-slate-950,
+html.light-theme button.bg-slate-700,
+html.light-theme .btn-slate,
+html.light-theme .btn-secondary,
+[data-theme="light"] button.bg-slate-800,
+[data-theme="light"] button.bg-slate-800\/90,
+[data-theme="light"] button.bg-slate-800\/80,
+[data-theme="light"] button.bg-slate-800\/70,
+[data-theme="light"] button.bg-slate-900,
+[data-theme="light"] button.bg-slate-900\/90,
+[data-theme="light"] button.bg-slate-900\/80,
+[data-theme="light"] button.bg-slate-950,
+[data-theme="light"] button.bg-slate-700,
+[data-theme="light"] .btn-slate,
+[data-theme="light"] .btn-secondary {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.1), 0 0 10px rgba(16, 185, 129, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.light-theme button.bg-slate-800:hover,
+html.light-theme button.bg-slate-800\/90:hover,
+html.light-theme button.bg-slate-800\/80:hover,
+html.light-theme button.bg-slate-800\/70:hover,
+html.light-theme button.bg-slate-900:hover,
+html.light-theme button.bg-slate-900\/90:hover,
+html.light-theme button.bg-slate-900\/80:hover,
+html.light-theme button.bg-slate-950:hover,
+html.light-theme button.bg-slate-700:hover,
+html.light-theme .btn-slate:hover,
+html.light-theme .btn-secondary:hover,
+[data-theme="light"] button.bg-slate-800:hover,
+[data-theme="light"] button.bg-slate-800\/90:hover,
+[data-theme="light"] button.bg-slate-800\/80:hover,
+[data-theme="light"] button.bg-slate-800\/70:hover,
+[data-theme="light"] button.bg-slate-900:hover,
+[data-theme="light"] button.bg-slate-900\/90:hover,
+[data-theme="light"] button.bg-slate-900\/80:hover,
+[data-theme="light"] button.bg-slate-950:hover,
+[data-theme="light"] button.bg-slate-700:hover,
+[data-theme="light"] .btn-slate:hover,
+[data-theme="light"] .btn-secondary:hover {
+  background-color: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25), 0 0 16px rgba(6, 182, 212, 0.2) !important;
+}
+
+/* Specific Notification dropdown buttons in Light Mode */
+html.light-theme #btn-dropdown-mark-read,
+[data-theme="light"] #btn-dropdown-mark-read {
+  color: #0891b2 !important;
+}
+html.light-theme #btn-dropdown-mark-read:hover,
+[data-theme="light"] #btn-dropdown-mark-read:hover {
+  color: #059669 !important;
+}
+html.light-theme #btn-dropdown-view-all,
+[data-theme="light"] #btn-dropdown-view-all {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  font-weight: 700 !important;
+}
+html.light-theme #btn-dropdown-view-all:hover,
+[data-theme="light"] #btn-dropdown-view-all:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+}
+
+/* 2. Pricing Card Action Buttons in Light Mode */
+html.light-theme .pricing-card-free button,
+[data-theme="light"] .pricing-card-free button {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15) !important;
+}
+html.light-theme .pricing-card-free button:hover,
+[data-theme="light"] .pricing-card-free button:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25) !important;
+}
+
+html.light-theme .pricing-card-pro button,
+[data-theme="light"] .pricing-card-pro button {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.35) !important;
+}
+
+/* 3. Status Badges & Plan Tags in Light Mode */
+html.light-theme .badge-fintrack-free,
+html.light-theme .badge-active-free,
+[data-theme="light"] .badge-fintrack-free,
+[data-theme="light"] .badge-active-free {
+  background-color: rgba(6, 182, 212, 0.12) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.15) !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .free-icon-box,
+[data-theme="light"] .free-icon-box {
+  background-color: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.15) !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .badge-vip-pro,
+[data-theme="light"] .badge-vip-pro {
+  background: rgba(6, 182, 212, 0.15) !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .badge-fintrack-vip,
+[data-theme="light"] .badge-fintrack-vip {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .badge-wallet-deposit,
+[data-theme="light"] .badge-wallet-deposit {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* 4. Transaction History Table Badges, Tags, Pills, and Buttons */
+html.light-theme td span.bg-slate-800\/90,
+html.light-theme td span.bg-slate-800,
+html.light-theme td span.bg-slate-900,
+html.light-theme td span.bg-slate-950,
+html.light-theme td span.border-slate-700\/60,
+html.light-theme td span.border-slate-700,
+html.light-theme .tx-category-badge,
+html.light-theme .tx-wallet-badge,
+[data-theme="light"] td span.bg-slate-800\/90,
+[data-theme="light"] td span.bg-slate-800,
+[data-theme="light"] td span.bg-slate-900,
+[data-theme="light"] td span.bg-slate-950,
+[data-theme="light"] td span.border-slate-700\/60,
+[data-theme="light"] td span.border-slate-700,
+[data-theme="light"] .tx-category-badge,
+[data-theme="light"] .tx-wallet-badge {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 6px rgba(6, 182, 212, 0.1) !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #transactions-table button,
+html.light-theme table button,
+[data-theme="light"] #transactions-table button,
+[data-theme="light"] table button {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme #transactions-table button:hover,
+html.light-theme table button:hover,
+[data-theme="light"] #transactions-table button:hover,
+[data-theme="light"] table button:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+/* Filter, Reset, and Export Buttons */
+html.light-theme #btn-apply-filters,
+[data-theme="light"] #btn-apply-filters {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3) !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #btn-reset-filters,
+html.light-theme #btn-tx-export-excel,
+html.light-theme #btn-tx-export-pdf,
+html.light-theme #btn-export-csv,
+html.light-theme #btn-reset-categories,
+[data-theme="light"] #btn-reset-filters,
+[data-theme="light"] #btn-tx-export-excel,
+[data-theme="light"] #btn-tx-export-pdf,
+[data-theme="light"] #btn-export-csv,
+[data-theme="light"] #btn-reset-categories {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme #btn-reset-filters:hover,
+html.light-theme #btn-tx-export-excel:hover,
+html.light-theme #btn-tx-export-pdf:hover,
+html.light-theme #btn-export-csv:hover,
+html.light-theme #btn-reset-categories:hover,
+[data-theme="light"] #btn-reset-filters:hover,
+[data-theme="light"] #btn-tx-export-excel:hover,
+[data-theme="light"] #btn-tx-export-pdf:hover,
+[data-theme="light"] #btn-export-csv:hover,
+[data-theme="light"] #btn-reset-categories:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Pagination Controls in Light Mode */
+html.light-theme .btn-tx-page:not([aria-current="page"]):not(.bg-cyan-500),
+html.light-theme #btn-tx-prev,
+html.light-theme #btn-tx-next,
+[data-theme="light"] .btn-tx-page:not([aria-current="page"]):not(.bg-cyan-500),
+[data-theme="light"] #btn-tx-prev,
+[data-theme="light"] #btn-tx-next {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme .btn-tx-page:not([aria-current="page"]):not(.bg-cyan-500):hover,
+html.light-theme #btn-tx-prev:hover,
+html.light-theme #btn-tx-next:hover,
+[data-theme="light"] .btn-tx-page:not([aria-current="page"]):not(.bg-cyan-500):hover,
+[data-theme="light"] #btn-tx-prev:hover,
+[data-theme="light"] #btn-tx-next:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme #select-tx-page-size,
+[data-theme="light"] #select-tx-page-size {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* 5. Wallets Real Wallet Section & Action Cards in Light Mode */
+html.light-theme #real-wallet-section,
+html.light-theme #real-wallet-section .glass-card,
+html.light-theme #real-wallet-section .bg-slate-950\/80,
+html.light-theme #real-wallet-section .bg-slate-900\/90,
+[data-theme="light"] #real-wallet-section,
+[data-theme="light"] #real-wallet-section .glass-card,
+[data-theme="light"] #real-wallet-section .bg-slate-950\/80,
+[data-theme="light"] #real-wallet-section .bg-slate-900\/90 {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(16, 185, 129, 0.2), 0 0 40px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme .deposit-quick-btn,
+[data-theme="light"] .deposit-quick-btn {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+  color: #059669 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme .deposit-quick-btn:hover,
+[data-theme="light"] .deposit-quick-btn:hover {
+  background: rgba(236, 253, 245, 0.95) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 6. Sub-Module Chips, Gamification Level Cards & Tags in Light Mode */
+html.light-theme .quick-chip,
+[data-theme="light"] .quick-chip {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme .quick-chip:hover,
+[data-theme="light"] .quick-chip:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+html.light-theme #gamification-level-icon-box,
+[data-theme="light"] #gamification-level-icon-box {
+  background: #ffffff !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme #gamification-level-badge-pill,
+[data-theme="light"] #gamification-level-badge-pill {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35) !important;
+}
+
+html.light-theme .badge-tag-pill,
+html.light-theme span.badge,
+[data-theme="light"] .badge-tag-pill,
+[data-theme="light"] span.badge {
+  background-color: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  color: #1e293b !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ==========================================================================
+   TOAST ALERTS SYSTEM IN LIGHT MODE (SOOTHING EMERALD-CYAN LIGHT GRADIENT)
+   Màu nền Light pha sắc Xanh lá & Xanh dương dịu mắt (emerald-50 to cyan-50)
+   Viền mảnh màu xanh neon Cyan/Emerald, chữ đậm rõ ràng, phát sáng mờ.
+   ========================================================================== */
+html.light-theme .toast-msg,
+html.light-theme #toast-container > div,
+[data-theme="light"] .toast-msg,
+[data-theme="light"] #toast-container > div {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1px solid rgba(6, 182, 212, 0.5) !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 16px rgba(6, 182, 212, 0.22), 0 0 25px rgba(16, 185, 129, 0.15) !important;
+}
+
+html.light-theme .toast-msg span,
+html.light-theme #toast-container > div span,
+html.light-theme #toast-container > div p,
+[data-theme="light"] .toast-msg span,
+[data-theme="light"] #toast-container > div span,
+[data-theme="light"] #toast-container > div p {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme .toast-msg i,
+html.light-theme #toast-container > div i,
+[data-theme="light"] .toast-msg i,
+[data-theme="light"] #toast-container > div i {
+  font-size: 15px !important;
+}
+
+/* Success Toasts in Light Mode (e.g. "Chào mừng ...") */
+html.light-theme .toast-msg.bg-emerald-600,
+html.light-theme .toast-msg:has(i.fa-circle-check),
+[data-theme="light"] .toast-msg.bg-emerald-600,
+[data-theme="light"] .toast-msg:has(i.fa-circle-check) {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.98) 0%, rgba(255, 255, 255, 0.99) 55%, rgba(236, 254, 255, 0.95) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.6) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 18px rgba(16, 185, 129, 0.3) !important;
+}
+
+html.light-theme .toast-msg.bg-emerald-600 i,
+html.light-theme .toast-msg:has(i.fa-circle-check) i,
+[data-theme="light"] .toast-msg.bg-emerald-600 i,
+[data-theme="light"] .toast-msg:has(i.fa-circle-check) i {
+  color: #059669 !important;
+}
+
+/* Info Toasts in Light Mode (e.g. "Đã điền thông tin Demo Admin ...") */
+html.light-theme .toast-msg.bg-slate-800,
+html.light-theme .toast-msg:has(i.fa-circle-info),
+[data-theme="light"] .toast-msg.bg-slate-800,
+[data-theme="light"] .toast-msg:has(i.fa-circle-info) {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.98) 0%, rgba(255, 255, 255, 0.99) 50%, rgba(240, 253, 250, 0.98) 100%) !important;
+  border-color: rgba(6, 182, 212, 0.6) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 18px rgba(6, 182, 212, 0.3) !important;
+}
+
+html.light-theme .toast-msg.bg-slate-800 i,
+html.light-theme .toast-msg:has(i.fa-circle-info) i,
+[data-theme="light"] .toast-msg.bg-slate-800 i,
+[data-theme="light"] .toast-msg:has(i.fa-circle-info) i {
+  color: #0891b2 !important;
+}
+
+/* Warning Toasts in Light Mode */
+html.light-theme .toast-msg.bg-amber-500,
+html.light-theme .toast-msg:has(i.fa-triangle-exclamation),
+[data-theme="light"] .toast-msg.bg-amber-500,
+[data-theme="light"] .toast-msg:has(i.fa-triangle-exclamation) {
+  background: linear-gradient(135deg, rgba(254, 252, 232, 0.98) 0%, rgba(255, 255, 255, 0.99) 50%, rgba(236, 254, 255, 0.95) 100%) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 18px rgba(245, 158, 11, 0.3) !important;
+}
+
+html.light-theme .toast-msg.bg-amber-500 i,
+html.light-theme .toast-msg:has(i.fa-triangle-exclamation) i,
+[data-theme="light"] .toast-msg.bg-amber-500 i,
+[data-theme="light"] .toast-msg:has(i.fa-triangle-exclamation) i {
+  color: #d97706 !important;
+}
+
+/* Error Toasts in Light Mode */
+html.light-theme .toast-msg.bg-rose-600,
+html.light-theme .toast-msg:has(i.fa-circle-exclamation),
+[data-theme="light"] .toast-msg.bg-rose-600,
+[data-theme="light"] .toast-msg:has(i.fa-circle-exclamation) {
+  background: linear-gradient(135deg, rgba(255, 241, 242, 0.98) 0%, rgba(255, 255, 255, 0.99) 50%, rgba(236, 254, 255, 0.95) 100%) !important;
+  border-color: rgba(244, 63, 94, 0.6) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 18px rgba(244, 63, 94, 0.3) !important;
+}
+
+html.light-theme .toast-msg.bg-rose-600 i,
+html.light-theme .toast-msg:has(i.fa-circle-exclamation) i,
+[data-theme="light"] .toast-msg.bg-rose-600 i,
+[data-theme="light"] .toast-msg:has(i.fa-circle-exclamation) i {
+  color: #e11d48 !important;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE ALL-PAGE LIGHT THEME SYNCHRONIZATION SYSTEM
+   Dashboard, Gói Dịch Vụ, Hỗ Trợ, Danh Mục Thu-Chi, Huy Hiệu, Trợ Lý AI...
+   Đồng bộ toàn bộ thẻ Card, Khung Bảng và Tiêu đề sang nền sáng tinh khôi
+   hoặc nền Light pha sắc Xanh Lá & Xanh Dương dịu mắt (emerald-50 to cyan-50),
+   viền mảnh sắc nét, chữ rõ ràng dễ đọc.
+   TUYỆT ĐỐI KHÔNG ẢNH HƯỞNG ĐẾN DARK THEME (100% Scoped to Light Theme).
+   ========================================================================== */
+
+/* 1. Universal Slate & Dark Background Overrides for Light Mode */
+html.light-theme .bg-slate-950,
+html.light-theme .bg-slate-950\/95,
+html.light-theme .bg-slate-950\/90,
+html.light-theme .bg-slate-950\/80,
+html.light-theme .bg-slate-950\/70,
+html.light-theme .bg-slate-950\/60,
+html.light-theme .bg-slate-950\/50,
+html.light-theme .bg-slate-950\/40,
+html.light-theme .bg-slate-900,
+html.light-theme .bg-slate-900\/95,
+html.light-theme .bg-slate-900\/90,
+html.light-theme .bg-slate-900\/85,
+html.light-theme .bg-slate-900\/80,
+html.light-theme .bg-slate-900\/70,
+html.light-theme .bg-slate-900\/60,
+html.light-theme .bg-slate-900\/50,
+html.light-theme .bg-slate-900\/40,
+html.light-theme .bg-slate-850,
+html.light-theme .bg-slate-800,
+html.light-theme .bg-slate-800\/90,
+html.light-theme .bg-slate-800\/80,
+html.light-theme .bg-slate-800\/70,
+html.light-theme .bg-slate-800\/60,
+html.light-theme .bg-slate-800\/50,
+html.light-theme .bg-slate-800\/40,
+html.light-theme .bg-\[\#080d1a\],
+html.light-theme .bg-\[\#0b0f19\],
+html.light-theme .bg-\[\#0b0f19\]\/90,
+html.light-theme .bg-\[\#0b0f19\]\/95,
+html.light-theme .bg-\[\#060810\]\/95,
+html.light-theme .bg-\[\#07090e\],
+html.light-theme .bg-\[\#080c15\],
+html.light-theme .bg-\[\#111827\],
+html.light-theme .bg-\[\#1e293b\],
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-950\/95,
+[data-theme="light"] .bg-slate-950\/90,
+[data-theme="light"] .bg-slate-950\/80,
+[data-theme="light"] .bg-slate-950\/70,
+[data-theme="light"] .bg-slate-950\/60,
+[data-theme="light"] .bg-slate-950\/50,
+[data-theme="light"] .bg-slate-950\/40,
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900\/95,
+[data-theme="light"] .bg-slate-900\/90,
+[data-theme="light"] .bg-slate-900\/85,
+[data-theme="light"] .bg-slate-900\/80,
+[data-theme="light"] .bg-slate-900\/70,
+[data-theme="light"] .bg-slate-900\/60,
+[data-theme="light"] .bg-slate-900\/50,
+[data-theme="light"] .bg-slate-900\/40,
+[data-theme="light"] .bg-slate-850,
+[data-theme="light"] .bg-slate-800,
+[data-theme="light"] .bg-slate-800\/90,
+[data-theme="light"] .bg-slate-800\/80,
+[data-theme="light"] .bg-slate-800\/70,
+[data-theme="light"] .bg-slate-800\/60,
+[data-theme="light"] .bg-slate-800\/50,
+[data-theme="light"] .bg-slate-800\/40,
+[data-theme="light"] .bg-\[\#080d1a\],
+[data-theme="light"] .bg-\[\#0b0f19\],
+[data-theme="light"] .bg-\[\#0b0f19\]\/90,
+[data-theme="light"] .bg-\[\#0b0f19\]\/95,
+[data-theme="light"] .bg-\[\#060810\]\/95,
+[data-theme="light"] .bg-\[\#07090e\],
+[data-theme="light"] .bg-\[\#080c15\],
+[data-theme="light"] .bg-\[\#111827\],
+[data-theme="light"] .bg-\[\#1e293b\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Guard: Preserve Modal Backdrop Blurs in Light Mode so popups are clearly framed */
+html.light-theme .modal-backdrop-blur,
+html.light-theme .fixed.inset-0.bg-black\/40,
+html.light-theme .fixed.inset-0.bg-black\/50,
+html.light-theme .fixed.inset-0.bg-black\/60,
+html.light-theme .fixed.inset-0.bg-black\/70,
+html.light-theme .fixed.inset-0.bg-black\/80,
+html.light-theme .fixed.inset-0.bg-slate-950\/70,
+[data-theme="light"] .modal-backdrop-blur,
+[data-theme="light"] .fixed.inset-0.bg-black\/40,
+[data-theme="light"] .fixed.inset-0.bg-black\/50,
+[data-theme="light"] .fixed.inset-0.bg-black\/60,
+[data-theme="light"] .fixed.inset-0.bg-black\/70,
+[data-theme="light"] .fixed.inset-0.bg-black\/80,
+[data-theme="light"] .fixed.inset-0.bg-slate-950\/70 {
+  background-color: rgba(15, 23, 42, 0.25) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* 2. TRỢ LÝ AI (AI ASSISTANT & CHAT THREAD) IN LIGHT MODE */
+html.light-theme #ai-chat-thread,
+[data-theme="light"] #ai-chat-thread {
+  background: linear-gradient(180deg, #f8fafc 0%, rgba(236, 254, 255, 0.6) 50%, rgba(236, 253, 245, 0.6) 100%) !important;
+  border-left: 1px solid rgba(6, 182, 212, 0.2) !important;
+  border-right: 1px solid rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme #ai-chat-thread .bg-slate-900\/90,
+html.light-theme #ai-chat-thread .bg-slate-900,
+[data-theme="light"] #ai-chat-thread .bg-slate-900\/90,
+[data-theme="light"] #ai-chat-thread .bg-slate-900 {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.08) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #ai-chat-thread .bg-slate-900\/90 p,
+html.light-theme #ai-chat-thread .bg-slate-900\/90 span,
+html.light-theme #ai-chat-thread .bg-slate-900\/90 li,
+[data-theme="light"] #ai-chat-thread .bg-slate-900\/90 p,
+[data-theme="light"] #ai-chat-thread .bg-slate-900\/90 span,
+[data-theme="light"] #ai-chat-thread .bg-slate-900\/90 li {
+  color: #0f172a !important;
+}
+
+html.light-theme #ai-chat-thread code,
+html.light-theme code.bg-slate-950,
+[data-theme="light"] #ai-chat-thread code,
+[data-theme="light"] code.bg-slate-950 {
+  background-color: #f1f5f9 !important;
+  color: #059669 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme .chat-prompt-pill,
+html.light-theme .chat-followup-pill,
+[data-theme="light"] .chat-prompt-pill,
+[data-theme="light"] .chat-followup-pill {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme .chat-prompt-pill:hover,
+html.light-theme .chat-followup-pill:hover,
+[data-theme="light"] .chat-prompt-pill:hover,
+[data-theme="light"] .chat-followup-pill:hover {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25) !important;
+}
+
+html.light-theme #ai-advisor-quota-badge,
+[data-theme="light"] #ai-advisor-quota-badge {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+}
+
+/* 3. HUY HIỆU & THÀNH TÍCH (GAMIFICATION & BADGES) IN LIGHT MODE */
+html.light-theme #gamification-roadmap,
+[data-theme="light"] #gamification-roadmap {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.08) !important;
+}
+
+html.light-theme .badge-filter-tab,
+[data-theme="light"] .badge-filter-tab {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme .badge-filter-tab:hover,
+[data-theme="light"] .badge-filter-tab:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .badge-filter-tab.active,
+[data-theme="light"] .badge-filter-tab.active {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35) !important;
+}
+
+html.light-theme .badge-filter-tab.active span,
+[data-theme="light"] .badge-filter-tab.active span {
+  color: #ffffff !important;
+}
+
+/* Progress bar background tracks in Light Mode */
+html.light-theme .w-full.bg-slate-800,
+html.light-theme .w-full.bg-slate-950,
+html.light-theme .w-full.bg-slate-950\/80,
+[data-theme="light"] .w-full.bg-slate-800,
+[data-theme="light"] .w-full.bg-slate-950,
+[data-theme="light"] .w-full.bg-slate-950\/80 {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* 4. GÓI DỊCH VỤ & NẠP TIỀN (VIP & SUBSCRIPTIONS) IN LIGHT MODE */
+html.light-theme #vip-modal-backdrop + div,
+html.light-theme #vip-modal .bg-slate-950,
+html.light-theme #upgradeModal .bg-slate-950,
+html.light-theme #vipModal .bg-slate-950,
+html.light-theme #subscription-modal .bg-slate-950,
+[data-theme="light"] #vip-modal-backdrop + div,
+[data-theme="light"] #vip-modal .bg-slate-950,
+[data-theme="light"] #upgradeModal .bg-slate-950,
+[data-theme="light"] #vipModal .bg-slate-950,
+[data-theme="light"] #subscription-modal .bg-slate-950 {
+  background: #ffffff !important;
+  border: 2px solid #10b981 !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15), 0 0 35px rgba(16, 185, 129, 0.25) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme .vip-duration-pill,
+[data-theme="light"] .vip-duration-pill {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-theme .vip-duration-pill:hover,
+[data-theme="light"] .vip-duration-pill:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .vip-duration-pill.border-amber-400,
+html.light-theme .vip-duration-pill.border-teal-400,
+html.light-theme .vip-duration-pill.border-emerald-400,
+html.light-theme .vip-duration-pill.border-cyan-400,
+[data-theme="light"] .vip-duration-pill.border-amber-400,
+[data-theme="light"] .vip-duration-pill.border-teal-400,
+[data-theme="light"] .vip-duration-pill.border-emerald-400,
+[data-theme="light"] .vip-duration-pill.border-cyan-400 {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 2px solid #06b6d4 !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme #btnTabRealWallet,
+html.light-theme #btnTabVietQR,
+[data-theme="light"] #btnTabRealWallet,
+[data-theme="light"] #btnTabVietQR {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme #btnTabRealWallet.bg-slate-800,
+html.light-theme #btnTabVietQR.bg-slate-800,
+[data-theme="light"] #btnTabRealWallet.bg-slate-800,
+[data-theme="light"] #btnTabVietQR.bg-slate-800 {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35) !important;
+}
+
+/* User orders table headers and rows */
+html.light-theme #user-orders-table-container thead tr,
+html.light-theme thead.bg-slate-900\/90,
+[data-theme="light"] #user-orders-table-container thead tr,
+[data-theme="light"] thead.bg-slate-900\/90 {
+  background-color: #f8fafc !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #user-orders-table-container thead th,
+[data-theme="light"] #user-orders-table-container thead th {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* 5. HỖ TRỢ & KHIẾU NẠI (SUPPORT) IN LIGHT MODE */
+html.light-theme .ticket-filter-btn,
+[data-theme="light"] .ticket-filter-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme .ticket-filter-btn:hover,
+[data-theme="light"] .ticket-filter-btn:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .ticket-filter-btn.bg-teal-500\/20,
+html.light-theme .ticket-filter-btn.border-teal-500,
+[data-theme="light"] .ticket-filter-btn.bg-teal-500\/20,
+[data-theme="light"] .ticket-filter-btn.border-teal-500 {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3) !important;
+}
+
+html.light-theme .ticket-card,
+html.light-theme #support-tickets-list > div,
+[data-theme="light"] .ticket-card,
+[data-theme="light"] #support-tickets-list > div {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 6. DANH MỤC THU - CHI & GHI THU - CHI IN LIGHT MODE */
+html.light-theme #categories-container .glass-card,
+html.light-theme .category-card,
+[data-theme="light"] #categories-container .glass-card,
+[data-theme="light"] .category-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04), 0 0 10px rgba(6, 182, 212, 0.08) !important;
+}
+
+html.light-theme option.bg-slate-900,
+html.light-theme option.bg-slate-950,
+[data-theme="light"] option.bg-slate-900,
+[data-theme="light"] option.bg-slate-950 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* 7. ALL CARD TITLES & SECTION HEADINGS IN LIGHT MODE - CRISP DARK TEXT */
+html.light-theme .glass-card h2,
+html.light-theme .glass-card h3,
+html.light-theme .glass-card h4,
+html.light-theme .glass-card h5,
+html.light-theme .glass-card .font-bold.text-slate-100,
+html.light-theme .glass-card .font-extrabold.text-slate-100,
+html.light-theme .glass-card .font-black.text-slate-100,
+html.light-theme .glass-card .font-bold.text-white,
+html.light-theme .glass-card .font-extrabold.text-white,
+html.light-theme .glass-card .font-black.text-white,
+[data-theme="light"] .glass-card h2,
+[data-theme="light"] .glass-card h3,
+[data-theme="light"] .glass-card h4,
+[data-theme="light"] .glass-card h5,
+[data-theme="light"] .glass-card .font-bold.text-slate-100,
+[data-theme="light"] .glass-card .font-extrabold.text-slate-100,
+[data-theme="light"] .glass-card .font-black.text-slate-100,
+[data-theme="light"] .glass-card .font-bold.text-white,
+[data-theme="light"] .glass-card .font-extrabold.text-white,
+[data-theme="light"] .glass-card .font-black.text-white {
+  color: #0f172a !important;
+}
+
+/* ==========================================================================
+   ADMIN PORTAL & CONTROL CENTER LIGHT THEME SYSTEM (CYAN #06b6d4 & EMERALD #10b981)
+   Soothing Emerald-Cyan Light Gradient (from-emerald-50/90 to-cyan-50/90)
+   Đồng bộ triệt để toàn bộ phân hệ Admin Control Center sang nền sáng dịu mắt.
+   Không để bất kỳ banner hoặc thẻ card nào của Admin giữ nền tối/đen (bg-slate-900 / bg-slate-800).
+   TUYỆT ĐỐI KHÔNG ẢNH HƯỞNG ĐẾN DARK MODE (100% Scoped to Light Theme).
+   ========================================================================== */
+
+/* 1. Admin Top Command Cockpit Banner in Light Mode */
+html.light-theme #admin-cockpit-banner,
+html.light-theme .admin-cockpit-banner,
+html.light-theme .from-slate-950.via-slate-900.to-\[\#120818\],
+html.light-theme [class*="from-slate-950"][class*="via-slate-900"],
+[data-theme="light"] #admin-cockpit-banner,
+[data-theme="light"] .admin-cockpit-banner,
+[data-theme="light"] .from-slate-950.via-slate-900.to-\[\#120818\],
+[data-theme="light"] [class*="from-slate-950"][class*="via-slate-900"] {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 15px 40px -10px rgba(6, 182, 212, 0.15), 0 0 25px rgba(16, 185, 129, 0.1) !important;
+}
+
+html.light-theme #admin-cockpit-banner h1,
+html.light-theme #admin-cockpit-banner h1 span:not(.bg-clip-text),
+html.light-theme .admin-cockpit-banner h1,
+html.light-theme .admin-cockpit-banner h1 span:not(.bg-clip-text),
+[data-theme="light"] #admin-cockpit-banner h1,
+[data-theme="light"] #admin-cockpit-banner h1 span:not(.bg-clip-text),
+[data-theme="light"] .admin-cockpit-banner h1,
+[data-theme="light"] .admin-cockpit-banner h1 span:not(.bg-clip-text) {
+  color: #0f172a !important;
+}
+
+html.light-theme #admin-cockpit-banner p,
+html.light-theme .admin-cockpit-banner p,
+[data-theme="light"] #admin-cockpit-banner p,
+[data-theme="light"] .admin-cockpit-banner p {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+/* 2. Cockpit Status Badges & Action Buttons in Light Mode */
+html.light-theme #admin-cockpit-banner .bg-slate-900\/90,
+html.light-theme #admin-cockpit-banner .bg-slate-900,
+html.light-theme .admin-cockpit-banner .bg-slate-900\/90,
+html.light-theme .admin-cockpit-banner .bg-slate-900,
+[data-theme="light"] #admin-cockpit-banner .bg-slate-900\/90,
+[data-theme="light"] #admin-cockpit-banner .bg-slate-900,
+[data-theme="light"] .admin-cockpit-banner .bg-slate-900\/90,
+[data-theme="light"] .admin-cockpit-banner .bg-slate-900 {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.1) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #btn-admin-exit-user-mode,
+[data-theme="light"] #btn-admin-exit-user-mode {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2) !important;
+}
+
+html.light-theme #btn-admin-exit-user-mode:hover,
+[data-theme="light"] #btn-admin-exit-user-mode:hover {
+  background: rgba(236, 253, 245, 0.95) !important;
+  border-color: #059669 !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 3. Admin Dynamic Contextual Subtabs Toolbar in Light Mode */
+html.light-theme .admin-subtab-bar,
+html.light-theme #admin-dynamic-subtabs,
+[data-theme="light"] .admin-subtab-bar,
+[data-theme="light"] #admin-dynamic-subtabs {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 0 14px rgba(6, 182, 212, 0.1) !important;
+}
+
+html.light-theme .admin-subtab-pill,
+[data-theme="light"] .admin-subtab-pill {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+html.light-theme .admin-subtab-pill:hover,
+[data-theme="light"] .admin-subtab-pill:hover {
+  background: rgba(236, 254, 255, 0.9) !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+}
+
+html.light-theme .admin-subtab-pill.active,
+[data-theme="light"] .admin-subtab-pill.active {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35) !important;
+}
+
+html.light-theme .admin-subtab-pill.active span,
+html.light-theme .admin-subtab-pill.active i,
+[data-theme="light"] .admin-subtab-pill.active span,
+[data-theme="light"] .admin-subtab-pill.active i {
+  color: #ffffff !important;
+}
+
+/* 4. Active Cycle Banner in Light Mode */
+html.light-theme #admin-cycle-banner,
+html.light-theme .admin-cycle-banner,
+[data-theme="light"] #admin-cycle-banner,
+[data-theme="light"] .admin-cycle-banner {
+  background: linear-gradient(135deg, rgba(236, 254, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 253, 245, 0.95) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 4px 15px -2px rgba(6, 182, 212, 0.12) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #admin-cycle-banner span,
+html.light-theme #admin-cycle-banner b,
+html.light-theme .admin-cycle-banner span,
+html.light-theme .admin-cycle-banner b,
+[data-theme="light"] #admin-cycle-banner span,
+[data-theme="light"] #admin-cycle-banner b,
+[data-theme="light"] .admin-cycle-banner span,
+[data-theme="light"] .admin-cycle-banner b {
+  color: #0f172a !important;
+}
+
+/* 5. 4 KPI Metric Cards in Admin Control Center (Light Soothing Emerald-Cyan Gradient) */
+html.light-theme .from-blue-950\/20.to-slate-900\/60,
+html.light-theme .from-emerald-950\/20.to-slate-900\/60,
+html.light-theme .from-indigo-950\/20.to-slate-900\/60,
+html.light-theme .from-teal-950\/20.to-slate-900\/60,
+[data-theme="light"] .from-blue-950\/20.to-slate-900\/60,
+[data-theme="light"] .from-emerald-950\/20.to-slate-900\/60,
+[data-theme="light"] .from-indigo-950\/20.to-slate-900\/60,
+[data-theme="light"] .from-teal-950\/20.to-slate-900\/60 {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .admin-subtab-content-anim .glass-card,
+[data-theme="light"] .admin-subtab-content-anim .glass-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 8px 25px -5px rgba(15, 23, 42, 0.05), 0 0 14px rgba(6, 182, 212, 0.08) !important;
+}
+
+/* 6. Admin Donut Breakdown Pills & Feed in Light Mode */
+html.light-theme #admin-view-body .sm\:col-span-6 .bg-slate-900\/80,
+html.light-theme #admin-view-body .sm\:col-span-6 .bg-indigo-950\/40,
+html.light-theme #admin-view-body .sm\:col-span-6 .bg-amber-950\/40,
+html.light-theme #admin-view-body .sm\:col-span-6 .bg-purple-950\/40,
+[data-theme="light"] #admin-view-body .sm\:col-span-6 .bg-slate-900\/80,
+[data-theme="light"] #admin-view-body .sm\:col-span-6 .bg-indigo-950\/40,
+[data-theme="light"] #admin-view-body .sm\:col-span-6 .bg-amber-950\/40,
+[data-theme="light"] #admin-view-body .sm\:col-span-6 .bg-purple-950\/40 {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-theme #admin-view-body .sm\:col-span-6 span,
+[data-theme="light"] #admin-view-body .sm\:col-span-6 span {
+  color: #0f172a !important;
+}
+
+/* 7. Admin Tables (Users, Subscriptions, Logs, Bank Gateway) in Light Mode */
+html.light-theme #admin-view-body table,
+html.light-theme #admin-view-body thead,
+[data-theme="light"] #admin-view-body table,
+[data-theme="light"] #admin-view-body thead {
+  color: #0f172a !important;
+}
+
+html.light-theme #admin-view-body thead tr,
+[data-theme="light"] #admin-view-body thead tr {
+  background-color: #f8fafc !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #admin-view-body thead th,
+[data-theme="light"] #admin-view-body thead th {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body tbody tr:hover,
+[data-theme="light"] #admin-view-body tbody tr:hover {
+  background-color: rgba(236, 254, 255, 0.65) !important;
+}
+
+html.light-theme #admin-view-body .divide-y > * {
+  border-color: #f1f5f9 !important;
+}
+
+html.light-theme #admin-view-body .bg-slate-900\/80,
+html.light-theme #admin-view-body .bg-slate-900,
+html.light-theme #admin-view-body .bg-slate-950,
+[data-theme="light"] #admin-view-body .bg-slate-900\/80,
+[data-theme="light"] #admin-view-body .bg-slate-900,
+[data-theme="light"] #admin-view-body .bg-slate-950 {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  color: #0f172a !important;
+}
+
+/* 8. Bank Gateway (VietQR) Cards & Config in Admin */
+html.light-theme #admin-bank-gateway-container .glass-card,
+html.light-theme #admin-vietqr-card,
+[data-theme="light"] #admin-bank-gateway-container .glass-card,
+[data-theme="light"] #admin-vietqr-card {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(16, 185, 129, 0.2) !important;
 }

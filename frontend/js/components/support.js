@@ -356,7 +356,7 @@ export class SupportComponent {
     const isOpen = t.status === 'OPEN';
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-teal-500/30 animate-in fade-in zoom-in duration-200 space-y-4">
           
           <button id="user-ticket-detail-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">

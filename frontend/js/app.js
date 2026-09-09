@@ -1735,11 +1735,31 @@ class App {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    const colors = {
+    const isLight = document.documentElement.classList.contains('light-theme') || 
+                    document.documentElement.getAttribute('data-theme') === 'light';
+
+    const colors = isLight ? {
+      success: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-cyan-50/95 text-slate-900 border border-emerald-500/50 shadow-lg shadow-emerald-500/15',
+      error: 'bg-gradient-to-r from-rose-50/95 via-white/98 to-cyan-50/95 text-slate-900 border border-rose-500/50 shadow-lg shadow-rose-500/15',
+      warning: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-cyan-50/95 text-slate-900 border border-amber-500/50 shadow-lg shadow-amber-500/15',
+      info: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-cyan-50/95 text-slate-900 border border-cyan-500/50 shadow-lg shadow-cyan-500/15'
+    } : {
       success: 'bg-emerald-600 text-white shadow-emerald-500/30',
       error: 'bg-rose-600 text-white shadow-rose-500/30',
       warning: 'bg-amber-500 text-white shadow-amber-500/30',
       info: 'bg-slate-800 text-white shadow-slate-800/30'
+    };
+
+    const iconColors = isLight ? {
+      success: 'text-emerald-600',
+      error: 'text-rose-600',
+      warning: 'text-amber-600',
+      info: 'text-cyan-600'
+    } : {
+      success: 'text-white',
+      error: 'text-white',
+      warning: 'text-white',
+      info: 'text-white'
     };
 
     const icons = {
@@ -1752,8 +1772,8 @@ class App {
     const toast = document.createElement('div');
     toast.className = `toast-msg flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-xs font-semibold ${colors[type] || colors.info}`;
     toast.innerHTML = `
-      <i class="fa-solid ${icons[type] || icons.info} text-sm"></i>
-      <span>${message}</span>
+      <i class="fa-solid ${icons[type] || icons.info} text-sm ${iconColors[type] || iconColors.info}"></i>
+      <span class="${isLight ? 'text-slate-900 font-bold' : 'text-white'}">${message}</span>
     `;
 
     container.appendChild(toast);
@@ -1964,7 +1984,7 @@ class App {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-slate-950 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative overflow-hidden border border-teal-500/30 animate-in fade-in zoom-in duration-200">
           <button id="user-ticket-modal-close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center justify-center transition">
             <i class="fa-solid fa-xmark text-sm"></i>

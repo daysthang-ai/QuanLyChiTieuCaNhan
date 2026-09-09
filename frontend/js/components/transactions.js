@@ -565,7 +565,7 @@ export class TransactionsComponent {
       : `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 inline-flex items-center gap-1"><i class="fa-solid fa-seedling text-[8px] text-slate-400"></i> Free &bull; Tối đa 50 GD/tháng</span>`;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-xl p-5 sm:p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-200 max-h-[92vh] flex flex-col">
           
           <!-- Modal Header -->
