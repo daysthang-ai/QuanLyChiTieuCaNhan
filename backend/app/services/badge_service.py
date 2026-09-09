@@ -511,6 +511,8 @@ class BadgeService:
             }
         ]
 
+        is_admin = (user.role or "").upper() == "ADMIN" or (user.email or "").lower() == "admin@fintrack.ai"
+
         # Calculate progress percentage for each badge
         for b in badges_def:
             target = b["target_val"]
@@ -518,38 +520,92 @@ class BadgeService:
             if b["is_unlocked"]:
                 b["progress_pct"] = 100
             else:
-                pct = int((curr / target * 100)) if target > 0 else 0
-                b["progress_pct"] = max(0, min(99, pct))
+                pct = min(100, int(round((curr / target * 100)))) if target > 0 else 0
+                b["progress_pct"] = pct
+                if curr >= target and target > 0:
+                    b["is_unlocked"] = True
+                    b["progress_pct"] = 100
+                    if not b.get("unlocked_at"):
+                        b["unlocked_at"] = today_str
 
-        unlocked_count = sum(1 for b in badges_def if b["is_unlocked"])
-        total_count = len(badges_def)
+        if is_admin:
+            # Root Admin Prestigious Gamification State: Lv.8 - Hạng Kim Cương
+            current_streak = max(current_streak, 68)
+            admin_unlocked_ids = {
+                # 8 Onboarding & Bronze
+                "first_wallet", "first_transaction", "multi_wallets", "first_goal", "first_budget", "category_explorer", "streak_3_days", "savings_1m",
+                # 6 Silver
+                "streak_7_days", "streak_14_days", "completed_goal", "savings_10m", "smart_ai_user", "smart_investor",
+                # 4 Gold
+                "streak_30_days", "savings_50m", "fifty_thirty_twenty_achieved", "budget_guardian",
+                # Diamond streak
+                "streak_60_days"
+            }
 
-        # Gamification Level / Rank calculation based on standardized XP thresholds
-        xp = unlocked_count * 150 + current_streak * 25
-        if xp >= 5000:
-            level = 10
-            level_title = "Huyền Thoại FinTrack"
+            for b in badges_def:
+                if b["id"] in admin_unlocked_ids:
+                    b["is_unlocked"] = True
+                    b["current_val"] = b["target_val"]
+                    b["progress_pct"] = 100
+                    if not b.get("unlocked_at"):
+                        b["unlocked_at"] = today_str
+                elif b["id"] == "streak_100_days":
+                    b["current_val"] = current_streak
+                    b["progress_pct"] = min(100, int(round((current_streak / 100) * 100)))
+                elif b["id"] == "streak_365_days":
+                    b["current_val"] = current_streak
+                    b["progress_pct"] = min(100, int(round((current_streak / 365) * 100)))
+
+            # Dynamic binding for asset badges: networth_100m, networth_500m, networth_1b
+            for b in badges_def:
+                if b["id"] in ("networth_100m", "networth_500m", "networth_1b"):
+                    b["current_val"] = total_net_worth
+                    target = b["target_val"]
+                    pct = min(100, int(round((total_net_worth / target) * 100))) if target > 0 else 0
+                    b["progress_pct"] = pct
+                    if total_net_worth >= target and target > 0:
+                        b["is_unlocked"] = True
+                        if not b.get("unlocked_at"):
+                            b["unlocked_at"] = today_str
+                    else:
+                        b["is_unlocked"] = False
+
+            unlocked_count = sum(1 for b in badges_def if b["is_unlocked"])
+            total_count = len(badges_def)
+            level = 8
+            level_title = "Quản Trị Viên Kim Cương FinTrack"
+            xp = 4850
             xp_next_level = 5000
-        elif xp >= 3000:
-            level = 7 + min(1, (xp - 3000) // 1000)
-            level_title = "Đại Gia Tài Chính FinTrack"
-            xp_next_level = 5000
-        elif xp >= 1500:
-            level = 5 + min(1, (xp - 1500) // 750)
-            level_title = "Bậc Thầy Tài Chính FinTrack"
-            xp_next_level = 3000
-        elif xp >= 800:
-            level = 3 + min(1, (xp - 800) // 350)
-            level_title = "Chuyên Viên Quản Lý FinTrack"
-            xp_next_level = 1500
-        elif xp >= 300:
-            level = 1 + min(1, (xp - 300) // 250)
-            level_title = "Chiến Binh Tài Chính FinTrack"
-            xp_next_level = 800
         else:
-            level = 0
-            level_title = "Người Tập Sự FinTrack"
-            xp_next_level = 300
+            unlocked_count = sum(1 for b in badges_def if b["is_unlocked"])
+            total_count = len(badges_def)
+
+            # Gamification Level / Rank calculation based on standardized XP thresholds
+            xp = unlocked_count * 150 + current_streak * 25
+            if xp >= 5000:
+                level = 10
+                level_title = "Huyền Thoại FinTrack"
+                xp_next_level = 5000
+            elif xp >= 3000:
+                level = 7 + min(1, (xp - 3000) // 1000)
+                level_title = "Đại Gia Tài Chính FinTrack"
+                xp_next_level = 5000
+            elif xp >= 1500:
+                level = 5 + min(1, (xp - 1500) // 750)
+                level_title = "Bậc Thầy Tài Chính FinTrack"
+                xp_next_level = 3000
+            elif xp >= 800:
+                level = 3 + min(1, (xp - 800) // 350)
+                level_title = "Chuyên Viên Quản Lý FinTrack"
+                xp_next_level = 1500
+            elif xp >= 300:
+                level = 1 + min(1, (xp - 300) // 250)
+                level_title = "Chiến Binh Tài Chính FinTrack"
+                xp_next_level = 800
+            else:
+                level = 0
+                level_title = "Người Tập Sự FinTrack"
+                xp_next_level = 300
 
         return {
             "unlocked_count": unlocked_count,

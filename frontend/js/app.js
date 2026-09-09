@@ -6,10 +6,10 @@ import { TransactionsComponent } from './components/transactions.js?v=20260904_1
 import { WalletsComponent } from './components/wallets.js?v=20260904_14';
 import { CategoriesComponent } from './components/categories.js?v=20260904_14';
 import { BudgetsComponent } from './components/budgets.js?v=20260904_14';
-import { SavingsComponent } from './components/savings.js?v=20260904_14';
+import { SavingsComponent } from './components/savings.js?v=20260908_01';
 import { AnalyticsComponent } from './components/analytics.js?v=20260904_14';
 import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_14';
-import { BadgesComponent } from './components/badges.js?v=20260904_14';
+import { BadgesComponent } from './components/badges.js?v=20260908_01';
 import { AdminComponent } from './components/admin.js?v=20260904_14';
 import { SubscriptionComponent } from './components/subscription.js?v=20260907_01';
 import { NotificationsComponent } from './components/notifications.js?v=20260904_14';
@@ -603,6 +603,11 @@ class App {
 
   switchPortal(portal) {
     if (portal === 'admin') {
+      const role = String(this.currentUser?.role || '').toUpperCase();
+      if (role !== 'ADMIN' && role !== 'MODERATOR') {
+        this.showToast('Bạn không có quyền truy cập vào Admin Portal!', 'warning');
+        return;
+      }
       this.navigate('admin_dashboard');
     } else {
       this.navigate('dashboard');
@@ -613,16 +618,29 @@ class App {
     // Reset overlay & body overflow khi khởi động
     forceResetOverlay();
 
-    // 1. Configure Chart.js for Dark Theme safely with 0ms resize delay
+    // 1. Configure Chart.js for Dynamic Theme safely with 0ms resize delay
     try {
       if (window.Chart) {
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+        const isLight = window.getFinTrackTheme?.() === 'light';
+        Chart.defaults.color = isLight ? '#334155' : '#94a3b8';
+        Chart.defaults.borderColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
         Chart.defaults.resizeDelay = 0;
       }
     } catch (chartErr) {
       console.warn('[FinTrack] Lỗi cấu hình Chart.js:', chartErr);
     }
+
+    // 1.1 Listen for dynamic theme changes (Dark Mix Neon <-> Light Mix Neon)
+    window.addEventListener('fintrack:theme-changed', (e) => {
+      const isLight = e.detail?.isLight;
+      if (window.Chart) {
+        Chart.defaults.color = isLight ? '#334155' : '#94a3b8';
+        Chart.defaults.borderColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
+      }
+      if (this.activeTab === 'dashboard' && this.dashboard?.onThemeChanged) {
+        this.dashboard.onThemeChanged(isLight);
+      }
+    });
 
     // 2. Listen for unauthorized 401 & account locked 403 events
     try {
@@ -1225,6 +1243,11 @@ class App {
     // Admin Portal button in header
     document.getElementById('header-admin-portal-btn')?.addEventListener('click', (e) => {
       e.preventDefault();
+      const role = String(this.currentUser?.role || '').toUpperCase();
+      if (role !== 'ADMIN' && role !== 'MODERATOR') {
+        this.showToast('Bạn không có quyền truy cập vào Admin Portal!', 'warning');
+        return;
+      }
       this.navigate('admin_dashboard');
     });
 
@@ -1550,6 +1573,8 @@ class App {
     mainContainer.classList.add('tab-anim-enter');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const glassWrapper = document.getElementById('main-glass-wrapper');
+    if (glassWrapper) glassWrapper.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
       if (isAdminTab) {

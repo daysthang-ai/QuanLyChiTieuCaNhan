@@ -83,12 +83,19 @@ export class WalletsComponent {
   }
 
   async loadWallets() {
-    const realSection = document.getElementById('real-wallet-section');
-    const virtualGrid = document.getElementById('virtual-wallets-grid');
-    if (!realSection || !virtualGrid) return;
-
     try {
       this.wallets = await api.getWallets();
+
+      // Compute total live net worth and broadcast to system
+      const totalNetWorth = Array.isArray(this.wallets) 
+        ? this.wallets.reduce((acc, w) => acc + (parseFloat(w.balance) || 0), 0)
+        : 0;
+      window.fintrackLiveNetWorth = totalNetWorth;
+      window.dispatchEvent(new CustomEvent('fintrack:networth-changed', { detail: { netWorth: totalNetWorth } }));
+
+      const realSection = document.getElementById('real-wallet-section');
+      const virtualGrid = document.getElementById('virtual-wallets-grid');
+      if (!realSection || !virtualGrid) return;
       
       const realWallet = this.wallets.find(w => w.wallet_scope === 'real') || {
         id: null,

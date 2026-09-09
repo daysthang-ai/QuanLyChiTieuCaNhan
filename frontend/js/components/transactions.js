@@ -11,9 +11,12 @@ export class TransactionsComponent {
       type: '',
       from_date: '',
       to_date: '',
-      limit: 20,
+      limit: 500,
       offset: 0
     };
+    this.currentPage = 1;
+    this.pageSize = 10;
+    this.allTransactions = [];
     this.allCategories = [];
     this.allWallets = [];
   }
@@ -215,16 +218,44 @@ export class TransactionsComponent {
     }
   }
 
+  generatePaginationPages(currentPage, totalPages) {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [];
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push('...');
+      pages.push(totalPages);
+    } else if (currentPage >= totalPages - 3) {
+      pages.push(1);
+      pages.push('...');
+      for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('...');
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
+      pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  }
+
   async loadTransactions() {
     const tbody = document.getElementById('transactions-table-body');
+    const paginationEl = document.getElementById('tx-pagination-container');
     if (!tbody) return;
 
     try {
-      const txs = await api.getTransactions(this.currentFilters);
+      const filters = { ...this.currentFilters, limit: 500, offset: 0 };
+      const txs = await api.getTransactions(filters);
+      this.allTransactions = Array.isArray(txs) ? txs : [];
 
       let totInc = 0;
       let totExp = 0;
-      txs.forEach(t => {
+      this.allTransactions.forEach(t => {
         if (t.type === 'INCOME') totInc += t.amount;
         else if (t.type === 'EXPENSE') totExp += t.amount;
       });
@@ -233,7 +264,7 @@ export class TransactionsComponent {
         badge.innerHTML = `Tổng thu: <span class="text-emerald-400 font-bold font-mono">+${formatVND(totInc)}</span> | Tổng chi: <span class="text-rose-400 font-bold font-mono">-${formatVND(totExp)}</span>`;
       }
 
-      if (txs.length === 0) {
+      if (this.allTransactions.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-12 text-center text-slate-400">
@@ -242,10 +273,19 @@ export class TransactionsComponent {
             </td>
           </tr>
         `;
+        if (paginationEl) paginationEl.innerHTML = '';
         return;
       }
 
-      tbody.innerHTML = txs.map(t => {
+      const totalRecords = this.allTransactions.length;
+      const totalPages = Math.max(1, Math.ceil(totalRecords / this.pageSize));
+      this.currentPage = Math.min(Math.max(1, this.currentPage), totalPages);
+
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = Math.min(startIndex + this.pageSize, totalRecords);
+      const pagedTxs = this.allTransactions.slice(startIndex, endIndex);
+
+      tbody.innerHTML = pagedTxs.map(t => {
         const isIncome = t.type === 'INCOME';
         const isTransfer = t.type === 'TRANSFER';
         const typeBadge = isIncome 
@@ -287,7 +327,7 @@ export class TransactionsComponent {
               <div class="flex items-center gap-1.5 min-w-0">
                 <span class="truncate" title="${t.note || ''}">${t.note || '-'}</span>
                 ${t.receipt_url ? `
-                  <button onclick="window.openReceipt('${t.receipt_url}')" class="text-emerald-400 hover:text-emerald-300 text-xs flex-shrink-0" title="Xem hóa đơn đính kèm">
+                  <button onclick="window.openReceipt('${t.receipt_url}')" class="text-emerald-400 hover:text-emerald-300 text-xs flex-shrink-0 cursor-pointer" title="Xem hóa đơn đính kèm">
                     <i class="fa-solid fa-paperclip"></i>
                   </button>
                 ` : ''}
@@ -304,10 +344,10 @@ export class TransactionsComponent {
             </td>
             <td class="py-3 px-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition">
-                <button onclick="window.editTransaction(${t.id})" class="w-7 h-7 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-slate-100 flex items-center justify-center transition" title="Sửa">
+                <button onclick="window.editTransaction(${t.id})" class="w-7 h-7 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-slate-100 flex items-center justify-center transition cursor-pointer" title="Sửa">
                   <i class="fa-regular fa-pen-to-square"></i>
                 </button>
-                <button onclick="window.deleteTransaction(${t.id})" class="w-7 h-7 rounded-lg hover:bg-red-950/60 text-slate-400 hover:text-red-400 flex items-center justify-center transition" title="Xóa">
+                <button onclick="window.deleteTransaction(${t.id})" class="w-7 h-7 rounded-lg hover:bg-red-950/60 text-slate-400 hover:text-red-400 flex items-center justify-center transition cursor-pointer" title="Xóa">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
               </div>
@@ -321,6 +361,86 @@ export class TransactionsComponent {
       window.deleteTransaction = (id) => this.handleDeleteTransaction(id);
       window.openReceipt = (url) => window.open(url, '_blank');
 
+      // Render Pagination Bar
+      if (paginationEl) {
+        const pageList = this.generatePaginationPages(this.currentPage, totalPages);
+        const pageButtonsHtml = pageList.map(p => {
+          if (p === '...') {
+            return `<span class="w-7 h-7 flex items-center justify-center text-slate-600 text-xs font-bold select-none">…</span>`;
+          }
+          if (p === this.currentPage) {
+            return `<button type="button" class="w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center text-white cursor-default pagination-active-btn" aria-current="page" style="background: linear-gradient(135deg, #ec4899 0%, #06b6d4 50%, #10b981 100%) !important; box-shadow: 0 0 16px rgba(6, 182, 212, 0.65), 0 0 8px rgba(236, 72, 153, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;">${p}</button>`;
+          }
+          return `<button type="button" data-page="${p}" class="btn-tx-page w-7 h-7 rounded-lg font-semibold text-xs flex items-center justify-center bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition cursor-pointer active:scale-95" title="Trang ${p}">${p}</button>`;
+        }).join('');
+
+        paginationEl.innerHTML = `
+          <div class="flex items-center gap-3 flex-wrap justify-between w-full select-none">
+            <div class="flex items-center gap-3 flex-wrap">
+              <span>Hiển thị <b class="text-cyan-400 font-mono">${startIndex + 1} - ${endIndex}</b> trên <b class="text-slate-200 font-mono">${totalRecords}</b> giao dịch</span>
+              <div class="flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-1 rounded-xl border border-slate-800">
+                <span class="text-slate-400">Hiển thị:</span>
+                <select id="select-tx-page-size" class="bg-transparent text-cyan-400 font-bold outline-none cursor-pointer text-xs">
+                  <option value="10" class="bg-slate-900 text-slate-200" ${this.pageSize === 10 ? 'selected' : ''}>10 / trang</option>
+                  <option value="12" class="bg-slate-900 text-slate-200" ${this.pageSize === 12 ? 'selected' : ''}>12 / trang</option>
+                  <option value="15" class="bg-slate-900 text-slate-200" ${this.pageSize === 15 ? 'selected' : ''}>15 / trang</option>
+                  <option value="20" class="bg-slate-900 text-slate-200" ${this.pageSize === 20 ? 'selected' : ''}>20 / trang</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="btn-tx-prev" class="px-2.5 py-1 rounded-xl border flex items-center gap-1 text-xs font-semibold transition ${this.currentPage <= 1 ? 'border-slate-800/60 text-slate-600 cursor-not-allowed opacity-40' : 'border-slate-700/80 bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer active:scale-95'}" ${this.currentPage <= 1 ? 'disabled' : ''}>
+                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                <span class="hidden sm:inline">Trước</span>
+              </button>
+              
+              <div class="flex items-center gap-1">
+                ${pageButtonsHtml}
+              </div>
+
+              <button type="button" id="btn-tx-next" class="px-2.5 py-1 rounded-xl border flex items-center gap-1 text-xs font-semibold transition ${this.currentPage >= totalPages ? 'border-slate-800/60 text-slate-600 cursor-not-allowed opacity-40' : 'border-slate-700/80 bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer active:scale-95'}" ${this.currentPage >= totalPages ? 'disabled' : ''}>
+                <span class="hidden sm:inline">Sau</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btn-tx-prev')?.addEventListener('click', () => {
+          if (this.currentPage > 1) {
+            this.currentPage--;
+            this.loadTransactions();
+          }
+        });
+
+        document.getElementById('btn-tx-next')?.addEventListener('click', () => {
+          if (this.currentPage < totalPages) {
+            this.currentPage++;
+            this.loadTransactions();
+          }
+        });
+
+        paginationEl.querySelectorAll('.btn-tx-page').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pageNum = parseInt(btn.getAttribute('data-page'), 10);
+            if (pageNum) {
+              this.currentPage = pageNum;
+              this.loadTransactions();
+            }
+          });
+        });
+
+        document.getElementById('select-tx-page-size')?.addEventListener('change', (e) => {
+          const newSize = parseInt(e.target.value, 10);
+          if (newSize > 0) {
+            this.pageSize = newSize;
+            this.currentPage = 1;
+            this.loadTransactions();
+          }
+        });
+      }
+
     } catch (e) {
       console.error('Load transactions error:', e);
       this.app.showToast('Không thể tải danh sách giao dịch', 'error');
@@ -328,6 +448,25 @@ export class TransactionsComponent {
   }
 
   async handleExport(format) {
+    const userPlan = (this.app?.currentUser?.plan || 'FREE').toUpperCase();
+    const isAdmin = this.app?.currentUser?.role === 'ADMIN';
+
+    if (!isAdmin && userPlan === 'FREE') {
+      this.app.showToast('Tài khoản Free không hỗ trợ xuất báo cáo. Hãy nâng cấp lên gói VIP Pro, FinTrack VIP hoặc Platinum VIP!', 'warning');
+      setTimeout(() => {
+        if (this.app?.navigate) this.app.navigate('subscription');
+      }, 1000);
+      return;
+    }
+
+    if (!isAdmin && format === 'pdf' && userPlan === 'PRO') {
+      this.app.showToast('Xuất báo cáo PDF tài chính chỉ hỗ trợ từ gói FinTrack VIP và Platinum VIP!', 'warning');
+      setTimeout(() => {
+        if (this.app?.navigate) this.app.navigate('subscription');
+      }, 1000);
+      return;
+    }
+
     try {
       this.app.showToast(`Đang tạo file báo cáo ${format.toUpperCase()}...`, 'info');
       let blob;
@@ -419,6 +558,12 @@ export class TransactionsComponent {
       { name: 'Thu nhập khác', icon: 'wallet', emoji: '➕', kw: 'khác' }
     ];
 
+    const uPlan = (this.app?.currentUser?.plan || 'FREE').toUpperCase();
+    const isVip = uPlan === 'PRO' || uPlan === 'PREMIUM' || uPlan === 'VIP' || uPlan === 'PLATINUM';
+    const planBadgeMarkup = isVip
+      ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-crown text-[8px] text-purple-300"></i> ${uPlan} &bull; Không Giới Hạn</span>`
+      : `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 inline-flex items-center gap-1"><i class="fa-solid fa-seedling text-[8px] text-slate-400"></i> Free &bull; Tối đa 50 GD/tháng</span>`;
+
     modalEl.innerHTML = `
       <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-xl p-5 sm:p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-200 max-h-[92vh] flex flex-col">
@@ -430,13 +575,16 @@ export class TransactionsComponent {
                 <i class="fa-solid fa-${existingTx ? 'pen-to-square' : 'receipt'}"></i>
               </span>
               <div>
-                <h3 class="text-base font-extrabold text-slate-100">
-                  ${existingTx ? 'Chỉnh Sửa Giao Dịch' : (initialType === 'INCOME' ? 'Ghi Nhận Thu Nhập / Nạp Tiền' : 'Ghi Giao Dịch Mới')}
-                </h3>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-extrabold text-slate-100">
+                    ${existingTx ? 'Chỉnh Sửa Giao Dịch' : (initialType === 'INCOME' ? 'Ghi Nhận Thu Nhập / Nạp Tiền' : 'Ghi Giao Dịch Mới')}
+                  </h3>
+                  ${planBadgeMarkup}
+                </div>
                 <p class="text-[11px] text-slate-400">Điền thông tin giao dịch hoặc chọn nhanh từ danh mục & ví có sẵn</p>
               </div>
             </div>
-            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-800 text-slate-400 flex items-center justify-center transition">
+            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-800 text-slate-400 flex items-center justify-center transition cursor-pointer">
               <i class="fa-solid fa-xmark text-sm"></i>
             </button>
           </div>
@@ -871,6 +1019,9 @@ export class TransactionsComponent {
 
         closeModal();
         await this.loadTransactions();
+        if (this.app?.wallets?.loadWallets) {
+          this.app.wallets.loadWallets().catch(() => {});
+        }
         if (this.app.activeTab === 'dashboard') {
           await this.app.dashboard.loadDashboardData();
         }
@@ -889,6 +1040,9 @@ export class TransactionsComponent {
       await api.deleteTransaction(id);
       this.app.showToast('Đã xóa giao dịch và hoàn tất cập nhật số dư ví!', 'success');
       await this.loadTransactions();
+      if (this.app?.wallets?.loadWallets) {
+        this.app.wallets.loadWallets().catch(() => {});
+      }
       if (this.app.activeTab === 'dashboard') {
         await this.app.dashboard.loadDashboardData();
       }

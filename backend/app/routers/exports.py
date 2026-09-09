@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import extract, func, desc
 
@@ -10,6 +10,22 @@ from backend.app.routers.auth import get_current_user
 from backend.app.services.report_service import report_service
 
 router = APIRouter(prefix="/exports", tags=["Xuất Báo cáo Tài chính"])
+
+def check_export_plan_access(current_user: User, export_format: str):
+    """Kiểm tra quyền hạn xuất báo cáo theo gói cước (Free: Chặn, Pro: Excel+CSV, VIP/Platinum: Đầy đủ)."""
+    if current_user.role == "ADMIN":
+        return
+    plan = (current_user.plan or "FREE").upper()
+    if plan == "FREE":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản FinTrack Free không hỗ trợ xuất báo cáo. Hãy nâng cấp lên gói VIP Pro, FinTrack VIP hoặc Platinum VIP để tải báo cáo tài chính!"
+        )
+    if export_format.upper() == "PDF" and plan == "PRO":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tính năng xuất báo cáo PDF tài chính chuyên sâu chỉ hỗ trợ từ gói FinTrack VIP và Platinum VIP. Hãy nâng cấp ngay!"
+        )
 
 def get_export_data(current_user: User, db: Session, month_year: Optional[str] = None):
     """Gathers transaction and summary data for export."""
@@ -65,6 +81,7 @@ def export_excel(
     db: Session = Depends(get_db)
 ):
     """Xuất file báo cáo tài chính Excel (.xlsx)."""
+    check_export_plan_access(current_user, "EXCEL")
     txs, summary = get_export_data(current_user, db, month_year)
     excel_stream = report_service.generate_excel_report(current_user.full_name, txs, summary)
 
@@ -82,6 +99,7 @@ def export_csv(
     db: Session = Depends(get_db)
 ):
     """Xuất file báo cáo CSV có UTF-8 BOM chuẩn tiếng Việt."""
+    check_export_plan_access(current_user, "CSV")
     txs, _ = get_export_data(current_user, db, month_year)
     csv_str = report_service.generate_csv_report(txs)
 
@@ -99,6 +117,7 @@ def export_pdf(
     db: Session = Depends(get_db)
 ):
     """Xuất file báo cáo tài chính PDF (.pdf)."""
+    check_export_plan_access(current_user, "PDF")
     txs, summary = get_export_data(current_user, db, month_year)
     pdf_stream = report_service.generate_pdf_report(current_user.full_name, txs, summary)
 

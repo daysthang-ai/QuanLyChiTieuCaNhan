@@ -64,7 +64,7 @@ export class SavingsComponent {
         const color = g.color || '#10B981';
 
         return `
-          <div class="glass-card p-6 rounded-2xl flex flex-col justify-between hover:shadow-md transition relative group border ${isCompleted ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'}">
+          <div class="glass-card p-6 rounded-2xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group border ${isCompleted ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800/80 bg-slate-900/60 hover:border-emerald-500/30'}">
             
             <div>
               <!-- Header -->
@@ -74,51 +74,51 @@ export class SavingsComponent {
                     <i class="fa-solid fa-${g.icon || 'bullseye'}"></i>
                   </div>
                   <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm">${g.name}</h3>
+                    <h3 class="font-extrabold text-slate-100 text-sm">${g.name}</h3>
                     <span class="text-[11px] text-slate-400">Hạn: ${g.target_date ? formatDateVN(g.target_date) : 'Không giới hạn'}</span>
                   </div>
                 </div>
                 ${isCompleted ? `
-                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                    🎉 Hoàn thành
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold text-[10px] flex items-center gap-1">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> Hoàn thành
                   </span>
                 ` : `
-                  <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
+                  <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold text-[10px]">
                     ${g.days_left ? `${g.days_left} ngày nữa` : 'Đang tích lũy'}
                   </span>
                 `}
               </div>
 
               <!-- Note -->
-              ${g.note ? `<p class="text-xs text-slate-500 mt-3 line-clamp-2">${g.note}</p>` : ''}
+              ${g.note ? `<p class="text-xs text-slate-400 mt-3 line-clamp-2">${g.note}</p>` : ''}
 
               <!-- Progress stats -->
               <div class="mt-5">
                 <div class="flex justify-between items-baseline text-xs mb-1.5 font-bold">
-                  <span class="text-slate-800 text-base font-black">${formatVND(g.current_amount)}</span>
-                  <span class="text-slate-400">Mục tiêu: ${formatVND(g.target_amount)}</span>
+                  <span class="text-slate-100 text-base font-black font-mono">${formatVND(g.current_amount)}</span>
+                  <span class="text-slate-400 font-mono">Mục tiêu: ${formatVND(g.target_amount)}</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
-                  <div class="h-full rounded-full progress-animated transition-all duration-700 ${isCompleted ? 'gradient-emerald' : 'gradient-indigo'}" 
+                <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+                  <div class="h-full rounded-full progress-animated savings-progress-fill bg-gradient-to-r from-fuchsia-500 via-cyan-500 to-lime-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-700" 
                     style="width: ${Math.min(100, g.progress_percentage)}%"></div>
                 </div>
-                <div class="flex justify-between text-[11px] font-semibold text-slate-400 mt-1.5">
-                  <span>Tiến độ: <b class="text-indigo-400">${g.progress_percentage}%</b></span>
+                <div class="flex justify-between text-[11px] font-semibold text-slate-400 mt-1.5 font-mono">
+                  <span>Tiến độ: <b class="text-cyan-400">${g.progress_percentage}%</b></span>
                   <span>Còn thiếu: ${formatVND(g.remaining_amount)}</span>
                 </div>
               </div>
             </div>
 
             <!-- Deposit button & actions -->
-            <div class="flex items-center gap-2 pt-4 mt-4 border-t border-slate-100">
-              <button onclick="window.depositGoal(${g.id})" class="btn-sparkle-burst flex-1 py-2 rounded-xl gradient-emerald text-white font-bold text-xs shadow-sm hover:shadow-md active:scale-95 transition flex items-center justify-center gap-1.5">
+            <div class="flex items-center gap-2 pt-4 mt-4 border-t border-slate-800/80">
+              <button onclick="window.depositGoal(${g.id})" class="btn-sparkle-burst flex-1 py-2 rounded-xl gradient-emerald text-white font-bold text-xs shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition flex items-center justify-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus-circle"></i>
                 <span>Nạp Thêm Tiền</span>
               </button>
-              <button onclick="window.editGoal(${g.id})" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition" title="Sửa">
+              <button onclick="window.editGoal(${g.id})" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition cursor-pointer" title="Sửa">
                 <i class="fa-regular fa-pen-to-square text-xs"></i>
               </button>
-              <button onclick="window.deleteGoal(${g.id})" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-400 flex items-center justify-center transition" title="Xóa">
+              <button onclick="window.deleteGoal(${g.id})" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 flex items-center justify-center transition cursor-pointer" title="Xóa">
                 <i class="fa-regular fa-trash-can text-xs"></i>
               </button>
             </div>
@@ -145,56 +145,56 @@ export class SavingsComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900/95 text-slate-100 rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150 backdrop-blur-xl">
           
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-piggy-bank text-emerald-600"></i>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-piggy-bank text-emerald-400"></i>
               Nạp Tiền Vào Mục Tiêu
             </h3>
-            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+            <button id="modal-close-btn" class="w-8 h-8 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
-          <div class="mt-3 p-3 bg-emerald-50 rounded-xl flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base">
+          <div class="mt-3 p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl gradient-emerald text-white flex items-center justify-center text-base shadow-sm">
               <i class="fa-solid fa-${goal.icon || 'bullseye'}"></i>
             </div>
             <div>
-              <h4 class="font-extrabold text-xs text-emerald-900">${goal.name}</h4>
-              <span class="text-[11px] text-emerald-700">Đã tích lũy: <b>${formatVND(goal.current_amount)}</b> / ${formatVND(goal.target_amount)}</span>
+              <h4 class="font-extrabold text-xs text-emerald-300">${goal.name}</h4>
+              <span class="text-[11px] text-emerald-400/90 font-mono">Đã tích lũy: <b>${formatVND(goal.current_amount)}</b> / ${formatVND(goal.target_amount)}</span>
             </div>
           </div>
 
           <form id="deposit-form" class="mt-4 space-y-4">
             
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Số Tiền Nạp (VND)</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Số Tiền Nạp (VND)</label>
               <input type="number" id="deposit-amount" required min="10000" step="10000" placeholder="Ví dụ: 1000000" 
-                class="w-full px-3 py-2.5 text-sm font-bold text-slate-800 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                class="w-full px-3 py-2.5 text-sm font-bold text-emerald-400 bg-slate-950/80 rounded-xl border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Trích Từ Ví Thanh Toán (Tùy chọn)</label>
-              <select id="deposit-wallet" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="">-- Không trừ ví (chỉ ghi tăng mục tiêu) --</option>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Trích Từ Ví Thanh Toán (Tùy chọn)</label>
+              <select id="deposit-wallet" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="" class="bg-slate-900 text-slate-300">-- Không trừ ví (chỉ ghi tăng mục tiêu) --</option>
                 ${this.allWallets.map(w => `
-                  <option value="${w.id}">Ví ${w.name} (Số dư: ${formatVND(w.balance)})</option>
+                  <option value="${w.id}" class="bg-slate-900 text-slate-100">Ví ${w.name} (Số dư: ${formatVND(w.balance)})</option>
                 `).join('')}
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Ghi Chú</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Ghi Chú</label>
               <input type="text" id="deposit-note" value="Nạp tiền vào ${goal.name}" 
-                class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Hủy</button>
-              <button type="submit" id="deposit-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">Hủy</button>
+              <button type="submit" id="deposit-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
                 Xác Nhận Nạp Tiền
               </button>
             </div>
@@ -231,15 +231,15 @@ export class SavingsComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900/95 text-slate-100 rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150 backdrop-blur-xl">
           
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-bullseye text-emerald-600"></i>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-emerald-400"></i>
               ${existing ? 'Chỉnh Sửa Mục Tiêu' : 'Tạo Mục Tiêu Tiết Kiệm'}
             </h3>
-            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+            <button id="modal-close-btn" class="w-8 h-8 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -247,60 +247,60 @@ export class SavingsComponent {
           <form id="goal-form" class="mt-4 space-y-4">
             
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tên Mục Tiêu</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Tên Mục Tiêu</label>
               <input type="text" id="goal-name" required value="${existing ? existing.name : ''}" placeholder="VD: Quỹ khẩn cấp 6 tháng, Mua xe máy mới" 
-                class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
+                class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Số Tiền Cần Đạt</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Số Tiền Cần Đạt</label>
                 <input type="number" id="goal-target-amount" required min="100000" step="100000" 
                   value="${existing ? existing.target_amount : '50000000'}" 
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
+                  class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-emerald-400 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold font-mono" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Số Tiền Đã Có</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Số Tiền Đã Có</label>
                 <input type="number" id="goal-current-amount" min="0" step="10000" 
                   value="${existing ? existing.current_amount : '0'}" 
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
+                  class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold font-mono" />
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Hạn Định</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Hạn Định</label>
                 <input type="date" id="goal-date" value="${existing && existing.target_date ? existing.target_date : ''}" 
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                  class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Màu Sắc</label>
-                <input type="color" id="goal-color" value="${existing ? existing.color : '#10B981'}" class="w-full h-9 rounded-xl border border-slate-200 cursor-pointer p-1" />
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Màu Sắc</label>
+                <input type="color" id="goal-color" value="${existing ? existing.color : '#10B981'}" class="w-full h-9 rounded-xl border border-slate-800 bg-slate-950/80 cursor-pointer p-1" />
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Icon FontAwesome</label>
-              <select id="goal-icon" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="shield-halved">Bảo vệ / Khẩn cấp (shield-halved)</option>
-                <option value="motorcycle">Xe máy (motorcycle)</option>
-                <option value="car">Ô tô (car)</option>
-                <option value="plane">Du lịch (plane)</option>
-                <option value="house">Mua nhà (house)</option>
-                <option value="graduation-cap">Học vấn (graduation-cap)</option>
-                <option value="ring">Kết hôn (ring)</option>
-                <option value="bullseye">Mục tiêu chung (bullseye)</option>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Icon FontAwesome</label>
+              <select id="goal-icon" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="shield-halved" class="bg-slate-900 text-slate-100">Bảo vệ / Khẩn cấp (shield-halved)</option>
+                <option value="motorcycle" class="bg-slate-900 text-slate-100">Xe máy (motorcycle)</option>
+                <option value="car" class="bg-slate-900 text-slate-100">Ô tô (car)</option>
+                <option value="plane" class="bg-slate-900 text-slate-100">Du lịch (plane)</option>
+                <option value="house" class="bg-slate-900 text-slate-100">Mua nhà (house)</option>
+                <option value="graduation-cap" class="bg-slate-900 text-slate-100">Học vấn (graduation-cap)</option>
+                <option value="ring" class="bg-slate-900 text-slate-100">Kết hôn (ring)</option>
+                <option value="bullseye" class="bg-slate-900 text-slate-100">Mục tiêu chung (bullseye)</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Ghi Chú & Kế Hoạch</label>
-              <textarea id="goal-note" rows="2" placeholder="Ghi chú kế hoạch thực hiện..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">${existing ? existing.note || '' : ''}</textarea>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Ghi Chú & Kế Hoạch</label>
+              <textarea id="goal-note" rows="2" placeholder="Ghi chú kế hoạch thực hiện..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">${existing ? existing.note || '' : ''}</textarea>
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Hủy</button>
-              <button type="submit" id="goal-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">Hủy</button>
+              <button type="submit" id="goal-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
                 ${existing ? 'Lưu Mục Tiêu' : 'Tạo Mục Tiêu'}
               </button>
             </div>

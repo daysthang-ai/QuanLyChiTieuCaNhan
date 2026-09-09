@@ -61,12 +61,12 @@ export class CategoriesComponent {
         const groupCats = this.categories.filter(c => c.group === g.id);
 
         return `
-          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+          <div class="glass-card p-5 rounded-2xl flex flex-col justify-between border border-slate-800/80 bg-slate-900/60 shadow-lg">
             <div>
-              <div class="flex items-center gap-2 pb-3 mb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2 pb-3 mb-3 border-b border-slate-800/80">
                 <i class="fa-solid fa-${g.icon} ${g.color} text-sm"></i>
                 <div>
-                  <h3 class="font-extrabold text-xs text-slate-800">${g.title}</h3>
+                  <h3 class="font-extrabold text-xs text-slate-100">${g.title}</h3>
                   <span class="text-[10px] text-slate-400 block">${g.subtitle}</span>
                 </div>
               </div>
@@ -75,19 +75,19 @@ export class CategoriesComponent {
                 ${groupCats.map(c => {
                   const iconClass = (c.icon || 'tags').replace(/^fa-solid\s+|^fa-regular\s+|^fa-brands\s+|^fa-/, '');
                   return `
-                  <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-white border border-transparent hover:border-slate-200 transition group">
+                  <div class="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-850 hover:border-slate-700/80 transition group">
                     <div class="flex items-center gap-2.5">
-                      <span class="w-7 h-7 rounded-lg text-white flex items-center justify-center text-xs shadow-sm" style="background-color: ${c.color}">
+                      <span class="w-7 h-7 rounded-lg text-white flex items-center justify-center text-xs shadow-sm flex-shrink-0" style="background-color: ${c.color}">
                         <i class="fa-solid fa-${iconClass}"></i>
                       </span>
-                      <span class="font-bold text-xs text-slate-700">${c.name}</span>
+                      <span class="font-bold text-xs text-slate-200">${c.name}</span>
                     </div>
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                      <button onclick="window.editCategory(${c.id})" class="w-6 h-6 rounded-md hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+                      <button onclick="window.editCategory(${c.id})" class="w-6 h-6 rounded-md hover:bg-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer" title="Sửa">
                         <i class="fa-regular fa-pen-to-square text-[10px]"></i>
                       </button>
                       ${!c.is_default ? `
-                        <button onclick="window.deleteCategory(${c.id})" class="w-6 h-6 rounded-md hover:bg-red-100 hover:text-red-600 text-slate-400 flex items-center justify-center">
+                        <button onclick="window.deleteCategory(${c.id})" class="w-6 h-6 rounded-md hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 flex items-center justify-center transition cursor-pointer" title="Xóa">
                           <i class="fa-regular fa-trash-can text-[10px]"></i>
                         </button>
                       ` : ''}
@@ -95,7 +95,13 @@ export class CategoriesComponent {
                   </div>
                 `;
                 }).join('')}
+                ${groupCats.length === 0 ? '<div class="text-[11px] text-slate-500 py-3 text-center">Chưa có danh mục nào</div>' : ''}
               </div>
+            </div>
+
+            <div class="pt-3 mt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex justify-between font-mono">
+              <span>Số lượng:</span>
+              <span class="font-bold text-emerald-400">${groupCats.length}</span>
             </div>
           </div>
         `;
@@ -116,85 +122,85 @@ export class CategoriesComponent {
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900/95 text-slate-100 rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150 backdrop-blur-xl">
           
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-tag text-emerald-600"></i>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-tag text-emerald-400"></i>
               ${existing ? 'Chỉnh Sửa Danh Mục' : 'Thêm Danh Mục Mới'}
             </h3>
-            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+            <button id="modal-close-btn" class="w-8 h-8 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
           <form id="cat-form" class="mt-4 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tên Danh Mục</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Tên Danh Mục</label>
               <input type="text" id="cat-name" required value="${existing ? existing.name : ''}" placeholder="VD: Thú cưng, Học thêm tiếng Anh" 
-                class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
+                class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Loại</label>
-                <select id="cat-type" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="EXPENSE" ${!existing || existing.type === 'EXPENSE' ? 'selected' : ''}>Chi tiêu</option>
-                  <option value="INCOME" ${existing && existing.type === 'INCOME' ? 'selected' : ''}>Thu nhập</option>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Loại</label>
+                <select id="cat-type" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <option value="EXPENSE" ${!existing || existing.type === 'EXPENSE' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Chi tiêu</option>
+                  <option value="INCOME" ${existing && existing.type === 'INCOME' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thu nhập</option>
                 </select>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nhóm 50/30/20</label>
-                <select id="cat-group" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="NEEDS" ${!existing || existing.group === 'NEEDS' ? 'selected' : ''}>Thiết yếu (50%)</option>
-                  <option value="WANTS" ${existing && existing.group === 'WANTS' ? 'selected' : ''}>Mong muốn (30%)</option>
-                  <option value="SAVINGS" ${existing && existing.group === 'SAVINGS' ? 'selected' : ''}>Tiết kiệm (20%)</option>
-                  <option value="INCOME" ${existing && existing.group === 'INCOME' ? 'selected' : ''}>Thu nhập</option>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nhóm 50/30/20</label>
+                <select id="cat-group" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <option value="NEEDS" ${!existing || existing.group === 'NEEDS' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thiết yếu (50%)</option>
+                  <option value="WANTS" ${existing && existing.group === 'WANTS' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Mong muốn (30%)</option>
+                  <option value="SAVINGS" ${existing && existing.group === 'SAVINGS' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Tiết kiệm (20%)</option>
+                  <option value="INCOME" ${existing && existing.group === 'INCOME' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thu nhập</option>
                 </select>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Màu Đại Diện</label>
-                <input type="color" id="cat-color" value="${existing ? existing.color : '#10B981'}" class="w-full h-9 rounded-xl border border-slate-200 cursor-pointer p-1" />
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Màu Đại Diện</label>
+                <input type="color" id="cat-color" value="${existing ? existing.color : '#10B981'}" class="w-full h-9 rounded-xl border border-slate-800 bg-slate-950/80 cursor-pointer p-1" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Icon FontAwesome</label>
-                <select id="cat-icon" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="utensils" ${existing && (existing.icon === 'utensils' || existing.icon === 'fa-utensils') ? 'selected' : ''}>Ăn uống (utensils)</option>
-                  <option value="house" ${existing && (existing.icon === 'house' || existing.icon === 'home' || existing.icon === 'fa-house') ? 'selected' : ''}>Nhà ở & Tiền thuê (house)</option>
-                  <option value="bolt" ${existing && (existing.icon === 'bolt' || existing.icon === 'fa-bolt') ? 'selected' : ''}>Hóa đơn & Tiện ích (bolt)</option>
-                  <option value="car" ${existing && (existing.icon === 'car' || existing.icon === 'fa-car') ? 'selected' : ''}>Đi lại & Xăng xe (car)</option>
-                  <option value="heart-pulse" ${existing && (existing.icon === 'heart-pulse' || existing.icon === 'fa-heart-pulse') ? 'selected' : ''}>Y tế & Sức khỏe (heart-pulse)</option>
-                  <option value="graduation-cap" ${existing && (existing.icon === 'graduation-cap' || existing.icon === 'book' || existing.icon === 'fa-graduation-cap') ? 'selected' : ''}>Học tập & Giáo dục (graduation-cap)</option>
-                  <option value="bag-shopping" ${existing && (existing.icon === 'bag-shopping' || existing.icon === 'bag' || existing.icon === 'fa-bag-shopping') ? 'selected' : ''}>Mua sắm cá nhân (bag-shopping)</option>
-                  <option value="plane" ${existing && (existing.icon === 'plane' || existing.icon === 'fa-plane') ? 'selected' : ''}>Du lịch & Nghỉ dưỡng (plane)</option>
-                  <option value="gamepad" ${existing && (existing.icon === 'gamepad' || existing.icon === 'film' || existing.icon === 'fa-gamepad') ? 'selected' : ''}>Giải trí & Thư giãn (gamepad)</option>
-                  <option value="mug-saucer" ${existing && (existing.icon === 'mug-saucer' || existing.icon === 'mug-hot' || existing.icon === 'coffee' || existing.icon === 'fa-mug-saucer') ? 'selected' : ''}>Cà phê & Gặp gỡ (mug-saucer)</option>
-                  <option value="wand-magic-sparkles" ${existing && (existing.icon === 'wand-magic-sparkles' || existing.icon === 'scissors' || existing.icon === 'fa-wand-magic-sparkles') ? 'selected' : ''}>Làm đẹp & Spa (wand-magic-sparkles)</option>
-                  <option value="gift" ${existing && (existing.icon === 'gift' || existing.icon === 'fa-gift') ? 'selected' : ''}>Quà tặng & Hiếu hỷ (gift)</option>
-                  <option value="shield-heart" ${existing && (existing.icon === 'shield-heart' || existing.icon === 'shield' || existing.icon === 'fa-shield-heart') ? 'selected' : ''}>Quỹ khẩn cấp (shield-heart)</option>
-                  <option value="chart-line" ${existing && (existing.icon === 'chart-line' || existing.icon === 'trending-up' || existing.icon === 'line-chart' || existing.icon === 'fa-chart-line') ? 'selected' : ''}>Đầu tư sinh lời (chart-line)</option>
-                  <option value="piggy-bank" ${existing && (existing.icon === 'piggy-bank' || existing.icon === 'bullseye' || existing.icon === 'fa-piggy-bank') ? 'selected' : ''}>Tiết kiệm & Tích lũy (piggy-bank)</option>
-                  <option value="money-bill-transfer" ${existing && (existing.icon === 'money-bill-transfer' || existing.icon === 'credit-card' || existing.icon === 'fa-money-bill-transfer') ? 'selected' : ''}>Trả nợ gốc (money-bill-transfer)</option>
-                  <option value="money-bill-wave" ${existing && (existing.icon === 'money-bill-wave' || existing.icon === 'wallet' || existing.icon === 'fa-money-bill-wave') ? 'selected' : ''}>Lương chính thức (money-bill-wave)</option>
-                  <option value="award" ${existing && (existing.icon === 'award' || existing.icon === 'fa-award') ? 'selected' : ''}>Thưởng & Hoa hồng (award)</option>
-                  <option value="laptop-code" ${existing && (existing.icon === 'laptop-code' || existing.icon === 'laptop' || existing.icon === 'fa-laptop-code') ? 'selected' : ''}>Freelance & Phụ (laptop-code)</option>
-                  <option value="arrow-trend-up" ${existing && (existing.icon === 'arrow-trend-up' || existing.icon === 'fa-arrow-trend-up') ? 'selected' : ''}>Lãi suất & Đầu tư (arrow-trend-up)</option>
-                  <option value="wallet" ${existing && (existing.icon === 'wallet' || existing.icon === 'plus-circle' || existing.icon === 'fa-wallet') ? 'selected' : ''}>Thu nhập khác / Ví (wallet)</option>
-                  <option value="tags" ${existing && (existing.icon === 'tags' || existing.icon === 'tag' || existing.icon === 'fa-tags') ? 'selected' : ''}>Nhãn danh mục (tags)</option>
-                  <option value="paw" ${existing && existing.icon === 'paw' ? 'selected' : ''}>Thú cưng (paw)</option>
-                  <option value="dumbbell" ${existing && existing.icon === 'dumbbell' ? 'selected' : ''}>Thể thao & Gym (dumbbell)</option>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Icon FontAwesome</label>
+                <select id="cat-icon" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <option value="utensils" ${existing && (existing.icon === 'utensils' || existing.icon === 'fa-utensils') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Ăn uống (utensils)</option>
+                  <option value="house" ${existing && (existing.icon === 'house' || existing.icon === 'home' || existing.icon === 'fa-house') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Nhà ở & Tiền thuê (house)</option>
+                  <option value="bolt" ${existing && (existing.icon === 'bolt' || existing.icon === 'fa-bolt') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Hóa đơn & Tiện ích (bolt)</option>
+                  <option value="car" ${existing && (existing.icon === 'car' || existing.icon === 'fa-car') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Đi lại & Xăng xe (car)</option>
+                  <option value="heart-pulse" ${existing && (existing.icon === 'heart-pulse' || existing.icon === 'fa-heart-pulse') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Y tế & Sức khỏe (heart-pulse)</option>
+                  <option value="graduation-cap" ${existing && (existing.icon === 'graduation-cap' || existing.icon === 'book' || existing.icon === 'fa-graduation-cap') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Học tập & Giáo dục (graduation-cap)</option>
+                  <option value="bag-shopping" ${existing && (existing.icon === 'bag-shopping' || existing.icon === 'bag' || existing.icon === 'fa-bag-shopping') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Mua sắm cá nhân (bag-shopping)</option>
+                  <option value="plane" ${existing && (existing.icon === 'plane' || existing.icon === 'fa-plane') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Du lịch & Nghỉ dưỡng (plane)</option>
+                  <option value="gamepad" ${existing && (existing.icon === 'gamepad' || existing.icon === 'film' || existing.icon === 'fa-gamepad') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Giải trí & Thư giãn (gamepad)</option>
+                  <option value="mug-saucer" ${existing && (existing.icon === 'mug-saucer' || existing.icon === 'mug-hot' || existing.icon === 'coffee' || existing.icon === 'fa-mug-saucer') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Cà phê & Gặp gỡ (mug-saucer)</option>
+                  <option value="wand-magic-sparkles" ${existing && (existing.icon === 'wand-magic-sparkles' || existing.icon === 'scissors' || existing.icon === 'fa-wand-magic-sparkles') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Làm đẹp & Spa (wand-magic-sparkles)</option>
+                  <option value="gift" ${existing && (existing.icon === 'gift' || existing.icon === 'fa-gift') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Quà tặng & Hiếu hỷ (gift)</option>
+                  <option value="shield-heart" ${existing && (existing.icon === 'shield-heart' || existing.icon === 'shield' || existing.icon === 'fa-shield-heart') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Quỹ khẩn cấp (shield-heart)</option>
+                  <option value="chart-line" ${existing && (existing.icon === 'chart-line' || existing.icon === 'trending-up' || existing.icon === 'line-chart' || existing.icon === 'fa-chart-line') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Đầu tư sinh lời (chart-line)</option>
+                  <option value="piggy-bank" ${existing && (existing.icon === 'piggy-bank' || existing.icon === 'bullseye' || existing.icon === 'fa-piggy-bank') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Tiết kiệm & Tích lũy (piggy-bank)</option>
+                  <option value="money-bill-transfer" ${existing && (existing.icon === 'money-bill-transfer' || existing.icon === 'credit-card' || existing.icon === 'fa-money-bill-transfer') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Trả nợ gốc (money-bill-transfer)</option>
+                  <option value="money-bill-wave" ${existing && (existing.icon === 'money-bill-wave' || existing.icon === 'wallet' || existing.icon === 'fa-money-bill-wave') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Lương chính thức (money-bill-wave)</option>
+                  <option value="award" ${existing && (existing.icon === 'award' || existing.icon === 'fa-award') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thưởng & Hoa hồng (award)</option>
+                  <option value="laptop-code" ${existing && (existing.icon === 'laptop-code' || existing.icon === 'laptop' || existing.icon === 'fa-laptop-code') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Freelance & Phụ (laptop-code)</option>
+                  <option value="arrow-trend-up" ${existing && (existing.icon === 'arrow-trend-up' || existing.icon === 'fa-arrow-trend-up') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Lãi suất & Đầu tư (arrow-trend-up)</option>
+                  <option value="wallet" ${existing && (existing.icon === 'wallet' || existing.icon === 'plus-circle' || existing.icon === 'fa-wallet') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thu nhập khác / Ví (wallet)</option>
+                  <option value="tags" ${existing && (existing.icon === 'tags' || existing.icon === 'tag' || existing.icon === 'fa-tags') ? 'selected' : ''} class="bg-slate-900 text-slate-100">Nhãn danh mục (tags)</option>
+                  <option value="paw" ${existing && existing.icon === 'paw' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thú cưng (paw)</option>
+                  <option value="dumbbell" ${existing && existing.icon === 'dumbbell' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Thể thao & Gym (dumbbell)</option>
                 </select>
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Hủy</button>
-              <button type="submit" id="cat-submit-btn" class="px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">Hủy</button>
+              <button type="submit" id="cat-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
                 ${existing ? 'Lưu Danh Mục' : 'Thêm Danh Mục'}
               </button>
             </div>

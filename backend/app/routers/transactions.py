@@ -5,7 +5,7 @@ import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, and_, desc, func
 
 from backend.app.config import settings
 from backend.app.database import get_db, get_utc_now
@@ -93,6 +93,25 @@ def create_transaction(
         raise HTTPException(status_code=400, detail="Loại giao dịch không hợp lệ (EXPENSE, INCOME, TRANSFER)")
 
     tx_date = tx_in.transaction_date or get_utc_now()
+
+    # Kiểm tra hạn mức giao dịch theo gói cước (Free: tối đa 50 giao dịch/tháng, VIP: không giới hạn)
+    user_plan = (current_user.plan or "FREE").upper()
+    if user_plan == "FREE" and current_user.role != "ADMIN":
+        tx_dt = tx_date if isinstance(tx_date, datetime.datetime) else get_utc_now()
+        start_of_month = datetime.datetime(tx_dt.year, tx_dt.month, 1)
+        next_month = (tx_dt.month % 12) + 1
+        next_year = tx_dt.year + (1 if next_month == 1 else 0)
+        end_of_month = datetime.datetime(next_year, next_month, 1)
+        month_count = db.query(func.count(Transaction.id)).filter(
+            Transaction.user_id == current_user.id,
+            Transaction.transaction_date >= start_of_month,
+            Transaction.transaction_date < end_of_month
+        ).scalar() or 0
+        if month_count >= 50:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tài khoản FinTrack Free đã đạt hạn mức tối đa 50 giao dịch trong tháng. Hãy nâng cấp lên gói VIP để ghi chép thu chi không giới hạn!"
+            )
 
     new_tx = Transaction(
         user_id=current_user.id,

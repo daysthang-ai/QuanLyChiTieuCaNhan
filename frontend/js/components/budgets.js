@@ -32,21 +32,9 @@ export class BudgetsComponent {
           </div>
         </div>
 
-        <!-- 50/30/20 Budgeting Tips Bar -->
-        <div class="glass-card p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-emerald-500/30">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl gradient-emerald text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/30">
-              <i class="fa-solid fa-scale-balanced"></i>
-            </div>
-            <div>
-              <h4 class="text-xs font-bold text-slate-100">Quy Tắc Quản Trị Ngân Sách Vàng 50/30/20</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">
-                • <b class="text-rose-400">50% Nhu cầu thiết yếu</b> (Ăn uống, Nhà ở, Hóa đơn, Đi lại) | 
-                • <b class="text-purple-400">30% Mong muốn</b> (Mua sắm, Cà phê, Giải trí) | 
-                • <b class="text-emerald-400">20% Tiết kiệm</b>
-              </p>
-            </div>
-          </div>
+        <!-- Dynamic 50/30/20 Allocation Visualization Card -->
+        <div id="fifty-thirty-twenty-container">
+          <div class="glass-card p-5 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900/90 to-slate-950 border border-emerald-500/20 animate-pulse h-28"></div>
         </div>
 
         <!-- Budget Cards Grid -->
@@ -72,20 +60,26 @@ export class BudgetsComponent {
     if (!container) return;
 
     try {
-      const [budgets, categories] = await Promise.all([
+      const [budgets, categories, rule503020] = await Promise.all([
         api.getBudgets(this.selectedMonth),
-        api.getCategories('EXPENSE')
+        api.getCategories('EXPENSE'),
+        api.getFiftyThirtyTwenty(this.selectedMonth).catch(err => {
+          console.warn('[Budgets] Không thể tải phân tích 50/30/20:', err);
+          return null;
+        })
       ]);
 
       this.budgets = budgets;
       this.allCategories = categories;
 
+      this.renderFiftyThirtyTwentyCard(rule503020);
+
       if (budgets.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-400 glass-card rounded-2xl">
-            <i class="fa-solid fa-bullseye text-3xl mb-2 text-slate-300 block"></i>
+          <div class="col-span-full py-12 text-center text-slate-400 glass-card rounded-2xl border border-slate-800">
+            <i class="fa-solid fa-bullseye text-3xl mb-2 text-slate-500 block"></i>
             Chưa có hạn mức nào được thiết lập cho tháng ${this.selectedMonth}.<br/>
-            <button id="btn-quick-create-budget" class="mt-3 px-4 py-2 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25">
+            <button id="btn-quick-create-budget" class="mt-3 px-4 py-2 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
               + Thiết lập hạn mức ngay
             </button>
           </div>
@@ -185,21 +179,155 @@ export class BudgetsComponent {
     }
   }
 
+  renderFiftyThirtyTwentyCard(rule) {
+    const container = document.getElementById('fifty-thirty-twenty-container');
+    if (!container) return;
+
+    if (!rule) {
+      container.innerHTML = `
+        <div class="glass-card p-4 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-emerald-500/30">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl gradient-emerald text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/30">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-100">Quy Tắc Quản Trị Ngân Sách Vàng 50/30/20</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                • <b class="text-cyan-400">50% Nhu cầu thiết yếu</b> (Ăn uống, Nhà ở, Hóa đơn) | 
+                • <b class="text-purple-400">30% Mong muốn</b> (Mua sắm, Cà phê, Giải trí) | 
+                • <b class="text-emerald-400">20% Tiết kiệm & Tích lũy</b>
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const needsPct = Number(rule.needs_actual_pct || 0);
+    const wantsPct = Number(rule.wants_actual_pct || 0);
+    const savingsPct = Number(rule.savings_actual_pct || 0);
+
+    const needsOver = needsPct > 55;
+    const wantsOver = wantsPct > 35;
+    const savingsGood = savingsPct >= 20;
+
+    container.innerHTML = `
+      <div class="glass-card p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-800/90 shadow-xl relative overflow-hidden transition-all duration-300">
+        <!-- Glow accent -->
+        <div class="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+
+        <!-- Card Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800/80">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl gradient-emerald text-white flex items-center justify-center text-base shadow-md shadow-emerald-500/30 flex-shrink-0">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-black text-slate-100 tracking-tight">Phân Bổ Ngân Sách Chuẩn 50 / 30 / 20</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">AI Phân Tích</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Cơ sở tính: <span class="font-mono text-slate-300 font-semibold">${rule.total_income > 0 ? `Thu nhập ${formatVND(rule.total_income)}` : 'Tổng chi tiêu thực tế'}</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="text-right">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${needsOver || wantsOver ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'}">
+              <i class="fa-solid ${needsOver || wantsOver ? 'fa-triangle-exclamation text-amber-400' : 'fa-circle-check text-emerald-400'} mr-1"></i>
+              ${rule.evaluation || 'Cơ cấu cân bằng'}
+            </span>
+          </div>
+        </div>
+
+        <!-- 3 Interactive Allocation Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Column 1: Needs (50%) -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border ${needsOver ? 'border-rose-500/40 bg-rose-950/10' : 'border-slate-800'} flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block shadow-sm shadow-cyan-400/50"></span>
+                  <span class="text-xs font-bold text-slate-200">Nhu cầu thiết yếu</span>
+                </div>
+                <span class="text-[11px] font-mono font-bold ${needsOver ? 'text-rose-400' : 'text-cyan-400'}">${needsPct}% <span class="text-slate-500 font-normal">/ 50%</span></span>
+              </div>
+              <p class="text-[10px] text-slate-400 mb-2">Ăn uống, nhà ở, hóa đơn, đi lại</p>
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full rounded-full transition-all duration-700 ${needsOver ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'}" style="width: ${Math.min(100, needsPct)}%"></div>
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+              <span class="text-slate-500 font-medium">Thực tế:</span>
+              <span class="font-mono font-bold ${needsOver ? 'text-rose-300' : 'text-slate-200'}">${formatVND(rule.needs_actual_amount || 0)}</span>
+            </div>
+          </div>
+
+          <!-- Column 2: Wants (30%) -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border ${wantsOver ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800'} flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block shadow-sm shadow-purple-400/50"></span>
+                  <span class="text-xs font-bold text-slate-200">Mong muốn cá nhân</span>
+                </div>
+                <span class="text-[11px] font-mono font-bold ${wantsOver ? 'text-amber-400' : 'text-purple-400'}">${wantsPct}% <span class="text-slate-500 font-normal">/ 30%</span></span>
+              </div>
+              <p class="text-[10px] text-slate-400 mb-2">Mua sắm, cà phê, giải trí, du lịch</p>
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full rounded-full transition-all duration-700 ${wantsOver ? 'bg-gradient-to-r from-amber-500 to-rose-500' : 'bg-gradient-to-r from-purple-500 to-pink-500'}" style="width: ${Math.min(100, wantsPct)}%"></div>
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+              <span class="text-slate-500 font-medium">Thực tế:</span>
+              <span class="font-mono font-bold ${wantsOver ? 'text-amber-300' : 'text-slate-200'}">${formatVND(rule.wants_actual_amount || 0)}</span>
+            </div>
+          </div>
+
+          <!-- Column 3: Savings (20%) -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border ${savingsGood ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-slate-800'} flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-sm shadow-emerald-400/50"></span>
+                  <span class="text-xs font-bold text-slate-200">Tiết kiệm & Đầu tư</span>
+                </div>
+                <span class="text-[11px] font-mono font-bold ${savingsGood ? 'text-emerald-400' : 'text-slate-400'}">${savingsPct}% <span class="text-slate-500 font-normal">/ 20%</span></span>
+              </div>
+              <p class="text-[10px] text-slate-400 mb-2">Quỹ khẩn cấp, tích lũy, đầu tư sinh lời</p>
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-emerald-500 to-teal-400" style="width: ${Math.min(100, savingsPct)}%"></div>
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+              <span class="text-slate-500 font-medium">Thực tế:</span>
+              <span class="font-mono font-bold ${savingsGood ? 'text-emerald-300' : 'text-slate-200'}">${formatVND(rule.savings_actual_amount || 0)}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
   openBudgetModal(editId = null) {
     const existing = editId ? this.budgets.find(b => b.id === editId) : null;
     const modalEl = document.getElementById('generic-modal');
     if (!modalEl) return;
 
     modalEl.innerHTML = `
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900/95 text-slate-100 rounded-2xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700/80 animate-in fade-in zoom-in duration-150 backdrop-blur-xl">
           
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-bullseye text-emerald-600"></i>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-black text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-emerald-400"></i>
               ${existing ? 'Sửa Hạn Mức Ngân Sách' : 'Đặt Hạn Mức Ngân Sách'}
             </h3>
-            <button id="modal-close-btn" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+            <button id="modal-close-btn" class="w-8 h-8 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition cursor-pointer">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -207,44 +335,44 @@ export class BudgetsComponent {
           <form id="budget-form" class="mt-4 space-y-4">
             
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Danh Mục Chi Tiêu</label>
-              <select id="budget-category" ${existing ? 'disabled' : ''} class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Danh Mục Chi Tiêu</label>
+              <select id="budget-category" ${existing ? 'disabled' : ''} class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 ${this.allCategories.map(c => `
-                  <option value="${c.id}" ${existing && existing.category_id === c.id ? 'selected' : ''}>${c.name}</option>
+                  <option value="${c.id}" ${existing && existing.category_id === c.id ? 'selected' : ''} class="bg-slate-900 text-slate-100">${c.name}</option>
                 `).join('')}
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Hạn Mức Tối Đa (VND)</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Hạn Mức Tối Đa (VND)</label>
               <input type="number" id="budget-limit" required min="10000" step="10000" 
                 value="${existing ? existing.amount_limit : '2000000'}" placeholder="Ví dụ: 3000000" 
-                class="w-full px-3 py-2.5 text-sm font-bold text-slate-800 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                class="w-full px-3 py-2.5 text-sm font-bold text-emerald-400 bg-slate-950/80 rounded-xl border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Kỳ Hạn</label>
-                <select id="budget-period" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                  <option value="MONTHLY" ${!existing || existing.period === 'MONTHLY' ? 'selected' : ''}>Hàng tháng</option>
-                  <option value="WEEKLY" ${existing && existing.period === 'WEEKLY' ? 'selected' : ''}>Hàng tuần</option>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Kỳ Hạn</label>
+                <select id="budget-period" class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <option value="MONTHLY" ${!existing || existing.period === 'MONTHLY' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Hàng tháng</option>
+                  <option value="WEEKLY" ${existing && existing.period === 'WEEKLY' ? 'selected' : ''} class="bg-slate-900 text-slate-100">Hàng tuần</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tháng Áp Dụng</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Tháng Áp Dụng</label>
                 <input type="month" id="budget-month" value="${existing ? existing.month_year : this.selectedMonth}" 
-                  class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold text-slate-700" />
+                  class="w-full px-3 py-2 text-xs rounded-xl bg-slate-950/80 text-slate-100 border border-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold" />
               </div>
             </div>
 
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 flex items-start gap-2">
-              <i class="fa-solid fa-bell text-amber-600 mt-0.5"></i>
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[11px] text-amber-300 flex items-start gap-2">
+              <i class="fa-solid fa-bell text-amber-400 mt-0.5"></i>
               <span>Hệ thống sẽ tự động gửi cảnh báo khi chi tiêu danh mục này vượt quá <b>80%</b> và <b>100%</b> hạn mức.</span>
             </div>
 
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Hủy</button>
-              <button type="submit" id="budget-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition">
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <button type="button" id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">Hủy</button>
+              <button type="submit" id="budget-submit-btn" class="btn-sparkle-burst px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-bold shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
                 ${existing ? 'Lưu Hạn Mức' : 'Xác Nhận Đặt'}
               </button>
             </div>

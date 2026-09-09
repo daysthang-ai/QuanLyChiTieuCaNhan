@@ -4,6 +4,7 @@ import { formatVND, formatDateVN } from '../utils/formatters.js?v=20260904_14';
 export class AIAssistantComponent {
   constructor(app) {
     this.app = app;
+    this.currentQuota = null;
     this.chatHistory = [
       {
         role: 'assistant',
@@ -228,9 +229,9 @@ export class AIAssistantComponent {
       <div id="tab-ai_assistant" class="user-tab-pane h-[calc(100vh-140px)] flex flex-col glass-card rounded-3xl overflow-hidden shadow-sm animate-in fade-in duration-300 border border-slate-800">
         
         <!-- Chat Header -->
-        <div class="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+        <div class="p-4 border-b border-slate-800 bg-slate-900/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl gradient-indigo text-white flex items-center justify-center text-lg shadow-md shadow-indigo-500/30">
+            <div class="w-10 h-10 rounded-2xl gradient-indigo text-white flex items-center justify-center text-lg shadow-md shadow-indigo-500/30 shrink-0">
               <i class="fa-solid fa-robot"></i>
             </div>
             <div>
@@ -242,8 +243,16 @@ export class AIAssistantComponent {
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="btn-clear-chat" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 active:scale-95">
+          <!-- Daily Quota Synchronizer Badge & Action Controls -->
+          <div class="flex items-center gap-2.5 flex-wrap justify-end">
+            <div id="ai-advisor-quota-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs shadow-inner">
+              <div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
+              <span class="text-slate-300 font-bold text-[11px]" id="ai-quota-text">Đang đồng bộ hạn mức...</span>
+            </div>
+            <button id="btn-upgrade-ai-quota" class="hidden px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 font-black text-[10px] shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer">
+              <i class="fa-solid fa-crown text-[9px]"></i> Nâng Cấp VIP
+            </button>
+            <button id="btn-clear-chat" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 active:scale-95 cursor-pointer">
               <i class="fa-solid fa-trash-can text-[10px] text-rose-400"></i>
               <span>Xóa Lịch Sử</span>
             </button>
@@ -324,6 +333,61 @@ export class AIAssistantComponent {
         }
       }
     });
+
+    // Synchronize daily AI quota
+    await this.syncQuota();
+  }
+
+  async syncQuota() {
+    try {
+      const quota = await api.getAIQuota();
+      this.currentQuota = quota;
+      const textEl = document.getElementById('ai-quota-text');
+      const badgeContainer = document.getElementById('ai-advisor-quota-badge');
+      const upgradeBtn = document.getElementById('btn-upgrade-ai-quota');
+      if (!textEl || !quota) return;
+
+      const planKey = (quota.plan || this.app?.currentUser?.plan || 'FREE').toUpperCase();
+      const isUnlimited = quota.is_unlimited || planKey === 'PLATINUM';
+
+      if (upgradeBtn) {
+        if (isUnlimited) {
+          upgradeBtn.classList.add('hidden');
+        } else {
+          upgradeBtn.classList.remove('hidden');
+          upgradeBtn.onclick = () => this.app?.navigate('subscription');
+        }
+      }
+
+      if (isUnlimited) {
+        if (badgeContainer) {
+          badgeContainer.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-teal-500/15 to-blue-500/15 border border-amber-500/40 text-xs shadow-sm';
+        }
+        textEl.innerHTML = `<span class="text-amber-300 font-extrabold flex items-center gap-1.5"><i class="fa-solid fa-crown text-amber-400 text-[10px]"></i> PLATINUM VIP</span> &bull; <span class="text-emerald-400 font-mono font-bold">Không Giới Hạn Lượt AI</span>`;
+      } else {
+        const remaining = quota.remaining_today !== undefined ? quota.remaining_today : Math.max(0, (quota.daily_limit || 10) - (quota.used_today || 0));
+        const limit = quota.daily_limit || 10;
+        const isExpiring = remaining <= 2;
+        const planName = planKey === 'PREMIUM' ? 'FinTrack VIP' : planKey === 'PRO' ? 'VIP Pro' : 'FinTrack Free';
+        const planIcon = planKey === 'PREMIUM' ? 'fa-crown text-purple-400' : planKey === 'PRO' ? 'fa-bolt text-cyan-400' : 'fa-seedling text-slate-400';
+
+        if (badgeContainer) {
+          badgeContainer.className = `flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border ${isExpiring ? 'border-rose-500/50 shadow-rose-500/10' : 'border-slate-800'} text-xs shadow-inner`;
+        }
+
+        textEl.innerHTML = `
+          <span class="text-slate-300 font-bold flex items-center gap-1"><i class="fa-solid ${planIcon} text-[10px]"></i> ${planName}:</span>
+          <span class="font-mono ${isExpiring ? 'text-rose-400 font-black animate-pulse' : 'text-cyan-400 font-bold'}">Còn ${remaining}/${limit} lượt hôm nay</span>
+        `;
+      }
+    } catch (e) {
+      console.warn('[AI Advisor] Sync quota warning:', e);
+      const textEl = document.getElementById('ai-quota-text');
+      if (textEl) {
+        const uPlan = (this.app?.currentUser?.plan || 'FREE').toUpperCase();
+        textEl.textContent = uPlan === 'PLATINUM' ? 'Platinum VIP (Không giới hạn)' : `Gói ${uPlan}`;
+      }
+    }
   }
 
   renderChatMessages() {
@@ -354,6 +418,16 @@ export class AIAssistantComponent {
             </div>
             <div class="bg-slate-900/90 p-4 rounded-2xl rounded-tl-none border border-slate-700/60 text-xs text-slate-200 max-w-2xl shadow-md leading-relaxed space-y-2.5">
               <div>${html}</div>
+
+              ${m.isQuotaExceeded ? `
+                <div class="pt-2">
+                  <button type="button" onclick="window.fintrackApp.navigate('subscription')" class="btn-sparkle-burst px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-crown text-[10px]"></i>
+                    <span>Nâng Cấp Gói VIP Ngay</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  </button>
+                </div>
+              ` : ''}
 
               ${hasFollowups ? `
                 <div class="mt-3 pt-2.5 border-t border-slate-800/80">
@@ -392,6 +466,21 @@ export class AIAssistantComponent {
 
     const input = document.getElementById('ai-chat-input');
     const sendBtn = document.getElementById('btn-send-chat');
+    const thread = document.getElementById('ai-chat-thread');
+
+    // Quota pre-check: prevent sending if quota exhausted
+    if (this.currentQuota && !this.currentQuota.is_unlimited && this.currentQuota.remaining_today <= 0) {
+      this.chatHistory.push({ role: 'user', text: query });
+      this.chatHistory.push({
+        role: 'assistant',
+        text: `⚠️ Bạn đã sử dụng hết hạn mức **${this.currentQuota.daily_limit} lượt hỏi đáp AI hôm nay** của gói **${this.currentQuota.plan_name || this.currentQuota.plan}**.\n\nHạn mức sẽ tự động được làm mới vào 00:00 ngày mai. Hãy nâng cấp lên **FinTrack Platinum VIP** để thoải mái cố vấn AI 24/7 hoàn toàn không giới hạn!`,
+        isQuotaExceeded: true
+      });
+      if (input) input.value = '';
+      if (thread) thread.innerHTML = this.renderChatMessages();
+      this.scrollToBottom();
+      return;
+    }
 
     // Add user message
     this.chatHistory.push({ role: 'user', text: query });
@@ -403,7 +492,6 @@ export class AIAssistantComponent {
       sendBtn.disabled = true;
     }
 
-    const thread = document.getElementById('ai-chat-thread');
     if (thread) {
       thread.innerHTML = this.renderChatMessages() + `
         <div id="ai-typing-indicator" class="flex justify-start gap-3">
@@ -435,18 +523,24 @@ export class AIAssistantComponent {
         responseTimeMs: res?.response_time_ms || 0
       });
 
+      await this.syncQuota();
       if (thread) thread.innerHTML = this.renderChatMessages();
       this.scrollToBottom();
     } catch (err) {
+      const isQuotaLimit = (err.message || '').includes('429') || (err.message || '').includes('hạn mức') || (err.message || '').includes('lượt gọi');
       this.chatHistory.push({
         role: 'assistant',
-        text: `⚠️ Không thể xử lý câu hỏi: ${err.message || 'Lỗi kết nối API AI'}`,
-        followups: [
+        text: isQuotaLimit 
+          ? `⚠️ **Hết hạn mức AI hôm nay:** ${err.message}\n\nHãy nâng cấp lên gói VIP để mở khóa thêm lượt hỏi đáp AI không giới hạn!`
+          : `⚠️ Không thể xử lý câu hỏi: ${err.message || 'Lỗi kết nối API AI'}`,
+        isQuotaExceeded: isQuotaLimit,
+        followups: isQuotaLimit ? ["Nâng cấp lên FinTrack VIP", "Tìm hiểu gói Platinum VIP"] : [
           "Tư vấn ngân sách 3 triệu",
           "Đánh giá sức khỏe tài chính 50/30/20",
           "Tháng này tôi đã chi bao nhiêu?"
         ]
       });
+      if (isQuotaLimit) await this.syncQuota();
       if (thread) thread.innerHTML = this.renderChatMessages();
     } finally {
       if (input) {

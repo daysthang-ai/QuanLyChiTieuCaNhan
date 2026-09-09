@@ -24,7 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/static/css/style.css?v=20260907_01">
+  <link rel="stylesheet" href="/static/css/style.css?v=20260908_01">
 
   <!-- Active Pagination Button Mix Neon & Cyan Glow Styling -->
   <style>
@@ -42,11 +42,55 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
       cursor: default !important;
     }
+
+    /* Savings Goals Gradient Mix Neon Progress Bar & Cyan Glow */
+    .savings-progress-fill,
+    .saving-progress-neon,
+    #view-savings .progress-animated,
+    [data-tab-id="savings"] .progress-animated {
+      background: linear-gradient(90deg, #d946ef 0%, #06b6d4 50%, #84cc16 100%) !important;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
+    }
+    .savings-progress-fill.progress-animated,
+    .saving-progress-neon.progress-animated,
+    #view-savings .progress-animated,
+    [data-tab-id="savings"] .progress-animated {
+      background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+      ), linear-gradient(90deg, #d946ef 0%, #06b6d4 50%, #84cc16 100%) !important;
+      background-size: 1rem 1rem, 100% 100% !important;
+      animation: progressStripeAnimation 1.5s linear infinite !important;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
+    }
   </style>
 
-  <!-- Immediate Anti-Flicker & Session Check Script in Head -->
+  <!-- Immediate Anti-Flicker & Theme Controller Script in Head -->
   <script>
     (function() {
+      // 1. Immediate Theme Detection & Initialization (Zero FOUC)
+      try {
+        var savedTheme = localStorage.getItem('fintrack_theme') || 'dark';
+        if (savedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light-theme');
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.style.colorScheme = 'light';
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light-theme');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      } catch (_) {}
+
+      // 2. Immediate Session & Anti-Flicker
       try {
         var token = localStorage.getItem('fintrack_token') || localStorage.getItem('token');
         if (token) {
@@ -67,6 +111,145 @@
         }
       } catch (_) {}
     })();
+
+    // 3. Global Theme Controller Functions (Dark Mix Neon vs Light Mix Neon)
+    window.getFinTrackTheme = function() {
+      try {
+        return localStorage.getItem('fintrack_theme') || 'dark';
+      } catch (_) {
+        return 'dark';
+      }
+    };
+
+    window.updateThemeSwitchUI = function(theme) {
+      var currentTheme = theme || window.getFinTrackTheme();
+      var isLight = currentTheme === 'light';
+
+      // A. Update Header Switch
+      var headerThumb = document.getElementById('header-theme-thumb');
+      var headerThumbIcon = document.getElementById('header-theme-thumb-icon');
+      var headerLabel = document.getElementById('header-theme-label');
+      if (headerThumb) {
+        if (isLight) {
+          headerThumb.style.transform = 'translateX(34px)';
+          headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-rose-400 shadow-[0_0_14px_rgba(251,191,36,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
+          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-sun';
+          if (headerLabel) headerLabel.textContent = 'Sáng Neon';
+        } else {
+          headerThumb.style.transform = 'translateX(0px)';
+          headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_14px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
+          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-moon';
+          if (headerLabel) headerLabel.textContent = 'Tối Neon';
+        }
+      }
+
+      // B. Update Landing Header Switch
+      var landingThumb = document.getElementById('landing-theme-thumb');
+      var landingThumbIcon = document.getElementById('landing-theme-thumb-icon');
+      if (landingThumb) {
+        if (isLight) {
+          landingThumb.style.transform = 'translateX(28px)';
+          landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-amber-400 to-rose-400 shadow-[0_0_14px_rgba(251,191,36,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
+          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-sun';
+        } else {
+          landingThumb.style.transform = 'translateX(0px)';
+          landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_14px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none';
+          if (landingThumbIcon) landingThumbIcon.className = 'fa-solid fa-moon';
+        }
+      }
+
+      // C. Update Sidebar Single Pill Switch
+      var sidebarPillBtn = document.getElementById('sidebar-theme-pill-btn');
+      var sidebarThumb = document.getElementById('sidebar-theme-slider-thumb');
+      var labelDark = document.getElementById('sidebar-pill-label-dark');
+      var labelLight = document.getElementById('sidebar-pill-label-light');
+
+      if (sidebarThumb) {
+        if (isLight) {
+          sidebarThumb.style.transform = 'translateX(100%)';
+          sidebarThumb.style.background = 'linear-gradient(135deg, #f59e0b 0%, #ec4899 100%)';
+          sidebarThumb.style.boxShadow = '0 0 18px rgba(245, 158, 11, 0.75), 0 0 30px rgba(236, 72, 153, 0.4)';
+          if (sidebarPillBtn) {
+            sidebarPillBtn.style.background = '#ffffff';
+            sidebarPillBtn.style.borderColor = 'rgba(245, 158, 11, 0.55)';
+            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.05)';
+          }
+          if (labelLight) {
+            labelLight.style.color = '#ffffff';
+            labelLight.style.fontWeight = '900';
+            labelLight.style.opacity = '1';
+            labelLight.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.45)';
+          }
+          if (labelDark) {
+            labelDark.style.color = '#64748b';
+            labelDark.style.fontWeight = '600';
+            labelDark.style.opacity = '0.75';
+            labelDark.style.textShadow = 'none';
+          }
+        } else {
+          sidebarThumb.style.transform = 'translateX(0%)';
+          sidebarThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+          sidebarThumb.style.boxShadow = '0 0 18px rgba(6, 182, 212, 0.75), 0 0 30px rgba(16, 185, 129, 0.35)';
+          if (sidebarPillBtn) {
+            sidebarPillBtn.style.background = 'rgba(11, 15, 25, 0.95)';
+            sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.45)';
+            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5)';
+          }
+          if (labelDark) {
+            labelDark.style.color = '#020617';
+            labelDark.style.fontWeight = '900';
+            labelDark.style.opacity = '1';
+            labelDark.style.textShadow = 'none';
+          }
+          if (labelLight) {
+            labelLight.style.color = '#94a3b8';
+            labelLight.style.fontWeight = '600';
+            labelLight.style.opacity = '0.75';
+            labelLight.style.textShadow = 'none';
+          }
+        }
+      }
+    };
+
+    window.applyFinTrackTheme = function(theme) {
+      var isLight = theme === 'light';
+      var root = document.documentElement;
+      if (isLight) {
+        root.classList.remove('dark');
+        root.classList.add('light-theme');
+        root.setAttribute('data-theme', 'light');
+        root.style.colorScheme = 'light';
+      } else {
+        root.classList.add('dark');
+        root.classList.remove('light-theme');
+        root.setAttribute('data-theme', 'dark');
+        root.style.colorScheme = 'dark';
+      }
+      try {
+        localStorage.setItem('fintrack_theme', theme);
+      } catch (_) {}
+
+      window.updateThemeSwitchUI(theme);
+
+      // Notify App & Components
+      window.dispatchEvent(new CustomEvent('fintrack:theme-changed', {
+        detail: { theme: theme, isLight: isLight }
+      }));
+    };
+
+    window.setFinTrackTheme = function(theme) {
+      window.applyFinTrackTheme(theme);
+    };
+
+    window.toggleFinTrackTheme = function() {
+      var current = window.getFinTrackTheme();
+      var target = current === 'dark' ? 'light' : 'dark';
+      window.applyFinTrackTheme(target);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      window.updateThemeSwitchUI(window.getFinTrackTheme());
+    });
   </script>
 
   <!-- Immediate Global Functions in Head -->
@@ -887,13 +1070,26 @@
                 <span class="text-xl font-black tracking-tight text-white font-sans">FinTrack</span>
                 <span class="text-xs font-black px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 tracking-wider">AI</span>
               </div>
-              <span class="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-1">Smart Finance & Advisor</span>
+              <span class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mt-0.5">Smart Finance & Advisor</span>
             </div>
           </a>
         </div>
 
         <!-- Right: Action Buttons -->
         <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Landing Theme Toggle Switch Slider -->
+          <div class="landing-theme-toggle-box flex items-center" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
+            <button id="landing-theme-toggle-btn" type="button" onclick="window.toggleFinTrackTheme()" 
+              class="relative w-14 sm:w-16 h-8 rounded-full p-1 bg-slate-900/90 border border-cyan-500/40 hover:border-cyan-400 transition-all duration-300 flex items-center justify-between cursor-pointer shadow-inner active:scale-95 group" 
+              role="switch" aria-label="Đổi giao diện Tối / Sáng Neon">
+              <span class="text-[11px] text-amber-400 pl-1"><i class="fa-solid fa-sun"></i></span>
+              <span class="text-[11px] text-cyan-400 pr-1"><i class="fa-solid fa-moon"></i></span>
+              <span id="landing-theme-thumb" class="absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_12px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none">
+                <i id="landing-theme-thumb-icon" class="fa-solid fa-moon"></i>
+              </span>
+            </button>
+          </div>
+
           <!-- Login / Register Button -->
           <button type="button" onclick="window.openAuthModal('login')" 
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
@@ -2538,7 +2734,7 @@
        1. APP WORKSPACE CONTAINER (#app-workspace-container)
        Chứa Header làm việc, Sidebar điều hướng, và các màn hình Dashboard, Thu chi...
        ========================================================================== -->
-  <div id="app-workspace-container" class="w-full min-h-screen relative z-10 flex flex-col hidden" style="display: none !important;">
+  <div id="app-workspace-container" class="w-full h-screen max-h-screen overflow-hidden relative z-10 flex flex-col hidden" style="display: none !important;">
 
     <!-- Top Navigation Bar (Independent Fixed Glass Header) -->
     <header id="top-glass-header" class="fixed top-0 left-0 right-0 w-full h-[68px] z-[100] flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80">
@@ -2560,11 +2756,27 @@
             <span class="text-xl font-black tracking-tight text-white font-sans">FinTrack</span>
             <span class="text-xs font-black px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 tracking-wider">AI</span>
           </div>
-          <span class="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-1">Smart Finance & Advisor</span>
+          <span class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mt-0.5">Smart Finance & Advisor</span>
         </div>
       </a>
       <div class="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-slate-800/80">
         <span id="sidebar-mobile-subtitle" class="text-[11px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">Menu Quản Lý</span>
+      </div>
+
+      <!-- Header Theme Toggle Slider Switch (Tích hợp tại Menu Thanh Điều Hướng Header) -->
+      <div class="header-theme-toggle-wrapper flex items-center gap-2 pl-3 ml-1 border-l border-slate-800/80" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
+        <div id="header-theme-toggle-track" onclick="window.toggleFinTrackTheme()" class="theme-slider-switch-header relative w-16 h-7 rounded-full bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 p-0.5 flex items-center justify-between cursor-pointer select-none transition-all duration-300 shadow-inner group" role="switch" aria-label="Đổi giao diện Tối / Sáng Mix Neon">
+          <span class="w-6 h-6 flex items-center justify-center text-amber-400 text-[11px] z-0 transition-opacity">
+            <i class="fa-solid fa-sun"></i>
+          </span>
+          <span class="w-6 h-6 flex items-center justify-center text-cyan-400 text-[11px] z-0 transition-opacity">
+            <i class="fa-solid fa-moon"></i>
+          </span>
+          <span id="header-theme-thumb" class="theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_12px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none">
+            <i id="header-theme-thumb-icon" class="fa-solid fa-moon"></i>
+          </span>
+        </div>
+        <span id="header-theme-label" class="hidden xl:inline text-[11px] font-bold text-slate-300 uppercase tracking-wider">Tối Neon</span>
       </div>
     </div>
 
@@ -2629,7 +2841,7 @@
             <span id="user-display-name" class="text-xs font-extrabold text-slate-100 block">Nguyễn Văn An</span>
             <span id="user-display-plan" onclick="window.openSubscriptionModal()" class="badge-vip-toi-cao px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-[0_0_15px_rgba(251,191,36,0.5)] cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5" title="Gói tài khoản Platinum VIP - Nhấn để xem & quản lý"><i class="fa-solid fa-crown text-[10px] text-slate-950"></i> <span>PLATINUM VIP (CÒN 52 NGÀY)</span></span>
           </div>
-          <span id="user-display-email" class="text-[10px] text-slate-400 block font-medium">user@fintrack.ai</span>
+          <span id="user-display-email" class="text-xs text-slate-300 block font-semibold">user@fintrack.ai</span>
         </div>
         
         <img id="user-display-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar" 
@@ -2647,22 +2859,42 @@
   <!-- <div id="sidebarOverlay" class="hidden" style="display: none !important;"></div> -->
 
   <!-- 2. App Main Layout Container (Parent Flex Container for Sticky Sidebar & Main Content) -->
-  <div id="app-layout-container" class="app-main-layout w-full max-w-full mx-auto pt-[72px] px-4 sm:px-6 lg:px-8 pb-4 flex gap-5 lg:gap-6 items-start transition-all duration-300 relative flex-1 min-w-0 hidden">
+  <div id="app-layout-container" class="app-main-layout w-full max-w-full mx-auto mt-[68px] h-[calc(100vh-68px)] max-h-[calc(100vh-68px)] p-4 sm:p-6 flex flex-row gap-5 lg:gap-6 items-start overflow-hidden transition-all duration-300 relative flex-1 min-w-0 hidden">
 
     <!-- Sidebar Navigation (Sticky Collapsible Sidebar) -->
-    <aside id="sidebar" class="sticky top-[72px] h-[calc(100vh-84px)] flex-shrink-0 flex flex-col justify-between glass-card rounded-2xl p-3 pb-5 shadow-lg shadow-cyan-950/20 z-30 pointer-events-auto bg-[#0b0f19] lg:bg-slate-900/60 border border-cyan-500/30 overflow-y-auto overflow-x-hidden self-start">
+    <aside id="sidebar" class="sticky top-6 self-start h-[calc(100vh-6rem)] overflow-y-auto flex-shrink-0 w-[280px] min-w-[280px] max-w-[280px] flex flex-col justify-between rounded-2xl p-3 pb-5 shadow-xl shadow-cyan-950/20 z-30 pointer-events-auto bg-[#0b0f19]/95 lg:bg-slate-900/85 backdrop-blur-2xl border border-cyan-500/30 overflow-x-hidden overscroll-contain transition-all duration-300 custom-scrollbar">
       
       <!-- Sidebar Header (Aligned cleanly with Sidebar and Hamburger Icon) -->
-      <div class="flex items-center gap-2.5 px-3 py-2.5 mb-2 border-b border-slate-800/80 text-slate-200">
+      <div class="flex items-center gap-2.5 px-3 py-2.5 mb-2 border-b border-slate-800/80 text-slate-200 shrink-0">
         <div class="w-6 h-6 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs shrink-0">
           <i class="fa-solid fa-bars-staggered"></i>
         </div>
         <span class="text-xs font-black uppercase tracking-wider text-slate-200">Menu Quản Lý</span>
       </div>
+
+      <!-- NÚT HẠT THUỐC (PILL TOGGLE BUTTON) DUY NHẤT CHUYỂN ĐỔI GIAO DIỆN -->
+      <div class="px-1 mb-3 shrink-0">
+        <button id="sidebar-theme-pill-btn" type="button" onclick="window.toggleFinTrackTheme()" class="sidebar-theme-pill relative w-full h-[38px] rounded-full p-1 flex items-center cursor-pointer select-none transition-all duration-300 shadow-md group focus:outline-none" role="switch" aria-label="Chuyển đổi giao diện Sáng / Tối Neon" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
+          <!-- Sliding pill thumb -->
+          <div id="sidebar-theme-slider-thumb" class="sidebar-theme-slider-thumb absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out shadow-lg pointer-events-none z-0 flex items-center justify-center" style="background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%); box-shadow: 0 0 18px rgba(6, 182, 212, 0.75), 0 0 30px rgba(16, 185, 129, 0.35);"></div>
+
+          <!-- Dark State Segment (Left) -->
+          <span id="sidebar-pill-label-dark" onclick="event.stopPropagation(); window.setFinTrackTheme('dark')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-black transition-all duration-300 cursor-pointer text-slate-950">
+            <i class="fa-solid fa-moon text-xs"></i>
+            <span>Tối Neon</span>
+          </span>
+
+          <!-- Light State Segment (Right) -->
+          <span id="sidebar-pill-label-light" onclick="event.stopPropagation(); window.setFinTrackTheme('light')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-bold transition-all duration-300 cursor-pointer text-slate-400">
+            <i class="fa-solid fa-sun text-xs"></i>
+            <span>Sáng Neon</span>
+          </span>
+        </button>
+      </div>
       
       <!-- 1. USER NAVIGATION MENU (Visible in User Mode) -->
-      <nav id="sidebar-user-nav" class="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 pr-1 pb-2">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1.5 block">Danh Mục Chính</span>
+      <nav id="sidebar-user-nav" class="space-y-1.5 flex-1 pr-1 pb-2">
+        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider px-3 mb-1.5 block">Danh Mục Chính</span>
         
         <a href="#" class="nav-btn nav-item user-nav-item active flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="dashboard">
           <div class="flex items-center gap-2.5 min-w-0">
@@ -2727,36 +2959,36 @@
             <i class="fa-solid fa-crown text-amber-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Gói Dịch Vụ</span>
           </div>
-          <span id="sidebar-subscription-badge" class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">👑 Nâng Cấp</span>
+          <span id="sidebar-subscription-badge" class="ml-auto shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">👑 Nâng Cấp</span>
         </a>
 
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 pt-3 mb-1.5 block">AI Cố Vấn / Trợ Giúp</span>
+        <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider px-3 pt-3 mb-1.5 block">AI Cố Vấn / Trợ Giúp</span>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-indigo-950/50 hover:text-indigo-300 transition" data-tab="ai_assistant">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-semibold text-slate-200 hover:bg-indigo-950/50 hover:text-indigo-300 transition" data-tab="ai_assistant">
           <div class="flex items-center gap-2.5 min-w-0">
             <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Trợ Lý AI FinTrack</span>
           </div>
-          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-indigo text-white whitespace-nowrap">24/7</span>
+          <span class="ml-auto shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full gradient-indigo text-white whitespace-nowrap">24/7</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="notifications">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-semibold text-slate-200 hover:bg-pink-950/40 hover:text-pink-300 transition" data-tab="notifications">
           <div class="flex items-center gap-2.5 min-w-0">
             <i class="fa-solid fa-bell text-pink-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hộp Thư & Thông Báo</span>
           </div>
-          <span id="sidebar-notification-badge" class="ml-auto hidden shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">0</span>
+          <span id="sidebar-notification-badge" class="ml-auto hidden shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">0</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-teal-950/40 hover:text-teal-300 transition" data-tab="support">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-semibold text-slate-200 hover:bg-teal-950/40 hover:text-teal-300 transition" data-tab="support">
           <div class="flex items-center gap-2.5 min-w-0">
             <i class="fa-solid fa-headset text-emerald-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Hỗ Trợ & Khiếu Nại</span>
           </div>
-          <span class="ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 whitespace-nowrap">24/7</span>
+          <span class="ml-auto shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 whitespace-nowrap">24/7</span>
         </a>
 
-        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition" data-tab="settings">
+        <a href="#" class="nav-btn nav-item user-nav-item flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-semibold text-slate-200 hover:bg-slate-800/70 hover:text-white transition" data-tab="settings">
           <div class="flex items-center gap-2.5 min-w-0">
             <i class="fa-solid fa-gear text-slate-400 text-sm shrink-0 w-5 h-5 flex items-center justify-center"></i>
             <span class="truncate">Cài Đặt & Bảo Mật</span>
@@ -2765,19 +2997,19 @@
 
         <!-- Admin Shortcut in User Sidebar (Visible for Admins) -->
         <div id="admin-nav-section" class="hidden pt-2.5">
-          <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest px-3 mb-1.5 block">Hệ Thống</span>
+          <span class="text-[11px] font-bold text-rose-300 uppercase tracking-wider px-3 mb-1.5 block">Hệ Thống</span>
           <a href="javascript:void(0)" onclick="switchPortal('admin')" class="flex items-center justify-between w-full px-3 py-2 rounded-xl bg-slate-900/60 border border-rose-500/30 hover:border-rose-500/60 hover:bg-rose-950/20 text-slate-200 transition-all group" data-tab="admin_dashboard">
             <div class="flex items-center gap-2.5">
               <i class="fa-solid fa-shield-halved text-rose-400 text-sm w-5 h-5 flex items-center justify-center group-hover:scale-110 transition-transform"></i>
               <span id="admin-portal-nav-text" class="text-xs font-semibold tracking-wide text-rose-200">Vào Admin Portal</span>
             </div>
-            <span id="admin-portal-role-badge" class="ml-auto text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 uppercase">Root</span>
+            <span id="admin-portal-role-badge" class="ml-auto text-[11px] font-black px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 uppercase">Root</span>
           </a>
         </div>
       </nav>
 
       <!-- 2. DEDICATED ADMIN NAVIGATION MENU (Visible ONLY in Admin Portal Mode) -->
-      <nav id="sidebar-admin-nav" class="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 pr-1 hidden">
+      <nav id="sidebar-admin-nav" class="space-y-1.5 flex-1 pr-1 hidden">
         <div class="px-3 pb-2 mb-1.5 border-b border-slate-800">
           <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest block flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> CONTROL CENTER
@@ -2861,7 +3093,7 @@
 
       <!-- Sidebar Bottom Card / Footers -->
       <!-- User Footer Card -->
-      <div id="sidebar-user-footer" class="p-2.5 rounded-xl gradient-indigo text-white shadow-md shadow-indigo-500/20 text-xs">
+      <div id="sidebar-user-footer" class="p-2.5 rounded-xl gradient-indigo text-white shadow-md shadow-indigo-500/20 text-xs shrink-0 mt-3">
         <div class="flex items-center gap-2 mb-1 font-bold">
           <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-xs"></i>
           <span class="text-xs">FinTrack AI 1.0</span>
@@ -2872,7 +3104,7 @@
       </div>
 
       <!-- Admin Footer Card -->
-      <div id="sidebar-admin-footer" class="hidden p-2.5 rounded-xl bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-500/30 text-xs space-y-1.5">
+      <div id="sidebar-admin-footer" class="hidden p-2.5 rounded-xl bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-500/30 text-xs space-y-1.5 shrink-0 mt-3">
         <div class="flex items-center gap-2 font-bold text-rose-300">
           <i class="fa-solid fa-shield-halved text-amber-300 text-xs"></i>
           <span class="text-xs">Admin Cyber Console</span>
@@ -2886,9 +3118,9 @@
     </aside>
 
     <!-- Master Floating Glass Container for Main Content -->
-    <div id="main-glass-wrapper" class="flex-1 min-w-0 w-full max-w-full flex flex-col p-4 sm:p-5 lg:p-6 pb-8 lg:pb-10 relative rounded-[28px] overflow-visible transition-all duration-300" style="border: 2px solid #06b6d4; box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15); background: rgba(11, 19, 41, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+    <div id="main-glass-wrapper" class="flex-1 min-w-0 w-full max-w-full h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col p-4 sm:p-5 lg:p-6 pb-8 lg:pb-10 relative rounded-[28px] transition-all duration-300" style="border: 2px solid #06b6d4; box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), 0 0 50px rgba(6, 182, 212, 0.15), inset 0 0 15px rgba(6, 182, 212, 0.15); background: rgba(11, 19, 41, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
       <!-- Main Content Area -->
-      <main class="flex-1 min-w-0 w-full max-w-full overflow-y-visible overflow-x-hidden transition-all duration-300 pb-8" id="main-content-view">
+      <main class="flex-1 min-w-0 w-full max-w-full pb-8" id="main-content-view">
         <!-- Injected by Router -->
       </main>
     </div>
@@ -2937,7 +3169,7 @@
 
   <!-- Theme Mapping & Application Module Scripts -->
   <script type="module" src="/static/js/theme_mapping.js?v=20260906_01"></script>
-  <script type="module" src="/static/js/app.js?v=20260906_01"></script>
+  <script type="module" src="/static/js/app.js?v=20260908_01"></script>
 
   <!-- ==========================================================================
        AUTH MODAL (Đăng Nhập / Đăng Ký)
