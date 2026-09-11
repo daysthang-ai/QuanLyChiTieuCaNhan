@@ -191,27 +191,31 @@ export class BadgesComponent {
             <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
               
               <!-- Streak Pill -->
-              <div class="p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-orange-500/5">
+              <div id="gamification-streak-card" class="gamification-streak-pill p-4 rounded-2xl bg-slate-900/90 border border-orange-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-orange-500/5 transition-all">
                 <div class="flex items-center justify-center gap-1.5 text-orange-400 text-xs sm:text-sm font-black mb-1">
-                  <i class="fa-solid fa-fire text-orange-500 animate-pulse text-sm sm:text-base"></i>
-                  <span>CHUỖI KỶ LUẬT</span>
+                  <div class="streak-flame-icon-box w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-fire text-orange-500 animate-pulse text-sm sm:text-base"></i>
+                  </div>
+                  <span class="streak-pill-title font-black">CHUỖI KỶ LUẬT</span>
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-slate-100 font-mono tracking-tight stat-value" id="gamification-streak-days">
+                <div class="text-xl sm:text-2xl font-black text-slate-100 font-mono tracking-tight stat-value streak-pill-count" id="gamification-streak-days">
                   0 Ngày
                 </div>
-                <div class="text-[11px] text-slate-400 mt-0.5">Ghi chép liên tiếp</div>
+                <div class="text-[11px] text-slate-400 mt-0.5 streak-pill-sub">Ghi chép liên tiếp</div>
               </div>
 
               <!-- Unlocked Count Pill -->
-              <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-emerald-500/5">
+              <div id="gamification-unlocked-card" class="gamification-unlocked-pill p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 text-center min-w-[135px] sm:min-w-[145px] shadow-lg shadow-emerald-500/5 transition-all">
                 <div class="flex items-center justify-center gap-1.5 text-emerald-400 text-xs sm:text-sm font-black mb-1">
-                  <i class="fa-solid fa-award text-emerald-400 text-sm sm:text-base"></i>
-                  <span>HUY HIỆU ĐẠT</span>
+                  <div class="unlocked-award-icon-box w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-award text-emerald-400 text-sm sm:text-base"></i>
+                  </div>
+                  <span class="unlocked-pill-title font-black">HUY HIỆU ĐẠT</span>
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono tracking-tight stat-value" id="gamification-badges-unlocked">
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono tracking-tight stat-value unlocked-pill-count" id="gamification-badges-unlocked">
                   0 / 0
                 </div>
-                <div class="text-[11px] text-slate-400 mt-0.5" id="gamification-completion-pct">0% hoàn thành</div>
+                <div class="text-[11px] text-slate-400 mt-0.5 unlocked-pill-sub" id="gamification-completion-pct">0% hoàn thành</div>
               </div>
 
             </div>
@@ -676,26 +680,26 @@ export class BadgesComponent {
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           
           <!-- Milestone Card -->
-          <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ${isUnlocked ? 'bg-slate-900/80 border border-slate-800' : 'opacity-40 grayscale border-dashed border-slate-700 bg-slate-900/40'}">
+          <div class="roadmap-milestone-card ${isUnlocked ? 'roadmap-unlocked bg-slate-900/80 border border-slate-800' : 'roadmap-locked opacity-40 grayscale border-dashed border-slate-700 bg-slate-900/40'} flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200">
             
             <!-- Icon with status badge -->
             <div class="relative flex-shrink-0">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${isUnlocked ? m.activeIconStyle : 'border border-slate-700 bg-slate-800 text-slate-500'}">
+              <div class="roadmap-icon-box roadmap-tier-${idx} w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${isUnlocked ? m.activeIconStyle : 'border border-slate-700 bg-slate-800 text-slate-500'}">
                 <i class="${m.icon}"></i>
               </div>
               ${isUnlocked
-                ? '<i class="fa-solid fa-circle-check text-[10px] text-emerald-400 absolute -top-1 -right-1 bg-slate-950 rounded-full"></i>'
-                : '<i class="fa-solid fa-lock text-[10px] text-slate-500 absolute -top-1 -right-1 bg-slate-950 rounded-full"></i>'
+                ? '<i class="roadmap-status-check fa-solid fa-circle-check text-[10px] text-emerald-400 absolute -top-1 -right-1 bg-slate-950 rounded-full"></i>'
+                : '<i class="roadmap-status-lock fa-solid fa-lock text-[10px] text-slate-500 absolute -top-1 -right-1 bg-slate-950 rounded-full"></i>'
               }
             </div>
 
             <!-- Texts -->
             <div class="flex flex-col leading-tight min-w-[65px]">
               <div class="flex items-center gap-1">
-                <span class="text-[11px] font-black ${isUnlocked ? 'text-slate-100' : 'text-slate-400'}">${m.title}</span>
-                <span class="text-[9px] font-bold text-slate-400 font-mono">(${m.levelText})</span>
+                <span class="roadmap-title text-[11px] font-black ${isUnlocked ? 'text-slate-100' : 'text-slate-400'}">${m.title}</span>
+                <span class="roadmap-level-text text-[9px] font-bold text-slate-400 font-mono">(${m.levelText})</span>
               </div>
-              <span class="text-[9px] font-mono mt-0.5 ${isUnlocked ? 'text-amber-400 font-bold' : 'text-slate-500'}">${m.xpText}</span>
+              <span class="roadmap-xp text-[9px] font-mono mt-0.5 ${isUnlocked ? 'text-amber-400 font-bold' : 'text-slate-500'}">${m.xpText}</span>
             </div>
 
           </div>
@@ -734,26 +738,26 @@ export class BadgesComponent {
       };
 
       return `
-        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-700/70 flex flex-col justify-between hover:border-indigo-500/50 transition cursor-pointer group"
+        <div class="upcoming-badge-card p-4 rounded-2xl bg-slate-900/90 border border-slate-700/70 flex flex-col justify-between hover:border-indigo-500/50 transition cursor-pointer group"
           onclick="window.openBadgeModal('${b.id}')">
           <div>
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">
+                <div class="upcoming-badge-icon-box w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">
                   <i class="${b.icon}"></i>
                 </div>
-                <span class="font-extrabold text-xs text-slate-100 group-hover:text-indigo-300 transition">${b.title}</span>
+                <span class="upcoming-badge-title font-extrabold text-xs text-slate-100 group-hover:text-indigo-300 transition">${b.title}</span>
               </div>
-              <span class="text-[10px] font-bold text-indigo-400 font-mono">${b.progress_pct}%</span>
+              <span class="upcoming-badge-pct text-[10px] font-bold text-indigo-400 font-mono">${b.progress_pct}%</span>
             </div>
-            <p class="text-[11px] text-slate-400 line-clamp-2 mb-2">${b.description}</p>
+            <p class="upcoming-badge-desc text-[11px] text-slate-400 line-clamp-2 mb-2">${b.description}</p>
           </div>
 
           <div>
             <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
               <div class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="width: ${b.progress_pct}%"></div>
             </div>
-            <div class="flex items-center justify-between text-[10px] text-slate-400">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 upcoming-badge-meta">
               <span>Đạt: ${formatVal(b.current_val, b.unit)}</span>
               <span>Mục tiêu: ${formatVal(b.target_val, b.unit)}</span>
             </div>
@@ -854,7 +858,7 @@ export class BadgesComponent {
       };
 
       return `
-        <div class="glass-card badge-card p-5 rounded-3xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${cardContainerClass} ${isUnlocked ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-75 hover:opacity-100 hover:scale-[1.01] cursor-pointer'}"
+        <div class="glass-card badge-card ${isUnlocked ? 'badge-card-unlocked' : 'badge-card-locked'} badge-tier-${tier.toLowerCase()} p-5 rounded-3xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${cardContainerClass} ${isUnlocked ? 'hover:scale-[1.02] cursor-pointer' : 'opacity-75 hover:opacity-100 hover:scale-[1.01] cursor-pointer'}"
           onclick="window.openBadgeModal('${b.id}')">
           
           <!-- Top Row: Icon & Tier Badge & Status -->
@@ -862,21 +866,21 @@ export class BadgesComponent {
             <div class="flex items-start justify-between mb-3.5">
               
               <!-- Badge Icon Box -->
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${iconBoxClass}">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${iconBoxClass} ${isUnlocked ? 'badge-icon-unlocked' : 'badge-icon-locked'} badge-icon-${tier.toLowerCase()}">
                 <i class="${b.icon}"></i>
               </div>
 
               <!-- Status Badge & Tier Pill -->
               <div class="flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${pillClass}">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${pillClass} ${isUnlocked ? 'badge-tier-unlocked' : 'badge-tier-locked'} badge-pill-${tier.toLowerCase()}">
                   ${b.tier_name || tier}
                 </span>
 
                 ${isUnlocked 
-                  ? `<span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30" title="Đã mở khóa">
+                  ? `<span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30 badge-status-indicator-unlocked" title="Đã mở khóa">
                       <i class="fa-solid fa-check text-xs"></i>
                     </span>`
-                  : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center border border-slate-700" title="Chưa mở khóa - Click để xem cách đạt">
+                  : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center border border-slate-700 badge-status-indicator-locked" title="Chưa mở khóa - Click để xem cách đạt">
                       <i class="fa-solid fa-lock text-[11px]"></i>
                     </span>`
                 }
@@ -985,7 +989,7 @@ export class BadgesComponent {
 
     modalEl.innerHTML = `
       <div class="modal-backdrop-blur fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700 animate-in fade-in zoom-in duration-200 text-center">
+        <div id="badge-modal-card" class="badge-modal-card badge-modal-${tier.toLowerCase()} bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-6 relative overflow-hidden border border-slate-700 animate-in fade-in zoom-in duration-200 text-center">
           
           <!-- Background Ambient Glow -->
           <div class="absolute -top-12 -right-12 w-48 h-48 rounded-full ${isUnlocked ? style.glow : 'bg-slate-700/15'} blur-2xl pointer-events-none"></div>
@@ -996,13 +1000,13 @@ export class BadgesComponent {
           </button>
 
           <!-- Badge Icon in Large Box with Status Corner -->
-          <div class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-xl ring-4 relative ${isUnlocked ? `${style.iconBox} ${style.ring}` : 'bg-slate-800 text-slate-500 ring-slate-700/50 border border-slate-700'}">
+          <div id="badge-modal-icon-box" class="badge-modal-icon-box badge-modal-icon-${tier.toLowerCase()} w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-3xl mb-4 shadow-xl ring-4 relative ${isUnlocked ? `${style.iconBox} ${style.ring}` : 'bg-slate-800 text-slate-500 ring-slate-700/50 border border-slate-700'}">
             <i class="${badge.icon}"></i>
             ${isUnlocked 
-              ? `<span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/50 absolute -bottom-1 -right-1 border-2 border-slate-900" title="Đã mở khóa">
+              ? `<span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/50 absolute -bottom-1 -right-1 border-2 border-slate-900 badge-modal-status-check" title="Đã mở khóa">
                   <i class="fa-solid fa-check text-xs"></i>
                 </span>`
-              : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center absolute -bottom-1 -right-1 border-2 border-slate-900" title="Chưa mở khóa">
+              : `<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center absolute -bottom-1 -right-1 border-2 border-slate-900 badge-modal-status-lock" title="Chưa mở khóa">
                   <i class="fa-solid fa-lock text-[10px]"></i>
                 </span>`
             }
@@ -1010,25 +1014,25 @@ export class BadgesComponent {
 
           <!-- Status & Tier Pill Row -->
           <div class="flex items-center justify-center gap-2 mb-2">
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isUnlocked ? style.pill : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+            <span class="badge-modal-pill inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${isUnlocked ? style.pill : 'bg-slate-800 text-slate-400 border border-slate-700'}">
               <span>Bậc ${badge.tier_name || tier}</span> &bull; <span>${badge.category}</span>
             </span>
             ${isUnlocked 
-              ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shadow-sm">
+              ? `<span class="badge-modal-unlock-status px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shadow-sm">
                   <i class="fa-solid fa-circle-check text-emerald-400"></i> Đã Mở Khóa
                 </span>`
-              : `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
+              : `<span class="badge-modal-lock-status px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
                   <i class="fa-solid fa-lock text-[10px]"></i> Đang Tích Lũy
                 </span>`
             }
           </div>
 
           <!-- Title & Description -->
-          <h2 class="text-xl font-black text-slate-100 mb-1.5">${badge.title}</h2>
-          <p class="text-xs text-slate-400 mb-4 leading-relaxed">${badge.description}</p>
+          <h2 class="badge-modal-title text-xl font-black text-slate-100 mb-1.5">${badge.title}</h2>
+          <p class="badge-modal-desc text-xs text-slate-400 mb-4 leading-relaxed">${badge.description}</p>
 
           <!-- Progress / Unlock Box -->
-          <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left mb-4">
+          <div id="badge-modal-condition-box" class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left mb-4">
             <div class="flex items-center justify-between text-xs font-bold mb-2">
               <span class="text-slate-300 flex items-center gap-1.5">
                 <i class="fa-solid fa-crosshairs ${isUnlocked ? 'text-emerald-400' : 'text-indigo-400'}"></i>

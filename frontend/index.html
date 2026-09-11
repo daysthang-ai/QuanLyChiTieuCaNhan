@@ -24,7 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/static/css/style.css?v=20260908_01">
+  <link rel="stylesheet" href="/static/css/style.css?v=20260910_01">
 
   <!-- Active Pagination Button Mix Neon & Cyan Glow Styling -->
   <style>
@@ -688,6 +688,172 @@
       display: inline-block;
     }
 
+    /* =========================================================================
+       HORIZONTAL HEADER NAVIGATION BAR (CENTER GLASSMORPHISM MENU)
+       ========================================================================= */
+    #landing-header-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.3rem 0.4rem;
+      background: rgba(10, 16, 32, 0.75) !important;
+      backdrop-filter: blur(24px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+      border: 1px solid rgba(56, 189, 248, 0.22) !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #landing-header-nav:hover {
+      border-color: rgba(56, 189, 248, 0.38) !important;
+      box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(6, 182, 212, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+    }
+
+    #landing-header-nav .landing-nav-item {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 0.45rem !important;
+      width: auto !important;
+      padding: 0.45rem 0.85rem !important;
+      border-radius: 9999px !important;
+      font-size: 0.8125rem !important;
+      font-weight: 600 !important;
+      color: #94a3b8 !important;
+      background: transparent !important;
+      border: 1px solid transparent !important;
+      white-space: nowrap !important;
+      transform: none !important;
+      box-shadow: none !important;
+      cursor: pointer !important;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    @media (min-width: 1280px) {
+      #landing-header-nav .landing-nav-item {
+        padding: 0.45rem 1.05rem !important;
+        gap: 0.55rem !important;
+      }
+    }
+
+    #landing-header-nav .landing-nav-item:hover {
+      color: #ffffff !important;
+      background: rgba(30, 41, 59, 0.65) !important;
+      border-color: rgba(148, 163, 184, 0.3) !important;
+      transform: translateY(-1.5px) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    #landing-header-nav .landing-nav-item:active {
+      transform: translateY(0) scale(0.97) !important;
+    }
+
+    #landing-header-nav .landing-nav-item .nav-icon-box {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: auto !important;
+      height: auto !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      font-size: 0.825rem !important;
+      transform: none !important;
+      transition: transform 0.22s ease, color 0.22s ease !important;
+    }
+
+    #landing-header-nav .landing-nav-item:hover .nav-icon-box {
+      transform: scale(1.18) !important;
+    }
+
+    /* 1. Trang Chủ - Emerald Active / Hover */
+    #landing-header-nav .landing-nav-item[data-landing-tab="home"]:hover,
+    #landing-header-nav .landing-nav-item[data-landing-tab="home"].active {
+      color: #34d399 !important;
+      background: rgba(16, 185, 129, 0.16) !important;
+      border-color: rgba(16, 185, 129, 0.45) !important;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    #landing-header-nav .landing-nav-item[data-landing-tab="home"]:hover .nav-icon-box,
+    #landing-header-nav .landing-nav-item[data-landing-tab="home"].active .nav-icon-box {
+      color: #34d399 !important;
+      transform: scale(1.18) !important;
+    }
+
+    /* 2. Cố Vấn AI - Purple Active / Hover */
+    #landing-header-nav .landing-nav-item[data-landing-tab="advisor"]:hover,
+    #landing-header-nav .landing-nav-item[data-landing-tab="advisor"].active {
+      color: #c084fc !important;
+      background: rgba(168, 85, 247, 0.16) !important;
+      border-color: rgba(168, 85, 247, 0.45) !important;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    #landing-header-nav .landing-nav-item[data-landing-tab="advisor"]:hover .nav-icon-box,
+    #landing-header-nav .landing-nav-item[data-landing-tab="advisor"].active .nav-icon-box {
+      color: #c084fc !important;
+      transform: scale(1.18) !important;
+    }
+
+    /* 3. Tính Năng - Cyan Active / Hover */
+    #landing-header-nav .landing-nav-item[data-landing-tab="features"]:hover,
+    #landing-header-nav .landing-nav-item[data-landing-tab="features"].active {
+      color: #22d3ee !important;
+      background: rgba(6, 182, 212, 0.16) !important;
+      border-color: rgba(6, 182, 212, 0.45) !important;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    #landing-header-nav .landing-nav-item[data-landing-tab="features"]:hover .nav-icon-box,
+    #landing-header-nav .landing-nav-item[data-landing-tab="features"].active .nav-icon-box {
+      color: #22d3ee !important;
+      transform: scale(1.18) !important;
+    }
+
+    /* 4. Bảng Giá VIP - Amber Active / Hover */
+    #landing-header-nav .landing-nav-item[data-landing-tab="pricing"]:hover,
+    #landing-header-nav .landing-nav-item[data-landing-tab="pricing"].active {
+      color: #fbbf24 !important;
+      background: rgba(245, 158, 11, 0.16) !important;
+      border-color: rgba(245, 158, 11, 0.45) !important;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    #landing-header-nav .landing-nav-item[data-landing-tab="pricing"]:hover .nav-icon-box,
+    #landing-header-nav .landing-nav-item[data-landing-tab="pricing"].active .nav-icon-box {
+      color: #fbbf24 !important;
+      transform: scale(1.18) !important;
+    }
+
+    /* 5. Về Chúng Tôi - Teal Active / Hover */
+    #landing-header-nav .landing-nav-item[data-landing-tab="about"]:hover,
+    #landing-header-nav .landing-nav-item[data-landing-tab="about"].active {
+      color: #2dd4bf !important;
+      background: rgba(20, 184, 166, 0.16) !important;
+      border-color: rgba(20, 184, 166, 0.45) !important;
+      box-shadow: 0 0 16px rgba(20, 184, 166, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    #landing-header-nav .landing-nav-item[data-landing-tab="about"]:hover .nav-icon-box,
+    #landing-header-nav .landing-nav-item[data-landing-tab="about"].active .nav-icon-box {
+      color: #2dd4bf !important;
+      transform: scale(1.18) !important;
+    }
+
+    /* Light Theme Compatibility for Horizontal Nav */
+    html.light-theme #landing-header-nav,
+    [data-theme="light"] #landing-header-nav {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border-color: rgba(203, 213, 225, 0.8) !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+    }
+    html.light-theme #landing-header-nav .landing-nav-item,
+    [data-theme="light"] #landing-header-nav .landing-nav-item {
+      color: #64748b !important;
+    }
+    html.light-theme #landing-header-nav .landing-nav-item:hover,
+    [data-theme="light"] #landing-header-nav .landing-nav-item:hover {
+      background: rgba(241, 245, 249, 0.9) !important;
+      color: #0f172a !important;
+    }
+
     /* Enterprise Smooth FAQ Accordion Animation & Transitions */
     details {
       transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, transform 0.3s ease !important;
@@ -1052,20 +1218,20 @@
        ========================================================================== -->
   <div id="landing-page-container" class="w-full min-h-screen relative z-20 flex flex-col justify-between pointer-events-auto">
     
-    <!-- A. LANDING HEADER (Fixed glass navbar with Hamburger Slide-Down Menu) -->
+    <!-- A. LANDING HEADER (Fixed glass navbar with Center Horizontal Glassmorphism Navigation Menu) -->
     <header class="sticky top-0 left-0 right-0 w-full h-[68px] z-50 bg-[#0b0f19]/95 backdrop-blur-xl border-b border-slate-800/80 pointer-events-auto relative">
-      <div class="w-full max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 h-full flex items-center justify-between">
-        <!-- Left: Hamburger Button + Brand Logo -->
-        <div class="flex items-center gap-3 sm:gap-4">
-          <!-- Hamburger Menu Button (3 gạch) -->
+      <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-2 sm:gap-4">
+        <!-- Left: Brand Logo (+ Mobile Hamburger Button) -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <!-- Mobile Hamburger Menu Button (chỉ hiện trên màn hình nhỏ md:hidden) -->
           <button id="landing-sidebar-toggle-btn" type="button" onclick="window.toggleLandingNavMenu(event)" 
-            class="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 shadow-md shadow-black/40 transition-all duration-200 cursor-pointer active:scale-95 group focus:outline-none focus:ring-2 focus:ring-cyan-500/30" 
+            class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 shadow-md shadow-black/40 transition-all duration-200 cursor-pointer active:scale-95 group focus:outline-none focus:ring-2 focus:ring-cyan-500/30" 
             aria-label="Mở danh mục điều hướng" title="Danh mục điều hướng">
-            <i class="fa-solid fa-bars text-base transition-transform"></i>
+            <i class="fa-solid fa-bars text-sm transition-transform"></i>
           </button>
 
           <!-- Logo & Brand -->
-          <a href="javascript:void(0)" onclick="window.switchLandingTab('home')" class="flex items-center gap-3 group">
+          <a href="javascript:void(0)" onclick="window.switchLandingTab('home')" class="flex items-center gap-2.5 sm:gap-3 group">
             <div class="logo-neon-glow-wrapper !w-9 !h-9 !rounded-xl flex-shrink-0">
               <div class="logo-neon-inner !rounded-[10px]">
                 <i class="fa-solid fa-gem text-amber-400 text-sm drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"></i>
@@ -1076,20 +1242,87 @@
                 <span class="text-xl font-black tracking-tight text-white font-sans">FinTrack</span>
                 <span class="text-xs font-black px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 tracking-wider">AI</span>
               </div>
-              <span class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mt-0.5">Smart Finance & Advisor</span>
+              <span class="text-[10px] font-bold tracking-wider text-cyan-400 uppercase mt-0.5">Trung Tâm Chỉ Huy</span>
             </div>
           </a>
         </div>
 
+        <!-- Center: Thanh Menu Ngang Kính Mờ (Glassmorphism Navigation) Căn Giữa Header -->
+        <div id="landing-header-nav-container" class="hidden md:flex flex-1 items-center justify-center px-2">
+          <nav id="landing-header-nav" aria-label="Thanh điều hướng chính">
+            <!-- 1. Trang Chủ (Emerald) -->
+            <button type="button" 
+              class="landing-nav-item active group" 
+              data-landing-tab="home" 
+              onclick="window.switchLandingTab('home')" 
+              title="Trang Chủ">
+              <div class="nav-icon-box">
+                <i class="fa-solid fa-house"></i>
+              </div>
+              <span class="nav-item-title">Trang Chủ</span>
+            </button>
+
+            <!-- 2. Cố Vấn AI (Purple) -->
+            <button type="button" 
+              class="landing-nav-item group" 
+              data-landing-tab="advisor" 
+              onclick="window.switchLandingTab('advisor')" 
+              title="Cố Vấn AI">
+              <div class="nav-icon-box">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <span class="nav-item-title">Cố Vấn AI</span>
+              <span class="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 ml-0.5">AI</span>
+            </button>
+
+            <!-- 3. Tính Năng (Cyan) -->
+            <button type="button" 
+              class="landing-nav-item group" 
+              data-landing-tab="features" 
+              onclick="window.switchLandingTab('features')" 
+              title="Hệ thống tính năng">
+              <div class="nav-icon-box">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <span class="nav-item-title">Tính Năng</span>
+            </button>
+
+            <!-- 4. Bảng Giá VIP (Amber) -->
+            <button type="button" 
+              class="landing-nav-item group" 
+              data-landing-tab="pricing" 
+              onclick="window.switchLandingTab('pricing')" 
+              title="Bảng giá các gói VIP">
+              <div class="nav-icon-box">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <span class="nav-item-title">Bảng Giá VIP</span>
+              <span class="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 ml-0.5">VIP</span>
+            </button>
+
+            <!-- 5. Về Chúng Tôi (Teal) -->
+            <button type="button" 
+              class="landing-nav-item group" 
+              data-landing-tab="about" 
+              onclick="window.switchLandingTab('about')" 
+              title="Về chúng tôi & Tiêu chuẩn bảo mật">
+              <div class="nav-icon-box">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <span class="nav-item-title">Về Chúng Tôi</span>
+            </button>
+          </nav>
+        </div>
+
         <!-- Right: Action Buttons -->
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <!-- Landing Theme Toggle Switch Slider -->
           <div class="landing-theme-toggle-box flex items-center" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
             <button id="landing-theme-toggle-btn" type="button" onclick="window.toggleFinTrackTheme()" 
               class="relative w-14 sm:w-16 h-8 rounded-full p-1 bg-slate-900/90 border border-cyan-500/40 hover:border-cyan-400 transition-all duration-300 flex items-center justify-between cursor-pointer shadow-inner active:scale-95 group" 
               role="switch" aria-label="Đổi giao diện Tối / Sáng Neon">
-              <span class="text-[11px] text-amber-400 pl-1"><i class="fa-solid fa-sun"></i></span>
-              <span class="text-[11px] text-cyan-400 pr-1"><i class="fa-solid fa-moon"></i></span>
+              <span class="text-[11px] text-cyan-400 pl-1"><i class="fa-solid fa-moon"></i></span>
+              <span class="text-[11px] text-amber-400 pr-1"><i class="fa-solid fa-sun"></i></span>
               <span id="landing-theme-thumb" class="absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_12px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none">
                 <i id="landing-theme-thumb-icon" class="fa-solid fa-moon"></i>
               </span>
@@ -1098,16 +1331,16 @@
 
           <!-- Login / Register Button -->
           <button type="button" onclick="window.openAuthModal('login')" 
-            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer">
+            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl gradient-emerald text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition cursor-pointer whitespace-nowrap">
             <i class="fa-solid fa-arrow-right-to-bracket"></i>
             <span>Đăng Nhập / Đăng Ký</span>
           </button>
         </div>
       </div>
 
-      <!-- Compact Vertical Dropdown Menu (Gọn gàng bên dưới nút 3 gạch) -->
+      <!-- Compact Vertical Dropdown Menu (Chỉ dành cho thiết bị di động khi nhấn nút menu) -->
       <div id="landing-nav-dropdown" 
-        class="absolute top-[calc(100%+8px)] left-6 sm:left-8 lg:left-12 w-72 sm:w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(6,182,212,0.15)] z-50 overflow-hidden opacity-0 pointer-events-none -translate-y-2 scale-95 invisible transition-all duration-200 ease-out">
+        class="md:hidden absolute top-[calc(100%+8px)] left-4 sm:left-6 w-72 sm:w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800/90 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(6,182,212,0.15)] z-50 overflow-hidden opacity-0 pointer-events-none -translate-y-2 scale-95 invisible transition-all duration-200 ease-out">
         
         <!-- Dropdown Header: Tiêu đề "DANH MỤC ĐIỀU HƯỚNG" -->
         <div class="px-4 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/40">
@@ -1208,9 +1441,9 @@
       </div>
     </header>
 
-    <!-- Backdrop Overlay below Header (click outside to close) -->
+    <!-- Backdrop Overlay below Header (click outside to close - mobile only) -->
     <div id="landing-nav-backdrop" onclick="window.closeLandingNavMenu()" 
-      class="modal-backdrop-blur fixed inset-0 top-[68px] bg-black/40 backdrop-blur-md z-40 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out" 
+      class="md:hidden modal-backdrop-blur fixed inset-0 top-[68px] bg-black/40 backdrop-blur-md z-40 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out" 
       aria-hidden="true"></div>
 
     <!-- MAIN TAB CONTENTS CONTAINER -->
@@ -2772,11 +3005,11 @@
       <!-- Header Theme Toggle Slider Switch (Tích hợp tại Menu Thanh Điều Hướng Header) -->
       <div class="header-theme-toggle-wrapper flex items-center gap-2 pl-3 ml-1 border-l border-slate-800/80" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
         <div id="header-theme-toggle-track" onclick="window.toggleFinTrackTheme()" class="theme-slider-switch-header relative w-16 h-7 rounded-full bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 p-0.5 flex items-center justify-between cursor-pointer select-none transition-all duration-300 shadow-inner group" role="switch" aria-label="Đổi giao diện Tối / Sáng Mix Neon">
-          <span class="w-6 h-6 flex items-center justify-center text-amber-400 text-[11px] z-0 transition-opacity">
-            <i class="fa-solid fa-sun"></i>
-          </span>
           <span class="w-6 h-6 flex items-center justify-center text-cyan-400 text-[11px] z-0 transition-opacity">
             <i class="fa-solid fa-moon"></i>
+          </span>
+          <span class="w-6 h-6 flex items-center justify-center text-amber-400 text-[11px] z-0 transition-opacity">
+            <i class="fa-solid fa-sun"></i>
           </span>
           <span id="header-theme-thumb" class="theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_12px_rgba(6,182,212,0.85)] transition-transform duration-300 ease-out flex items-center justify-center text-[10px] text-slate-950 font-black pointer-events-none">
             <i id="header-theme-thumb-icon" class="fa-solid fa-moon"></i>
@@ -3175,7 +3408,7 @@
 
   <!-- Theme Mapping & Application Module Scripts -->
   <script type="module" src="/static/js/theme_mapping.js?v=20260906_01"></script>
-  <script type="module" src="/static/js/app.js?v=20260908_01"></script>
+  <script type="module" src="/static/js/app.js?v=20260910_01"></script>
 
   <!-- ==========================================================================
        AUTH MODAL (Đăng Nhập / Đăng Ký)

@@ -9,8 +9,8 @@ import { BudgetsComponent } from './components/budgets.js?v=20260904_14';
 import { SavingsComponent } from './components/savings.js?v=20260908_01';
 import { AnalyticsComponent } from './components/analytics.js?v=20260904_14';
 import { AIAssistantComponent } from './components/ai_assistant.js?v=20260904_14';
-import { BadgesComponent } from './components/badges.js?v=20260908_01';
-import { AdminComponent } from './components/admin.js?v=20260904_14';
+import { BadgesComponent } from './components/badges.js?v=20260910_01';
+import { AdminComponent } from './components/admin.js?v=20260910_01';
 import { SubscriptionComponent } from './components/subscription.js?v=20260907_01';
 import { NotificationsComponent } from './components/notifications.js?v=20260904_14';
 import { SupportComponent } from './components/support.js?v=20260904_14';
@@ -639,6 +639,9 @@ class App {
       }
       if (this.activeTab === 'dashboard' && this.dashboard?.onThemeChanged) {
         this.dashboard.onThemeChanged(isLight);
+      }
+      if ((this.activeTab === 'admin' || this.activeTab?.startsWith('admin_')) && this.admin?.onThemeChanged) {
+        this.admin.onThemeChanged(isLight);
       }
     });
 

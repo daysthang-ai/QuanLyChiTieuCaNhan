@@ -575,6 +575,15 @@ export class AdminComponent {
     }
   }
 
+  onThemeChanged(isLight) {
+    if (this.growthChart || this.planChart) {
+      if (this.dashboardData) {
+        this.renderGrowthChart(this.dashboardData.user_growth || []);
+        this.renderPlanDonutChart(this.dashboardData.plan_distribution || null);
+      }
+    }
+  }
+
   // =========================================================================
   // 1. DASHBOARD TAB & TIMEFRAME FILTERING
   // =========================================================================
@@ -1056,6 +1065,8 @@ export class AdminComponent {
       lineLabel = 'User hoạt động (DAU)';
     }
 
+    const isLight = document.documentElement.classList.contains('light-theme') || document.documentElement.getAttribute('data-theme') === 'light';
+
     this.growthChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -1065,7 +1076,7 @@ export class AdminComponent {
             type: 'bar',
             label: barLabel,
             data: dataBar,
-            backgroundColor: 'rgba(99, 102, 241, 0.8)',
+            backgroundColor: isLight ? 'rgba(79, 70, 229, 0.85)' : 'rgba(99, 102, 241, 0.8)',
             borderRadius: 6,
             barPercentage: 0.5,
             order: 2
@@ -1075,7 +1086,7 @@ export class AdminComponent {
             label: lineLabel,
             data: dataLine,
             borderColor: '#F43F5E',
-            backgroundColor: 'rgba(244, 63, 94, 0.1)',
+            backgroundColor: isLight ? 'rgba(244, 63, 94, 0.15)' : 'rgba(244, 63, 94, 0.1)',
             borderWidth: 2.5,
             pointBackgroundColor: '#F43F5E',
             pointRadius: 4,
@@ -1097,15 +1108,18 @@ export class AdminComponent {
               boxWidth: 10,
               boxHeight: 10,
               font: { size: 10, weight: 'bold' },
-              color: '#94A3B8'
+              color: isLight ? '#475569' : '#94A3B8'
             }
           }
         },
         scales: {
-          x: { grid: { display: false } },
+          x: { 
+            grid: { display: false },
+            ticks: { color: isLight ? '#475569' : '#94a3b8' }
+          },
           y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { precision: 0 }
+            grid: { color: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)' },
+            ticks: { precision: 0, color: isLight ? '#475569' : '#94a3b8' }
           }
         }
       }
@@ -1128,6 +1142,8 @@ export class AdminComponent {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const isLight = document.documentElement.classList.contains('light-theme') || document.documentElement.getAttribute('data-theme') === 'light';
+
     this.planChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -1136,7 +1152,7 @@ export class AdminComponent {
           data: plans.counts || [1, 1, 1],
           backgroundColor: plans.colors || ['#64748B', '#6366F1', '#F59E0B'],
           borderWidth: 2,
-          borderColor: '#020617'
+          borderColor: isLight ? '#ffffff' : '#020617'
         }]
       },
       options: {
@@ -1791,6 +1807,9 @@ export class AdminComponent {
       const data = await api.getAdminAIConfig();
       this.aiConfigData = data;
       this.renderAIContent(container);
+      if (this.activeAIFilter && this.activeAIFilter !== 'ai_stats') {
+        setTimeout(() => this.applyAIFilter(this.activeAIFilter), 120);
+      }
     } catch (e) {
       container.innerHTML = `<div class="p-6 text-center text-rose-400 text-xs">Lỗi khi tải AI config: ${e.message}</div>`;
     }
@@ -1799,31 +1818,41 @@ export class AdminComponent {
   renderAIContent(container) {
     if (!this.aiConfigData) return;
     const data = this.aiConfigData;
-    const c = data.config;
-    const s = data.stats;
+    const c = data.config || {};
+    const s = data.stats || { today_tokens: 0, today_calls: 0, month_tokens: 0, month_calls: 0, est_monthly_cost_usd: '0.00', est_monthly_cost_vnd: 0 };
+
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
 
     container.innerHTML = `
       <div class="space-y-6 admin-subtab-content-anim">
         
         <!-- Module 1: Token Stats & Consumption -->
-        <div id="ai-module-stats" class="space-y-3 ${this.activeAIFilter === 'ai_stats' || this.activeAIFilter === 'all' ? 'block' : 'opacity-60'} transition">
+        <div id="ai-module-stats" class="space-y-3 transition">
           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <i class="fa-solid fa-bolt text-amber-300"></i> Module 1: Thống Kê & Chi Phí Token AI
+            <i class="fa-solid fa-bolt text-amber-300"></i> <span>Module 1: Thống Kê & Chi Phí Token AI</span>
           </h4>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="glass-card p-5 rounded-3xl border border-indigo-500/20 bg-indigo-950/15">
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Token Sử Dụng Hôm Nay</span>
-              <div class="text-2xl font-black text-indigo-400 font-mono">${s.today_tokens.toLocaleString()} tokens</div>
-              <div class="text-[11px] text-slate-400 mt-1">${s.today_calls} lượt truy vấn trong ngày</div>
+              <div class="text-2xl font-black text-indigo-400 font-mono">${(s.today_tokens || 0).toLocaleString()} tokens</div>
+              <div class="text-[11px] text-slate-400 mt-1">${s.today_calls || 0} lượt truy vấn trong ngày</div>
             </div>
             <div class="glass-card p-5 rounded-3xl border border-purple-500/20 bg-purple-950/15">
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Token Sử Dụng Tháng Này</span>
-              <div class="text-2xl font-black text-purple-400 font-mono">${s.month_tokens.toLocaleString()} tokens</div>
-              <div class="text-[11px] text-slate-400 mt-1">${s.month_calls} lượt truy vấn trong tháng</div>
+              <div class="text-2xl font-black text-purple-400 font-mono">${(s.month_tokens || 0).toLocaleString()} tokens</div>
+              <div class="text-[11px] text-slate-400 mt-1">${s.month_calls || 0} lượt truy vấn trong tháng</div>
             </div>
             <div class="glass-card p-5 rounded-3xl border border-amber-500/20 bg-amber-950/15">
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Chi Phí API Ước Tính</span>
-              <div class="text-2xl font-black text-amber-300 font-mono">$${s.est_monthly_cost_usd} (~${s.est_monthly_cost_vnd.toLocaleString()} ₫)</div>
+              <div class="text-2xl font-black text-amber-300 font-mono">$${s.est_monthly_cost_usd || '0.00'} (~${(s.est_monthly_cost_vnd || 0).toLocaleString()} ₫)</div>
               <div class="text-[11px] text-emerald-400 mt-1">Zero-PII Engine Tối Ưu Chi Phí</div>
             </div>
           </div>
@@ -1837,22 +1866,22 @@ export class AdminComponent {
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
               <h3 class="text-sm font-extrabold text-slate-100 flex items-center gap-2">
                 <i class="fa-solid fa-gear text-cyan-400"></i>
-                Module 4: Cấu Hình Model Engine AI & Endpoint
+                <span>Module 4: Cấu Hình Model Engine AI & Endpoint</span>
               </h3>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">Model: ${c.provider}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">Model: ${escapeHtml(c.provider || 'Gemini 1.5 Pro')}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block font-bold text-slate-300 mb-1">Mô Hình AI Kích Hoạt (Provider)</label>
                 <select id="ai-provider" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-semibold">
-                  ${data.providers_available.map(p => `
+                  ${(data.providers_available || []).map(p => `
                     <option value="${p.name}" ${p.name === c.provider ? 'selected' : ''}>${p.name} (${p.status})</option>
                   `).join('')}
                 </select>
               </div>
               <div>
                 <label class="block font-bold text-slate-300 mb-1">Model Name / Endpoint Code</label>
-                <input type="text" id="ai-model-name" value="${c.model_name}" 
+                <input type="text" id="ai-model-name" value="${escapeHtml(c.model_name || 'gemini-1.5-pro')}" 
                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
               </div>
             </div>
@@ -1871,19 +1900,19 @@ export class AdminComponent {
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
               <h3 class="text-sm font-extrabold text-slate-100 flex items-center gap-2">
                 <i class="fa-solid fa-file-lines text-indigo-400"></i>
-                Module 2: System Prompt Natural Language Parser (Bóc tách giao dịch tự nhiên)
+                <span>Module 2: System Prompt Natural Language Parser (Bóc tách giao dịch tự nhiên)</span>
               </h3>
               <span class="text-[10px] font-bold text-indigo-300 font-mono">Zero-PII Active</span>
             </div>
             <p class="text-[11px] text-slate-400">Quy định logic trích xuất Số tiền, Danh mục, Ví và Loại giao dịch từ tiếng Việt tự nhiên</p>
             <div class="flex flex-wrap items-center gap-1.5 text-[10px]">
               <span class="text-slate-400 font-bold">Biến hỗ trợ:</span>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{raw_text}')">{raw_text}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{available_wallets}')">{available_wallets}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{available_categories}')">{available_categories}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{current_date}')">{current_date}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{raw_text}')">{raw_text}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{available_wallets}')">{available_wallets}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{available_categories}')">{available_categories}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-parser', '{current_date}')">{current_date}</button>
             </div>
-            <textarea id="ai-prompt-parser" rows="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-[11px] leading-relaxed">${c.system_prompt_parser}</textarea>
+            <textarea id="ai-prompt-parser" rows="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-[11px] leading-relaxed">${escapeHtml(c.system_prompt_parser || '')}</textarea>
           </div>
 
           <!-- Module 3: System Prompt Advisor -->
@@ -1891,40 +1920,40 @@ export class AdminComponent {
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
               <h3 class="text-sm font-extrabold text-slate-100 flex items-center gap-2">
                 <i class="fa-solid fa-brain text-purple-400"></i>
-                Module 3: System Prompt Financial Health Advisor (Bác sĩ tài chính 50/30/20)
+                <span>Module 3: System Prompt Financial Health Advisor (Bác sĩ tài chính 50/30/20)</span>
               </h3>
               <span class="text-[10px] font-bold text-purple-300 font-mono">50/30/20 Rule</span>
             </div>
             <p class="text-[11px] text-slate-400">Quy định tính cách và nguyên tắc tư vấn tái cơ cấu ngân sách cho người dùng</p>
             <div class="flex flex-wrap items-center gap-1.5 text-[10px]">
               <span class="text-slate-400 font-bold">Biến hỗ trợ:</span>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{total_income}')">{total_income}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{total_expense}')">{total_expense}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{needs_pct}')">{needs_pct}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{wants_pct}')">{wants_pct}</button>
-              <button type="button" class="px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{savings_pct}')">{savings_pct}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{total_income}')">{total_income}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{total_expense}')">{total_expense}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{needs_pct}')">{needs_pct}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{wants_pct}')">{wants_pct}</button>
+              <button type="button" class="prompt-variable-tag px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900 text-purple-300 border border-purple-800/40 font-mono font-bold transition" onclick="window.fintrackAdmin.insertVariableToPrompt('ai-prompt-advisor', '{savings_pct}')">{savings_pct}</button>
             </div>
-            <textarea id="ai-prompt-advisor" rows="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-[11px] leading-relaxed">${c.system_prompt_advisor}</textarea>
+            <textarea id="ai-prompt-advisor" rows="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-[11px] leading-relaxed">${escapeHtml(c.system_prompt_advisor || '')}</textarea>
           </div>
 
           <!-- Module 5: Rate Limits & Quotas -->
           <div id="ai-module-limits" class="glass-card p-6 rounded-3xl space-y-3 border ${this.activeAIFilter === 'ai_limits' ? 'border-rose-500 shadow-xl shadow-rose-500/15 ring-2 ring-rose-500/20' : 'border-slate-800'} transition">
             <h3 class="text-sm font-extrabold text-slate-100 flex items-center gap-2 pb-2 border-b border-slate-800">
               <i class="fa-solid fa-stopwatch text-rose-400"></i>
-              Module 5: Hạn Mức Lượt Gọi AI Cho Từng Gói Tài Khoản (Rate Limits / Day)
+              <span>Module 5: Hạn Mức Lượt Gọi AI Cho Từng Gói Tài Khoản (Rate Limits / Day)</span>
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label class="block text-[11px] text-slate-400 mb-1 font-bold">Gói FREE (Lượt/Ngày)</label>
-                <input type="number" id="ai-limit-free" value="${c.rate_limit_free}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
+                <input type="number" id="ai-limit-free" value="${c.rate_limit_free !== undefined ? c.rate_limit_free : 10}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
               </div>
               <div>
                 <label class="block text-[11px] text-slate-400 mb-1 font-bold">Gói PRO (Lượt/Ngày)</label>
-                <input type="number" id="ai-limit-pro" value="${c.rate_limit_pro}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
+                <input type="number" id="ai-limit-pro" value="${c.rate_limit_pro !== undefined ? c.rate_limit_pro : 100}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
               </div>
               <div>
                 <label class="block text-[11px] text-slate-400 mb-1 font-bold">Gói PREMIUM (Lượt/Ngày)</label>
-                <input type="number" id="ai-limit-prem" value="${c.rate_limit_premium}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
+                <input type="number" id="ai-limit-prem" value="${c.rate_limit_premium !== undefined ? c.rate_limit_premium : 1000}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono font-bold" />
               </div>
             </div>
           </div>
@@ -1987,7 +2016,8 @@ export class AdminComponent {
       'ai_limits': 'ai-module-limits'
     };
 
-    const targetEl = document.getElementById(map[filterId]);
+    const targetId = map[filterId] || 'ai-module-stats';
+    const targetEl = document.getElementById(targetId);
     if (targetEl) {
       targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       targetEl.classList.add('cyber-card-highlight');
@@ -4632,6 +4662,9 @@ export class AdminComponent {
     `;
 
     try {
+      const role = (this.app?.currentUser?.role || '').toUpperCase();
+      const isRootAdmin = role === 'ADMIN';
+
       const res = await api.getAdminPaymentSettings();
       const settings = (res && res.settings) ? res.settings : {
         bank_id: 'MB',
@@ -4670,15 +4703,24 @@ export class AdminComponent {
           <!-- Banner Header -->
           <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/20 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/10">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/10 shrink-0">
                 <i class="fa-solid fa-qrcode"></i>
               </div>
               <div>
-                <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                <h3 class="text-base font-black text-slate-100 flex items-center gap-2 flex-wrap">
                   <span>Cổng Thanh Toán VietQR Thụ Hưởng Động</span>
                   <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
                     🟢 Live Gateway
                   </span>
+                  ${isRootAdmin ? `
+                    <span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[9px] font-bold uppercase">
+                      Root Admin
+                    </span>
+                  ` : `
+                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-bold uppercase">
+                      Moderator Read-Only
+                    </span>
+                  `}
                 </h3>
                 <p class="text-xs text-slate-400 mt-0.5">
                   Cấu hình tài khoản ngân hàng thụ hưởng nhận tiền nạp tự động 100% của toàn bộ sàn FinTrack AI.
@@ -4686,14 +4728,16 @@ export class AdminComponent {
               </div>
             </div>
 
-            <div class="px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs font-mono text-right">
+            <div class="px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs font-mono text-right shrink-0">
               <span class="text-slate-500 block text-[10px]">Cổng Hiện Tại:</span>
-              <span class="font-bold text-amber-300">${settings.bank_name || settings.bank_id} - ${currentAccNum}</span>
+              <span class="font-bold text-amber-300 truncate max-w-[200px] block" title="${settings.bank_name || currentBankId} - ${currentAccNum}">
+                ${settings.bank_name || currentBankId} - ${currentAccNum}
+              </span>
             </div>
           </div>
 
           <!-- Main Two-Column Gateway Form & Live Preview Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             <!-- Left 7 cols: Gateway Configuration Form -->
             <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
@@ -4705,6 +4749,13 @@ export class AdminComponent {
                 <span class="text-[11px] text-slate-400 font-mono">Chuẩn VietQR Napas247</span>
               </div>
 
+              ${!isRootAdmin ? `
+                <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                  <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                  <span>Chế độ chỉ đọc: Chỉ tài khoản Root Admin mới có quyền thay đổi thông tin nhận tiền hệ thống.</span>
+                </div>
+              ` : ''}
+
               <form id="form-admin-payment-gateway" class="space-y-4">
                 
                 <!-- Bank Select Dropdown -->
@@ -4712,8 +4763,8 @@ export class AdminComponent {
                   <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
                     1. Ngân Hàng Thụ Hưởng (VietQR ID) *
                   </label>
-                  <select id="admin-gateway-bank-select" required
-                    class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                  <select id="admin-gateway-bank-select" ${!isRootAdmin ? 'disabled' : 'required'}
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${!isRootAdmin ? 'opacity-70 cursor-not-allowed' : ''}">
                     ${availableBanks.map(b => `
                       <option value="${b.id}" data-name="${b.name}" ${b.id.toUpperCase() === currentBankId ? 'selected' : ''}>
                         [${b.id}] ${b.name}
@@ -4731,8 +4782,8 @@ export class AdminComponent {
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
                       <i class="fa-solid fa-credit-card text-xs"></i>
                     </span>
-                    <input type="text" id="admin-gateway-acc-num" required value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
-                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                    <input type="text" id="admin-gateway-acc-num" ${!isRootAdmin ? 'readonly disabled' : 'required'} value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${!isRootAdmin ? 'opacity-70 cursor-not-allowed' : ''}" />
                   </div>
                   <span class="text-[10px] text-slate-500 mt-1 block">Nhập số tài khoản ngân hàng chính xác để tạo mã QR chuẩn.</span>
                 </div>
@@ -4746,8 +4797,8 @@ export class AdminComponent {
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
                       <i class="fa-solid fa-user-check text-xs"></i>
                     </span>
-                    <input type="text" id="admin-gateway-acc-name" required value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
-                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-sm font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase" />
+                    <input type="text" id="admin-gateway-acc-name" ${!isRootAdmin ? 'readonly disabled' : 'required'} value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
+                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-sm font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase ${!isRootAdmin ? 'opacity-70 cursor-not-allowed' : ''}" />
                   </div>
                   <span class="text-[10px] text-slate-500 mt-1 block">Tên in trên thẻ/tài khoản (viết hoa không dấu hoặc có dấu).</span>
                 </div>
@@ -4757,69 +4808,78 @@ export class AdminComponent {
                   <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
                     4. Kiểu Mẫu Khung VietQR (Template)
                   </label>
-                  <select id="admin-gateway-template-select"
-                    class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500">
+                  <select id="admin-gateway-template-select" ${!isRootAdmin ? 'disabled' : ''}
+                    class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500 ${!isRootAdmin ? 'opacity-70 cursor-not-allowed' : ''}">
                     <option value="compact2" ${currentTemplate === 'compact2' ? 'selected' : ''}>compact2 (Đẹp & Chuẩn Napas 24/7 có logo ngân hàng)</option>
                     <option value="compact" ${currentTemplate === 'compact' ? 'selected' : ''}>compact (Mẫu gọn)</option>
                     <option value="qr_only" ${currentTemplate === 'qr_only' ? 'selected' : ''}>qr_only (Chỉ mã QR thuần không khung)</option>
                   </select>
                 </div>
 
-                <div class="pt-2">
-                  <button type="submit" id="btn-save-admin-gateway"
-                    class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk text-sm"></i>
-                    <span>Lưu & Kích Hoạt Cổng Ngân Hàng Mới</span>
-                  </button>
-                </div>
+                ${isRootAdmin ? `
+                  <div class="pt-2">
+                    <button type="submit" id="btn-save-admin-gateway"
+                      class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-floppy-disk text-sm"></i>
+                      <span>Lưu & Kích Hoạt Cổng Ngân Hàng Mới</span>
+                    </button>
+                  </div>
+                ` : `
+                  <div class="pt-2">
+                    <div class="w-full py-3.5 rounded-2xl bg-slate-800/80 text-slate-400 font-bold text-xs border border-slate-700/60 flex items-center justify-center gap-2 cursor-not-allowed">
+                      <i class="fa-solid fa-lock text-amber-400 text-sm"></i>
+                      <span>Chỉ Root Admin Có Quyền Sửa Cấu Hình Cổng Ngân Hàng</span>
+                    </div>
+                  </div>
+                `}
 
               </form>
             </div>
 
             <!-- Right 5 cols: Live Realtime QR Preview Box -->
-            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/90 border border-amber-500/30 shadow-xl flex flex-col items-center justify-between text-center space-y-4">
+            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/90 border border-amber-500/30 shadow-xl flex flex-col items-center justify-between text-center space-y-4 overflow-hidden">
               
               <div class="w-full text-left border-b border-slate-800 pb-3 flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
                   <i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Mã QR Trực Quan (Live Preview)
                 </span>
-                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">VietQR API</span>
+                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">VietQR API</span>
               </div>
 
               <!-- Dynamic QR Image -->
-              <div class="relative group my-2">
-                <div class="p-3 bg-white rounded-3xl shadow-2xl border-2 border-amber-500/50 max-w-[230px] mx-auto transition transform hover:scale-105">
+              <div class="relative group my-2 w-full flex justify-center">
+                <div class="p-3 bg-white rounded-3xl shadow-2xl border-2 border-amber-500/50 w-[200px] h-[200px] flex items-center justify-center transition transform hover:scale-105">
                   <img id="admin-gateway-preview-img" src="${generatePreviewQR(currentBankId, currentAccNum, currentTemplate, currentAccName)}" 
-                    alt="VietQR Preview" class="w-full h-auto object-contain rounded-xl"
+                    alt="VietQR Preview" class="w-full h-full object-contain rounded-xl"
                     onerror="this.src='/TKnganhangMB.jpg'" />
                 </div>
-                <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1">
+                <div class="absolute -bottom-2 px-3 py-1 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1">
                   <i class="fa-solid fa-shield-check"></i>
                   <span id="admin-gateway-badge-bank">${currentBankId}</span>
                 </div>
               </div>
 
               <!-- Live Meta Info Box -->
-              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800/90 text-left text-xs font-mono space-y-1.5">
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Ngân hàng:</span>
-                  <span class="font-bold text-slate-100" id="preview-meta-bank">${settings.bank_name || currentBankId}</span>
+              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800/90 text-left text-xs font-mono space-y-2">
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Ngân hàng:</span>
+                  <span class="font-bold text-slate-100 truncate text-right" id="preview-meta-bank" title="${settings.bank_name || currentBankId}">${settings.bank_name || currentBankId}</span>
                 </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Số tài khoản:</span>
-                  <span class="font-bold text-cyan-400" id="preview-meta-acc">${currentAccNum}</span>
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Số tài khoản:</span>
+                  <span class="font-bold text-cyan-400 truncate text-right" id="preview-meta-acc">${currentAccNum}</span>
                 </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Chủ tài khoản:</span>
-                  <span class="font-bold text-amber-300" id="preview-meta-name">${currentAccName}</span>
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Chủ tài khoản:</span>
+                  <span class="font-bold text-amber-300 uppercase truncate text-right" id="preview-meta-name">${currentAccName}</span>
                 </div>
-                <div class="flex justify-between items-center text-slate-300 border-t border-slate-800/80 pt-1">
+                <div class="flex justify-between items-center text-slate-300 border-t border-slate-800/80 pt-1.5">
                   <span class="text-slate-500 font-sans">Nội dung test:</span>
-                  <span class="text-slate-400 text-[11px]">TEST GATEWAY</span>
+                  <span class="text-slate-400 text-[11px] font-mono">TEST GATEWAY</span>
                 </div>
               </div>
 
-              <p class="text-[11px] text-slate-400 font-sans leading-relaxed">
+              <p class="text-[11px] text-slate-400 font-sans leading-relaxed w-full text-left">
                 💡 Khi Admin nhấn Lưu, toàn bộ người dùng khi mở modal nạp tiền / mua gói VIP sẽ quét mã QR chuyển khoản trực tiếp về tài khoản ngân hàng này.
               </p>
 
@@ -4850,7 +4910,10 @@ export class AdminComponent {
         const tmpl = templateSelect?.value || 'compact2';
 
         if (previewImg) previewImg.src = generatePreviewQR(bId, aNum, tmpl, aName);
-        if (metaBank) metaBank.textContent = bName;
+        if (metaBank) {
+          metaBank.textContent = bName;
+          metaBank.title = bName;
+        }
         if (metaAcc) metaAcc.textContent = aNum || '---';
         if (metaName) metaName.textContent = aName || '---';
         if (badgeBank) badgeBank.textContent = bId;
@@ -4864,6 +4927,11 @@ export class AdminComponent {
       // Submit Form
       document.getElementById('form-admin-payment-gateway')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (!isRootAdmin) {
+          this.app.showToast('Từ chối quyền hạn: Chỉ Root Admin mới có quyền cập nhật cổng ngân hàng!', 'warning');
+          return;
+        }
+
         const submitBtn = document.getElementById('btn-save-admin-gateway');
         const bId = bankSelect?.value || 'MB';
         const selOption = bankSelect?.options[bankSelect.selectedIndex];
@@ -4963,6 +5031,9 @@ export class AdminComponent {
     `;
 
     try {
+      const role = (this.app?.currentUser?.role || '').toUpperCase();
+      const isRootAdmin = role === 'ADMIN';
+
       const res = await api.getAdminBankGateway();
       const activeGateway = res?.active_gateway || {
         bank_code: 'MB',
@@ -4989,9 +5060,10 @@ export class AdminComponent {
 
       const currentBankCode = (activeGateway.bank_code || 'MB').toUpperCase();
       const currentAccNum = activeGateway.account_number || '0374617569';
-      const currentAccName = activeGateway.account_name || 'DANG QUYET THANG';
+      const currentAccName = (activeGateway.account_name || 'DANG QUYET THANG').toUpperCase();
       const currentBranch = activeGateway.branch || 'Hội Sở Chính';
       const currentTemplate = activeGateway.qr_template || 'compact2';
+      const currentMemoPrefix = (activeGateway.memo_prefix || 'NAP VIP').toUpperCase();
 
       const generatePreviewQR = (bankCode, accNum, template, accName) => {
         const sanitizedAcc = (accNum || '0374617569').replace(/\s+/g, '');
@@ -5005,183 +5077,313 @@ export class AdminComponent {
           <!-- Banner Header -->
           <div class="p-6 rounded-3xl bg-gradient-to-r from-amber-950/50 via-slate-900 to-amber-950/30 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20 shrink-0">
                 <i class="fa-solid fa-building-columns"></i>
               </div>
               <div>
-                <h3 class="text-base font-black text-slate-100 flex items-center gap-2">
+                <h3 class="text-base font-black text-slate-100 flex items-center gap-2 flex-wrap">
                   <span>Cấu Hình Tài Khoản Ngân Hàng Thụ Hưởng (Admin Bank Gateway)</span>
                   <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold uppercase tracking-wider">
                     🟢 Live Napas 24/7
                   </span>
+                  ${isRootAdmin ? `
+                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black uppercase tracking-wider">
+                      👑 Root Admin (Toàn Quyền)
+                    </span>
+                  ` : `
+                    <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-black uppercase tracking-wider">
+                      🔒 Moderator (Chỉ Đọc)
+                    </span>
+                  `}
                 </h3>
                 <p class="text-xs text-slate-400 mt-0.5">
-                  Thiết lập tài khoản ngân hàng thực tế để đồng bộ trực tiếp sang mã VietQR nạp tiền của toàn bộ User.
+                  Tài khoản ngân hàng tiếp nhận các giao dịch nạp tiền & mua gói VIP tự động toàn hệ thống.
                 </p>
               </div>
             </div>
 
-            <div class="px-4 py-2 rounded-2xl bg-slate-950/90 border border-slate-800 text-xs font-mono text-right">
+            <div class="px-4 py-2 rounded-2xl bg-slate-950/90 border border-slate-800 text-xs font-mono text-right shrink-0">
               <span class="text-slate-500 block text-[10px]">Cổng Đang Kích Hoạt:</span>
-              <span class="font-bold text-amber-300">${activeGateway.bank_name || currentBankCode} - ${currentAccNum}</span>
+              <span class="font-bold text-amber-300 truncate max-w-[200px] block" title="${activeGateway.bank_name || currentBankCode} - ${currentAccNum}">
+                ${currentBankCode} - ${currentAccNum}
+              </span>
             </div>
           </div>
 
-          <!-- Main Form & Live Preview Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Main Layout Grid (7 : 5) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- Left 7 cols: Gateway Configuration Form -->
+            <!-- Left 7 cols: Gateway Form OR Moderator Read-Only Inspector -->
             <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/95 border border-slate-800 shadow-xl space-y-5">
+              
               <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <h4 class="text-sm font-black text-slate-100 flex items-center gap-2">
-                  <i class="fa-solid fa-pen-to-square text-amber-400"></i>
-                  <span>Thông Tin Ngân Hàng Liên Kết</span>
+                  <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                  <span>${isRootAdmin ? 'Cấu Hình Cổng Ngân Hàng' : 'Chi Tiết Cổng Ngân Hàng Thụ Hưởng'}</span>
                 </h4>
                 <span class="text-[11px] text-slate-400 font-mono">Chuẩn VietQR Napas247</span>
               </div>
 
-              <form id="form-admin-bank-gateway-module" class="space-y-4">
-                
-                <!-- 1. Bank Select -->
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    1. Chọn Ngân Hàng Thụ Hưởng *
-                  </label>
-                  <select id="gateway-bank-select" required
-                    class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-                    ${availableBanks.map(b => `
-                      <option value="${b.code || b.id}" data-name="${b.name}" ${(b.code || b.id).toUpperCase() === currentBankCode ? 'selected' : ''}>
-                        [${b.code || b.id}] ${b.name}
-                      </option>
-                    `).join('')}
-                  </select>
-                </div>
+              ${!isRootAdmin ? `
+                <!-- MODERATOR READ-ONLY INSPECTOR VIEW (Strict RBAC: No form, full security warnings) -->
+                <div class="space-y-4">
+                  <!-- Security Notice Banner -->
+                  <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-base mt-0.5 border border-amber-500/30">
+                      <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-amber-300 text-xs">CHẾ ĐỘ XEM BẢO MẬT (MODERATOR READ-ONLY)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-mono font-bold">RBAC Enforced</span>
+                      </div>
+                      <p class="text-[11px] text-slate-300 leading-relaxed">
+                        Thông tin tài khoản ngân hàng thụ hưởng cốt lõi do <strong>Root Admin</strong> thiết lập và bảo vệ. Tài khoản Moderator chỉ có thẩm quyền xem xét, đối soát và kiểm tra giao dịch nạp tiền. Form sửa đổi đã được khóa hoàn toàn nhằm đảm bảo an ninh dòng tiền.
+                      </p>
+                    </div>
+                  </div>
 
-                <!-- 2. Account Number -->
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    2. Số Tài Khoản Ngân Hàng (Account Number) *
-                  </label>
-                  <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                      <i class="fa-solid fa-credit-card text-xs"></i>
+                  <!-- Read-Only Parameter Cards Grid -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                    
+                    <!-- Ngân Hàng -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-building-columns text-amber-400 mr-1"></i> Ngân Hàng Thụ Hưởng
+                      </span>
+                      <div class="text-xs font-black text-slate-100 truncate" title="${activeGateway.bank_name || currentBankCode}">
+                        [${currentBankCode}] ${activeGateway.bank_name || currentBankCode}
+                      </div>
+                      <span class="text-[9px] font-bold text-emerald-400 font-mono block">Napas 24/7 Chuẩn Quốc Gia</span>
+                    </div>
+
+                    <!-- Số Tài Khoản + Copy -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-credit-card text-cyan-400 mr-1"></i> Số Tài Khoản Nhận Tiền
+                      </span>
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-black text-cyan-400 font-mono tracking-wider">${currentAccNum}</span>
+                        <button type="button" id="btn-copy-gw-acc" class="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 text-[10px] font-bold border border-cyan-500/30 transition flex items-center gap-1 active:scale-95">
+                          <i class="fa-regular fa-copy"></i> Sao chép
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Chủ Tài Khoản -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-user-check text-purple-400 mr-1"></i> Chủ Tài Khoản (Cardholder)
+                      </span>
+                      <div class="text-xs font-black text-amber-300 font-mono uppercase truncate">${currentAccName}</div>
+                      <span class="text-[9px] font-bold text-slate-400 font-mono block">Đã xác minh danh tính</span>
+                    </div>
+
+                    <!-- Mẫu VietQR -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-shapes text-teal-400 mr-1"></i> Mẫu Khung VietQR
+                      </span>
+                      <div class="text-xs font-bold text-slate-200 font-mono">${currentTemplate} (Napas 24/7)</div>
+                    </div>
+
+                    <!-- Chi Nhánh -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> Chi Nhánh / Hội Sở
+                      </span>
+                      <div class="text-xs font-semibold text-slate-200 truncate">${currentBranch}</div>
+                    </div>
+
+                    <!-- Cú Pháp Nạp Tiền -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        <i class="fa-solid fa-tag text-indigo-400 mr-1"></i> Cú Pháp Giao Dịch
+                      </span>
+                      <div class="text-xs font-mono font-bold text-indigo-300">${currentMemoPrefix} [USER_ID]</div>
+                    </div>
+
+                  </div>
+
+                  <!-- Status Notification -->
+                  <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                      <span class="text-xs font-bold text-slate-200">Trạng Thái Kích Hoạt Toàn Sàn:</span>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                      🟢 Đang Hoạt Động
                     </span>
-                    <input type="text" id="gateway-acc-num" required value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
-                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
                   </div>
-                </div>
 
-                <!-- 3. Account Name -->
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    3. Tên Chủ Tài Khoản (Account Holder Name) *
-                  </label>
-                  <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                      <i class="fa-solid fa-user-check text-xs"></i>
-                    </span>
-                    <input type="text" id="gateway-acc-name" required value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
-                      class="w-full pl-9 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-sm font-black focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase" />
-                  </div>
-                  <span class="text-[10px] text-slate-500 mt-1 block">Tên tự động chuẩn hóa chữ hoa in trên thẻ/tài khoản.</span>
-                </div>
-
-                <!-- 4. Branch / Note -->
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    4. Chi Nhánh / Ghi Chú (Tùy chọn)
-                  </label>
-                  <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                      <i class="fa-solid fa-location-dot text-xs"></i>
-                    </span>
-                    <input type="text" id="gateway-branch" value="${currentBranch}" placeholder="Ví dụ: Hội Sở Chính / Chi Nhánh Ba Đình"
-                      class="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <!-- 5. VietQR Template -->
-                <div>
-                  <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-                    5. Mẫu Khung VietQR (Template)
-                  </label>
-                  <select id="gateway-template-select"
-                    class="w-full px-4 py-2.5 rounded-2xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500">
-                    <option value="compact2" ${currentTemplate === 'compact2' ? 'selected' : ''}>compact2 (Đẹp & Chuẩn Napas 24/7 có logo ngân hàng)</option>
-                    <option value="compact" ${currentTemplate === 'compact' ? 'selected' : ''}>compact (Mẫu gọn)</option>
-                    <option value="qr_only" ${currentTemplate === 'qr_only' ? 'selected' : ''}>qr_only (Chỉ mã QR thuần)</option>
-                  </select>
-                </div>
-
-                <!-- 6. Toggle Default Gateway Switch -->
-                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                  <div class="space-y-0.5">
-                    <span class="text-xs font-bold text-slate-200 block">Kích hoạt làm cổng thanh toán mặc định toàn sàn</span>
-                    <span class="text-[11px] text-slate-400 block">Toàn bộ Modal Nạp Tiền Thật & Mua Gói VIP sẽ đồng bộ ngay lập tức.</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="gateway-is-active" class="sr-only peer" checked>
-                    <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                  </label>
-                </div>
-
-                <div class="pt-2">
-                  <button type="submit" id="btn-save-bank-gateway-module"
-                    class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrows-rotate text-sm"></i>
-                    <span>Lưu & Đồng Bộ Toàn Sàn</span>
+                  <!-- Moderator Action: Switch to Transactions -->
+                  <button type="button" id="btn-mod-switch-txs" class="w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center justify-center gap-2 active:scale-95 shadow-md">
+                    <i class="fa-solid fa-list-check text-cyan-400"></i>
+                    <span>Chuyển Sang Tab Kiểm Tra Biến Động Số Dư (Transactions)</span>
                   </button>
-                </div>
 
-              </form>
+                </div>
+              ` : `
+                <!-- ROOT ADMIN EDIT FORM -->
+                <form id="form-admin-bank-gateway-module" class="space-y-4">
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- 1. Bank Select -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-building-columns text-amber-400 mr-1"></i> 1. Ngân Hàng Thụ Hưởng *
+                      </label>
+                      <select id="gateway-bank-select" required
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                        ${availableBanks.map(b => `
+                          <option value="${b.code || b.id}" data-name="${b.name}" ${(b.code || b.id).toUpperCase() === currentBankCode ? 'selected' : ''}>
+                            [${b.code || b.id}] ${b.name}
+                          </option>
+                        `).join('')}
+                      </select>
+                    </div>
+
+                    <!-- 2. VietQR Template -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-shapes text-cyan-400 mr-1"></i> 2. Mẫu Khung VietQR *
+                      </label>
+                      <select id="gateway-template-select"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs font-mono focus:ring-2 focus:ring-amber-500">
+                        <option value="compact2" ${currentTemplate === 'compact2' ? 'selected' : ''}>compact2 (Chuẩn Napas 24/7 có logo)</option>
+                        <option value="compact" ${currentTemplate === 'compact' ? 'selected' : ''}>compact (Mẫu tối giản)</option>
+                        <option value="qr_only" ${currentTemplate === 'qr_only' ? 'selected' : ''}>qr_only (Chỉ mã QR)</option>
+                      </select>
+                    </div>
+
+                    <!-- 3. Account Number -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-credit-card text-emerald-400 mr-1"></i> 3. Số Tài Khoản Ngân Hàng *
+                      </label>
+                      <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                          <i class="fa-solid fa-hashtag text-xs"></i>
+                        </span>
+                        <input type="text" id="gateway-acc-num" required value="${currentAccNum}" placeholder="Ví dụ: 0374617569"
+                          class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-mono text-xs font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                      </div>
+                    </div>
+
+                    <!-- 4. Account Name -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-user-check text-purple-400 mr-1"></i> 4. Tên Chủ Tài Khoản *
+                      </label>
+                      <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                          <i class="fa-solid fa-signature text-xs"></i>
+                        </span>
+                        <input type="text" id="gateway-acc-name" required value="${currentAccName}" placeholder="Ví dụ: DANG QUYET THANG"
+                          class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs font-black uppercase focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                      </div>
+                    </div>
+
+                    <!-- 5. Branch / Note -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> 5. Chi Nhánh / Hội Sở
+                      </label>
+                      <input type="text" id="gateway-branch" value="${currentBranch}" placeholder="Ví dụ: Hội Sở Chính"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:ring-2 focus:ring-amber-500" />
+                    </div>
+
+                    <!-- 6. Memo Prefix -->
+                    <div>
+                      <label class="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                        <i class="fa-solid fa-tag text-teal-400 mr-1"></i> 6. Cú Pháp Nạp Tiền
+                      </label>
+                      <input type="text" id="gateway-memo-prefix" value="${currentMemoPrefix}" placeholder="Ví dụ: NAP VIP"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 font-mono text-xs focus:ring-2 focus:ring-amber-500 uppercase" />
+                    </div>
+                  </div>
+
+                  <!-- Toggle Default Gateway Switch -->
+                  <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                      <span class="text-xs font-bold text-slate-200 block">Kích hoạt làm cổng thanh toán mặc định toàn sàn</span>
+                      <span class="text-[11px] text-slate-400 block">Toàn bộ Modal Nạp Tiền Thật & Mua Gói VIP sẽ đồng bộ ngay lập tức.</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="gateway-is-active" class="sr-only peer" ${activeGateway.is_active !== false ? 'checked' : ''}>
+                      <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+
+                  <div class="pt-2">
+                    <button type="submit" id="btn-save-bank-gateway-module"
+                      class="w-full py-3.5 rounded-2xl gradient-amber text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 active:scale-95 transition flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                      <span>Lưu & Đồng Bộ Toàn Sàn</span>
+                    </button>
+                  </div>
+
+                </form>
+              `}
             </div>
 
             <!-- Right 5 cols: Live Realtime QR Preview Box -->
-            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 shadow-2xl flex flex-col items-center justify-between text-center space-y-4">
+            <div class="lg:col-span-5 p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 shadow-2xl flex flex-col items-center justify-between text-center space-y-4 overflow-hidden">
               
               <div class="w-full text-left border-b border-slate-800 pb-3 flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
                   <i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Mã VietQR (Live Preview)
                 </span>
-                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono">VietQR API</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold">Napas 24/7</span>
               </div>
 
-              <!-- Dynamic QR Image -->
-              <div class="relative group my-2">
-                <div class="p-3 bg-white rounded-3xl shadow-2xl border-2 border-amber-500/50 max-w-[240px] mx-auto transition transform hover:scale-105">
+              <!-- Dynamic QR Image Card -->
+              <div class="relative group my-2 w-full flex justify-center">
+                <div class="p-3.5 bg-white rounded-2xl shadow-2xl border-2 border-amber-500/50 w-[200px] h-[200px] flex items-center justify-center transition transform hover:scale-105">
                   <img id="gateway-preview-qr-img" src="${generatePreviewQR(currentBankCode, currentAccNum, currentTemplate, currentAccName)}" 
-                    alt="VietQR Live Preview" class="w-full h-auto object-contain rounded-xl"
+                    alt="VietQR Live Preview" class="w-full h-full object-contain rounded-xl"
                     onerror="this.src='/TKnganhangMB.jpg'" />
                 </div>
-                <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1">
+                <div class="absolute -bottom-2.5 px-3 py-0.5 rounded-full gradient-amber text-slate-950 font-black text-[10px] shadow-md flex items-center gap-1 whitespace-nowrap">
                   <i class="fa-solid fa-shield-check"></i>
                   <span id="gateway-badge-bank">${currentBankCode}</span>
                 </div>
               </div>
 
-              <!-- Live Meta Info Box -->
-              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs font-mono space-y-2">
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Ngân hàng:</span>
-                  <span class="font-bold text-slate-100" id="gw-preview-bank">${activeGateway.bank_name || currentBankCode}</span>
+              <!-- Live Meta Info Box (Carefully truncated to prevent layout breaking) -->
+              <div class="w-full p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs font-mono space-y-2 mt-2">
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Ngân hàng:</span>
+                  <span class="font-bold text-slate-100 truncate text-right" id="gw-preview-bank" title="${activeGateway.bank_name || currentBankCode}">${activeGateway.bank_name || currentBankCode}</span>
                 </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Số tài khoản:</span>
-                  <span class="font-bold text-cyan-400" id="gw-preview-acc">${currentAccNum}</span>
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Số tài khoản:</span>
+                  <span class="font-bold text-cyan-400 font-mono tracking-wider truncate text-right" id="gw-preview-acc">${currentAccNum}</span>
                 </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-500 font-sans">Chủ tài khoản:</span>
-                  <span class="font-bold text-amber-300" id="gw-preview-name">${currentAccName}</span>
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Chủ tài khoản:</span>
+                  <span class="font-bold text-amber-300 uppercase truncate text-right" id="gw-preview-name">${currentAccName}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300 gap-2">
+                  <span class="text-slate-500 font-sans shrink-0">Cú pháp mẫu:</span>
+                  <span class="font-bold text-indigo-400 truncate text-right" id="gw-preview-memo">${currentMemoPrefix} [USER_ID]</span>
                 </div>
                 <div class="flex justify-between items-center text-slate-300 border-t border-slate-800/80 pt-1.5">
-                  <span class="text-slate-500 font-sans">Số tiền mẫu:</span>
+                  <span class="text-slate-500 font-sans">Số tiền test:</span>
                   <span class="text-emerald-400 font-bold">100.000 ₫</span>
                 </div>
               </div>
 
-              <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-sans text-left flex items-start gap-2">
-                <i class="fa-solid fa-circle-info mt-0.5 shrink-0"></i>
-                <span>Khi nhấn Lưu, toàn bộ người dùng khi mở modal nạp tiền sẽ quét mã QR về đúng tài khoản thụ hưởng này!</span>
+              <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-sans text-left flex items-start gap-2 w-full">
+                <i class="fa-solid fa-circle-info mt-0.5 shrink-0 text-amber-400"></i>
+                <span class="leading-relaxed">
+                  ${isRootAdmin 
+                    ? 'Khi nhấn Lưu, toàn bộ người dùng khi mở modal nạp tiền thật hoặc mua VIP sẽ quét mã QR về đúng tài khoản thụ hưởng này.' 
+                    : 'Toàn bộ luồng thanh toán VietQR trên hệ thống đang được định tuyến an toàn về tài khoản thụ hưởng trên.'}
+                </span>
               </div>
 
             </div>
@@ -5191,86 +5393,116 @@ export class AdminComponent {
         </div>
       `;
 
-      // Live Preview Events
-      const bankSelect = document.getElementById('gateway-bank-select');
-      const accNumInput = document.getElementById('gateway-acc-num');
-      const accNameInput = document.getElementById('gateway-acc-name');
-      const templateSelect = document.getElementById('gateway-template-select');
-      const previewImg = document.getElementById('gateway-preview-qr-img');
-      const gwBank = document.getElementById('gw-preview-bank');
-      const gwAcc = document.getElementById('gw-preview-acc');
-      const gwName = document.getElementById('gw-preview-name');
-      const badgeBank = document.getElementById('gateway-badge-bank');
-
-      const updateLivePreview = () => {
-        const bCode = bankSelect?.value || 'MB';
-        const selOption = bankSelect?.options[bankSelect.selectedIndex];
-        const bName = selOption?.getAttribute('data-name') || bCode;
-        const aNum = accNumInput?.value?.trim() || '';
-        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
-        const tmpl = templateSelect?.value || 'compact2';
-
-        if (previewImg) previewImg.src = generatePreviewQR(bCode, aNum, tmpl, aName);
-        if (gwBank) gwBank.textContent = bName;
-        if (gwAcc) gwAcc.textContent = aNum || '---';
-        if (gwName) gwName.textContent = aName || '---';
-        if (badgeBank) badgeBank.textContent = bCode;
-      };
-
-      bankSelect?.addEventListener('change', updateLivePreview);
-      accNumInput?.addEventListener('input', updateLivePreview);
-      accNameInput?.addEventListener('input', updateLivePreview);
-      templateSelect?.addEventListener('change', updateLivePreview);
-
-      // Submit Form
-      document.getElementById('form-admin-bank-gateway-module')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitBtn = document.getElementById('btn-save-bank-gateway-module');
-        const bCode = bankSelect?.value || 'MB';
-        const selOption = bankSelect?.options[bankSelect.selectedIndex];
-        const bName = selOption?.getAttribute('data-name') || `Ngân Hàng ${bCode}`;
-        const aNum = accNumInput?.value?.trim() || '';
-        const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
-        const branchVal = document.getElementById('gateway-branch')?.value?.trim() || 'Hội Sở Chính';
-        const tmpl = templateSelect?.value || 'compact2';
-        const isActiveVal = document.getElementById('gateway-is-active')?.checked ?? true;
-
-        if (!aNum || !aName) {
-          this.app.showToast('Vui lòng điền đầy đủ số tài khoản và tên chủ tài khoản', 'error');
-          return;
-        }
-
-        if (submitBtn) {
-          submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang đồng bộ cổng ngân hàng...`;
-          submitBtn.disabled = true;
-        }
-
-        try {
-          const updateRes = await api.saveAdminBankGateway({
-            bank_code: bCode,
-            bank_name: bName,
-            account_number: aNum,
-            account_name: aName,
-            branch: branchVal,
-            qr_template: tmpl,
-            memo_prefix: 'NAP VIP',
-            is_active: isActiveVal
-          });
-
-          if (window.confetti) {
-            window.confetti({ particleCount: 150, spread: 85, origin: { y: 0.6 } });
-          }
-
-          this.app.showToast(updateRes.message || 'Đã đồng bộ cổng ngân hàng toàn sàn thành công!', 'success');
-          await this.renderBankConfigModule(wrapper);
-        } catch (saveErr) {
-          this.app.showToast(saveErr.message || 'Lỗi khi lưu cấu hình cổng ngân hàng', 'error');
-          if (submitBtn) {
-            submitBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate text-sm"></i> Lưu & Thử Lại`;
-            submitBtn.disabled = false;
-          }
-        }
+      // Copy Account Number button for Moderator
+      document.getElementById('btn-copy-gw-acc')?.addEventListener('click', () => {
+        navigator.clipboard?.writeText(currentAccNum).then(() => {
+          this.app.showToast('Đã sao chép số tài khoản thụ hưởng!', 'success');
+        }).catch(() => {
+          this.app.showToast(`Số tài khoản: ${currentAccNum}`, 'info');
+        });
       });
+
+      // Moderator switch to Transactions
+      document.getElementById('btn-mod-switch-txs')?.addEventListener('click', () => {
+        this.applyBankGatewayFilter('bank_txs');
+      });
+
+      // Live Preview Events for Root Admin
+      if (isRootAdmin) {
+        const bankSelect = document.getElementById('gateway-bank-select');
+        const accNumInput = document.getElementById('gateway-acc-num');
+        const accNameInput = document.getElementById('gateway-acc-name');
+        const templateSelect = document.getElementById('gateway-template-select');
+        const memoPrefixInput = document.getElementById('gateway-memo-prefix');
+        const previewImg = document.getElementById('gateway-preview-qr-img');
+        const gwBank = document.getElementById('gw-preview-bank');
+        const gwAcc = document.getElementById('gw-preview-acc');
+        const gwName = document.getElementById('gw-preview-name');
+        const gwMemo = document.getElementById('gw-preview-memo');
+        const badgeBank = document.getElementById('gateway-badge-bank');
+
+        const updateLivePreview = () => {
+          const bCode = bankSelect?.value || 'MB';
+          const selOption = bankSelect?.options[bankSelect.selectedIndex];
+          const bName = selOption?.getAttribute('data-name') || bCode;
+          const aNum = accNumInput?.value?.trim() || '';
+          const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+          const tmpl = templateSelect?.value || 'compact2';
+          const mPrefix = memoPrefixInput?.value?.trim()?.toUpperCase() || 'NAP VIP';
+
+          if (previewImg) previewImg.src = generatePreviewQR(bCode, aNum, tmpl, aName);
+          if (gwBank) {
+            gwBank.textContent = bName;
+            gwBank.title = bName;
+          }
+          if (gwAcc) gwAcc.textContent = aNum || '---';
+          if (gwName) gwName.textContent = aName || '---';
+          if (gwMemo) gwMemo.textContent = `${mPrefix} [USER_ID]`;
+          if (badgeBank) badgeBank.textContent = bCode;
+        };
+
+        bankSelect?.addEventListener('change', updateLivePreview);
+        accNumInput?.addEventListener('input', updateLivePreview);
+        accNameInput?.addEventListener('input', updateLivePreview);
+        templateSelect?.addEventListener('change', updateLivePreview);
+        memoPrefixInput?.addEventListener('input', updateLivePreview);
+
+        // Submit Form
+        document.getElementById('form-admin-bank-gateway-module')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!isRootAdmin) {
+            this.app.showToast('Từ chối quyền hạn: Chỉ Root Admin mới có quyền cập nhật cấu hình cổng ngân hàng!', 'warning');
+            return;
+          }
+
+          const submitBtn = document.getElementById('btn-save-bank-gateway-module');
+          const bCode = bankSelect?.value || 'MB';
+          const selOption = bankSelect?.options[bankSelect.selectedIndex];
+          const bName = selOption?.getAttribute('data-name') || `Ngân Hàng ${bCode}`;
+          const aNum = accNumInput?.value?.trim() || '';
+          const aName = accNameInput?.value?.trim()?.toUpperCase() || '';
+          const branchVal = document.getElementById('gateway-branch')?.value?.trim() || 'Hội Sở Chính';
+          const tmpl = templateSelect?.value || 'compact2';
+          const mPrefixVal = memoPrefixInput?.value?.trim()?.toUpperCase() || 'NAP VIP';
+          const isActiveVal = document.getElementById('gateway-is-active')?.checked ?? true;
+
+          if (!aNum || !aName) {
+            this.app.showToast('Vui lòng điền đầy đủ số tài khoản và tên chủ tài khoản', 'error');
+            return;
+          }
+
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang đồng bộ cổng ngân hàng...`;
+            submitBtn.disabled = true;
+          }
+
+          try {
+            const updateRes = await api.saveAdminBankGateway({
+              bank_code: bCode,
+              bank_name: bName,
+              account_number: aNum,
+              account_name: aName,
+              branch: branchVal,
+              qr_template: tmpl,
+              memo_prefix: mPrefixVal,
+              is_active: isActiveVal
+            });
+
+            if (window.confetti) {
+              window.confetti({ particleCount: 150, spread: 85, origin: { y: 0.6 } });
+            }
+
+            this.app.showToast(updateRes.message || 'Đã đồng bộ cổng ngân hàng toàn sàn thành công!', 'success');
+            await this.renderBankConfigModule(wrapper);
+          } catch (saveErr) {
+            this.app.showToast(saveErr.message || 'Lỗi khi lưu cấu hình cổng ngân hàng', 'error');
+            if (submitBtn) {
+              submitBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate text-sm"></i> Lưu & Thử Lại`;
+              submitBtn.disabled = false;
+            }
+          }
+        });
+      }
 
     } catch (err) {
       wrapper.innerHTML = `

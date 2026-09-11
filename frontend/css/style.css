@@ -3665,60 +3665,336 @@ html.light-theme .text-teal-300,
   color: #0d9488 !important;
 }
 
-/* Icon Containers in Light Mode (Crisp, High Contrast & Subtle Neon Bloom) */
+html.light-theme .text-blue-400,
+html.light-theme .text-blue-300,
+[data-theme="light"] .text-blue-400,
+[data-theme="light"] .text-blue-300 {
+  color: #2563eb !important;
+}
+
+html.light-theme .text-yellow-400,
+html.light-theme .text-yellow-300,
+[data-theme="light"] .text-yellow-400,
+[data-theme="light"] .text-yellow-300 {
+  color: #ca8a04 !important;
+}
+
+html.light-theme .text-orange-400,
+html.light-theme .text-orange-300,
+[data-theme="light"] .text-orange-400,
+[data-theme="light"] .text-orange-300 {
+  color: #ea580c !important;
+}
+
+html.light-theme .text-sky-400,
+html.light-theme .text-sky-300,
+[data-theme="light"] .text-sky-400,
+[data-theme="light"] .text-sky-300 {
+  color: #0284c7 !important;
+}
+
+html.light-theme .text-violet-400,
+html.light-theme .text-violet-300,
+[data-theme="light"] .text-violet-400,
+[data-theme="light"] .text-violet-300 {
+  color: #7c3aed !important;
+}
+
+/* Universal Icon Color Synchronization in Light Mode: Crisp White Card Background with Themed Accented Border */
 html.light-theme .bg-cyan-500\/10,
 html.light-theme .bg-cyan-500\/15,
 html.light-theme .bg-cyan-500\/20,
+html.light-theme .bg-cyan-500\/25,
+html.light-theme .bg-cyan-950\/40,
+html.light-theme .bg-cyan-950\/50,
+html.light-theme .bg-cyan-950\/60,
+html.light-theme .bg-cyan-950\/70,
 [data-theme="light"] .bg-cyan-500\/10,
 [data-theme="light"] .bg-cyan-500\/15,
-[data-theme="light"] .bg-cyan-500\/20 {
-  background-color: rgba(6, 182, 212, 0.12) !important;
-  border-color: rgba(6, 182, 212, 0.45) !important;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2) !important;
+[data-theme="light"] .bg-cyan-500\/20,
+[data-theme="light"] .bg-cyan-500\/25,
+[data-theme="light"] .bg-cyan-950\/40,
+[data-theme="light"] .bg-cyan-950\/50,
+[data-theme="light"] .bg-cyan-950\/60,
+[data-theme="light"] .bg-cyan-950\/70 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #06b6d4 !important;
+  border-color: #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.18) !important;
+}
+
+html.light-theme .bg-cyan-500\/10 i,
+html.light-theme .bg-cyan-500\/15 i,
+html.light-theme .bg-cyan-500\/20 i,
+html.light-theme .bg-cyan-500\/25 i,
+[data-theme="light"] .bg-cyan-500\/10 i,
+[data-theme="light"] .bg-cyan-500\/15 i,
+[data-theme="light"] .bg-cyan-500\/20 i,
+[data-theme="light"] .bg-cyan-500\/25 i {
+  color: #0891b2 !important;
 }
 
 html.light-theme .bg-emerald-500\/10,
 html.light-theme .bg-emerald-500\/15,
 html.light-theme .bg-emerald-500\/20,
+html.light-theme .bg-emerald-500\/25,
+html.light-theme .bg-emerald-950\/40,
+html.light-theme .bg-emerald-950\/50,
 [data-theme="light"] .bg-emerald-500\/10,
 [data-theme="light"] .bg-emerald-500\/15,
-[data-theme="light"] .bg-emerald-500\/20 {
-  background-color: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.45) !important;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2) !important;
+[data-theme="light"] .bg-emerald-500\/20,
+[data-theme="light"] .bg-emerald-500\/25,
+[data-theme="light"] .bg-emerald-950\/40,
+[data-theme="light"] .bg-emerald-950\/50 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #10b981 !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.18) !important;
+}
+
+html.light-theme .bg-emerald-500\/10 i,
+html.light-theme .bg-emerald-500\/15 i,
+html.light-theme .bg-emerald-500\/20 i,
+html.light-theme .bg-emerald-500\/25 i,
+[data-theme="light"] .bg-emerald-500\/10 i,
+[data-theme="light"] .bg-emerald-500\/15 i,
+[data-theme="light"] .bg-emerald-500\/20 i,
+[data-theme="light"] .bg-emerald-500\/25 i {
+  color: #059669 !important;
+}
+
+html.light-theme .bg-orange-500\/10,
+html.light-theme .bg-orange-500\/15,
+html.light-theme .bg-orange-500\/20,
+html.light-theme .bg-orange-500\/25,
+html.light-theme .bg-orange-950\/40,
+[data-theme="light"] .bg-orange-500\/10,
+[data-theme="light"] .bg-orange-500\/15,
+[data-theme="light"] .bg-orange-500\/20,
+[data-theme="light"] .bg-orange-500\/25,
+[data-theme="light"] .bg-orange-950\/40 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #f97316 !important;
+  border-color: #f97316 !important;
+  color: #ea580c !important;
+  box-shadow: 0 2px 10px rgba(249, 115, 22, 0.18) !important;
+}
+
+html.light-theme .bg-orange-500\/10 i,
+html.light-theme .bg-orange-500\/15 i,
+html.light-theme .bg-orange-500\/20 i,
+html.light-theme .bg-orange-500\/25 i,
+[data-theme="light"] .bg-orange-500\/10 i,
+[data-theme="light"] .bg-orange-500\/15 i,
+[data-theme="light"] .bg-orange-500\/20 i,
+[data-theme="light"] .bg-orange-500\/25 i {
+  color: #ea580c !important;
 }
 
 html.light-theme .bg-rose-500\/10,
 html.light-theme .bg-rose-500\/15,
 html.light-theme .bg-rose-500\/20,
+html.light-theme .bg-rose-500\/25,
+html.light-theme .bg-rose-950\/40,
 [data-theme="light"] .bg-rose-500\/10,
 [data-theme="light"] .bg-rose-500\/15,
-[data-theme="light"] .bg-rose-500\/20 {
-  background-color: rgba(244, 63, 94, 0.12) !important;
-  border-color: rgba(244, 63, 94, 0.45) !important;
-  box-shadow: 0 0 10px rgba(244, 63, 94, 0.2) !important;
+[data-theme="light"] .bg-rose-500\/20,
+[data-theme="light"] .bg-rose-500\/25,
+[data-theme="light"] .bg-rose-950\/40 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #e11d48 !important;
+  box-shadow: 0 2px 10px rgba(244, 63, 94, 0.18) !important;
+}
+
+html.light-theme .bg-rose-500\/10 i,
+html.light-theme .bg-rose-500\/15 i,
+html.light-theme .bg-rose-500\/20 i,
+html.light-theme .bg-rose-500\/25 i,
+[data-theme="light"] .bg-rose-500\/10 i,
+[data-theme="light"] .bg-rose-500\/15 i,
+[data-theme="light"] .bg-rose-500\/20 i,
+[data-theme="light"] .bg-rose-500\/25 i {
+  color: #e11d48 !important;
 }
 
 html.light-theme .bg-purple-500\/10,
 html.light-theme .bg-purple-500\/15,
 html.light-theme .bg-purple-500\/20,
+html.light-theme .bg-purple-500\/25,
+html.light-theme .bg-purple-950\/40,
 [data-theme="light"] .bg-purple-500\/10,
 [data-theme="light"] .bg-purple-500\/15,
-[data-theme="light"] .bg-purple-500\/20 {
-  background-color: rgba(168, 85, 247, 0.12) !important;
-  border-color: rgba(168, 85, 247, 0.45) !important;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2) !important;
+[data-theme="light"] .bg-purple-500\/20,
+[data-theme="light"] .bg-purple-500\/25,
+[data-theme="light"] .bg-purple-950\/40 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #a855f7 !important;
+  border-color: #a855f7 !important;
+  color: #7c3aed !important;
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.18) !important;
+}
+
+html.light-theme .bg-purple-500\/10 i,
+html.light-theme .bg-purple-500\/15 i,
+html.light-theme .bg-purple-500\/20 i,
+html.light-theme .bg-purple-500\/25 i,
+[data-theme="light"] .bg-purple-500\/10 i,
+[data-theme="light"] .bg-purple-500\/15 i,
+[data-theme="light"] .bg-purple-500\/20 i,
+[data-theme="light"] .bg-purple-500\/25 i {
+  color: #7c3aed !important;
 }
 
 html.light-theme .bg-amber-500\/10,
 html.light-theme .bg-amber-500\/15,
 html.light-theme .bg-amber-500\/20,
+html.light-theme .bg-amber-500\/25,
+html.light-theme .bg-amber-900\/40,
+html.light-theme .bg-amber-900\/50,
+html.light-theme .bg-amber-950\/40,
+html.light-theme .bg-yellow-500\/10,
+html.light-theme .bg-yellow-500\/15,
+html.light-theme .bg-yellow-500\/20,
+html.light-theme .bg-yellow-900\/40,
 [data-theme="light"] .bg-amber-500\/10,
 [data-theme="light"] .bg-amber-500\/15,
-[data-theme="light"] .bg-amber-500\/20 {
-  background-color: rgba(245, 158, 11, 0.12) !important;
-  border-color: rgba(245, 158, 11, 0.45) !important;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2) !important;
+[data-theme="light"] .bg-amber-500\/20,
+[data-theme="light"] .bg-amber-500\/25,
+[data-theme="light"] .bg-amber-900\/40,
+[data-theme="light"] .bg-amber-900\/50,
+[data-theme="light"] .bg-amber-950\/40,
+[data-theme="light"] .bg-yellow-500\/10,
+[data-theme="light"] .bg-yellow-500\/15,
+[data-theme="light"] .bg-yellow-500\/20,
+[data-theme="light"] .bg-yellow-900\/40 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #f59e0b !important;
+  border-color: #f59e0b !important;
+  color: #d97706 !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.18) !important;
+}
+
+html.light-theme .bg-amber-500\/10 i,
+html.light-theme .bg-amber-500\/15 i,
+html.light-theme .bg-amber-500\/20 i,
+html.light-theme .bg-amber-500\/25 i,
+[data-theme="light"] .bg-amber-500\/10 i,
+[data-theme="light"] .bg-amber-500\/15 i,
+[data-theme="light"] .bg-amber-500\/20 i,
+[data-theme="light"] .bg-amber-500\/25 i {
+  color: #d97706 !important;
+}
+
+html.light-theme .bg-indigo-500\/10,
+html.light-theme .bg-indigo-500\/15,
+html.light-theme .bg-indigo-500\/20,
+html.light-theme .bg-indigo-500\/25,
+html.light-theme .bg-indigo-950\/40,
+html.light-theme .bg-blue-500\/10,
+html.light-theme .bg-blue-500\/15,
+html.light-theme .bg-blue-500\/20,
+[data-theme="light"] .bg-indigo-500\/10,
+[data-theme="light"] .bg-indigo-500\/15,
+[data-theme="light"] .bg-indigo-500\/20,
+[data-theme="light"] .bg-indigo-500\/25,
+[data-theme="light"] .bg-indigo-950\/40,
+[data-theme="light"] .bg-blue-500\/10,
+[data-theme="light"] .bg-blue-500\/15,
+[data-theme="light"] .bg-blue-500\/20 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #6366f1 !important;
+  border-color: #6366f1 !important;
+  color: #4f46e5 !important;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.18) !important;
+}
+
+html.light-theme .bg-indigo-500\/10 i,
+html.light-theme .bg-indigo-500\/15 i,
+html.light-theme .bg-indigo-500\/20 i,
+html.light-theme .bg-blue-500\/10 i,
+html.light-theme .bg-blue-500\/15 i,
+html.light-theme .bg-blue-500\/20 i,
+[data-theme="light"] .bg-indigo-500\/10 i,
+[data-theme="light"] .bg-indigo-500\/15 i,
+[data-theme="light"] .bg-indigo-500\/20 i,
+[data-theme="light"] .bg-blue-500\/10 i,
+[data-theme="light"] .bg-blue-500\/15 i,
+[data-theme="light"] .bg-blue-500\/20 i {
+  color: #4f46e5 !important;
+}
+
+html.light-theme .bg-teal-500\/10,
+html.light-theme .bg-teal-500\/15,
+html.light-theme .bg-teal-500\/20,
+html.light-theme .bg-teal-950\/40,
+[data-theme="light"] .bg-teal-500\/10,
+[data-theme="light"] .bg-teal-500\/15,
+[data-theme="light"] .bg-teal-500\/20,
+[data-theme="light"] .bg-teal-950\/40 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #14b8a6 !important;
+  border-color: #14b8a6 !important;
+  color: #0f766e !important;
+  box-shadow: 0 2px 10px rgba(20, 184, 166, 0.18) !important;
+}
+
+html.light-theme .bg-teal-500\/10 i,
+html.light-theme .bg-teal-500\/15 i,
+html.light-theme .bg-teal-500\/20 i,
+[data-theme="light"] .bg-teal-500\/10 i,
+[data-theme="light"] .bg-teal-500\/15 i,
+[data-theme="light"] .bg-teal-500\/20 i {
+  color: #0f766e !important;
+}
+
+/* Landing Navigation Icon Boxes & Hero Icon Boxes */
+html.light-theme .nav-icon-box,
+[data-theme="light"] .nav-icon-box {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-width: 1.5px !important;
+  border-style: solid !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Feature & Card Icon Boxes with Gradient classes in Light Mode */
+html.light-theme [class*="rounded-"][class*="from-cyan-500"][class*="to-cyan-500"],
+html.light-theme [class*="rounded-"][class*="from-emerald-500"][class*="to-emerald-500"],
+html.light-theme [class*="rounded-"][class*="from-amber-500"][class*="to-amber-500"],
+html.light-theme [class*="rounded-"][class*="from-orange-500"][class*="to-orange-500"],
+html.light-theme [class*="rounded-"][class*="from-rose-500"][class*="to-rose-500"],
+html.light-theme [class*="rounded-"][class*="from-purple-500"][class*="to-purple-500"],
+html.light-theme [class*="rounded-"][class*="from-indigo-500"][class*="to-indigo-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-cyan-500"][class*="to-cyan-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-emerald-500"][class*="to-emerald-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-amber-500"][class*="to-amber-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-orange-500"][class*="to-orange-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-rose-500"][class*="to-rose-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-purple-500"][class*="to-purple-500"],
+[data-theme="light"] [class*="rounded-"][class*="from-indigo-500"][class*="to-indigo-500"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
 }
 
 /* Badges & Donut Badges in Light Mode */
@@ -4723,13 +4999,9 @@ html.light-theme #btn-apply-filters,
 }
 
 html.light-theme #btn-reset-filters,
-html.light-theme #btn-tx-export-excel,
-html.light-theme #btn-tx-export-pdf,
 html.light-theme #btn-export-csv,
 html.light-theme #btn-reset-categories,
 [data-theme="light"] #btn-reset-filters,
-[data-theme="light"] #btn-tx-export-excel,
-[data-theme="light"] #btn-tx-export-pdf,
 [data-theme="light"] #btn-export-csv,
 [data-theme="light"] #btn-reset-categories {
   background: #ffffff !important;
@@ -4740,19 +5012,81 @@ html.light-theme #btn-reset-categories,
 }
 
 html.light-theme #btn-reset-filters:hover,
-html.light-theme #btn-tx-export-excel:hover,
-html.light-theme #btn-tx-export-pdf:hover,
 html.light-theme #btn-export-csv:hover,
 html.light-theme #btn-reset-categories:hover,
 [data-theme="light"] #btn-reset-filters:hover,
-[data-theme="light"] #btn-tx-export-excel:hover,
-[data-theme="light"] #btn-tx-export-pdf:hover,
 [data-theme="light"] #btn-export-csv:hover,
 [data-theme="light"] #btn-reset-categories:hover {
   background: rgba(236, 254, 255, 0.95) !important;
   border-color: #10b981 !important;
   color: #059669 !important;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Specific Excel & PDF Export Buttons: Preserving Thematic Background with Bold Dark Contrast */
+html.light-theme #btn-tx-export-excel,
+html.light-theme #btn-export-excel,
+html.light-theme #btn-export-tx-excel,
+[data-theme="light"] #btn-tx-export-excel,
+[data-theme="light"] #btn-export-excel,
+[data-theme="light"] #btn-export-tx-excel {
+  background: #d1fae5 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2) !important;
+}
+html.light-theme #btn-tx-export-excel i,
+html.light-theme #btn-export-excel i,
+html.light-theme #btn-export-tx-excel i,
+[data-theme="light"] #btn-tx-export-excel i,
+[data-theme="light"] #btn-export-excel i,
+[data-theme="light"] #btn-export-tx-excel i {
+  color: #059669 !important;
+}
+html.light-theme #btn-tx-export-excel span,
+html.light-theme #btn-export-excel span,
+html.light-theme #btn-export-tx-excel span,
+[data-theme="light"] #btn-tx-export-excel span,
+[data-theme="light"] #btn-export-excel span,
+[data-theme="light"] #btn-export-tx-excel span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #btn-tx-export-excel:hover,
+html.light-theme #btn-export-excel:hover,
+html.light-theme #btn-export-tx-excel:hover,
+[data-theme="light"] #btn-tx-export-excel:hover,
+[data-theme="light"] #btn-export-excel:hover,
+[data-theme="light"] #btn-export-tx-excel:hover {
+  background: #a7f3d0 !important;
+  border-color: #059669 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+}
+
+html.light-theme #btn-tx-export-pdf,
+[data-theme="light"] #btn-tx-export-pdf {
+  background: #ffe4e6 !important;
+  border: 1.5px solid #f43f5e !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.2) !important;
+}
+html.light-theme #btn-tx-export-pdf i,
+[data-theme="light"] #btn-tx-export-pdf i {
+  color: #e11d48 !important;
+}
+html.light-theme #btn-tx-export-pdf span,
+[data-theme="light"] #btn-tx-export-pdf span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #btn-tx-export-pdf:hover,
+[data-theme="light"] #btn-tx-export-pdf:hover {
+  background: #fecdd3 !important;
+  border-color: #be123c !important;
+  color: #0f172a !important;
 }
 
 /* Pagination Controls in Light Mode */
@@ -4789,16 +5123,36 @@ html.light-theme #select-tx-page-size,
 
 /* 5. Wallets Real Wallet Section & Action Cards in Light Mode */
 html.light-theme #real-wallet-section,
+html.light-theme #real-wallet-section > div,
 html.light-theme #real-wallet-section .glass-card,
+[data-theme="light"] #real-wallet-section,
+[data-theme="light"] #real-wallet-section > div,
+[data-theme="light"] #real-wallet-section .glass-card {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(16, 185, 129, 0.15) !important;
+}
+
 html.light-theme #real-wallet-section .bg-slate-950\/80,
 html.light-theme #real-wallet-section .bg-slate-900\/90,
-[data-theme="light"] #real-wallet-section,
-[data-theme="light"] #real-wallet-section .glass-card,
 [data-theme="light"] #real-wallet-section .bg-slate-950\/80,
 [data-theme="light"] #real-wallet-section .bg-slate-900\/90 {
   background: #ffffff !important;
-  border: 1.5px solid #10b981 !important;
-  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(16, 185, 129, 0.2), 0 0 40px rgba(6, 182, 212, 0.1) !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1) !important;
+}
+
+html.light-theme #real-wallet-section h3,
+html.light-theme #real-wallet-section p,
+html.light-theme #real-wallet-section span,
+html.light-theme #real-wallet-section strong,
+[data-theme="light"] #real-wallet-section h3,
+[data-theme="light"] #real-wallet-section p,
+[data-theme="light"] #real-wallet-section span,
+[data-theme="light"] #real-wallet-section strong {
+  color: #0f172a;
 }
 
 html.light-theme .deposit-quick-btn,
@@ -5038,8 +5392,39 @@ html.light-theme .bg-\[\#1e293b\],
 [data-theme="light"] .bg-\[\#111827\],
 [data-theme="light"] .bg-\[\#1e293b\] {
   background-color: #ffffff !important;
+  background-image: none !important;
   color: #0f172a !important;
   border-color: #e2e8f0 !important;
+}
+
+/* Comprehensive Dark Gradient Neutralizer in Light Mode */
+html.light-theme [class*="from-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+html.light-theme [class*="via-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+html.light-theme [class*="to-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+html.light-theme [class*="from-teal-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-amber-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-blue-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-indigo-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-emerald-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-rose-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="from-purple-950"]:not(.banner-soothing-gradient),
+html.light-theme [class*="to-amber-950"],
+html.light-theme [class*="to-cyan-950"],
+html.light-theme [class*="to-teal-950"],
+[data-theme="light"] [class*="from-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+[data-theme="light"] [class*="via-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+[data-theme="light"] [class*="to-slate-"]:not(.theme-slider-knob-header):not(#landing-theme-thumb):not(.sidebar-theme-slider-thumb):not([class*="gradient-"]),
+[data-theme="light"] [class*="from-teal-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-amber-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-blue-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-indigo-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-emerald-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-rose-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="from-purple-950"]:not(.banner-soothing-gradient),
+[data-theme="light"] [class*="to-amber-950"],
+[data-theme="light"] [class*="to-cyan-950"],
+[data-theme="light"] [class*="to-teal-950"] {
+  background-image: none !important;
 }
 
 /* Guard: Preserve Modal Backdrop Blurs in Light Mode so popups are clearly framed */
@@ -5162,15 +5547,813 @@ html.light-theme .badge-filter-tab.active span,
   color: #ffffff !important;
 }
 
+/* ==========================================================================
+   GAMIFICATION TOP BANNER & STREAK PILL (CHUỖI KỶ LUẬT) IN LIGHT MODE
+   ========================================================================== */
+
+/* Top Banner Header */
+html.light-theme #achievement-user-summary,
+[data-theme="light"] #achievement-user-summary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.95) 50%, rgba(255, 255, 255, 0.98) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.95) 50%, rgba(255, 255, 255, 0.98) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 10px 30px -5px rgba(6, 182, 212, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light-theme #gamification-level-icon-box,
+[data-theme="light"] #gamification-level-icon-box {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 2px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme #gamification-level-icon-box i,
+[data-theme="light"] #gamification-level-icon-box i {
+  color: #0891b2 !important;
+}
+
+html.light-theme #gamification-level-badge-pill,
+[data-theme="light"] #gamification-level-badge-pill {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme #gamification-level-title,
+[data-theme="light"] #gamification-level-title {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #gamification-tier-label,
+[data-theme="light"] #gamification-tier-label {
+  background: rgba(236, 254, 255, 0.95) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #gamification-xp-bar,
+[data-theme="light"] #gamification-xp-bar {
+  background: linear-gradient(90deg, #f59e0b 0%, #10b981 100%) !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
+}
+
+html.light-theme #gamification-xp-text,
+[data-theme="light"] #gamification-xp-text {
+  color: #b45309 !important;
+  font-weight: 800 !important;
+}
+
+/* CHUỖI KỶ LUẬT (Streak Pill) - Completely eliminate black rectangular frame */
+html.light-theme #gamification-streak-card,
+html.light-theme .gamification-streak-pill,
+html.light-theme #achievement-user-summary .border-orange-500\/30,
+[data-theme="light"] #gamification-streak-card,
+[data-theme="light"] .gamification-streak-pill,
+[data-theme="light"] #achievement-user-summary .border-orange-500\/30 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #f97316 !important;
+  border-color: #f97316 !important;
+  box-shadow: 0 4px 18px rgba(249, 115, 22, 0.15), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme .streak-flame-icon-box,
+[data-theme="light"] .streak-flame-icon-box {
+  background: #ffffff !important;
+  border: 1.5px solid #f97316 !important;
+  color: #ea580c !important;
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2) !important;
+}
+
+html.light-theme #gamification-streak-card i.fa-fire,
+html.light-theme .gamification-streak-pill i.fa-fire,
+html.light-theme #achievement-user-summary i.fa-fire,
+[data-theme="light"] #gamification-streak-card i.fa-fire,
+[data-theme="light"] .gamification-streak-pill i.fa-fire,
+[data-theme="light"] #achievement-user-summary i.fa-fire {
+  color: #ea580c !important;
+}
+
+html.light-theme .streak-pill-title,
+html.light-theme #gamification-streak-card .text-orange-400,
+html.light-theme #achievement-user-summary .text-orange-400,
+[data-theme="light"] .streak-pill-title,
+[data-theme="light"] #gamification-streak-card .text-orange-400,
+[data-theme="light"] #achievement-user-summary .text-orange-400 {
+  color: #c2410c !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #gamification-streak-days,
+html.light-theme .streak-pill-count,
+html.light-theme #achievement-user-summary .border-orange-500\/30 .text-slate-100,
+[data-theme="light"] #gamification-streak-days,
+[data-theme="light"] .streak-pill-count,
+[data-theme="light"] #achievement-user-summary .border-orange-500\/30 .text-slate-100 {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme .streak-pill-sub,
+html.light-theme #achievement-user-summary .border-orange-500\/30 .text-slate-400,
+[data-theme="light"] .streak-pill-sub,
+[data-theme="light"] #achievement-user-summary .border-orange-500\/30 .text-slate-400 {
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+/* HUY HIỆU ĐẠT (Unlocked Count Pill) */
+html.light-theme #gamification-unlocked-card,
+html.light-theme .gamification-unlocked-pill,
+html.light-theme #achievement-user-summary .border-emerald-500\/30,
+[data-theme="light"] #gamification-unlocked-card,
+[data-theme="light"] .gamification-unlocked-pill,
+[data-theme="light"] #achievement-user-summary .border-emerald-500\/30 {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #10b981 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.15), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme .unlocked-award-icon-box,
+[data-theme="light"] .unlocked-award-icon-box {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
+html.light-theme #gamification-unlocked-card i.fa-award,
+html.light-theme .gamification-unlocked-pill i.fa-award,
+html.light-theme #achievement-user-summary i.fa-award,
+[data-theme="light"] #gamification-unlocked-card i.fa-award,
+[data-theme="light"] .gamification-unlocked-pill i.fa-award,
+[data-theme="light"] #achievement-user-summary i.fa-award {
+  color: #059669 !important;
+}
+
+html.light-theme .unlocked-pill-title,
+html.light-theme #gamification-unlocked-card .text-emerald-400,
+html.light-theme #achievement-user-summary .text-emerald-400,
+[data-theme="light"] .unlocked-pill-title,
+[data-theme="light"] #gamification-unlocked-card .text-emerald-400,
+[data-theme="light"] #achievement-user-summary .text-emerald-400 {
+  color: #047857 !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #gamification-badges-unlocked,
+html.light-theme .unlocked-pill-count,
+[data-theme="light"] #gamification-badges-unlocked,
+[data-theme="light"] .unlocked-pill-count {
+  color: #059669 !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme .unlocked-pill-sub,
+html.light-theme #gamification-completion-pct,
+[data-theme="light"] .unlocked-pill-sub,
+[data-theme="light"] #gamification-completion-pct {
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   UPCOMING BADGES SHOWCASE SECTION IN LIGHT MODE
+   ========================================================================== */
+
+html.light-theme #upcoming-badges-showcase-section,
+[data-theme="light"] #upcoming-badges-showcase-section {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+  border: 1.5px solid rgba(99, 102, 241, 0.35) !important;
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.08) !important;
+}
+
+html.light-theme #upcoming-badges-showcase-section h3,
+[data-theme="light"] #upcoming-badges-showcase-section h3 {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #upcoming-badges-showcase-section p,
+[data-theme="light"] #upcoming-badges-showcase-section p {
+  color: #475569 !important;
+}
+
+html.light-theme #btn-view-all-locked-tab,
+[data-theme="light"] #btn-view-all-locked-tab {
+  color: #4f46e5 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme .upcoming-badge-card,
+html.light-theme #upcoming-badges-grid > div,
+[data-theme="light"] .upcoming-badge-card,
+[data-theme="light"] #upcoming-badges-grid > div {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(99, 102, 241, 0.25) !important;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.08) !important;
+}
+
+html.light-theme .upcoming-badge-card:hover,
+html.light-theme #upcoming-badges-grid > div:hover,
+[data-theme="light"] .upcoming-badge-card:hover,
+[data-theme="light"] #upcoming-badges-grid > div:hover {
+  border-color: #6366f1 !important;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15) !important;
+}
+
+html.light-theme .upcoming-badge-icon-box,
+html.light-theme #upcoming-badges-grid .w-8.h-8,
+[data-theme="light"] .upcoming-badge-icon-box,
+[data-theme="light"] #upcoming-badges-grid .w-8.h-8 {
+  background: #ffffff !important;
+  border: 1.5px solid #6366f1 !important;
+  color: #4f46e5 !important;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2) !important;
+}
+
+html.light-theme .upcoming-badge-icon-box i,
+html.light-theme #upcoming-badges-grid .w-8.h-8 i,
+[data-theme="light"] .upcoming-badge-icon-box i,
+[data-theme="light"] #upcoming-badges-grid .w-8.h-8 i {
+  color: #4f46e5 !important;
+}
+
+html.light-theme .upcoming-badge-title,
+html.light-theme #upcoming-badges-grid span.font-extrabold,
+[data-theme="light"] .upcoming-badge-title,
+[data-theme="light"] #upcoming-badges-grid span.font-extrabold {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .upcoming-badge-desc,
+html.light-theme #upcoming-badges-grid p,
+[data-theme="light"] .upcoming-badge-desc,
+[data-theme="light"] #upcoming-badges-grid p {
+  color: #475569 !important;
+}
+
+html.light-theme .upcoming-badge-pct,
+[data-theme="light"] .upcoming-badge-pct {
+  color: #4f46e5 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .upcoming-badge-meta,
+html.light-theme #upcoming-badges-grid .text-\[10px\].text-slate-400,
+[data-theme="light"] .upcoming-badge-meta,
+[data-theme="light"] #upcoming-badges-grid .text-\[10px\].text-slate-400 {
+  color: #64748b !important;
+}
+
+/* ==========================================================================
+   ROADMAP MILESTONES IN LIGHT MODE
+   ========================================================================== */
+
+html.light-theme .roadmap-milestone-card.roadmap-unlocked,
+[data-theme="light"] .roadmap-milestone-card.roadmap-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12) !important;
+}
+
+html.light-theme .roadmap-milestone-card.roadmap-locked,
+[data-theme="light"] .roadmap-milestone-card.roadmap-locked {
+  background: #f8fafc !important;
+  background-image: none !important;
+  border: 1.5px dashed #cbd5e1 !important;
+  opacity: 0.8 !important;
+}
+
+html.light-theme .roadmap-title,
+[data-theme="light"] .roadmap-title {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .roadmap-locked .roadmap-title,
+[data-theme="light"] .roadmap-locked .roadmap-title {
+  color: #475569 !important;
+}
+
+html.light-theme .roadmap-level-text,
+[data-theme="light"] .roadmap-level-text {
+  color: #475569 !important;
+}
+
+html.light-theme .roadmap-xp,
+[data-theme="light"] .roadmap-xp {
+  color: #b45309 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .roadmap-icon-box,
+[data-theme="light"] .roadmap-icon-box {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+html.light-theme .roadmap-tier-0,
+[data-theme="light"] .roadmap-tier-0 {
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
+html.light-theme .roadmap-tier-1,
+[data-theme="light"] .roadmap-tier-1 {
+  border: 1.5px solid #d97706 !important;
+  color: #b45309 !important;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2) !important;
+}
+
+html.light-theme .roadmap-tier-2,
+[data-theme="light"] .roadmap-tier-2 {
+  border: 1.5px solid #94a3b8 !important;
+  color: #475569 !important;
+  box-shadow: 0 2px 6px rgba(148, 163, 184, 0.2) !important;
+}
+
+html.light-theme .roadmap-tier-3,
+[data-theme="light"] .roadmap-tier-3 {
+  border: 1.5px solid #eab308 !important;
+  color: #ca8a04 !important;
+  box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2) !important;
+}
+
+html.light-theme .roadmap-tier-4,
+[data-theme="light"] .roadmap-tier-4 {
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme .roadmap-tier-5,
+[data-theme="light"] .roadmap-tier-5 {
+  border: 1.5px solid #d946ef !important;
+  color: #c026d3 !important;
+  box-shadow: 0 2px 6px rgba(217, 70, 239, 0.2) !important;
+}
+
+html.light-theme .roadmap-status-check,
+[data-theme="light"] .roadmap-status-check {
+  color: #059669 !important;
+  background: #ffffff !important;
+}
+
+html.light-theme .roadmap-status-lock,
+[data-theme="light"] .roadmap-status-lock {
+  color: #64748b !important;
+  background: #ffffff !important;
+}
+
+/* ==========================================================================
+   LOCKED & UNLOCKED BADGES (HUY HIỆU CHƯA CHINH PHỤC & ĐÃ MỞ KHÓA) IN LIGHT MODE
+   ========================================================================== */
+
+/* Locked Badge Card: Soft Slate/White background with dashed border */
+html.light-theme .badge-card-locked,
+[data-theme="light"] .badge-card-locked {
+  background: #f8fafc !important;
+  background-image: none !important;
+  border: 1.5px dashed #94a3b8 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+  opacity: 0.85 !important;
+}
+
+html.light-theme .badge-card-locked:hover,
+[data-theme="light"] .badge-card-locked:hover {
+  background: #f1f5f9 !important;
+  border-color: #64748b !important;
+  opacity: 1 !important;
+  box-shadow: 0 4px 14px rgba(100, 116, 139, 0.12) !important;
+}
+
+/* Locked Icon Box: Dimmed, subtle grayscale with dashed border */
+html.light-theme .badge-icon-locked,
+html.light-theme .badge-card-locked .w-12.h-12,
+[data-theme="light"] .badge-icon-locked,
+[data-theme="light"] .badge-card-locked .w-12.h-12 {
+  background: #e2e8f0 !important;
+  border: 1.5px dashed #94a3b8 !important;
+  color: #64748b !important;
+  opacity: 0.75 !important;
+  filter: grayscale(0.85) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+html.light-theme .badge-card-locked:hover .badge-icon-locked,
+html.light-theme .badge-card-locked:hover .w-12.h-12,
+[data-theme="light"] .badge-card-locked:hover .badge-icon-locked,
+[data-theme="light"] .badge-card-locked:hover .w-12.h-12 {
+  opacity: 0.95 !important;
+  filter: grayscale(0.2) !important;
+  color: #475569 !important;
+}
+
+/* Locked Lock Indicator Icon Circle */
+html.light-theme .badge-status-indicator-locked,
+html.light-theme .badge-card-locked .fa-lock,
+[data-theme="light"] .badge-status-indicator-locked,
+[data-theme="light"] .badge-card-locked .fa-lock {
+  color: #64748b !important;
+}
+
+html.light-theme .badge-status-indicator-locked,
+[data-theme="light"] .badge-status-indicator-locked {
+  background: #e2e8f0 !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+/* Locked Badge Tier Pill */
+html.light-theme .badge-tier-locked,
+[data-theme="light"] .badge-tier-locked {
+  background: #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+/* Locked Badge Title and Description */
+html.light-theme .badge-card-locked .badge-title,
+html.light-theme .badge-card-locked h4,
+[data-theme="light"] .badge-card-locked .badge-title,
+[data-theme="light"] .badge-card-locked h4 {
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .badge-card-locked .gamification-desc,
+html.light-theme .badge-card-locked p,
+[data-theme="light"] .badge-card-locked .gamification-desc,
+[data-theme="light"] .badge-card-locked p {
+  color: #64748b !important;
+}
+
+/* Locked Badge Progress Track & Bar */
+html.light-theme .badge-card-locked .w-full.bg-slate-800.h-2,
+[data-theme="light"] .badge-card-locked .w-full.bg-slate-800.h-2 {
+  background-color: #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html.light-theme .badge-card-locked .h-full.bg-indigo-500,
+[data-theme="light"] .badge-card-locked .h-full.bg-indigo-500 {
+  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%) !important;
+}
+
+/* UNLOCKED BADGES (Universal Pure White Background + Themed Accent Border) */
+html.light-theme .badge-card-unlocked,
+[data-theme="light"] .badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.05), 0 0 14px rgba(16, 185, 129, 0.12) !important;
+}
+
+html.light-theme .badge-card-unlocked:hover,
+[data-theme="light"] .badge-card-unlocked:hover {
+  border-color: #10b981 !important;
+  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.2), 0 0 20px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme .badge-card-unlocked .badge-title,
+html.light-theme .badge-card-unlocked h4,
+[data-theme="light"] .badge-card-unlocked .badge-title,
+[data-theme="light"] .badge-card-unlocked h4 {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+/* TIER-SPECIFIC UNLOCKED BADGE CARDS, ICONS & PILLS */
+/* 1. GOLD TIER (Vàng) */
+html.light-theme .badge-tier-gold.badge-card-unlocked,
+[data-theme="light"] .badge-tier-gold.badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #eab308 !important;
+  box-shadow: 0 6px 22px rgba(234, 179, 8, 0.14) !important;
+}
+
+html.light-theme .badge-icon-gold.badge-icon-unlocked,
+[data-theme="light"] .badge-icon-gold.badge-icon-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #eab308 !important;
+  color: #ca8a04 !important;
+  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.25) !important;
+}
+
+html.light-theme .badge-pill-gold.badge-tier-unlocked,
+[data-theme="light"] .badge-pill-gold.badge-tier-unlocked {
+  background: #ffffff !important;
+  border: 1.5px solid #eab308 !important;
+  color: #ca8a04 !important;
+  font-weight: 900 !important;
+}
+
+/* 2. SILVER TIER (Bạc) */
+html.light-theme .badge-tier-silver.badge-card-unlocked,
+[data-theme="light"] .badge-tier-silver.badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #94a3b8 !important;
+  box-shadow: 0 6px 22px rgba(148, 163, 184, 0.16) !important;
+}
+
+html.light-theme .badge-icon-silver.badge-icon-unlocked,
+[data-theme="light"] .badge-icon-silver.badge-icon-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #94a3b8 !important;
+  color: #475569 !important;
+  box-shadow: 0 2px 10px rgba(148, 163, 184, 0.25) !important;
+}
+
+html.light-theme .badge-pill-silver.badge-tier-unlocked,
+[data-theme="light"] .badge-pill-silver.badge-tier-unlocked {
+  background: #ffffff !important;
+  border: 1.5px solid #94a3b8 !important;
+  color: #475569 !important;
+  font-weight: 900 !important;
+}
+
+/* 3. BRONZE TIER (Đồng) */
+html.light-theme .badge-tier-bronze.badge-card-unlocked,
+[data-theme="light"] .badge-tier-bronze.badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #d97706 !important;
+  box-shadow: 0 6px 22px rgba(217, 119, 6, 0.14) !important;
+}
+
+html.light-theme .badge-icon-bronze.badge-icon-unlocked,
+[data-theme="light"] .badge-icon-bronze.badge-icon-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #d97706 !important;
+  color: #b45309 !important;
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.25) !important;
+}
+
+html.light-theme .badge-pill-bronze.badge-tier-unlocked,
+[data-theme="light"] .badge-pill-bronze.badge-tier-unlocked {
+  background: #ffffff !important;
+  border: 1.5px solid #d97706 !important;
+  color: #b45309 !important;
+  font-weight: 900 !important;
+}
+
+/* 4. DIAMOND TIER (Kim Cương) */
+html.light-theme .badge-tier-diamond.badge-card-unlocked,
+[data-theme="light"] .badge-tier-diamond.badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #06b6d4 !important;
+  box-shadow: 0 6px 22px rgba(6, 182, 212, 0.16) !important;
+}
+
+html.light-theme .badge-icon-diamond.badge-icon-unlocked,
+[data-theme="light"] .badge-icon-diamond.badge-icon-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.25) !important;
+}
+
+html.light-theme .badge-pill-diamond.badge-tier-unlocked,
+[data-theme="light"] .badge-pill-diamond.badge-tier-unlocked {
+  background: #ffffff !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  font-weight: 900 !important;
+}
+
+/* 5. MYTHIC TIER (Huyền Thoại) */
+html.light-theme .badge-tier-mythic.badge-card-unlocked,
+[data-theme="light"] .badge-tier-mythic.badge-card-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #d946ef !important;
+  box-shadow: 0 6px 22px rgba(217, 70, 239, 0.16) !important;
+}
+
+html.light-theme .badge-icon-mythic.badge-icon-unlocked,
+[data-theme="light"] .badge-icon-mythic.badge-icon-unlocked {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #d946ef !important;
+  color: #c026d3 !important;
+  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.25) !important;
+}
+
+html.light-theme .badge-pill-mythic.badge-tier-unlocked,
+[data-theme="light"] .badge-pill-mythic.badge-tier-unlocked {
+  background: #ffffff !important;
+  border: 1.5px solid #d946ef !important;
+  color: #c026d3 !important;
+  font-weight: 900 !important;
+}
+
+/* ==========================================================================
+   BADGE DETAIL MODAL IN LIGHT MODE
+   ========================================================================== */
+
+html.light-theme #badge-modal-card,
+html.light-theme .badge-modal-card,
+[data-theme="light"] #badge-modal-card,
+[data-theme="light"] .badge-modal-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2), 0 0 35px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #badge-modal-close,
+[data-theme="light"] #badge-modal-close {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+}
+
+html.light-theme #badge-modal-close:hover,
+[data-theme="light"] #badge-modal-close:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme .badge-modal-title,
+[data-theme="light"] .badge-modal-title {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme .badge-modal-desc,
+[data-theme="light"] .badge-modal-desc {
+  color: #475569 !important;
+}
+
+html.light-theme #badge-modal-condition-box,
+[data-theme="light"] #badge-modal-condition-box {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #badge-modal-condition-box span,
+html.light-theme #badge-modal-condition-box b,
+[data-theme="light"] #badge-modal-condition-box span,
+[data-theme="light"] #badge-modal-condition-box b {
+  color: #0f172a !important;
+}
+
+html.light-theme .badge-modal-pill,
+[data-theme="light"] .badge-modal-pill {
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .badge-modal-unlock-status,
+[data-theme="light"] .badge-modal-unlock-status {
+  background: #ffffff !important;
+  border: 1.5px solid #10b981 !important;
+  color: #059669 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme .badge-modal-lock-status,
+[data-theme="light"] .badge-modal-lock-status {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+/* Modal Icon Boxes by Tier */
+html.light-theme .badge-modal-icon-gold,
+[data-theme="light"] .badge-modal-icon-gold {
+  background: #ffffff !important;
+  border: 2.5px solid #eab308 !important;
+  color: #ca8a04 !important;
+  box-shadow: 0 4px 16px rgba(234, 179, 8, 0.25) !important;
+  --tw-ring-color: rgba(234, 179, 8, 0.3) !important;
+}
+
+html.light-theme .badge-modal-icon-silver,
+[data-theme="light"] .badge-modal-icon-silver {
+  background: #ffffff !important;
+  border: 2.5px solid #94a3b8 !important;
+  color: #475569 !important;
+  box-shadow: 0 4px 16px rgba(148, 163, 184, 0.25) !important;
+  --tw-ring-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+html.light-theme .badge-modal-icon-bronze,
+[data-theme="light"] .badge-modal-icon-bronze {
+  background: #ffffff !important;
+  border: 2.5px solid #d97706 !important;
+  color: #b45309 !important;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.25) !important;
+  --tw-ring-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+html.light-theme .badge-modal-icon-diamond,
+[data-theme="light"] .badge-modal-icon-diamond {
+  background: #ffffff !important;
+  border: 2.5px solid #06b6d4 !important;
+  color: #0891b2 !important;
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25) !important;
+  --tw-ring-color: rgba(6, 182, 212, 0.3) !important;
+}
+
+html.light-theme .badge-modal-icon-mythic,
+[data-theme="light"] .badge-modal-icon-mythic {
+  background: #ffffff !important;
+  border: 2.5px solid #d946ef !important;
+  color: #c026d3 !important;
+  box-shadow: 0 4px 16px rgba(217, 70, 239, 0.25) !important;
+  --tw-ring-color: rgba(217, 70, 239, 0.3) !important;
+}
+
 /* Progress bar background tracks in Light Mode */
 html.light-theme .w-full.bg-slate-800,
 html.light-theme .w-full.bg-slate-950,
-html.light-theme .w-full.bg-slate-950\/80,
+html.light-theme .w-full.bg-slate-900,
+html.light-theme .w-full.rounded-full.bg-slate-950,
+html.light-theme .w-full.rounded-full.bg-slate-900,
+html.light-theme .w-full.rounded-full.bg-slate-800,
+html.light-theme .rounded-full.bg-slate-950,
+html.light-theme .rounded-full.bg-slate-900,
+html.light-theme .rounded-full.bg-slate-800,
+html.light-theme #current-plan-banner .rounded-full.bg-slate-950,
+html.light-theme #tab-subscription .rounded-full.bg-slate-950,
 [data-theme="light"] .w-full.bg-slate-800,
 [data-theme="light"] .w-full.bg-slate-950,
-[data-theme="light"] .w-full.bg-slate-950\/80 {
+[data-theme="light"] .w-full.bg-slate-900,
+[data-theme="light"] .w-full.rounded-full.bg-slate-950,
+[data-theme="light"] .w-full.rounded-full.bg-slate-900,
+[data-theme="light"] .w-full.rounded-full.bg-slate-800,
+[data-theme="light"] .rounded-full.bg-slate-950,
+[data-theme="light"] .rounded-full.bg-slate-900,
+[data-theme="light"] .rounded-full.bg-slate-800,
+[data-theme="light"] #current-plan-banner .rounded-full.bg-slate-950,
+[data-theme="light"] #tab-subscription .rounded-full.bg-slate-950 {
   background-color: #e2e8f0 !important;
+  background-image: none !important;
   border-color: #cbd5e1 !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Progress Bar Fills in Light Mode */
+html.light-theme #current-plan-progress-fill,
+[data-theme="light"] #current-plan-progress-fill {
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%) !important;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.45) !important;
+}
+
+/* Badge Modal in Light Mode */
+html.light-theme #generic-modal .bg-slate-900,
+[data-theme="light"] #generic-modal .bg-slate-900 {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2), 0 0 35px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #generic-modal h2,
+[data-theme="light"] #generic-modal h2 {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #generic-modal p,
+[data-theme="light"] #generic-modal p {
+  color: #334155 !important;
+}
+
+html.light-theme #generic-modal .bg-slate-950\/70,
+[data-theme="light"] #generic-modal .bg-slate-950\/70 {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
 }
 
 /* 4. GÓI DỊCH VỤ & NẠP TIỀN (VIP & SUBSCRIPTIONS) IN LIGHT MODE */
@@ -5254,6 +6437,68 @@ html.light-theme #user-orders-table-container thead th,
 }
 
 /* 5. HỖ TRỢ & KHIẾU NẠI (SUPPORT) IN LIGHT MODE */
+html.light-theme #tab-support > div.relative.overflow-hidden.rounded-3xl,
+html.light-theme #tab-support .bg-gradient-to-r.from-teal-950\/60,
+[data-theme="light"] #tab-support > div.relative.overflow-hidden.rounded-3xl,
+[data-theme="light"] #tab-support .bg-gradient-to-r.from-teal-950\/60 {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(6, 182, 212, 0.15) !important;
+}
+
+html.light-theme #tab-support > div.relative.overflow-hidden.rounded-3xl h1,
+html.light-theme #tab-support > div.relative.overflow-hidden.rounded-3xl p,
+[data-theme="light"] #tab-support > div.relative.overflow-hidden.rounded-3xl h1,
+[data-theme="light"] #tab-support > div.relative.overflow-hidden.rounded-3xl p {
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-support .bg-slate-900\/90,
+html.light-theme #tab-support .bg-slate-950\/80,
+html.light-theme #tab-support .bg-slate-900,
+html.light-theme #tab-support .bg-slate-900\/60,
+[data-theme="light"] #tab-support .bg-slate-900\/90,
+[data-theme="light"] #tab-support .bg-slate-950\/80,
+[data-theme="light"] #tab-support .bg-slate-900,
+[data-theme="light"] #tab-support .bg-slate-900\/60 {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-support input,
+html.light-theme #tab-support select,
+html.light-theme #tab-support textarea,
+[data-theme="light"] #tab-support input,
+[data-theme="light"] #tab-support select,
+[data-theme="light"] #tab-support textarea {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-support input:focus,
+html.light-theme #tab-support select:focus,
+html.light-theme #tab-support textarea:focus,
+[data-theme="light"] #tab-support input:focus,
+[data-theme="light"] #tab-support select:focus,
+[data-theme="light"] #tab-support textarea:focus {
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
+}
+
+html.light-theme #tab-support .bg-teal-950\/30,
+html.light-theme #tab-support .from-teal-950\/40,
+[data-theme="light"] #tab-support .bg-teal-950\/30,
+[data-theme="light"] #tab-support .from-teal-950\/40 {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.95) 0%, rgba(236, 254, 255, 0.9) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(236, 253, 245, 0.95) 0%, rgba(236, 254, 255, 0.9) 100%) !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.35) !important;
+  color: #0f172a !important;
+}
+
 html.light-theme .ticket-filter-btn,
 [data-theme="light"] .ticket-filter-btn {
   background: #ffffff !important;
@@ -5279,8 +6524,10 @@ html.light-theme .ticket-filter-btn.border-teal-500,
 }
 
 html.light-theme .ticket-card,
+html.light-theme #user-tickets-feed .glass-card,
 html.light-theme #support-tickets-list > div,
 [data-theme="light"] .ticket-card,
+[data-theme="light"] #user-tickets-feed .glass-card,
 [data-theme="light"] #support-tickets-list > div {
   background: #ffffff !important;
   border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
@@ -5352,14 +6599,42 @@ html.light-theme [class*="from-slate-950"][class*="via-slate-900"],
 }
 
 html.light-theme #admin-cockpit-banner h1,
-html.light-theme #admin-cockpit-banner h1 span:not(.bg-clip-text),
 html.light-theme .admin-cockpit-banner h1,
-html.light-theme .admin-cockpit-banner h1 span:not(.bg-clip-text),
 [data-theme="light"] #admin-cockpit-banner h1,
-[data-theme="light"] #admin-cockpit-banner h1 span:not(.bg-clip-text),
-[data-theme="light"] .admin-cockpit-banner h1,
-[data-theme="light"] .admin-cockpit-banner h1 span:not(.bg-clip-text) {
+[data-theme="light"] .admin-cockpit-banner h1 {
   color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #admin-cockpit-banner h1 > span:first-child,
+html.light-theme .admin-cockpit-banner h1 > span:first-child,
+[data-theme="light"] #admin-cockpit-banner h1 > span:first-child,
+[data-theme="light"] .admin-cockpit-banner h1 > span:first-child {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+html.light-theme #admin-cockpit-banner h1 .bg-clip-text,
+html.light-theme .admin-cockpit-banner h1 .bg-clip-text,
+[data-theme="light"] #admin-cockpit-banner h1 .bg-clip-text,
+[data-theme="light"] .admin-cockpit-banner h1 .bg-clip-text {
+  background: linear-gradient(135deg, #be123c 0%, #b45309 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1)) !important;
+}
+
+html.light-theme #admin-cockpit-banner h1 .from-purple-400,
+html.light-theme .admin-cockpit-banner h1 .from-purple-400,
+[data-theme="light"] #admin-cockpit-banner h1 .from-purple-400,
+[data-theme="light"] .admin-cockpit-banner h1 .from-purple-400 {
+  background: linear-gradient(135deg, #6d28d9 0%, #be185d 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 html.light-theme #admin-cockpit-banner p,
@@ -5552,3 +6827,792 @@ html.light-theme #admin-vietqr-card,
   border: 1.5px solid #10b981 !important;
   box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(16, 185, 129, 0.2) !important;
 }
+
+/* 9. Master Data, AI & Settings Banners in Admin */
+html.light-theme #admin-view-body .from-amber-950\/40,
+html.light-theme #admin-view-body .from-amber-950\/50,
+html.light-theme #admin-view-body .from-emerald-950\/40,
+[data-theme="light"] #admin-view-body .from-amber-950\/40,
+[data-theme="light"] #admin-view-body .from-amber-950\/50,
+[data-theme="light"] #admin-view-body .from-emerald-950\/40 {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 8px 25px -5px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* 10. Admin Form Inputs, Selects & Modals */
+html.light-theme #admin-view-body input,
+html.light-theme #admin-view-body select,
+html.light-theme #admin-view-body textarea,
+[data-theme="light"] #admin-view-body input,
+[data-theme="light"] #admin-view-body select,
+[data-theme="light"] #admin-view-body textarea {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #admin-view-body input:focus,
+html.light-theme #admin-view-body select:focus,
+html.light-theme #admin-view-body textarea:focus,
+[data-theme="light"] #admin-view-body input:focus,
+[data-theme="light"] #admin-view-body select:focus,
+[data-theme="light"] #admin-view-body textarea:focus {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15) !important;
+}
+
+/* ==========================================================================
+   11. THEME TOGGLE SWITCH SLIDERS & PILLS IN LIGHT MODE
+   Zero Layout Shift, Dual-Color Neon Gradient Active State, Transparent Inactive
+   ========================================================================== */
+html.light-theme #header-theme-toggle-track,
+html.light-theme #landing-theme-toggle-btn,
+[data-theme="light"] #header-theme-toggle-track,
+[data-theme="light"] #landing-theme-toggle-btn {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.5) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 12px rgba(6, 182, 212, 0.2) !important;
+}
+
+html.light-theme #sidebar-theme-pill-btn,
+[data-theme="light"] #sidebar-theme-pill-btn {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ==========================================================================
+   12. NOTIFICATIONS TAB & LARGE TITLES CONTRAST IN LIGHT MODE
+   ========================================================================== */
+
+/* Notifications Header Banner */
+html.light-theme #tab-notifications > div.relative.rounded-3xl,
+[data-theme="light"] #tab-notifications > div.relative.rounded-3xl {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  background-image: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(236, 254, 255, 0.96) 100%) !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 22px rgba(6, 182, 212, 0.15) !important;
+}
+
+/* Notifications Title (Hộp Thư & Thông Báo) & Subtitle */
+html.light-theme #tab-notifications h1,
+html.light-theme #tab-notifications .relative.rounded-3xl h1,
+[data-theme="light"] #tab-notifications h1,
+[data-theme="light"] #tab-notifications .relative.rounded-3xl h1 {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+html.light-theme #tab-notifications .relative.rounded-3xl p,
+[data-theme="light"] #tab-notifications .relative.rounded-3xl p {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+/* Notifications Action Buttons */
+html.light-theme #tab-notifications #btn-mark-all-read,
+html.light-theme #tab-notifications #btn-refresh-notifs,
+[data-theme="light"] #tab-notifications #btn-mark-all-read,
+[data-theme="light"] #tab-notifications #btn-refresh-notifs {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-notifications #btn-clear-all-notifs,
+[data-theme="light"] #tab-notifications #btn-clear-all-notifs {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(244, 63, 94, 0.45) !important;
+  color: #e11d48 !important;
+}
+
+/* Notifications List Cards & Content */
+html.light-theme #tab-notifications .glass-card,
+html.light-theme #tab-notifications [class*="bg-gradient-to-r"][class*="via-slate-900"],
+[data-theme="light"] #tab-notifications .glass-card,
+[data-theme="light"] #tab-notifications [class*="bg-gradient-to-r"][class*="via-slate-900"] {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+html.light-theme #tab-notifications h3,
+html.light-theme #tab-notifications h4,
+[data-theme="light"] #tab-notifications h3,
+[data-theme="light"] #tab-notifications h4 {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #tab-notifications p,
+[data-theme="light"] #tab-notifications p {
+  color: #334155 !important;
+}
+
+/* Subscription Vip Banner Title Accent */
+html.light-theme #tab-subscription .bg-clip-text,
+[data-theme="light"] #tab-subscription .bg-clip-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #d97706 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+}
+
+/* ==========================================================================
+   13. VIP BADGE, ACTION BUTTONS, TABLE CONTRAST & BANK GATEWAY (LIGHT MODE)
+   Strictly scoped under light-theme / [data-theme="light"] to preserve 100% Dark Theme.
+   ========================================================================== */
+
+/* --- 13.1. Header VIP Plan Badge (#user-display-plan) --- */
+html.light-theme #user-display-plan,
+[data-theme="light"] #user-display-plan {
+  background: #f5f3ff !important;
+  border: 1.5px solid #7c3aed !important;
+  color: #581c87 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2) !important;
+}
+
+html.light-theme #user-display-plan i,
+[data-theme="light"] #user-display-plan i {
+  color: #7c3aed !important;
+}
+
+html.light-theme #user-display-plan span,
+[data-theme="light"] #user-display-plan span {
+  color: #581c87 !important;
+  font-weight: 900 !important;
+}
+
+/* Ensure all nested text elements inside header badge inherit sharp dark colors */
+html.light-theme #user-display-plan [class*="text-cyan"],
+html.light-theme #user-display-plan [class*="text-purple"],
+[data-theme="light"] #user-display-plan [class*="text-cyan"],
+[data-theme="light"] #user-display-plan [class*="text-purple"] {
+  color: #581c87 !important;
+  font-weight: 900 !important;
+}
+
+/* VIP Pro in Light Mode - High-contrast Deep Blue/Cyan */
+html.light-theme #user-display-plan.badge-vip-pro,
+html.light-theme #user-display-plan[class*="badge-vip-pro"],
+[data-theme="light"] #user-display-plan.badge-vip-pro,
+[data-theme="light"] #user-display-plan[class*="badge-vip-pro"] {
+  background: #e0f2fe !important;
+  border: 1.5px solid #0284c7 !important;
+  color: #0369a1 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.2) !important;
+}
+
+html.light-theme #user-display-plan.badge-vip-pro i,
+html.light-theme #user-display-plan[class*="badge-vip-pro"] i,
+[data-theme="light"] #user-display-plan.badge-vip-pro i,
+[data-theme="light"] #user-display-plan[class*="badge-vip-pro"] i {
+  color: #0284c7 !important;
+}
+
+html.light-theme #user-display-plan.badge-vip-pro span,
+html.light-theme #user-display-plan[class*="badge-vip-pro"] span,
+[data-theme="light"] #user-display-plan.badge-vip-pro span,
+[data-theme="light"] #user-display-plan[class*="badge-vip-pro"] span {
+  color: #0369a1 !important;
+  font-weight: 900 !important;
+}
+
+/* Expiring Soon / Rose Warning Header Badge (Crystal clear dark crimson text) */
+html.light-theme #user-display-plan.bg-rose-500\/20,
+html.light-theme #user-display-plan[class*="bg-rose"],
+[data-theme="light"] #user-display-plan.bg-rose-500\/20,
+[data-theme="light"] #user-display-plan[class*="bg-rose"] {
+  background: #fff1f2 !important;
+  border: 1.5px solid #e11d48 !important;
+  color: #9f1239 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.2) !important;
+}
+
+html.light-theme #user-display-plan.bg-rose-500\/20 i,
+html.light-theme #user-display-plan[class*="bg-rose"] i,
+[data-theme="light"] #user-display-plan.bg-rose-500\/20 i,
+[data-theme="light"] #user-display-plan[class*="bg-rose"] i {
+  color: #e11d48 !important;
+}
+
+html.light-theme #user-display-plan.bg-rose-500\/20 span,
+html.light-theme #user-display-plan[class*="bg-rose"] span,
+[data-theme="light"] #user-display-plan.bg-rose-500\/20 span,
+[data-theme="light"] #user-display-plan[class*="bg-rose"] span {
+  color: #9f1239 !important;
+  font-weight: 900 !important;
+}
+
+/* Platinum VIP Gradient Pill in Light Mode (Deep slate-900 / amber-900 text) */
+html.light-theme #user-display-plan.badge-vip-toi-cao,
+[data-theme="light"] #user-display-plan.badge-vip-toi-cao {
+  background: linear-gradient(135deg, #fef3c7 0%, #ccfbf1 50%, #e0e7ff 100%) !important;
+  border: 1.5px solid #0d9488 !important;
+  color: #0f172a !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 12px rgba(13, 148, 136, 0.25) !important;
+}
+html.light-theme #user-display-plan.badge-vip-toi-cao i,
+[data-theme="light"] #user-display-plan.badge-vip-toi-cao i {
+  color: #b45309 !important;
+}
+html.light-theme #user-display-plan.badge-vip-toi-cao span,
+[data-theme="light"] #user-display-plan.badge-vip-toi-cao span {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+/* Free Plan Badge in Light Mode */
+html.light-theme #user-display-plan.badge-fintrack-free,
+[data-theme="light"] #user-display-plan.badge-fintrack-free {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #94a3b8 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #user-display-plan.badge-fintrack-free span,
+[data-theme="light"] #user-display-plan.badge-fintrack-free span {
+  color: #0f172a !important;
+}
+
+/* --- 13.2. Action Buttons in Light Mode: Xóa Tài Khoản, Gửi Thông Báo Riêng, Xuất Excel --- */
+
+/* 1. Xóa Tài Khoản Button (High Contrast Dark Red/Black text, modern pastel red background) */
+html.light-theme #btn-admin-delete-user,
+html.light-theme button[id*="delete-user"],
+html.light-theme button[id*="delete-account"],
+[data-theme="light"] #btn-admin-delete-user,
+[data-theme="light"] button[id*="delete-user"],
+[data-theme="light"] button[id*="delete-account"] {
+  background: #fee2e2 !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15) !important;
+}
+html.light-theme #btn-admin-delete-user i,
+html.light-theme button[id*="delete-user"] i,
+html.light-theme button[id*="delete-account"] i,
+[data-theme="light"] #btn-admin-delete-user i,
+[data-theme="light"] button[id*="delete-user"] i,
+[data-theme="light"] button[id*="delete-account"] i {
+  color: #dc2626 !important;
+}
+html.light-theme #btn-admin-delete-user span,
+html.light-theme button[id*="delete-user"] span,
+html.light-theme button[id*="delete-account"] span,
+[data-theme="light"] #btn-admin-delete-user span,
+[data-theme="light"] button[id*="delete-user"] span,
+[data-theme="light"] button[id*="delete-account"] span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #btn-admin-delete-user:hover,
+html.light-theme button[id*="delete-user"]:hover,
+html.light-theme button[id*="delete-account"]:hover,
+[data-theme="light"] #btn-admin-delete-user:hover,
+[data-theme="light"] button[id*="delete-user"]:hover,
+[data-theme="light"] button[id*="delete-account"]:hover {
+  background: #fecaca !important;
+  border-color: #b91c1c !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+}
+
+/* 2. Gửi Thông Báo Riêng Button (High Contrast Dark Purple/Black text, modern pastel purple background) */
+html.light-theme #btn-admin-send-personal-notif,
+html.light-theme button[id*="send-personal"],
+[data-theme="light"] #btn-admin-send-personal-notif,
+[data-theme="light"] button[id*="send-personal"] {
+  background: #f3e8ff !important;
+  border: 1.5px solid #a855f7 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.15) !important;
+}
+html.light-theme #btn-admin-send-personal-notif i,
+html.light-theme button[id*="send-personal"] i,
+[data-theme="light"] #btn-admin-send-personal-notif i,
+[data-theme="light"] button[id*="send-personal"] i {
+  color: #7c3aed !important;
+}
+html.light-theme #btn-admin-send-personal-notif span,
+html.light-theme button[id*="send-personal"] span,
+[data-theme="light"] #btn-admin-send-personal-notif span,
+[data-theme="light"] button[id*="send-personal"] span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #btn-admin-send-personal-notif:hover,
+html.light-theme button[id*="send-personal"]:hover,
+[data-theme="light"] #btn-admin-send-personal-notif:hover,
+[data-theme="light"] button[id*="send-personal"]:hover {
+  background: #e9d5ff !important;
+  border-color: #6d28d9 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25) !important;
+}
+
+/* 3. Xuất File Excel Buttons (High Contrast Dark Green/Black text, modern pastel emerald background) */
+html.light-theme #btn-tx-export-excel,
+html.light-theme #btn-export-excel,
+html.light-theme #btn-export-tx-excel,
+html.light-theme [id*="export-excel"],
+html.light-theme [title*="Xuất file Excel"],
+html.light-theme [title*="Xuất Excel"],
+html.light-theme button:has(.fa-file-excel),
+[data-theme="light"] #btn-tx-export-excel,
+[data-theme="light"] #btn-export-excel,
+[data-theme="light"] #btn-export-tx-excel,
+[data-theme="light"] [id*="export-excel"],
+[data-theme="light"] [title*="Xuất file Excel"],
+[data-theme="light"] [title*="Xuất Excel"],
+[data-theme="light"] button:has(.fa-file-excel) {
+  background: #d1fae5 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2) !important;
+}
+html.light-theme #btn-tx-export-excel i,
+html.light-theme #btn-export-excel i,
+html.light-theme #btn-export-tx-excel i,
+html.light-theme [id*="export-excel"] i,
+html.light-theme button:has(.fa-file-excel) i,
+[data-theme="light"] #btn-tx-export-excel i,
+[data-theme="light"] #btn-export-excel i,
+[data-theme="light"] #btn-export-tx-excel i,
+[data-theme="light"] [id*="export-excel"] i,
+[data-theme="light"] button:has(.fa-file-excel) i {
+  color: #047857 !important;
+}
+html.light-theme #btn-tx-export-excel span,
+html.light-theme #btn-export-excel span,
+html.light-theme #btn-export-tx-excel span,
+html.light-theme [id*="export-excel"] span,
+html.light-theme button:has(.fa-file-excel) span,
+[data-theme="light"] #btn-tx-export-excel span,
+[data-theme="light"] #btn-export-excel span,
+[data-theme="light"] #btn-export-tx-excel span,
+[data-theme="light"] [id*="export-excel"] span,
+[data-theme="light"] button:has(.fa-file-excel) span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+html.light-theme #btn-tx-export-excel:hover,
+html.light-theme #btn-export-excel:hover,
+html.light-theme #btn-export-tx-excel:hover,
+html.light-theme [id*="export-excel"]:hover,
+html.light-theme button:has(.fa-file-excel):hover,
+[data-theme="light"] #btn-tx-export-excel:hover,
+[data-theme="light"] #btn-export-excel:hover,
+[data-theme="light"] #btn-export-tx-excel:hover,
+[data-theme="light"] [id*="export-excel"]:hover,
+[data-theme="light"] button:has(.fa-file-excel):hover {
+  background: #a7f3d0 !important;
+  border-color: #059669 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* --- 13.3. Dynamic Tabs Typography, AI Prompts & Description Texts in Light Mode --- */
+/* Completely prevents vanishing/dim text when switching tabs dynamically */
+html.light-theme #admin-view-body h1,
+html.light-theme #admin-view-body h2,
+html.light-theme #admin-view-body h3,
+html.light-theme #admin-view-body h4,
+html.light-theme #admin-view-body h5,
+html.light-theme #admin-view-body h6,
+html.light-theme #admin-view-body strong,
+html.light-theme #admin-view-body b,
+[data-theme="light"] #admin-view-body h1,
+[data-theme="light"] #admin-view-body h2,
+[data-theme="light"] #admin-view-body h3,
+[data-theme="light"] #admin-view-body h4,
+[data-theme="light"] #admin-view-body h5,
+[data-theme="light"] #admin-view-body h6,
+[data-theme="light"] #admin-view-body strong,
+[data-theme="light"] #admin-view-body b {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* All description paragraphs & helper spans */
+html.light-theme #admin-view-body p,
+html.light-theme #admin-view-body .text-slate-400,
+html.light-theme #admin-view-body .text-slate-500,
+[data-theme="light"] #admin-view-body p,
+[data-theme="light"] #admin-view-body .text-slate-400,
+[data-theme="light"] #admin-view-body .text-slate-500 {
+  color: #334155 !important;
+  font-weight: 500 !important;
+}
+
+/* Form labels inside dynamic tabs */
+html.light-theme #admin-view-body label,
+[data-theme="light"] #admin-view-body label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* High contrast text overrides for Tailwind slate text in Light Mode */
+html.light-theme #admin-view-body .text-slate-100,
+html.light-theme #admin-view-body .text-slate-200,
+html.light-theme #admin-view-body .text-slate-300,
+[data-theme="light"] #admin-view-body .text-slate-100,
+[data-theme="light"] #admin-view-body .text-slate-200,
+[data-theme="light"] #admin-view-body .text-slate-300 {
+  color: #0f172a !important;
+}
+
+/* Saturated colored labels in light mode for crystal readability */
+html.light-theme #admin-view-body .text-indigo-300,
+html.light-theme #admin-view-body .text-indigo-400,
+[data-theme="light"] #admin-view-body .text-indigo-300,
+[data-theme="light"] #admin-view-body .text-indigo-400 {
+  color: #4338ca !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #admin-view-body .text-purple-300,
+html.light-theme #admin-view-body .text-purple-400,
+[data-theme="light"] #admin-view-body .text-purple-300,
+[data-theme="light"] #admin-view-body .text-purple-400 {
+  color: #6b21a8 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #admin-view-body .text-cyan-300,
+html.light-theme #admin-view-body .text-cyan-400,
+[data-theme="light"] #admin-view-body .text-cyan-300,
+[data-theme="light"] #admin-view-body .text-cyan-400 {
+  color: #0e7490 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #admin-view-body .text-rose-300,
+html.light-theme #admin-view-body .text-rose-400,
+[data-theme="light"] #admin-view-body .text-rose-300,
+[data-theme="light"] #admin-view-body .text-rose-400 {
+  color: #be123c !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #admin-view-body .text-amber-300,
+html.light-theme #admin-view-body .text-amber-400,
+[data-theme="light"] #admin-view-body .text-amber-300,
+[data-theme="light"] #admin-view-body .text-amber-400 {
+  color: #b45309 !important;
+  font-weight: 700 !important;
+}
+
+html.light-theme #admin-view-body .text-emerald-300,
+html.light-theme #admin-view-body .text-emerald-400,
+[data-theme="light"] #admin-view-body .text-emerald-300,
+[data-theme="light"] #admin-view-body .text-emerald-400 {
+  color: #047857 !important;
+  font-weight: 700 !important;
+}
+
+/* Variable insertion buttons in AI Prompt Modules (Zero Clashing in Light Mode) */
+html.light-theme button[onclick*="insertVariable"],
+html.light-theme #admin-view-body button[onclick*="insertVariable"],
+html.light-theme .glass-card button[class*="bg-indigo-950"],
+html.light-theme .glass-card button[class*="bg-purple-950"],
+[data-theme="light"] button[onclick*="insertVariable"],
+[data-theme="light"] #admin-view-body button[onclick*="insertVariable"],
+[data-theme="light"] .glass-card button[class*="bg-indigo-950"],
+[data-theme="light"] .glass-card button[class*="bg-purple-950"] {
+  background-color: #eef2ff !important;
+  border: 1.5px solid #6366f1 !important;
+  color: #312e81 !important;
+  font-weight: 800 !important;
+  font-family: monospace !important;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+html.light-theme button[onclick*="insertVariable"]:hover,
+html.light-theme #admin-view-body button[onclick*="insertVariable"]:hover,
+html.light-theme .glass-card button[class*="bg-indigo-950"]:hover,
+html.light-theme .glass-card button[class*="bg-purple-950"]:hover,
+[data-theme="light"] button[onclick*="insertVariable"]:hover,
+[data-theme="light"] #admin-view-body button[onclick*="insertVariable"]:hover,
+[data-theme="light"] .glass-card button[class*="bg-indigo-950"]:hover,
+[data-theme="light"] .glass-card button[class*="bg-purple-950"]:hover {
+  background-color: #e0e7ff !important;
+  border-color: #4f46e5 !important;
+  color: #1e1b4b !important;
+}
+
+/* AI Prompt Textareas in Light Mode */
+html.light-theme #ai-prompt-parser,
+html.light-theme #ai-prompt-advisor,
+html.light-theme #admin-view-body textarea,
+[data-theme="light"] #ai-prompt-parser,
+[data-theme="light"] #ai-prompt-advisor,
+[data-theme="light"] #admin-view-body textarea {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+/* Subtab Navigation Pills (Inactive state must have dark readable text) */
+html.light-theme .admin-subtab-pill:not(.active),
+[data-theme="light"] .admin-subtab-pill:not(.active) {
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+html.light-theme .admin-subtab-pill:not(.active) span,
+[data-theme="light"] .admin-subtab-pill:not(.active) span {
+  color: #334155 !important;
+  font-weight: 700 !important;
+}
+
+/* --- 13.4. Tables, Status Badges & Numbers Contrast in Light Mode --- */
+/* High contrast numbers & statuses in Data Tables */
+html.light-theme #admin-view-body table td,
+[data-theme="light"] #admin-view-body table td {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+html.light-theme #admin-view-body table td.font-mono,
+html.light-theme #admin-view-body table td .font-mono,
+html.light-theme #admin-view-body table td b,
+html.light-theme #admin-view-body table td strong,
+[data-theme="light"] #admin-view-body table td.font-mono,
+[data-theme="light"] #admin-view-body table td .font-mono,
+[data-theme="light"] #admin-view-body table td b,
+[data-theme="light"] #admin-view-body table td strong {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Table Status Badges: Clear pastel tint + solid border + high contrast dark text */
+html.light-theme #admin-view-body .bg-emerald-500\/15,
+html.light-theme #admin-view-body .bg-emerald-500\/20,
+html.light-theme #admin-view-body [class*="bg-emerald-500"],
+[data-theme="light"] #admin-view-body .bg-emerald-500\/15,
+[data-theme="light"] #admin-view-body .bg-emerald-500\/20,
+[data-theme="light"] #admin-view-body [class*="bg-emerald-500"] {
+  background-color: #ecfdf5 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #065f46 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-rose-500\/15,
+html.light-theme #admin-view-body .bg-rose-500\/20,
+html.light-theme #admin-view-body .bg-rose-500\/25,
+html.light-theme #admin-view-body .bg-red-500\/25,
+html.light-theme #admin-view-body [class*="bg-rose-500"],
+html.light-theme #admin-view-body [class*="bg-red-500"],
+[data-theme="light"] #admin-view-body .bg-rose-500\/15,
+[data-theme="light"] #admin-view-body .bg-rose-500\/20,
+[data-theme="light"] #admin-view-body .bg-rose-500\/25,
+[data-theme="light"] #admin-view-body .bg-red-500\/25,
+[data-theme="light"] #admin-view-body [class*="bg-rose-500"],
+[data-theme="light"] #admin-view-body [class*="bg-red-500"] {
+  background-color: #fff1f2 !important;
+  border: 1.5px solid #f43f5e !important;
+  color: #9f1239 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-amber-500\/20,
+html.light-theme #admin-view-body [class*="bg-amber-500"],
+[data-theme="light"] #admin-view-body .bg-amber-500\/20,
+[data-theme="light"] #admin-view-body [class*="bg-amber-500"] {
+  background-color: #fffbeb !important;
+  border: 1.5px solid #f59e0b !important;
+  color: #92400e !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-purple-500\/20,
+html.light-theme #admin-view-body [class*="bg-purple-500"],
+[data-theme="light"] #admin-view-body .bg-purple-500\/20,
+[data-theme="light"] #admin-view-body [class*="bg-purple-500"] {
+  background-color: #faf5ff !important;
+  border: 1.5px solid #a855f7 !important;
+  color: #6b21a8 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-cyan-500\/20,
+html.light-theme #admin-view-body .bg-cyan-950\/40,
+html.light-theme #admin-view-body [class*="bg-cyan-500"],
+[data-theme="light"] #admin-view-body .bg-cyan-500\/20,
+[data-theme="light"] #admin-view-body .bg-cyan-950\/40,
+[data-theme="light"] #admin-view-body [class*="bg-cyan-500"] {
+  background-color: #f0fdfa !important;
+  border: 1.5px solid #06b6d4 !important;
+  color: #0e7490 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-indigo-500\/20,
+html.light-theme #admin-view-body [class*="bg-indigo-500"],
+[data-theme="light"] #admin-view-body .bg-indigo-500\/20,
+[data-theme="light"] #admin-view-body [class*="bg-indigo-500"] {
+  background-color: #eef2ff !important;
+  border: 1.5px solid #6366f1 !important;
+  color: #3730a3 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body .bg-slate-800,
+[data-theme="light"] #admin-view-body .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+/* User table action buttons: Lock / Unlock & Edit */
+html.light-theme #admin-view-body button[onclick*="toggleUserStatus"],
+[data-theme="light"] #admin-view-body button[onclick*="toggleUserStatus"] {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #admin-view-body button[onclick*="openUserDetailModal"],
+[data-theme="light"] #admin-view-body button[onclick*="openUserDetailModal"] {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* --- 13.5. Bank Gateway Tab & VietQR Layout in Light Mode --- */
+html.light-theme #admin-bank-gateway-content-wrapper .bg-slate-900\/95,
+html.light-theme #admin-bank-gateway-content-wrapper .bg-slate-900\/90,
+html.light-theme #admin-bank-gateway-content-wrapper .bg-slate-900,
+html.light-theme #admin-bank-gateway-content-wrapper .bg-slate-950,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .bg-slate-900\/95,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .bg-slate-900\/90,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .bg-slate-900,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .bg-slate-950 {
+  background-color: #ffffff !important;
+  border-color: rgba(6, 182, 212, 0.35) !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Bank Gateway Top Banner */
+html.light-theme #admin-bank-gateway-content-wrapper .from-amber-950\/50,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .from-amber-950\/50 {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.96) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(254, 243, 199, 0.96) 100%) !important;
+  border: 1.5px solid #f59e0b !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 20px rgba(245, 158, 11, 0.15) !important;
+}
+
+/* Active gateway indicator pill in top banner */
+html.light-theme #admin-bank-gateway-content-wrapper .text-right.bg-slate-950\/90,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .text-right.bg-slate-950\/90 {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* Live Realtime Preview Card in Bank Gateway */
+html.light-theme #admin-bank-gateway-content-wrapper .lg\:col-span-5,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .lg\:col-span-5 {
+  background: #ffffff !important;
+  border: 1.5px solid #f59e0b !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 20px rgba(245, 158, 11, 0.15) !important;
+}
+
+html.light-theme #admin-bank-gateway-content-wrapper .lg\:col-span-5 .bg-slate-950,
+[data-theme="light"] #admin-bank-gateway-content-wrapper .lg\:col-span-5 .bg-slate-950 {
+  background-color: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+}
+
+html.light-theme #gw-preview-bank,
+[data-theme="light"] #gw-preview-bank {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #gw-preview-acc,
+[data-theme="light"] #gw-preview-acc {
+  color: #0891b2 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #gw-preview-name,
+[data-theme="light"] #gw-preview-name {
+  color: #b45309 !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #gw-preview-memo,
+[data-theme="light"] #gw-preview-memo {
+  color: #4338ca !important;
+  font-weight: 800 !important;
+}
+
+/* Secure Read-Only Inspector Card in Bank Gateway (for Moderator) */
+html.light-theme .bank-readonly-card,
+[data-theme="light"] .bank-readonly-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* --- 13.6. Generic Modal Light Theme Support --- */
+html.light-theme #generic-modal .bg-slate-950,
+html.light-theme #generic-modal .bg-slate-900,
+[data-theme="light"] #generic-modal .bg-slate-950,
+[data-theme="light"] #generic-modal .bg-slate-900 {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+}
+
+html.light-theme #generic-modal h1,
+html.light-theme #generic-modal h2,
+html.light-theme #generic-modal h3,
+html.light-theme #generic-modal h4,
+[data-theme="light"] #generic-modal h1,
+[data-theme="light"] #generic-modal h2,
+[data-theme="light"] #generic-modal h3,
+[data-theme="light"] #generic-modal h4 {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html.light-theme #generic-modal p,
+html.light-theme #generic-modal label,
+[data-theme="light"] #generic-modal p,
+[data-theme="light"] #generic-modal label {
+  color: #0f172a !important;
+}
+
+html.light-theme #generic-modal input,
+html.light-theme #generic-modal select,
+html.light-theme #generic-modal textarea,
+[data-theme="light"] #generic-modal input,
+[data-theme="light"] #generic-modal select,
+[data-theme="light"] #generic-modal textarea {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+
+

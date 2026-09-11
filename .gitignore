@@ -1,0 +1,96 @@
+# ==============================================================================
+# FINTRACK AI - ENTERPRISE GITIGNORE CONFIGURATION
+# ==============================================================================
+
+# 1. Virtual Environments (Môi trường ảo Python - Dung lượng cực lớn)
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 2. Python Cache & Compiled Bytecode (Bộ nhớ đệm thông dịch)
+__pycache__/
+backend/**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 3. Local Databases & Test Data (Cơ sở dữ liệu cục bộ và dữ liệu thử nghiệm)
+*.db
+*.sqlite
+*.sqlite3
+fintrack.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# 4. User Uploads & Media Storage (Giữ lại cấu trúc thư mục với .gitkeep)
+uploads/*
+!uploads/.gitkeep
+tmp/
+temp/
+
+# 5. Environment & Secret Credentials (Khóa bí mật API, Token, Biến môi trường)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+
+# 6. Testing & Quality Assurance Cache (Báo cáo kiểm thử & Cache)
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# 7. System & Application Logs (Nhật ký vận hành hệ thống)
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 8. AI Agent Cache & Working Artifacts (Aider, Claude, LLM tool artifacts)
+.aider*
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/
+
+# 9. IDE & Editor Workspace Settings (Cấu hình riêng của lập trình viên)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# 10. Operating System Junk (Tệp tin rác của hệ điều hành)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# 11. Large Backup & Extracted Presentation Documents (Tài liệu báo cáo nặng)
+*.docx
+*.pptx
+*.bak
+*_backup.*

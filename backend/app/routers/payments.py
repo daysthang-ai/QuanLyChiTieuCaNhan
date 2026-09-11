@@ -745,7 +745,7 @@ def get_admin_bank_gateway_details(
 @router.put("/admin/payment-settings")
 def save_admin_bank_gateway(
     payload: BankGatewaySaveRequest,
-    current_admin: User = Depends(get_current_admin_or_moderator_user),
+    current_admin: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
     """
