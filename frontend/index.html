@@ -69,6 +69,129 @@
       animation: progressStripeAnimation 1.5s linear infinite !important;
       box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
     }
+
+    /* ==========================================================================
+       COMMAND CENTER CHO NGƯỜI MỚI BẮT ĐẦU (CHẾ ĐỘ GỌN GÀNG / ĐẦY ĐỦ)
+       ========================================================================== */
+    
+    /* 1. Ẩn khung hướng dẫn 1-click rườm rà và các banner phụ */
+    .fintrack-command-center-compact #dashboard-quick-tips-container,
+    .fintrack-command-center-compact .dashboard-quick-tips-banner,
+    .fintrack-command-center-compact .dashboard-promo-banner,
+    .fintrack-command-center-compact .guide-extra-banner {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    #dashboard-quick-tips-container {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    /* 2. Khi ở chế độ Gọn Gàng: Ẩn biểu đồ xu hướng 6 tháng phức tạp và 4 card KPI chi tiết */
+    .fintrack-command-center-compact #cashflow-chart-card,
+    .fintrack-command-center-compact #kpi-cards-container {
+      display: none !important;
+    }
+
+    /* Giảm padding khung kính để vừa vặn màn hình */
+    .fintrack-command-center-compact #main-glass-wrapper {
+      padding: 0.875rem 1.125rem 1.25rem 1.125rem !important;
+    }
+
+    /* 3. Tối ưu Thẻ Trạng Thái Sức Khỏe & 3 Khối Trọng Tâm Dành Cho Người Mới */
+    #beginner-compact-summary-container {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    }
+
+    /* 4. Khối Cơ Cấu Chi Tiêu (#category-donut-card) mở rộng full hàng */
+    .fintrack-command-center-compact #category-donut-card {
+      grid-column: span 3 / span 3 !important;
+      padding: 0.875rem 1.125rem !important;
+      border-radius: 1rem !important;
+    }
+    .fintrack-command-center-compact #category-card-body {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-around !important;
+      gap: 1.5rem !important;
+      flex-wrap: wrap !important;
+    }
+    .fintrack-command-center-compact #category-card-body > div.h-48 {
+      height: 7.5rem !important;
+      width: 7.5rem !important;
+      flex-shrink: 0 !important;
+      margin: 0 !important;
+    }
+    .fintrack-command-center-compact #category-card-body canvas {
+      max-height: 7.5rem !important;
+      max-width: 7.5rem !important;
+    }
+    .fintrack-command-center-compact #category-custom-legend {
+      flex: 1 1 240px !important;
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+      gap: 0.35rem !important;
+      max-height: 7.5rem !important;
+      margin-top: 0 !important;
+    }
+    .fintrack-command-center-compact #category-custom-legend > div {
+      font-size: 10.5px !important;
+      padding: 2px 6px !important;
+    }
+
+    /* 5. Khối Cảnh Báo Ngân Sách: CHỈ HIỂN THỊ TOP 3 DANH MỤC LỚN NHẤT (Chống rối mắt cho người mới) */
+    .fintrack-command-center-compact #budget-watchlist-card {
+      padding: 0.875rem 1rem !important;
+      border-radius: 1rem !important;
+    }
+    .fintrack-command-center-compact #budget-card-body {
+      display: block !important;
+    }
+    .fintrack-command-center-compact #budget-alerts-list {
+      gap: 0.4rem !important;
+    }
+    .fintrack-command-center-compact #budget-alerts-list > div {
+      padding: 0.45rem 0.65rem !important;
+      border-radius: 0.75rem !important;
+      font-size: 11.5px !important;
+    }
+    /* Ẩn các danh mục ngân sách từ thứ 4 trở đi */
+    .fintrack-command-center-compact #budget-alerts-list > div:nth-child(n+4) {
+      display: none !important;
+    }
+
+    /* 6. Khối Giao Dịch Gần Đây: THU GỌN CHỈ HIỂN THỊ 4 GIAO DỊCH GẦN NHẤT (Không bị dài trang) */
+    .fintrack-command-center-compact #recent-txs-card {
+      padding: 0.875rem 1rem !important;
+      border-radius: 1rem !important;
+    }
+    .fintrack-command-center-compact #recent-txs-card-body {
+      display: block !important;
+    }
+    .fintrack-command-center-compact #recent-transactions-tbody tr:nth-child(n+5) {
+      display: none !important;
+    }
+    .fintrack-command-center-compact #recent-txs-card-body table th {
+      padding: 0.4rem 0.65rem !important;
+      font-size: 10px !important;
+      letter-spacing: 0.04em !important;
+    }
+    .fintrack-command-center-compact #recent-txs-card-body table td {
+      padding: 0.45rem 0.65rem !important;
+      font-size: 11px !important;
+    }
+
+    /* Thu hẹp khoảng cách grid chung của Viewport */
+    .fintrack-command-center-compact #main-content-view .grid {
+      gap: 0.75rem !important;
+      margin-bottom: 0.75rem !important;
+    }
   </style>
 
   <!-- Immediate Anti-Flicker & Theme Controller Script in Head -->
@@ -4229,6 +4352,414 @@
         }
       } catch (_) {}
     };
+
+    /**
+     * ============================================================================
+     * COMMAND CENTER VIEW MODE CONTROLLER DÀNH CHO NGƯỜI MỚI (GỌN GÀNG / ĐẦY ĐỦ)
+     * ============================================================================
+     * 1. Khi ở chế độ "Gọn Gàng":
+     *    - Ẩn biểu đồ xu hướng 6 tháng phức tạp (#cashflow-chart-card) và banner hướng dẫn cồng kềnh.
+     *    - Ẩn cụm 4 thẻ KPI chi tiết (#kpi-cards-container).
+     *    - Hiển thị khối tóm tắt trực quan chuyên biệt cho người mới (#beginner-compact-summary-container):
+     *      + Thẻ trạng thái sức khỏe tài chính tháng (An toàn / Cần lưu ý) kèm lời khuyên hành động.
+     *      + 3 khối trọng tâm lớn nhất:
+     *         1) Tổng Tài Sản Khả Dụng (tổng hợp tiền mặt, ngân hàng, ví ảo).
+     *         2) Dòng Tiền Thu & Chi tháng này (đối chiếu trực quan Thu vs Chi).
+     *         3) Số Tiền Còn Lại Có Thể Sử Dụng (Dư ròng khả dụng kèm tỷ lệ tiết kiệm).
+     *    - Thu gọn danh mục ngân sách: Chỉ hiển thị TOP 3 danh mục chi tiêu lớn nhất để không bị ngợp.
+     *    - Thu gọn bảng giao dịch gần đây: Chỉ hiển thị 4 giao dịch mới nhất, chống tràn trang.
+     *    - Biểu đồ Cơ cấu chi tiêu Donut hiển thị full chiều ngang tinh tế.
+     * 2. Khi ở chế độ "Đầy ĐỦ":
+     *    - Ẩn khối tóm tắt người mới, mở rộng lại biểu đồ xu hướng 6 tháng (#cashflow-chart-card),
+     *      hiển thị lại 4 thẻ KPI đầy đủ, mở rộng toàn bộ bảng giao dịch và danh mục ngân sách ban đầu.
+     * 3. An toàn 100% dữ liệu, tính toán, và logic xử lý hệ thống.
+     */
+
+    // Hàm tạo và đồng bộ hóa Thẻ Sức Khỏe Tài Chính & 3 Khối Trọng Tâm Cho Người Mới
+    function ensureBeginnerSummaryContainer() {
+      let container = document.getElementById('beginner-compact-summary-container');
+      if (!container) {
+        const kpiContainer = document.getElementById('kpi-cards-container');
+        if (!kpiContainer || !kpiContainer.parentNode) return null;
+
+        container = document.createElement('div');
+        container.id = 'beginner-compact-summary-container';
+        container.className = 'space-y-3 mb-3 animate-in fade-in duration-200';
+        container.innerHTML = `
+          <!-- 1. THẺ TRẠNG THÁI SỨC KHỎE TÀI CHÍNH THÁNG -->
+          <div id="beginner-health-card" class="glass-card p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(15, 23, 42, 0.75);">
+            <div class="flex items-center gap-3">
+              <div id="beginner-health-icon-wrapper" class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30">
+                <i id="beginner-health-icon" class="fa-solid fa-shield-heart text-emerald-400"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-black uppercase tracking-wider text-slate-300">Sức Khỏe Tài Chính:</span>
+                  <span id="beginner-health-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                    AN TOÀN (TỐT)
+                  </span>
+                </div>
+                <p id="beginner-health-message" class="text-xs text-slate-300 font-medium mt-0.5">
+                  Dòng tiền tháng rất tốt, thu nhập lớn hơn chi tiêu và đạt mục tiêu tích lũy an toàn.
+                </p>
+              </div>
+            </div>
+            <div class="shrink-0 flex items-center gap-2 self-end sm:self-center">
+              <span class="text-[11px] text-slate-400 font-semibold hidden md:inline">Chế độ người mới</span>
+              <button type="button" onclick="window.applyDashboardViewMode('detailed')" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer active:scale-95" title="Mở rộng toàn bộ biểu đồ và lịch sử giao dịch">
+                <i class="fa-solid fa-expand text-[10px] text-cyan-400"></i>
+                <span>Xem Đầy Đủ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. 3 KHỐI TRỌNG TÂM LỚN NHẤT: TỔNG TÀI SẢN, TỔNG THU/CHI, TIỀN CÒN LẠI -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Khối 1: Tổng Tài Sản -->
+            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-cyan-950/20" style="border: 1px solid rgba(6, 182, 212, 0.35); background: rgba(15, 23, 42, 0.65);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Tổng Tài Sản Khả Dụng</span>
+                <div class="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-sm border border-cyan-500/20">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+              </div>
+              <div class="mt-1">
+                <span id="beginner-val-networth" class="text-2xl font-black text-slate-100 font-mono tracking-tight group-hover:text-cyan-300 transition-colors">0 ₫</span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-medium mt-1">Tổng tiền mặt, tài khoản ngân hàng & ví</p>
+            </div>
+
+            <!-- Khối 2: Tổng Thu & Chi Tháng Này -->
+            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-purple-950/20" style="border: 1px solid rgba(168, 85, 247, 0.35); background: rgba(15, 23, 42, 0.65);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Dòng Tiền Thu & Chi</span>
+                <div class="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-sm border border-purple-500/20">
+                  <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-3 mt-1">
+                <div class="min-w-0">
+                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Tổng Thu</span>
+                  <span id="beginner-val-income" class="text-base sm:text-lg font-black text-emerald-400 font-mono tracking-tight block truncate">+0 ₫</span>
+                </div>
+                <div class="w-px h-8 bg-slate-800 shrink-0"></div>
+                <div class="min-w-0 text-right">
+                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Tổng Chi</span>
+                  <span id="beginner-val-expense" class="text-base sm:text-lg font-black text-rose-400 font-mono tracking-tight block truncate">-0 ₫</span>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 font-medium mt-1">Đối chiếu thu nhập và chi phí sinh hoạt</p>
+            </div>
+
+            <!-- Khối 3: Số Tiền Còn Lại Có Thể Sử Dụng -->
+            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-emerald-950/20" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(15, 23, 42, 0.65);">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">3. Tiền Còn Lại Khả Dụng</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20">
+                  <i class="fa-solid fa-piggy-bank"></i>
+                </div>
+              </div>
+              <div class="mt-1 flex items-baseline gap-2">
+                <span id="beginner-val-remaining" class="text-2xl font-black text-emerald-400 font-mono tracking-tight">+0 ₫</span>
+                <span id="beginner-val-savings-rate" class="text-xs text-emerald-300 font-mono font-bold">(0%)</span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-medium mt-1">Tiền nhàn rỗi sau khi trừ các khoản chi</p>
+            </div>
+          </div>
+        `;
+        kpiContainer.parentNode.insertBefore(container, kpiContainer);
+      }
+      return container;
+    }
+
+    // Cập nhật giá trị vào các khối tóm tắt dành cho người mới
+    function updateBeginnerSummaryCards() {
+      const summaryContainer = document.getElementById('beginner-compact-summary-container');
+      if (!summaryContainer) return;
+
+      const kpis = window.fintrackApp?.dashboard?.kpis;
+
+      const formatVND = (amount) => {
+        if (typeof window.fintrackApp?.dashboard?.formatVND === 'function') {
+          return window.fintrackApp.dashboard.formatVND(amount);
+        }
+        return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+      };
+
+      let netWorthText = '0 ₫';
+      const netWorthEl = document.getElementById('dash-net-worth-val');
+      if (netWorthEl && netWorthEl.textContent.trim()) {
+        netWorthText = netWorthEl.textContent.trim();
+      }
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+      let netSavings = 0;
+      let savingsRate = 0;
+
+      if (kpis) {
+        totalIncome = Number(kpis.total_income_month) || 0;
+        totalExpense = Number(kpis.total_expense_month) || 0;
+        netSavings = Number(kpis.net_savings_month !== undefined ? kpis.net_savings_month : (totalIncome - totalExpense));
+        savingsRate = Number(kpis.savings_rate_month || 0);
+      } else {
+        const incEl = document.querySelector('#kpi-card-income .text-2xl');
+        const expEl = document.querySelector('#kpi-card-expense .text-2xl');
+        const savRateEl = document.querySelector('#kpi-card-savings .text-2xl');
+        if (incEl) totalIncome = parseInt((incEl.textContent || '').replace(/[^\d]/g, '') || '0', 10);
+        if (expEl) totalExpense = parseInt((expEl.textContent || '').replace(/[^\d]/g, '') || '0', 10);
+        netSavings = totalIncome - totalExpense;
+        if (savRateEl) savingsRate = parseFloat((savRateEl.textContent || '').replace(/[^\d.]/g, '') || '0');
+      }
+
+      const incomeText = totalIncome > 0 ? `+${formatVND(totalIncome)}` : (document.querySelector('#kpi-card-income .text-2xl')?.textContent?.trim() || '+0 ₫');
+      const expenseText = totalExpense > 0 ? `-${formatVND(totalExpense)}` : (document.querySelector('#kpi-card-expense .text-2xl')?.textContent?.trim() || '-0 ₫');
+      const remainingText = netSavings >= 0 ? `+${formatVND(netSavings)}` : `-${formatVND(Math.abs(netSavings))}`;
+      const rateText = savingsRate > 0 ? `(${savingsRate.toFixed(1)}%)` : (document.querySelector('#kpi-card-savings .text-2xl')?.textContent?.trim() || '(0%)');
+
+      // Điền giá trị
+      const elNetWorth = document.getElementById('beginner-val-networth');
+      if (elNetWorth) elNetWorth.textContent = netWorthText;
+
+      const elIncome = document.getElementById('beginner-val-income');
+      if (elIncome) elIncome.textContent = incomeText;
+
+      const elExpense = document.getElementById('beginner-val-expense');
+      if (elExpense) elExpense.textContent = expenseText;
+
+      const elRemaining = document.getElementById('beginner-val-remaining');
+      if (elRemaining) {
+        elRemaining.textContent = remainingText;
+        if (netSavings >= 0) {
+          elRemaining.className = 'text-2xl font-black text-emerald-400 font-mono tracking-tight';
+        } else {
+          elRemaining.className = 'text-2xl font-black text-rose-400 font-mono tracking-tight';
+        }
+      }
+
+      const elSavingsRate = document.getElementById('beginner-val-savings-rate');
+      if (elSavingsRate) elSavingsRate.textContent = rateText;
+
+      // Đánh giá sức khỏe tài chính tháng
+      const isWarning = (totalExpense > totalIncome);
+      const isSafe = (totalExpense <= totalIncome && savingsRate >= 20);
+
+      const healthCard = document.getElementById('beginner-health-card');
+      const healthBadge = document.getElementById('beginner-health-badge');
+      const healthIcon = document.getElementById('beginner-health-icon');
+      const healthIconWrapper = document.getElementById('beginner-health-icon-wrapper');
+      const healthMsg = document.getElementById('beginner-health-message');
+
+      if (healthBadge && healthMsg && healthCard) {
+        if (isWarning) {
+          healthBadge.textContent = 'CẦN LƯU Ý (CHI VƯỢT THU)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20';
+          healthIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-rose-500/15 border border-rose-500/30';
+          healthCard.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+          healthMsg.textContent = 'Tổng chi tiêu tháng này đang lớn hơn thu nhập. Bạn nên kiểm tra lại các khoản mua sắm chưa cần thiết!';
+        } else if (isSafe) {
+          healthBadge.textContent = 'AN TOÀN (TỐT)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20';
+          healthIcon.className = 'fa-solid fa-shield-heart text-emerald-400';
+          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30';
+          healthCard.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          healthMsg.textContent = `Dòng tiền tháng rất tốt! Bạn đã tiết kiệm được ${savingsRate.toFixed(1)}% thu nhập (đạt chuẩn khuyến nghị tối thiểu 20%).`;
+        } else {
+          healthBadge.textContent = 'CẦN LƯU Ý (TIẾT KIỆM THẤP)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/20';
+          healthIcon.className = 'fa-solid fa-circle-exclamation text-amber-400';
+          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-amber-500/15 border border-amber-500/30';
+          healthCard.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+          healthMsg.textContent = `Dòng tiền đang dương nhưng mức tích lũy (${savingsRate.toFixed(1)}%) thấp hơn chuẩn 20%. Hãy tối ưu thêm các khoản chi nhỏ.`;
+        }
+      }
+    }
+
+    window.applyDashboardViewMode = function(mode = 'compact') {
+      try {
+        const isCompact = (mode === 'compact');
+        try {
+          localStorage.setItem('fintrack_dash_view_mode', isCompact ? 'compact' : 'detailed');
+        } catch (_) {}
+
+        // 1. Gắn class Command Center Compact lên container chính
+        const targetElements = [
+          document.documentElement,
+          document.body,
+          document.getElementById('main-glass-wrapper'),
+          document.getElementById('main-content-view'),
+          document.getElementById('app-workspace-container')
+        ];
+        targetElements.forEach(el => {
+          if (!el) return;
+          if (isCompact) {
+            el.classList.add('fintrack-command-center-compact');
+          } else {
+            el.classList.remove('fintrack-command-center-compact');
+          }
+        });
+
+        // 2. Quản lý Thẻ Sức Khỏe & 3 Khối Trọng Tâm Dành Cho Người Mới
+        const beginnerContainer = ensureBeginnerSummaryContainer();
+        if (beginnerContainer) {
+          if (isCompact) {
+            beginnerContainer.style.setProperty('display', 'block', 'important');
+            updateBeginnerSummaryCards();
+          } else {
+            beginnerContainer.style.setProperty('display', 'none', 'important');
+          }
+        }
+
+        // 3. Xử lý khung "Hướng Dẫn 1-Click Cho Người Mới Bắt Đầu" và các banner phụ
+        const quickTipsContainer = document.getElementById('dashboard-quick-tips-container');
+        if (quickTipsContainer) {
+          if (isCompact) {
+            quickTipsContainer.style.setProperty('display', 'none', 'important');
+            quickTipsContainer.classList.add('hidden', 'force-hidden');
+          } else {
+            quickTipsContainer.style.removeProperty('display');
+            quickTipsContainer.classList.remove('hidden', 'force-hidden');
+          }
+        }
+
+        // 4. Quản lý biểu đồ xu hướng 6 tháng & 4 thẻ KPI cũ
+        const cashflowCard = document.getElementById('cashflow-chart-card');
+        const kpiCardsContainer = document.getElementById('kpi-cards-container');
+
+        if (cashflowCard) {
+          if (isCompact) {
+            cashflowCard.style.setProperty('display', 'none', 'important');
+          } else {
+            cashflowCard.style.removeProperty('display');
+            const cfBody = document.getElementById('cashflow-card-body');
+            if (cfBody) {
+              cfBody.classList.remove('hidden');
+              cfBody.style.removeProperty('display');
+            }
+          }
+        }
+
+        if (kpiCardsContainer) {
+          if (isCompact) {
+            kpiCardsContainer.style.setProperty('display', 'none', 'important');
+          } else {
+            kpiCardsContainer.style.removeProperty('display');
+          }
+        }
+
+        // 5. Đảm bảo Card Cơ Cấu Chi Tiêu, Ngân Sách, và Giao Dịch luôn hiển thị
+        const catCard = document.getElementById('category-donut-card');
+        const catBody = document.getElementById('category-card-body');
+        const budgetCard = document.getElementById('budget-watchlist-card');
+        const budgetBody = document.getElementById('budget-card-body');
+        const recentTxsCard = document.getElementById('recent-txs-card');
+        const recentTxsBody = document.getElementById('recent-txs-card-body');
+
+        [catCard, catBody, budgetCard, budgetBody, recentTxsCard, recentTxsBody].forEach(el => {
+          if (el) {
+            el.classList.remove('hidden');
+            el.style.removeProperty('display');
+          }
+        });
+
+        // Đưa tất cả icon chevron của card về trạng thái mở rộng (fa-chevron-up)
+        document.querySelectorAll('.card-collapse-btn i').forEach(icon => {
+          icon.className = 'fa-solid fa-chevron-up text-xs transition-transform duration-200';
+        });
+
+        // 6. Đồng bộ màu sắc và hiệu ứng cho 2 nút bấm "Gọn Gàng" / "Đầy Đủ"
+        const btnCompact = document.getElementById('btn-view-mode-compact');
+        const btnDetailed = document.getElementById('btn-view-mode-detailed');
+
+        if (btnCompact) {
+          if (isCompact) {
+            btnCompact.className = 'dash-view-mode-btn px-3 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-md shadow-cyan-500/25 active:scale-95';
+          } else {
+            btnCompact.className = 'dash-view-mode-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto active:scale-95';
+          }
+        }
+
+        if (btnDetailed) {
+          if (!isCompact) {
+            btnDetailed.className = 'dash-view-mode-btn px-3 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-md shadow-cyan-500/25 active:scale-95';
+          } else {
+            btnDetailed.className = 'dash-view-mode-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5 cursor-pointer relative z-20 pointer-events-auto active:scale-95';
+          }
+        }
+
+        // 7. Đồng bộ biến trạng thái viewMode trong component dashboard nếu đang chạy
+        if (window.fintrackApp?.dashboard) {
+          window.fintrackApp.dashboard.viewMode = isCompact ? 'compact' : 'detailed';
+        }
+
+        // 8. Kích hoạt vẽ lại biểu đồ Chart.js tự động vừa khít với kích thước mới
+        requestAnimationFrame(() => {
+          try {
+            window.dispatchEvent(new Event('resize'));
+            if (window.fintrackApp?.dashboard?.categoryChart) {
+              window.fintrackApp.dashboard.categoryChart.resize();
+            }
+            if (window.fintrackApp?.dashboard?.cashflowChart && !isCompact) {
+              window.fintrackApp.dashboard.cashflowChart.resize();
+            }
+          } catch (_) {}
+        });
+
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi applyDashboardViewMode:", err);
+      }
+    };
+
+    // Lắng nghe sự kiện click trên toàn document (Giai đoạn Capture) để can thiệp trực tiếp trước listener gốc
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('button, a');
+      if (!btn) return;
+      const txt = (btn.textContent || '').trim();
+      if (btn.id === 'btn-view-mode-compact' || txt.includes('Gọn Gàng') || btn.getAttribute('data-view-mode') === 'compact') {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        window.applyDashboardViewMode('compact');
+      } else if (btn.id === 'btn-view-mode-detailed' || txt.includes('Đầy Đủ') || btn.getAttribute('data-view-mode') === 'detailed') {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        window.applyDashboardViewMode('detailed');
+      }
+    }, true);
+
+    // Tự động kiểm tra và áp dụng chế độ hiển thị khi DOM thay đổi hoặc khi render Dashboard
+    let _viewModeObserver = null;
+    let _applyViewModeTimer = null;
+    function setupDashboardViewModeObserver() {
+      const targetNode = document.getElementById('main-content-view') || document.body;
+      if (!targetNode) return;
+      if (_viewModeObserver) _viewModeObserver.disconnect();
+
+      _viewModeObserver = new MutationObserver(function() {
+        const compactBtn = document.getElementById('btn-view-mode-compact');
+        if (compactBtn) {
+          clearTimeout(_applyViewModeTimer);
+          _applyViewModeTimer = setTimeout(() => {
+            const savedMode = localStorage.getItem('fintrack_dash_view_mode') || 'compact';
+            window.applyDashboardViewMode(savedMode);
+          }, 35);
+        }
+      });
+      _viewModeObserver.observe(targetNode, { childList: true, subtree: true });
+
+      // Chạy khởi tạo ban đầu nếu dashboard đã có sẵn
+      const initialBtn = document.getElementById('btn-view-mode-compact');
+      if (initialBtn) {
+        const savedMode = localStorage.getItem('fintrack_dash_view_mode') || 'compact';
+        window.applyDashboardViewMode(savedMode);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupDashboardViewModeObserver);
+    } else {
+      setupDashboardViewModeObserver();
+    }
   </script>
 </body>
 </html>
