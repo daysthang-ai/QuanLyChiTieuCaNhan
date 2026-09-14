@@ -43,6 +43,496 @@
       cursor: default !important;
     }
 
+    /* ==========================================================================
+       GIAO DIỆN SÁNG (LIGHT MODE) - ĐỒNG BỘ MÀU CHỮ, ICON, VIỀN MIX NEON & SWITCH
+       ========================================================================== */
+
+    /* 1. CỤM BUTTON CHUYỂN ĐỔI GIAO DIỆN DARK / LIGHT MODE (SIDEBAR & HEADER) */
+    .sidebar-theme-pill {
+      position: relative !important;
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    /* Chế độ Tối (Dark mode): Nền tối sang trọng, viền neon cyan */
+    html.dark #sidebar-theme-pill-btn,
+    [data-theme="dark"] #sidebar-theme-pill-btn {
+      background: #090d16 !important;
+      border: 1.5px solid rgba(6, 182, 212, 0.6) !important;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+    }
+    /* Chế độ Sáng (Light mode): Nền sáng rõ nét, viền neon cyan sắc sảo không mờ */
+    html.light-theme #sidebar-theme-pill-btn,
+    [data-theme="light"] #sidebar-theme-pill-btn {
+      background: #f1f5f9 !important;
+      border: 2px solid #0891b2 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 14px rgba(8, 145, 178, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    /* Chữ & Icon nút Tối Neon khi ở Light mode: Nền sáng -> Màu đen / xám đậm sắc nét */
+    html.light-theme #sidebar-pill-label-dark,
+    [data-theme="light"] #sidebar-pill-label-dark {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      opacity: 1 !important;
+      text-shadow: none !important;
+    }
+    html.light-theme #sidebar-pill-label-dark i,
+    [data-theme="light"] #sidebar-pill-label-dark i {
+      color: #334155 !important;
+    }
+    /* ==========================================================================
+       ICON MẶT TRỜI (LIGHT MODE): MÀU VÀNG SÁNG NỔI BẬT Ở CẢ 2 TRẠNG THÁI GIAO DIỆN
+       ========================================================================== */
+    #sidebar-theme-pill-btn .fa-sun,
+    #sidebar-pill-label-light .fa-sun,
+    #sidebar-pill-label-light i,
+    #header-theme-toggle-track .fa-sun,
+    #header-theme-thumb .fa-sun,
+    #header-theme-thumb-icon.fa-sun,
+    .theme-slider-switch-header .fa-sun,
+    .theme-slider-knob-header .fa-sun,
+    #landing-theme-toggle .fa-sun {
+      color: #facc15 !important; /* Vàng sáng rực rỡ nổi bật */
+      filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.85)) !important;
+      opacity: 1 !important;
+    }
+    html.dark #sidebar-pill-label-light i,
+    html.dark #sidebar-pill-label-light .fa-sun,
+    [data-theme="dark"] #sidebar-pill-label-light i,
+    [data-theme="dark"] #sidebar-pill-label-light .fa-sun {
+      color: #facc15 !important;
+      filter: drop-shadow(0 0 7px rgba(250, 204, 21, 0.95)) !important;
+      opacity: 1 !important;
+    }
+    /* Chữ & Icon nút Sáng Neon khi ở Light mode (Đang chọn, có thumb nền gradient) */
+    html.light-theme #sidebar-pill-label-light,
+    [data-theme="light"] #sidebar-pill-label-light {
+      color: #ffffff !important;
+      font-weight: 900 !important;
+      opacity: 1 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    }
+    html.light-theme #sidebar-pill-label-light i,
+    html.light-theme #sidebar-pill-label-light .fa-sun,
+    [data-theme="light"] #sidebar-pill-label-light i,
+    [data-theme="light"] #sidebar-pill-label-light .fa-sun {
+      color: #fef08a !important; /* Vàng chanh sáng chói trên nền gradient ngọc */
+      filter: drop-shadow(0 0 8px rgba(254, 240, 138, 0.95)) !important;
+      opacity: 1 !important;
+    }
+
+    /* Header Theme Toggle Switch Styling */
+    html.dark #header-theme-toggle-track,
+    [data-theme="dark"] #header-theme-toggle-track {
+      background: rgba(2, 6, 23, 0.9) !important;
+      border: 1.5px solid rgba(6, 182, 212, 0.5) !important;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.25) !important;
+    }
+    html.light-theme #header-theme-toggle-track,
+    [data-theme="light"] #header-theme-toggle-track {
+      background: #f1f5f9 !important;
+      border: 1.5px solid #0891b2 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px rgba(8, 145, 178, 0.25) !important;
+    }
+    html.light-theme #header-theme-label,
+    [data-theme="light"] #header-theme-label {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+
+    /* 2. MENU / SIDEBAR NAVIGATION Ở NỀN SÁNG (LIGHT MODE) */
+    /* Nền sidebar tone tối dịu mắt ở Dark mode */
+    #sidebar {
+      background: rgba(15, 23, 42, 0.94) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(51, 65, 85, 0.65) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    }
+    /* Nền sidebar trắng ngà sáng dịu mắt kèm viền Mix Neon Cyan đậm ở Light mode */
+    html.light-theme #sidebar,
+    [data-theme="light"] #sidebar {
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.55) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 0 16px rgba(8, 145, 178, 0.2) !important;
+    }
+    /* Tiêu đề Menu Quản Lý và dải phân cách */
+    html.light-theme #sidebar .border-b,
+    [data-theme="light"] #sidebar .border-b {
+      border-color: rgba(203, 213, 225, 0.9) !important;
+    }
+    html.light-theme #sidebar span.text-slate-200,
+    html.light-theme #sidebar .text-slate-200,
+    [data-theme="light"] #sidebar span.text-slate-200,
+    [data-theme="light"] #sidebar .text-slate-200 {
+      color: #0f172a !important;
+      font-weight: 900 !important;
+    }
+    /* Toàn bộ tiêu đề nhóm menu (Danh Mục Chính, AI Cố Vấn, Hệ Thống, v.v.) */
+    html.light-theme #sidebar span.uppercase,
+    html.light-theme #sidebar nav span[class*="uppercase"],
+    html.light-theme #sidebar .text-slate-300.uppercase,
+    [data-theme="light"] #sidebar span.uppercase,
+    [data-theme="light"] #sidebar nav span[class*="uppercase"] {
+      color: #1e293b !important;
+      font-weight: 800 !important;
+    }
+    /* Toàn bộ chữ ở các mục menu/sidebar: Chuyển sang màu đen / xám đậm tương phản cao */
+    html.light-theme #sidebar nav a,
+    html.light-theme #sidebar .user-nav-item,
+    html.light-theme #sidebar .admin-nav-item,
+    html.light-theme #sidebar nav a span,
+    html.light-theme #sidebar .user-nav-item span,
+    html.light-theme #sidebar .admin-nav-item span,
+    [data-theme="light"] #sidebar nav a,
+    [data-theme="light"] #sidebar .user-nav-item,
+    [data-theme="light"] #sidebar .admin-nav-item,
+    [data-theme="light"] #sidebar nav a span {
+      color: #0f172a !important;
+      font-weight: 600 !important;
+    }
+    /* Toàn bộ icon ở menu/sidebar: Màu đen / xám đậm sắc nét trên nền trắng */
+    html.light-theme #sidebar nav a i,
+    html.light-theme #sidebar .user-nav-item i,
+    html.light-theme #sidebar .admin-nav-item i,
+    [data-theme="light"] #sidebar nav a i,
+    [data-theme="light"] #sidebar .user-nav-item i,
+    [data-theme="light"] #sidebar .admin-nav-item i {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+
+    /* Hiệu ứng hover menu sidebar: Nền sáng nhẹ, viền cyan neon, chữ & icon nổi bật */
+    #sidebar .user-nav-item,
+    #sidebar .admin-nav-item,
+    #sidebar nav a.nav-item {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      border: 1px solid transparent !important;
+    }
+    #sidebar .user-nav-item:hover,
+    #sidebar .admin-nav-item:hover,
+    #sidebar nav a.nav-item:hover {
+      background: rgba(30, 41, 59, 0.85) !important;
+      color: #ffffff !important;
+      border-color: rgba(56, 189, 248, 0.35) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 10px rgba(6, 182, 212, 0.15) !important;
+      transform: translateX(2px) !important;
+    }
+    html.light-theme #sidebar .user-nav-item:hover,
+    html.light-theme #sidebar .admin-nav-item:hover,
+    html.light-theme #sidebar nav a.nav-item:hover,
+    [data-theme="light"] #sidebar .user-nav-item:hover,
+    [data-theme="light"] #sidebar .admin-nav-item:hover,
+    [data-theme="light"] #sidebar nav a.nav-item:hover {
+      background: #f1f5f9 !important;
+      color: #0891b2 !important;
+      border-color: rgba(8, 145, 178, 0.55) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 10px rgba(8, 145, 178, 0.22) !important;
+      transform: translateX(2px) !important;
+    }
+    html.light-theme #sidebar .user-nav-item:hover i,
+    html.light-theme #sidebar .admin-nav-item:hover i,
+    html.light-theme #sidebar nav a.nav-item:hover i,
+    html.light-theme #sidebar .user-nav-item:hover span,
+    html.light-theme #sidebar .admin-nav-item:hover span,
+    html.light-theme #sidebar nav a.nav-item:hover span,
+    [data-theme="light"] #sidebar .user-nav-item:hover i,
+    [data-theme="light"] #sidebar .admin-nav-item:hover i,
+    [data-theme="light"] #sidebar nav a.nav-item:hover i {
+      color: #0891b2 !important;
+    }
+    /* Tab đang chọn (Active) */
+    #sidebar .user-nav-item.active,
+    #sidebar .admin-nav-item.active {
+      background: rgba(30, 41, 59, 0.95) !important;
+      border-color: rgba(6, 182, 212, 0.5) !important;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.2) !important;
+    }
+    html.light-theme #sidebar .user-nav-item.active,
+    html.light-theme #sidebar .admin-nav-item.active,
+    [data-theme="light"] #sidebar .user-nav-item.active,
+    [data-theme="light"] #sidebar .admin-nav-item.active {
+      background: linear-gradient(135deg, rgba(8, 145, 178, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%) !important;
+      border-color: #0891b2 !important;
+      box-shadow: 0 2px 10px rgba(8, 145, 178, 0.25), 0 0 12px rgba(6, 182, 212, 0.2) !important;
+    }
+    html.light-theme #sidebar .user-nav-item.active span,
+    html.light-theme #sidebar .admin-nav-item.active span,
+    [data-theme="light"] #sidebar .user-nav-item.active span,
+    [data-theme="light"] #sidebar .admin-nav-item.active span {
+      color: #0891b2 !important;
+      font-weight: 800 !important;
+    }
+    html.light-theme #sidebar .user-nav-item.active i,
+    html.light-theme #sidebar .admin-nav-item.active i,
+    [data-theme="light"] #sidebar .user-nav-item.active i,
+    [data-theme="light"] #sidebar .admin-nav-item.active i {
+      color: #0891b2 !important;
+      font-weight: 900 !important;
+    }
+
+    /* Admin Shortcut Section in Light Mode */
+    html.light-theme #admin-nav-section a,
+    [data-theme="light"] #admin-nav-section a {
+      background: #f8fafc !important;
+      border-color: rgba(225, 29, 72, 0.4) !important;
+    }
+    html.light-theme #admin-portal-nav-text,
+    [data-theme="light"] #admin-portal-nav-text {
+      color: #be123c !important;
+      font-weight: 700 !important;
+    }
+    html.light-theme #admin-portal-role-badge,
+    [data-theme="light"] #admin-portal-role-badge {
+      background: rgba(225, 29, 72, 0.12) !important;
+      color: #be123c !important;
+      border-color: rgba(225, 29, 72, 0.3) !important;
+    }
+
+    /* 3. ĐỒNG BỘ HIỆU ỨNG / VIỀN MIX NEON NỔI BẬT RÕ RÀNG TRÊN NỀN TRẮNG */
+    /* Khung nội dung chính (Main Glass Wrapper) */
+    html.light-theme #main-glass-wrapper,
+    [data-theme="light"] #main-glass-wrapper {
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 2px solid #0891b2 !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07), 0 0 22px rgba(8, 145, 178, 0.28) !important;
+    }
+    /* Thanh Header Top Glass */
+    html.light-theme #top-glass-header,
+    [data-theme="light"] #top-glass-header {
+      background: rgba(255, 255, 255, 0.98) !important;
+      border-bottom: 1px solid rgba(203, 213, 225, 0.9) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light-theme #top-glass-header .text-white,
+    [data-theme="light"] #top-glass-header .text-white {
+      color: #0f172a !important;
+    }
+    html.light-theme #top-glass-header .text-slate-300,
+    [data-theme="light"] #top-glass-header .text-slate-300 {
+      color: #334155 !important;
+    }
+    html.light-theme #top-glass-header #user-display-name,
+    [data-theme="light"] #top-glass-header #user-display-name {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    html.light-theme #top-glass-header #user-display-email,
+    [data-theme="light"] #top-glass-header #user-display-email {
+      color: #475569 !important;
+    }
+    html.light-theme #top-glass-header #mobile-menu-btn,
+    html.light-theme #top-glass-header #header-notification-btn,
+    html.light-theme #top-glass-header #btn-logout,
+    [data-theme="light"] #top-glass-header #mobile-menu-btn,
+    [data-theme="light"] #top-glass-header #header-notification-btn,
+    [data-theme="light"] #top-glass-header #btn-logout {
+      background: #f1f5f9 !important;
+      border: 1px solid rgba(203, 213, 225, 0.9) !important;
+      color: #0f172a !important;
+    }
+    html.light-theme #top-glass-header #mobile-menu-btn i,
+    html.light-theme #top-glass-header #header-notification-btn i,
+    html.light-theme #top-glass-header #btn-logout i {
+      color: #0f172a !important;
+    }
+    /* Các thẻ Glass Card, Stat Card, KPI Card trên nền sáng: Viền Mix Neon sắc nét, không bị mờ trắng */
+    html.light-theme .glass-card,
+    html.light-theme .stat-card,
+    html.light-theme .cyber-card,
+    [data-theme="light"] .glass-card,
+    [data-theme="light"] .stat-card,
+    [data-theme="light"] .cyber-card {
+      background: rgba(255, 255, 255, 0.96) !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.45) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 0 14px rgba(8, 145, 178, 0.2) !important;
+      color: #0f172a !important;
+    }
+    html.light-theme .fintrack-command-center-compact #kpi-cards-container > div,
+    [data-theme="light"] .fintrack-command-center-compact #kpi-cards-container > div {
+      background: #ffffff !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.4) !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), 0 0 12px rgba(8, 145, 178, 0.18) !important;
+      color: #0f172a !important;
+    }
+    /* Footer & Thông tin cố vấn AI ở Sidebar */
+    html.light-theme #sidebar-user-footer,
+    [data-theme="light"] #sidebar-user-footer {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%) !important;
+      border: 1.5px solid rgba(99, 102, 241, 0.3) !important;
+      color: #1e1b4b !important;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1) !important;
+    }
+    html.light-theme #sidebar-user-footer span,
+    [data-theme="light"] #sidebar-user-footer span {
+      color: #1e1b4b !important;
+      font-weight: 800 !important;
+    }
+    html.light-theme #sidebar-user-footer p,
+    [data-theme="light"] #sidebar-user-footer p {
+      color: #334155 !important;
+    }
+    html.light-theme #sidebar-user-footer i,
+    [data-theme="light"] #sidebar-user-footer i {
+      color: #6366f1 !important;
+    }
+
+    /* ==========================================================================
+       TỐI ƯU HÓA TOÀN DIỆN GIAO DIỆN NỀN SÁNG (LIGHT MODE) - ĐỘ TƯƠNG PHẢN CAO
+       ========================================================================== */
+
+    /* 1. Nền trang và Khung nhìn tổng thể */
+    html.light-theme body,
+    [data-theme="light"] body {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    /* 2. Tiêu đề, văn bản & nhãn hiển thị trong nội dung chính (Chống chìm màu, mờ nhạt) */
+    html.light-theme #main-glass-wrapper h1,
+    html.light-theme #main-glass-wrapper h2,
+    html.light-theme #main-glass-wrapper h3,
+    html.light-theme #main-glass-wrapper h4,
+    [data-theme="light"] #main-glass-wrapper h1,
+    [data-theme="light"] #main-glass-wrapper h2,
+    [data-theme="light"] #main-glass-wrapper h3,
+    [data-theme="light"] #main-glass-wrapper h4 {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    html.light-theme #main-glass-wrapper .text-slate-100,
+    html.light-theme #main-glass-wrapper .text-slate-200,
+    [data-theme="light"] #main-glass-wrapper .text-slate-100,
+    [data-theme="light"] #main-glass-wrapper .text-slate-200 {
+      color: #0f172a !important;
+    }
+    html.light-theme #main-glass-wrapper .text-slate-300,
+    html.light-theme #main-glass-wrapper .text-slate-400,
+    [data-theme="light"] #main-glass-wrapper .text-slate-300,
+    [data-theme="light"] #main-glass-wrapper .text-slate-400 {
+      color: #334155 !important;
+    }
+
+    /* 3. Khối Button (Nút bấm) ở Light mode: Rõ nét, có viền & nền tương phản sắc sảo */
+    html.light-theme .btn-secondary,
+    html.light-theme button.bg-slate-800,
+    html.light-theme button.bg-slate-800\/80,
+    html.light-theme button.bg-slate-800\/90,
+    [data-theme="light"] button.bg-slate-800,
+    [data-theme="light"] button.bg-slate-800\/80 {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.45) !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+    }
+    html.light-theme .btn-secondary:hover,
+    html.light-theme button.bg-slate-800:hover,
+    html.light-theme button.bg-slate-800\/80:hover,
+    [data-theme="light"] button.bg-slate-800:hover {
+      background: #e2e8f0 !important;
+      color: #0891b2 !important;
+      border-color: #0891b2 !important;
+      box-shadow: 0 0 10px rgba(8, 145, 178, 0.25) !important;
+    }
+    html.light-theme .action-icon-btn,
+    html.light-theme button.w-8.h-8,
+    html.light-theme button.w-9.h-9,
+    [data-theme="light"] .action-icon-btn {
+      color: #0f172a !important;
+    }
+    html.light-theme button.w-8.h-8 i,
+    html.light-theme button.w-9.h-9 i {
+      color: #0f172a !important;
+    }
+
+    /* 4. Form Controls (Input, Select, Textarea) trên nền sáng: Viền rõ ràng, chữ đen tuyền */
+    html.light-theme input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    html.light-theme select,
+    html.light-theme textarea,
+    [data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    [data-theme="light"] select,
+    [data-theme="light"] textarea {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.45) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light-theme input::placeholder,
+    html.light-theme textarea::placeholder,
+    [data-theme="light"] input::placeholder,
+    [data-theme="light"] textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+    html.light-theme input:focus,
+    html.light-theme select:focus,
+    html.light-theme textarea:focus,
+    [data-theme="light"] input:focus,
+    [data-theme="light"] select:focus,
+    [data-theme="light"] textarea:focus {
+      border-color: #0891b2 !important;
+      box-shadow: 0 0 12px rgba(8, 145, 178, 0.3) !important;
+      outline: none !important;
+    }
+
+    /* 5. Giao diện Bảng Dữ Liệu (Tables & Lists) */
+    html.light-theme table thead th,
+    [data-theme="light"] table thead th {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+      border-color: rgba(203, 213, 225, 0.9) !important;
+      font-weight: 800 !important;
+    }
+    html.light-theme table tbody tr,
+    [data-theme="light"] table tbody tr {
+      border-color: rgba(226, 232, 240, 0.9) !important;
+      color: #1e293b !important;
+    }
+    html.light-theme table tbody tr:hover,
+    [data-theme="light"] table tbody tr:hover {
+      background: rgba(241, 245, 249, 0.85) !important;
+    }
+
+    /* 6. Giao diện Hộp Thoại / Popup / Modals (Kể cả popup "Ghi Giao Dịch Mới") */
+    html.light-theme .modal-backdrop-blur > div,
+    html.light-theme .modal-card,
+    [data-theme="light"] .modal-backdrop-blur > div,
+    [data-theme="light"] .modal-card {
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 2px solid #0891b2 !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12), 0 0 25px rgba(8, 145, 178, 0.3) !important;
+      color: #0f172a !important;
+    }
+    html.light-theme .modal-backdrop-blur h2,
+    html.light-theme .modal-backdrop-blur h3,
+    html.light-theme .modal-backdrop-blur label,
+    [data-theme="light"] .modal-backdrop-blur h2,
+    [data-theme="light"] .modal-backdrop-blur h3,
+    [data-theme="light"] .modal-backdrop-blur label {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+    html.light-theme .modal-backdrop-blur .border-slate-800,
+    [data-theme="light"] .modal-backdrop-blur .border-slate-800 {
+      border-color: rgba(203, 213, 225, 0.85) !important;
+    }
+
+    /* 7. Hiệu ứng Mix Neon trên nền sáng: Sắc sảo, bão hòa cao, vầng hào quang rực rỡ */
+    html.light-theme .neon-border-cyan,
+    [data-theme="light"] .neon-border-cyan {
+      border-color: #0891b2 !important;
+      box-shadow: 0 0 16px rgba(8, 145, 178, 0.35) !important;
+    }
+    html.light-theme .neon-text-cyan,
+    [data-theme="light"] .neon-text-cyan {
+      color: #0891b2 !important;
+      text-shadow: 0 0 10px rgba(8, 145, 178, 0.35) !important;
+    }
+    html.light-theme .badge-cyan-neon,
+    [data-theme="light"] .badge-cyan-neon {
+      background: rgba(8, 145, 178, 0.12) !important;
+      color: #0e7490 !important;
+      border: 1.5px solid rgba(8, 145, 178, 0.5) !important;
+      box-shadow: 0 0 10px rgba(8, 145, 178, 0.2) !important;
+    }
+
     /* Savings Goals Gradient Mix Neon Progress Bar & Cyan Glow */
     .savings-progress-fill,
     .saving-progress-neon,
@@ -71,7 +561,7 @@
     }
 
     /* ==========================================================================
-       COMMAND CENTER CHO NGƯỜI MỚI BẮT ĐẦU (CHẾ ĐỘ GỌN GÀNG / ĐẦY ĐỦ)
+       COMMAND CENTER COMPACT MODE CHO NGƯỜI MỚI (BỐ CỤC THU GỌN SẮC NÉT)
        ========================================================================== */
     
     /* 1. Ẩn khung hướng dẫn 1-click rườm rà và các banner phụ */
@@ -92,60 +582,317 @@
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
-    /* 2. Khi ở chế độ Gọn Gàng: Ẩn biểu đồ xu hướng 6 tháng phức tạp và 4 card KPI chi tiết */
-    .fintrack-command-center-compact #cashflow-chart-card,
-    .fintrack-command-center-compact #kpi-cards-container {
-      display: none !important;
-    }
-
-    /* Giảm padding khung kính để vừa vặn màn hình */
+    /* 2. Khung kính chính thu gọn padding để mở rộng không gian Viewport */
     .fintrack-command-center-compact #main-glass-wrapper {
       padding: 0.875rem 1.125rem 1.25rem 1.125rem !important;
     }
 
-    /* 3. Tối ưu Thẻ Trạng Thái Sức Khỏe & 3 Khối Trọng Tâm Dành Cho Người Mới */
-    #beginner-compact-summary-container {
-      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    /* 3. BỐ CỤC 4 THẺ CỐT LÕI (TỔNG TÀI SẢN, THU, CHI, TIẾT KIỆM) - TỰ ĐỘNG CO GIÃN LẤP ĐẦY 100% CHIỀU NGANG */
+    .fintrack-command-center-compact #kpi-cards-container {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 0.75rem !important;
+      margin-bottom: 0.875rem !important;
+      width: 100% !important;
+    }
+    @media (max-width: 767px) {
+      .fintrack-command-center-compact #kpi-cards-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.5rem !important;
+      }
     }
 
-    /* 4. Khối Cơ Cấu Chi Tiêu (#category-donut-card) mở rộng full hàng */
-    .fintrack-command-center-compact #category-donut-card {
-      grid-column: span 3 / span 3 !important;
-      padding: 0.875rem 1.125rem !important;
+    .fintrack-command-center-compact #kpi-cards-container > div {
+      padding: 0.75rem 0.95rem !important;
       border-radius: 1rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      min-height: 5.5rem !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
     }
-    .fintrack-command-center-compact #category-card-body {
+
+    /* Tinh chỉnh tiêu đề và icon của thẻ KPI */
+    .fintrack-command-center-compact #kpi-cards-container span.text-xs {
+      font-size: 10.5px !important;
+      letter-spacing: 0.04em !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+    }
+    .fintrack-command-center-compact #kpi-cards-container .w-9.h-9 {
+      width: 1.85rem !important;
+      height: 1.85rem !important;
+      border-radius: 0.5rem !important;
+      font-size: 0.75rem !important;
+    }
+
+    /* Số tiền hiển thị nổi bật, chuẩn font monospace, không rớt dòng */
+    .fintrack-command-center-compact #kpi-cards-container .mt-2\.5 {
+      margin-top: 0.25rem !important;
+    }
+    .fintrack-command-center-compact #kpi-cards-container .text-2xl {
+      font-size: 1.25rem !important;
+      line-height: 1.25 !important;
+      font-weight: 900 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    /* Dòng xu hướng / so sánh tháng */
+    .fintrack-command-center-compact #kpi-cards-container .mt-1\.5 {
+      margin-top: 0.25rem !important;
+      font-size: 10px !important;
+      line-height: 1.2 !important;
+    }
+
+    /* 4. HÀNG BIỂU ĐỒ TRUNG TÂM (ROW 1) */
+    /* Ẩn biểu đồ xu hướng 6 tháng phức tạp đối với người mới */
+    .fintrack-command-center-compact #cashflow-chart-card {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       TỐI ƯU GIAO DIỆN & BỐ CỤC KHỐI "CƠ CẤU CHI TIÊU" (#category-donut-card)
+       ========================================================================== */
+
+    /* 1. Nút mũi tên thu gọn/mở rộng: Tương tác nhạy, z-index cao, cursor pointer */
+    #category-donut-card .card-collapse-btn,
+    .card-collapse-btn[data-target="category-card-body"],
+    .card-collapse-btn {
+      position: relative !important;
+      z-index: 40 !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 1.875rem !important;
+      min-height: 1.875rem !important;
+      touch-action: manipulation !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
+
+    #category-donut-card .card-collapse-btn *,
+    .card-collapse-btn[data-target="category-card-body"] * {
+      pointer-events: none !important;
+    }
+
+    /* 2. Trạng thái thu gọn: Ẩn triệt để khi có class .hidden hoặc .is-collapsed */
+    #category-card-body.hidden,
+    .fintrack-command-center-compact #category-card-body.hidden,
+    #category-donut-card.is-collapsed #category-card-body {
+      display: none !important;
+    }
+
+    /* 3. Bố cục tổng thể khi mở rộng: Biểu đồ tròn bên TRÁI, Danh mục bên PHẢI */
+    #category-card-body:not(.hidden) {
       display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
-      justify-content: space-around !important;
+      justify-content: flex-start !important;
       gap: 1.5rem !important;
-      flex-wrap: wrap !important;
-    }
-    .fintrack-command-center-compact #category-card-body > div.h-48 {
-      height: 7.5rem !important;
-      width: 7.5rem !important;
-      flex-shrink: 0 !important;
-      margin: 0 !important;
-    }
-    .fintrack-command-center-compact #category-card-body canvas {
-      max-height: 7.5rem !important;
-      max-width: 7.5rem !important;
-    }
-    .fintrack-command-center-compact #category-custom-legend {
-      flex: 1 1 240px !important;
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
-      gap: 0.35rem !important;
-      max-height: 7.5rem !important;
-      margin-top: 0 !important;
-    }
-    .fintrack-command-center-compact #category-custom-legend > div {
-      font-size: 10.5px !important;
-      padding: 2px 6px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      min-height: 10.5rem !important;
     }
 
-    /* 5. Khối Cảnh Báo Ngân Sách: CHỈ HIỂN THỊ TOP 3 DANH MỤC LỚN NHẤT (Chống rối mắt cho người mới) */
+    /* 4. Khối biểu đồ tròn bên trái */
+    #category-card-body:not(.hidden) > div:first-child,
+    #category-card-body:not(.hidden) > div.h-48 {
+      height: 9.75rem !important;
+      width: 9.75rem !important;
+      min-width: 9.75rem !important;
+      max-width: 9.75rem !important;
+      flex-shrink: 0 !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      position: relative !important;
+    }
+
+    #category-card-body:not(.hidden) canvas,
+    #category-card-body:not(.hidden) #category-donut-chart {
+      max-height: 9.75rem !important;
+      max-width: 9.75rem !important;
+      width: 9.75rem !important;
+      height: 9.75rem !important;
+      display: block !important;
+    }
+
+    /* 5. Danh sách danh mục chi tiêu bên phải: Lưới cân đối, phân bổ đều đặn, không bị dồn ép hay kéo dãn quá mức */
+    #category-card-body:not(.hidden) #category-custom-legend {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)) !important;
+      gap: 0.5rem 0.75rem !important;
+      max-height: 11.5rem !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      margin-top: 0 !important;
+      padding: 0.25rem 0.35rem 0.25rem 0 !important;
+      align-content: start !important;
+      scrollbar-width: thin !important;
+    }
+
+    /* Từng thẻ danh mục: Đầy đủ tên danh mục, tỷ lệ phần trăm và số tiền rõ ràng, không bị tràn hay cắt cụt */
+    #category-card-body:not(.hidden) #category-custom-legend > div {
+      padding: 0.45rem 0.7rem !important;
+      border-radius: 0.75rem !important;
+      font-size: 11.5px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 0.5rem !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      border: 1px solid rgba(51, 65, 85, 0.6) !important;
+      background: rgba(15, 23, 42, 0.6) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease !important;
+    }
+
+    #category-card-body:not(.hidden) #category-custom-legend > div:hover {
+      border-color: rgba(6, 182, 212, 0.5) !important;
+      background: rgba(15, 23, 42, 0.85) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* Nhóm trái: Chấm màu + Tên danh mục (Đầy đủ, cân đối, chống cắt cụt) */
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:first-child {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.45rem !important;
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+      overflow: hidden !important;
+    }
+
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:first-child span.rounded-full {
+      width: 0.55rem !important;
+      height: 0.55rem !important;
+      min-width: 0.55rem !important;
+      min-height: 0.55rem !important;
+      border-radius: 9999px !important;
+      flex-shrink: 0 !important;
+    }
+
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:first-child span.text-slate-200 {
+      font-size: 11.5px !important;
+      font-weight: 600 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      color: #f1f5f9 !important;
+      line-height: 1.3 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    /* Nhóm phải: Huy hiệu % và số tiền VND rõ ràng, định vị chuẩn xác */
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:last-child {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.35rem !important;
+      flex-shrink: 0 !important;
+      margin-left: 0.25rem !important;
+      white-space: nowrap !important;
+    }
+
+    /* Nhãn phần trăm (%) */
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:last-child span:first-child {
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      padding: 0.12rem 0.35rem !important;
+      border-radius: 0.375rem !important;
+      min-width: 2.65rem !important;
+      text-align: center !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    /* Số tiền VND */
+    #category-card-body:not(.hidden) #category-custom-legend > div > div:last-child span:last-child {
+      font-size: 11.5px !important;
+      font-weight: 800 !important;
+      color: #f8fafc !important;
+      text-align: right !important;
+      white-space: nowrap !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    /* Trạng thái trống khi chưa có giao dịch */
+    #category-card-body:not(.hidden) #category-custom-legend > div.text-center {
+      grid-column: 1 / -1 !important;
+      display: block !important;
+      border: none !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      padding: 1.5rem 0 !important;
+    }
+
+    /* Tương thích chế độ Sáng (Light Theme) cho khối Cơ Cấu Chi Tiêu */
+    html.light-theme #category-card-body:not(.hidden) #category-custom-legend > div,
+    [data-theme="light"] #category-card-body:not(.hidden) #category-custom-legend > div {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-color: rgba(226, 232, 240, 0.9) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    html.light-theme #category-card-body:not(.hidden) #category-custom-legend > div:hover,
+    [data-theme="light"] #category-card-body:not(.hidden) #category-custom-legend > div:hover {
+      background: #ffffff !important;
+      border-color: rgba(6, 182, 212, 0.5) !important;
+      box-shadow: 0 2px 6px rgba(6, 182, 212, 0.12) !important;
+    }
+
+    html.light-theme #category-card-body:not(.hidden) #category-custom-legend > div > div:first-child span.text-slate-200,
+    [data-theme="light"] #category-card-body:not(.hidden) #category-custom-legend > div > div:first-child span.text-slate-200 {
+      color: #1e293b !important;
+    }
+
+    html.light-theme #category-card-body:not(.hidden) #category-custom-legend > div > div:last-child span:last-child,
+    [data-theme="light"] #category-card-body:not(.hidden) #category-custom-legend > div > div:last-child span:last-child {
+      color: #0f172a !important;
+    }
+
+    /* 6. Tùy biến trong chế độ Gọn Gàng (Command Center Compact) */
+    .fintrack-command-center-compact #category-donut-card {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      padding: 0.875rem 1.25rem !important;
+      border-radius: 1rem !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* Tùy biến trên màn hình mobile hẹp (< 640px) */
+    @media (max-width: 639px) {
+      #category-card-body:not(.hidden) {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1rem !important;
+      }
+      #category-card-body:not(.hidden) #category-custom-legend {
+        width: 100% !important;
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* 5. HÀNG DƯỚI (ROW 2): TOP 3 DANH MỤC NGÂN SÁCH & GIAO DỊCH GẦN NHẤT */
+    .fintrack-command-center-compact #main-content-view .grid {
+      gap: 0.75rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+
+    /* KHỐI NGÂN SÁCH: CHỈ HIỂN THỊ ĐÚNG TOP 3 DANH MỤC TRỌNG YẾU (CHỐNG RỐI MẮT) */
     .fintrack-command-center-compact #budget-watchlist-card {
       padding: 0.875rem 1rem !important;
       border-radius: 1rem !important;
@@ -161,12 +908,12 @@
       border-radius: 0.75rem !important;
       font-size: 11.5px !important;
     }
-    /* Ẩn các danh mục ngân sách từ thứ 4 trở đi */
+    /* Ẩn các mục ngân sách sau vị trí top 3 */
     .fintrack-command-center-compact #budget-alerts-list > div:nth-child(n+4) {
       display: none !important;
     }
 
-    /* 6. Khối Giao Dịch Gần Đây: THU GỌN CHỈ HIỂN THỊ 4 GIAO DỊCH GẦN NHẤT (Không bị dài trang) */
+    /* KHỐI GIAO DỊCH GẦN ĐÂY: THU GỌN 4 DÒNG MỚI NHẤT */
     .fintrack-command-center-compact #recent-txs-card {
       padding: 0.875rem 1rem !important;
       border-radius: 1rem !important;
@@ -174,6 +921,7 @@
     .fintrack-command-center-compact #recent-txs-card-body {
       display: block !important;
     }
+    /* Chỉ hiển thị 4 giao dịch mới nhất */
     .fintrack-command-center-compact #recent-transactions-tbody tr:nth-child(n+5) {
       display: none !important;
     }
@@ -185,12 +933,6 @@
     .fintrack-command-center-compact #recent-txs-card-body table td {
       padding: 0.45rem 0.65rem !important;
       font-size: 11px !important;
-    }
-
-    /* Thu hẹp khoảng cách grid chung của Viewport */
-    .fintrack-command-center-compact #main-content-view .grid {
-      gap: 0.75rem !important;
-      margin-bottom: 0.75rem !important;
     }
   </style>
 
@@ -222,14 +964,16 @@
           style.innerHTML = '#landing-page-container { display: none !important; } #app-workspace-container { display: flex !important; }';
           document.head.appendChild(style);
 
-          var userStr = localStorage.getItem('currentUser');
+          var userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
           if (userStr) {
-            var cachedUser = JSON.parse(userStr);
-            document.addEventListener('DOMContentLoaded', function() {
-              if (typeof window.syncDynamicPlanTheme === 'function') {
-                window.syncDynamicPlanTheme(cachedUser);
-              }
-            });
+            try {
+              var cachedUser = JSON.parse(userStr);
+              document.addEventListener('DOMContentLoaded', function() {
+                if (typeof window.syncUserVipInfo === 'function') {
+                  window.syncUserVipInfo(cachedUser);
+                }
+              });
+            } catch (_) {}
           }
         }
       } catch (_) {}
@@ -248,30 +992,11 @@
       var currentTheme = theme || window.getFinTrackTheme();
       var isLight = currentTheme === 'light';
 
-      // A. Update Header Switch
-      var headerThumb = document.getElementById('header-theme-thumb');
-      var headerThumbIcon = document.getElementById('header-theme-thumb-icon');
-      var headerLabel = document.getElementById('header-theme-label');
-      if (headerThumb) {
-        headerThumb.className = 'theme-slider-knob-header absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 transition-transform duration-300 ease-out flex items-center justify-center text-[10px] font-black pointer-events-none';
-        headerThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
-        headerThumb.style.boxShadow = '0 0 14px rgba(6, 182, 212, 0.85)';
-        if (isLight) {
-          headerThumb.style.transform = 'translateX(34px)';
-          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-sun text-white';
-          if (headerLabel) headerLabel.textContent = 'Sáng Neon';
-        } else {
-          headerThumb.style.transform = 'translateX(0px)';
-          if (headerThumbIcon) headerThumbIcon.className = 'fa-solid fa-moon text-white';
-          if (headerLabel) headerLabel.textContent = 'Tối Neon';
-        }
-      }
-
-      // B. Update Landing Header Switch
+      // A. Update Landing Header Switch
       var landingThumb = document.getElementById('landing-theme-thumb');
       var landingThumbIcon = document.getElementById('landing-theme-thumb-icon');
       if (landingThumb) {
-        landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 transition-transform duration-300 ease-out flex items-center justify-center text-[10px] font-black pointer-events-none';
+        landingThumb.className = 'absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-out flex items-center justify-center text-[10px] font-black pointer-events-none';
         landingThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
         landingThumb.style.boxShadow = '0 0 14px rgba(6, 182, 212, 0.85)';
         if (isLight) {
@@ -283,58 +1008,115 @@
         }
       }
 
-      // C. Update Sidebar Single Pill Switch
+      // B. Update Top Glass Header Switch (#header-theme-toggle-track)
+      var headerTrack = document.getElementById('header-theme-toggle-track');
+      var headerThumb = document.getElementById('header-theme-thumb');
+      var headerThumbIcon = document.getElementById('header-theme-thumb-icon');
+      var headerLabel = document.getElementById('header-theme-label');
+      if (headerThumb) {
+        if (isLight) {
+          headerThumb.style.transform = 'translateX(36px)';
+          headerThumb.style.background = 'linear-gradient(135deg, #0891b2 0%, #059669 100%)';
+          headerThumb.style.boxShadow = '0 0 14px rgba(8, 145, 178, 0.85)';
+          if (headerThumbIcon) {
+            headerThumbIcon.className = 'fa-solid fa-sun text-yellow-300 text-[10px]';
+            headerThumbIcon.style.color = '#fef08a';
+            headerThumbIcon.style.filter = 'drop-shadow(0 0 6px rgba(254, 240, 138, 0.95))';
+          }
+          if (headerTrack) {
+            headerTrack.style.background = '#f1f5f9';
+            headerTrack.style.borderColor = '#0891b2';
+            headerTrack.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px rgba(8, 145, 178, 0.25)';
+          }
+          if (headerLabel) {
+            headerLabel.textContent = 'Sáng Neon';
+            headerLabel.className = 'hidden xl:inline text-[11px] font-bold text-cyan-700 uppercase tracking-wider';
+          }
+        } else {
+          headerThumb.style.transform = 'translateX(0px)';
+          headerThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+          headerThumb.style.boxShadow = '0 0 14px rgba(6, 182, 212, 0.85)';
+          if (headerThumbIcon) {
+            headerThumbIcon.className = 'fa-solid fa-moon text-slate-950 text-[10px]';
+            headerThumbIcon.style.color = '#020617';
+            headerThumbIcon.style.filter = 'none';
+          }
+          if (headerTrack) {
+            headerTrack.style.background = 'rgba(2, 6, 23, 0.9)';
+            headerTrack.style.borderColor = 'rgba(6, 182, 212, 0.5)';
+            headerTrack.style.boxShadow = '0 0 10px rgba(6, 182, 212, 0.25)';
+          }
+          if (headerLabel) {
+            headerLabel.textContent = 'Tối Neon';
+            headerLabel.className = 'hidden xl:inline text-[11px] font-bold text-slate-300 uppercase tracking-wider';
+          }
+        }
+      }
+
+      // C. Update Sidebar Single Pill Switch (#sidebar-theme-pill-btn)
       var sidebarPillBtn = document.getElementById('sidebar-theme-pill-btn');
       var sidebarThumb = document.getElementById('sidebar-theme-slider-thumb');
       var labelDark = document.getElementById('sidebar-pill-label-dark');
       var labelLight = document.getElementById('sidebar-pill-label-light');
 
       if (sidebarThumb) {
-        sidebarThumb.className = 'sidebar-theme-slider-thumb absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg shadow-cyan-500/40 pointer-events-none z-0 flex items-center justify-center';
-        sidebarThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
-        sidebarThumb.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.75), 0 0 25px rgba(16, 185, 129, 0.35)';
+        sidebarThumb.className = 'sidebar-theme-slider-thumb absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full transition-all duration-300 ease-out pointer-events-none z-0 flex items-center justify-center';
 
         if (isLight) {
           sidebarThumb.style.transform = 'translateX(100%)';
+          sidebarThumb.style.background = 'linear-gradient(135deg, #0891b2 0%, #059669 100%)';
+          sidebarThumb.style.boxShadow = '0 2px 10px rgba(8, 145, 178, 0.6), 0 0 18px rgba(16, 185, 129, 0.4)';
           if (sidebarPillBtn) {
-            sidebarPillBtn.style.background = '#ffffff';
-            sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.45)';
-            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05)';
+            sidebarPillBtn.style.background = '#f1f5f9';
+            sidebarPillBtn.style.borderColor = '#0891b2';
+            sidebarPillBtn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08), 0 0 14px rgba(8, 145, 178, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.06)';
           }
           if (labelLight) {
             labelLight.style.color = '#ffffff';
             labelLight.style.fontWeight = '900';
             labelLight.style.opacity = '1';
-            labelLight.style.background = 'transparent';
-            labelLight.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
+            labelLight.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.6)';
+            labelLight.innerHTML = '<i class="fa-solid fa-sun text-xs text-yellow-300"></i> <span>Sáng Neon</span>';
+            var sunIconEl = labelLight.querySelector('i');
+            if (sunIconEl) {
+              sunIconEl.style.color = '#fef08a';
+              sunIconEl.style.filter = 'drop-shadow(0 0 8px rgba(254, 240, 138, 0.95))';
+            }
           }
           if (labelDark) {
-            labelDark.style.color = '#64748b';
-            labelDark.style.fontWeight = '700';
-            labelDark.style.opacity = '0.75';
-            labelDark.style.background = 'transparent';
+            labelDark.style.color = '#0f172a';
+            labelDark.style.fontWeight = '800';
+            labelDark.style.opacity = '1';
             labelDark.style.textShadow = 'none';
+            labelDark.innerHTML = '<i class="fa-solid fa-moon text-xs text-slate-700"></i> <span>Tối Neon</span>';
           }
         } else {
           sidebarThumb.style.transform = 'translateX(0%)';
+          sidebarThumb.style.background = 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)';
+          sidebarThumb.style.boxShadow = '0 0 18px rgba(6, 182, 212, 0.75), 0 0 28px rgba(16, 185, 129, 0.4)';
           if (sidebarPillBtn) {
-            sidebarPillBtn.style.background = 'rgba(11, 15, 25, 0.95)';
-            sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.45)';
-            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5)';
+            sidebarPillBtn.style.background = '#090d16';
+            sidebarPillBtn.style.borderColor = 'rgba(6, 182, 212, 0.6)';
+            sidebarPillBtn.style.boxShadow = '0 0 16px rgba(6, 182, 212, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.7)';
           }
           if (labelDark) {
             labelDark.style.color = '#ffffff';
             labelDark.style.fontWeight = '900';
             labelDark.style.opacity = '1';
-            labelDark.style.background = 'transparent';
-            labelDark.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
+            labelDark.style.textShadow = '0 1px 3px rgba(0, 0, 0, 0.5), 0 0 10px rgba(6, 182, 212, 0.4)';
+            labelDark.innerHTML = '<i class="fa-solid fa-moon text-xs text-cyan-200"></i> <span>Tối Neon</span>';
           }
           if (labelLight) {
             labelLight.style.color = '#94a3b8';
             labelLight.style.fontWeight = '700';
-            labelLight.style.opacity = '0.75';
-            labelLight.style.background = 'transparent';
+            labelLight.style.opacity = '0.9';
             labelLight.style.textShadow = 'none';
+            labelLight.innerHTML = '<i class="fa-solid fa-sun text-xs text-yellow-400"></i> <span>Sáng Neon</span>';
+            var sunIconEl = labelLight.querySelector('i');
+            if (sunIconEl) {
+              sunIconEl.style.color = '#facc15';
+              sunIconEl.style.filter = 'drop-shadow(0 0 7px rgba(250, 204, 21, 0.95))';
+            }
           }
         }
       }
@@ -376,8 +1158,386 @@
       window.applyFinTrackTheme(target);
     };
 
+    /**
+     * ==========================================================================
+     * 4. ĐỒNG BỘ THÔNG TIN GÓI VIP THEO TÀI KHOẢN (REALTIME VIP SYNC ENGINE)
+     * ==========================================================================
+     */
+    window.syncUserVipInfo = function(providedUser) {
+      try {
+        let user = providedUser || window.fintrackApp?.user || window.fintrackApp?.state?.user || window.fintrackApp?.auth?.user || window.currentUser;
+        if (!user) {
+          const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
+          if (userStr) {
+            try { user = JSON.parse(userStr); } catch (_) {}
+          }
+          const token = localStorage.getItem('fintrack_token') || localStorage.getItem('token');
+          if (token && !window._fetchingUserVip) {
+            window._fetchingUserVip = true;
+            fetch('/api/v1/auth/me', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            }).then(r => r.ok ? r.json() : null).then(data => {
+              window._fetchingUserVip = false;
+              if (data) {
+                try {
+                  localStorage.setItem('currentUser', JSON.stringify(data));
+                  localStorage.setItem('user', JSON.stringify(data));
+                  if (window.fintrackApp) window.fintrackApp.user = data;
+                  window.currentUser = data;
+                } catch (_) {}
+                window.syncUserVipInfo(data);
+              }
+            }).catch(() => { window._fetchingUserVip = false; });
+          }
+        }
+        if (!user || typeof user !== 'object') return;
+
+        // A. Đồng bộ Họ tên, Email và Avatar
+        const nameEl = document.getElementById('user-display-name');
+        const emailEl = document.getElementById('user-display-email');
+        const avatarEl = document.getElementById('user-display-avatar');
+
+        const fullName = user.full_name || user.fullname || user.name || (user.email ? user.email.split('@')[0] : 'Người Dùng');
+        if (nameEl) nameEl.textContent = fullName;
+        if (emailEl && user.email) emailEl.textContent = user.email;
+        if (avatarEl && user.avatar_url) avatarEl.src = user.avatar_url;
+
+        // B. Xác định Tier gói cước thực tế của tài khoản (lấy trực tiếp từ state thực tế của user, không bị lệch hoặc hiển thị cứng)
+        const isAdmin = user.role === 'admin' || user.email === 'admin@fintrack.ai';
+        let rawTier = String(
+          user.subscription_tier ||
+          user.tier ||
+          user.plan ||
+          user.subscription_plan ||
+          user.package ||
+          (user.is_vip || user.vip || String(user.vip_status).toLowerCase() === 'active' ? 'VIP' : (isAdmin ? 'PLATINUM' : 'FREE'))
+        ).trim().toUpperCase();
+
+        if (!rawTier || rawTier === 'UNDEFINED' || rawTier === 'NULL') {
+          rawTier = isAdmin ? 'PLATINUM' : 'FREE';
+        }
+
+        // C. Tính toán thời hạn còn lại (nếu có)
+        let daysLeft = null;
+        if (user.subscription_days_left !== undefined && user.subscription_days_left !== null) {
+          daysLeft = Number(user.subscription_days_left);
+        } else if (user.days_left !== undefined && user.days_left !== null) {
+          daysLeft = Number(user.days_left);
+        } else if (user.subscription_expires_at || user.expires_at || user.vip_expires_at) {
+          const expDate = new Date(user.subscription_expires_at || user.expires_at || user.vip_expires_at);
+          if (!isNaN(expDate.getTime())) {
+            daysLeft = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          }
+        }
+
+        let expirySuffix = '';
+        if (daysLeft !== null && !isNaN(daysLeft)) {
+          expirySuffix = daysLeft > 0 ? ` (CÒN ${daysLeft} NGÀY)` : ' (HẾT HẠN)';
+        }
+
+        const isPlatinum = rawTier.includes('PLATINUM') || isAdmin;
+        const isPro = !isPlatinum && rawTier.includes('PRO');
+        const isVip = !isPlatinum && !isPro && (rawTier.includes('VIP') || rawTier.includes('PREMIUM') || user.is_vip || user.vip || String(user.vip_status).toLowerCase() === 'active');
+        const isFree = !isPlatinum && !isPro && !isVip;
+
+        const planShortName = isPlatinum ? 'PLATINUM VIP'
+          : isPro ? 'VIP PRO'
+          : isVip ? 'FINTRACK VIP'
+          : 'GÓI FREE';
+
+        const planDisplayTitle = isPlatinum ? `Platinum VIP${expirySuffix}`
+          : isPro ? `VIP Pro${expirySuffix}`
+          : isVip ? `FinTrack VIP${expirySuffix}`
+          : 'Gói Free (Miễn phí)';
+
+        // Lưu trạng thái gói cước vào biến global để toàn bộ app & modal truy xuất
+        window._fintrackUserPlan = {
+          tier: rawTier,
+          title: planDisplayTitle,
+          shortName: planShortName,
+          isPlatinum: isPlatinum,
+          isPro: isPro,
+          isVip: isVip,
+          isFree: isFree,
+          daysLeft: daysLeft,
+          isAdmin: isAdmin
+        };
+
+        // D. Đồng bộ nhãn gói VIP tại Header (#user-display-plan)
+        const planBadge = document.getElementById('user-display-plan');
+        if (planBadge) {
+          if (isPlatinum) {
+            planBadge.className = 'badge-vip-toi-cao px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-[0_0_15px_rgba(251,191,36,0.5)] cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5';
+            planBadge.innerHTML = `<i class="fa-solid fa-crown text-[10px] text-slate-950"></i> <span>PLATINUM VIP${expirySuffix}</span>`;
+            planBadge.title = 'Gói tài khoản Platinum VIP - Nhấn để xem & quản lý';
+          } else if (isPro) {
+            planBadge.className = 'badge-vip-pro px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.4)] cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5';
+            planBadge.innerHTML = `<i class="fa-solid fa-bolt text-[10px] text-cyan-300"></i> <span>VIP PRO${expirySuffix}</span>`;
+            planBadge.title = 'Gói tài khoản VIP Pro - Nhấn để xem & quản lý';
+          } else if (isVip) {
+            planBadge.className = 'badge-fintrack-vip px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5';
+            planBadge.innerHTML = `<i class="fa-solid fa-crown text-[10px] text-purple-300"></i> <span>FINTRACK VIP${expirySuffix}</span>`;
+            planBadge.title = 'Gói tài khoản FinTrack VIP - Nhấn để xem & quản lý';
+          } else {
+            planBadge.className = 'badge-fintrack-free px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-600 shadow-sm cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5';
+            planBadge.innerHTML = `<i class="fa-solid fa-seedling text-[10px] text-emerald-400"></i> <span>GÓI FREE</span>`;
+            planBadge.title = 'Gói miễn phí - Nhấn để nâng cấp VIP';
+          }
+        }
+
+        // E. Đồng bộ nhãn gói tại Sidebar (#sidebar-subscription-badge)
+        const sidebarBadge = document.getElementById('sidebar-subscription-badge');
+        if (sidebarBadge) {
+          if (isPlatinum) {
+            sidebarBadge.className = 'ml-auto shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-sm whitespace-nowrap';
+            sidebarBadge.innerHTML = '👑 Platinum VIP';
+          } else if (isPro) {
+            sidebarBadge.className = 'ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 whitespace-nowrap';
+            sidebarBadge.innerHTML = '⚡ VIP Pro';
+          } else if (isVip) {
+            sidebarBadge.className = 'ml-auto shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 whitespace-nowrap';
+            sidebarBadge.innerHTML = '👑 FinTrack VIP';
+          } else {
+            sidebarBadge.className = 'ml-auto shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap';
+            sidebarBadge.innerHTML = '👑 Nâng Cấp';
+          }
+        }
+
+        // F. Đồng bộ toàn bộ các nhãn hiển thị gói VIP trong tất cả các Modal & View (kể cả popup "Ghi Giao Dịch Mới")
+        const vipBadgeHtml = isPlatinum
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-sm"><i class="fa-solid fa-crown text-[9px]"></i> PLATINUM VIP${expirySuffix}</span>`
+          : isPro
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"><i class="fa-solid fa-bolt text-[9px]"></i> VIP PRO${expirySuffix}</span>`
+          : isVip
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40"><i class="fa-solid fa-crown text-[9px]"></i> FINTRACK VIP${expirySuffix}</span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700"><i class="fa-solid fa-seedling text-[9px] text-emerald-400"></i> GÓI FREE</span>`;
+
+        // 1. Cập nhật các element text thuần túy
+        document.querySelectorAll(
+          '.user-current-plan-name, [data-user-plan-label], [data-user-plan], #current-user-plan-name, #modal-current-plan, #tx-modal-user-plan, #tx-user-plan, .modal-user-plan, [data-vip-plan], #modal-vip-badge, #modal-transaction-plan, .user-plan-display, .user-plan-title, .user-plan-text'
+        ).forEach(el => {
+          el.textContent = planDisplayTitle;
+        });
+
+        // 2. Cập nhật các container chứa badge
+        document.querySelectorAll(
+          '.user-plan-badge-container, [data-user-plan-badge], #tx-modal-vip-badge, #transaction-modal-badge, .modal-vip-badge-tag'
+        ).forEach(el => {
+          el.innerHTML = vipBadgeHtml;
+        });
+
+        // 3. Quét tất cả các modal đang mở (Transaction Modal, Generic Modal, Subscription Modal, v.v.)
+        const modalContainers = document.querySelectorAll(
+          '#transaction-modal, #add-tx-modal, #generic-modal, #subscription-modal, #vipModal, #upgradeModal, .modal-container, .modal-backdrop-blur'
+        );
+        modalContainers.forEach(m => {
+          if (!m.classList.contains('hidden') || m.style.display !== 'none') {
+            m.querySelectorAll('.current-plan-label, .tx-user-plan, .tx-vip-badge').forEach(el => {
+              el.textContent = planDisplayTitle;
+            });
+            m.querySelectorAll('.tx-vip-badge-pill').forEach(el => {
+              el.innerHTML = vipBadgeHtml;
+            });
+          }
+        });
+
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi syncUserVipInfo:", err);
+      }
+    };
+    window.syncDynamicPlanTheme = window.syncUserVipInfo;
+    window.getFinTrackUserPlan = function() {
+      return window._fintrackUserPlan || { tier: 'FREE', title: 'Gói Free (Miễn phí)', isFree: true };
+    };
+
+    /**
+     * ==========================================================================
+     * 5. ĐỒNG BỘ HẠN MỨC NGÂN SÁCH KHI SỬ DỤNG (REALTIME BUDGET SYNC ENGINE)
+     * ==========================================================================
+     */
+    window.syncBudgetsRealtime = async function() {
+      try {
+        // A. Kích hoạt cập nhật lại các component trong fintrackApp
+        if (window.fintrackApp) {
+          if (window.fintrackApp.budgets) {
+            if (typeof window.fintrackApp.budgets.loadBudgets === 'function') {
+              window.fintrackApp.budgets.loadBudgets();
+            } else if (typeof window.fintrackApp.budgets.fetchBudgets === 'function') {
+              window.fintrackApp.budgets.fetchBudgets();
+            } else if (typeof window.fintrackApp.budgets.render === 'function') {
+              window.fintrackApp.budgets.render();
+            }
+          }
+          if (window.fintrackApp.dashboard) {
+            if (typeof window.fintrackApp.dashboard.loadBudgetWatchlist === 'function') {
+              window.fintrackApp.dashboard.loadBudgetWatchlist();
+            }
+            if (typeof window.fintrackApp.dashboard.fetchDashboardData === 'function') {
+              window.fintrackApp.dashboard.fetchDashboardData();
+            }
+          }
+          if (typeof updateBeginnerHealthStatus === 'function') {
+            updateBeginnerHealthStatus();
+          }
+        }
+
+        // B. Fetch dữ liệu ngân sách mới nhất từ API backend
+        const token = localStorage.getItem('fintrack_token') || localStorage.getItem('token');
+        if (!token) return;
+
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        const response = await fetch(`/api/v1/budgets?month=${month}&year=${year}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const budgetData = await response.json();
+          const budgets = Array.isArray(budgetData) ? budgetData : (budgetData.items || budgetData.data || []);
+          if (budgets && budgets.length > 0) {
+            window.updateBudgetsDOM(budgets);
+          }
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi syncBudgetsRealtime:", err);
+      }
+    };
+
+    window.updateBudgetsDOM = function(budgets) {
+      if (!Array.isArray(budgets) || budgets.length === 0) return;
+
+      const fmtVND = (num) => new Intl.NumberFormat('vi-VN').format(Math.round(num)) + ' ₫';
+
+      budgets.forEach(b => {
+        const catId = b.category_id || (b.category ? b.category.id : null);
+        const catName = (b.category_name || (b.category ? b.category.name : '') || b.name || '').trim().toLowerCase();
+        const limit = Number(b.limit_amount || b.limit || 0);
+        const spent = Number(b.spent_amount !== undefined ? b.spent_amount : (b.spent || 0));
+        const remaining = limit - spent;
+        const percent = limit > 0 ? (spent / limit) * 100 : 0;
+        const isOver100 = percent >= 100;
+        const isOver80 = percent >= 80 && percent < 100;
+
+        // Tìm các container ngân sách trên trang Hạn Mức Ngân Sách và Dashboard widget
+        const containers = document.querySelectorAll(
+          `[data-category-id="${catId}"], [data-budget-id="${b.id}"], .budget-item, .budget-card, #budget-alerts-list > div`
+        );
+
+        containers.forEach(card => {
+          if (catId && card.getAttribute('data-category-id') && card.getAttribute('data-category-id') != catId) {
+            return;
+          }
+          if (!card.getAttribute('data-category-id') && catName) {
+            const text = card.textContent.toLowerCase();
+            if (!text.includes(catName)) return;
+          }
+
+          // 1. Cập nhật số tiền 'Đã chi'
+          const spentEls = card.querySelectorAll('.budget-spent, [data-field="spent"], .spent-amount');
+          spentEls.forEach(el => {
+            el.textContent = fmtVND(spent);
+          });
+          card.querySelectorAll('span, p, div').forEach(node => {
+            if (node.children.length === 0 && node.textContent.includes('Đã chi:')) {
+              node.innerHTML = `Đã chi: <strong class="font-mono ${isOver100 ? 'text-rose-400' : 'text-slate-200'}">${fmtVND(spent)}</strong>`;
+            }
+          });
+
+          // 2. Cập nhật số tiền 'Còn lại'
+          const remEls = card.querySelectorAll('.budget-remaining, [data-field="remaining"], .remaining-amount');
+          remEls.forEach(el => {
+            el.textContent = remaining >= 0 ? fmtVND(remaining) : ('-' + fmtVND(Math.abs(remaining)));
+            if (remaining < 0) {
+              el.classList.add('text-rose-400', 'font-bold');
+            } else {
+              el.classList.remove('text-rose-400');
+            }
+          });
+          card.querySelectorAll('span, p, div').forEach(node => {
+            if (node.children.length === 0 && node.textContent.includes('Còn lại:')) {
+              const remText = remaining >= 0 ? fmtVND(remaining) : ('-' + fmtVND(Math.abs(remaining)));
+              node.innerHTML = `Còn lại: <strong class="font-mono ${remaining < 0 ? 'text-rose-400 font-bold' : (isOver80 ? 'text-amber-400' : 'text-emerald-400')}">${remText}</strong>`;
+            }
+          });
+
+          // 3. Cập nhật thanh tiến trình (Progress Bar)
+          const progressBars = card.querySelectorAll('.progress-bar, [role="progressbar"], .budget-progress-bar, div[style*="width"]');
+          progressBars.forEach(pBar => {
+            if (pBar.classList.contains('sidebar-theme-slider-thumb') || pBar.id === 'header-theme-thumb') return;
+            const clampedPercent = Math.min(100, Math.max(0, percent));
+            pBar.style.width = clampedPercent + '%';
+
+            pBar.classList.remove('bg-emerald-500', 'bg-emerald-400', 'bg-cyan-500', 'bg-amber-500', 'bg-amber-400', 'bg-rose-500', 'bg-rose-600');
+            if (isOver100) {
+              pBar.classList.add('bg-rose-500');
+              pBar.style.boxShadow = '0 0 12px rgba(244, 63, 94, 0.7)';
+            } else if (isOver80) {
+              pBar.classList.add('bg-amber-500');
+              pBar.style.boxShadow = '0 0 12px rgba(245, 158, 11, 0.7)';
+            } else {
+              pBar.classList.add('bg-emerald-500');
+              pBar.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.5)';
+            }
+          });
+
+          // 4. Cập nhật nhãn phần trăm và trạng thái cảnh báo (80% / 100%)
+          const percentBadges = card.querySelectorAll('.budget-percent-badge, .badge-warning, .status-badge');
+          percentBadges.forEach(badge => {
+            if (isOver100) {
+              badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.3)] animate-pulse inline-flex items-center gap-1';
+              badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400 text-[9px]"></i> VƯỢT HẠN MỨC (${percent.toFixed(0)}%)`;
+            } else if (isOver80) {
+              badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)] inline-flex items-center gap-1';
+              badge.innerHTML = `<i class="fa-solid fa-bolt text-amber-400 text-[9px]"></i> CẢNH BÁO (${percent.toFixed(0)}%)`;
+            } else {
+              badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1';
+              badge.innerHTML = `<i class="fa-solid fa-check text-emerald-400 text-[9px]"></i> ${percent.toFixed(0)}%`;
+            }
+          });
+        });
+      });
+    };
+
+    // Tự động kích hoạt đồng bộ ngân sách khi có bất kỳ thao tác giao dịch (thêm/sửa/xóa)
+    (function() {
+      const nativeFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const res = await nativeFetch.apply(this, args);
+        try {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+          const method = (args[1]?.method || 'GET').toUpperCase();
+          if (
+            res.ok &&
+            (method === 'POST' || method === 'PUT' || method === 'DELETE') &&
+            (url.includes('/api/v1/transactions') || url.includes('/api/v1/ai/parse') || url.includes('/api/v1/budgets'))
+          ) {
+            setTimeout(() => {
+              if (typeof window.syncBudgetsRealtime === 'function') {
+                window.syncBudgetsRealtime();
+              }
+            }, 120);
+          }
+        } catch (_) {}
+        return res;
+      };
+
+      ['fintrack:transaction-created', 'fintrack:transaction-updated', 'fintrack:transaction-deleted', 'fintrack:data-changed'].forEach(evtName => {
+        window.addEventListener(evtName, () => {
+          if (typeof window.syncBudgetsRealtime === 'function') {
+            window.syncBudgetsRealtime();
+          }
+        });
+      });
+    })();
+
     document.addEventListener('DOMContentLoaded', function() {
       window.updateThemeSwitchUI(window.getFinTrackTheme());
+      window.syncUserVipInfo();
     });
   </script>
 
@@ -3121,11 +4281,12 @@
           <span class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mt-0.5">Smart Finance & Advisor</span>
         </div>
       </a>
+      <!-- User Mode Title Badge -->
       <div class="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-slate-800/80">
         <span id="sidebar-mobile-subtitle" class="text-[11px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">Menu Quản Lý</span>
       </div>
 
-      <!-- Header Theme Toggle Slider Switch (Tích hợp tại Menu Thanh Điều Hướng Header) -->
+      <!-- Header Theme Toggle Slider Switch (Nút trượt đổi giao diện Tối/Sáng Neon) -->
       <div class="header-theme-toggle-wrapper flex items-center gap-2 pl-3 ml-1 border-l border-slate-800/80" title="Gạt chuyển đổi Dark / Light Theme Mix Neon">
         <div id="header-theme-toggle-track" onclick="window.toggleFinTrackTheme()" class="theme-slider-switch-header relative w-16 h-7 rounded-full bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 p-0.5 flex items-center justify-between cursor-pointer select-none transition-all duration-300 shadow-inner group" role="switch" aria-label="Đổi giao diện Tối / Sáng Mix Neon">
           <span class="w-6 h-6 flex items-center justify-center text-cyan-400 text-[11px] z-0 transition-opacity">
@@ -3200,14 +4361,15 @@
       <div class="flex items-center gap-3 pl-3 border-l border-slate-800">
         <div class="text-right hidden md:block">
           <div class="flex items-center justify-end gap-1.5">
-            <span id="user-display-name" class="text-xs font-extrabold text-slate-100 block">Nguyễn Văn An</span>
-            <span id="user-display-plan" onclick="window.openSubscriptionModal()" class="badge-vip-toi-cao px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-teal-400 to-blue-500 text-slate-950 border border-white/70 shadow-[0_0_15px_rgba(251,191,36,0.5)] cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5" title="Gói tài khoản Platinum VIP - Nhấn để xem & quản lý"><i class="fa-solid fa-crown text-[10px] text-slate-950"></i> <span>PLATINUM VIP (CÒN 52 NGÀY)</span></span>
+            <span id="user-display-name" class="text-xs font-extrabold text-slate-100 block">Người Dùng</span>
+            <span id="user-display-plan" onclick="window.openSubscriptionModal()" class="badge-fintrack-free px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-600 shadow-sm cursor-pointer relative z-20 pointer-events-auto hover:scale-105 transition inline-flex items-center gap-1.5" title="Gói tài khoản - Nhấn để nâng cấp VIP"><i class="fa-solid fa-crown text-[10px]"></i> <span>GÓI FREE</span></span>
           </div>
           <span id="user-display-email" class="text-xs text-slate-300 block font-semibold">user@fintrack.ai</span>
         </div>
         
-        <img id="user-display-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar" 
-          class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 shadow-sm cursor-pointer" />
+        <img id="user-display-avatar" onclick="window.navigateToSettings()" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar" 
+          title="Cài Đặt & Thông Tin Cá Nhân" 
+          class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 hover:border-cyan-400 hover:scale-105 transition shadow-sm cursor-pointer relative z-20 pointer-events-auto" />
 
         <button id="btn-logout" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-red-950/60 hover:text-red-400 text-slate-400 flex items-center justify-center transition border border-slate-700/50 cursor-pointer relative z-20 pointer-events-auto" title="Đăng xuất">
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
@@ -3242,13 +4404,13 @@
 
           <!-- Dark State Segment (Left) -->
           <span id="sidebar-pill-label-dark" onclick="event.stopPropagation(); window.setFinTrackTheme('dark')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-black transition-all duration-300 cursor-pointer text-white drop-shadow">
-            <i class="fa-solid fa-moon text-xs"></i>
+            <i class="fa-solid fa-moon text-xs text-cyan-200"></i>
             <span>Tối Neon</span>
           </span>
 
           <!-- Light State Segment (Right) -->
           <span id="sidebar-pill-label-light" onclick="event.stopPropagation(); window.setFinTrackTheme('light')" class="sidebar-pill-label relative flex-1 h-full z-10 flex items-center justify-center gap-1.5 text-xs font-bold transition-all duration-300 cursor-pointer text-slate-400">
-            <i class="fa-solid fa-sun text-xs"></i>
+            <i class="fa-solid fa-sun text-xs text-amber-400"></i>
             <span>Sáng Neon</span>
           </span>
         </button>
@@ -3753,9 +4915,12 @@
       modal.style.setProperty('pointer-events', 'none', 'important');
     };
 
-    // Auto-sync dynamic modal host containers (#generic-modal, #modal-deposit-wallet, #upgradeModal, #vipModal)
+    // Auto-sync dynamic modal host containers (#generic-modal, #modal-deposit-wallet, #upgradeModal, #vipModal, #transaction-modal, #subscription-modal)
     function setupDynamicModalSync() {
-      const dynamicHostIds = ['generic-modal', 'modal-deposit-wallet', 'upgradeModal', 'vipModal'];
+      const dynamicHostIds = [
+        'generic-modal', 'modal-deposit-wallet', 'upgradeModal', 'vipModal',
+        'transaction-modal', 'add-tx-modal', 'subscription-modal', 'vip-modal', 'wallet-modal'
+      ];
       dynamicHostIds.forEach(id => {
         const el = document.getElementById(id);
         if (!el || el._syncAttached) return;
@@ -3768,6 +4933,9 @@
             el.style.setProperty('display', 'block', 'important');
             el.style.setProperty('z-index', '999999', 'important');
             el.style.setProperty('pointer-events', 'auto', 'important');
+            if (typeof window.syncUserVipInfo === 'function') {
+              window.syncUserVipInfo();
+            }
           } else {
             el.classList.add('hidden', 'pointer-events-none');
             el.classList.remove('pointer-events-auto');
@@ -3776,7 +4944,7 @@
           }
         };
         const observer = new MutationObserver(updateVisibility);
-        observer.observe(el, { childList: true });
+        observer.observe(el, { childList: true, subtree: true });
         updateVisibility();
       });
     }
@@ -3874,20 +5042,30 @@
         window.closeModalById('generic-modal');
         generic.innerHTML = '';
       }
+      if (typeof window.syncBudgetsRealtime === 'function') {
+        window.syncBudgetsRealtime();
+      }
     };
 
     window.openAiModal = window.openQuickAiModal;
     window.closeAiModal = window.closeQuickAiModal;
 
     window.openTransactionModal = function(type = 'EXPENSE', defaultWalletId = null) {
+      if (typeof window.syncUserVipInfo === 'function') {
+        window.syncUserVipInfo();
+      }
       try {
         if (window.fintrackApp?.transactions?.openTransactionModal) {
           const editId = (typeof type === 'number' || (typeof type === 'string' && /^\d+$/.test(type))) ? parseInt(type) : null;
           const finalType = editId ? 'EXPENSE' : (type || 'EXPENSE');
           window.fintrackApp.transactions.openTransactionModal(editId, finalType, defaultWalletId);
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 50);
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 250);
           return;
         } else if (window.fintrackApp?.openTransactionModal) {
           window.fintrackApp.openTransactionModal(type);
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 50);
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 250);
           return;
         }
       } catch (err) {
@@ -3901,6 +5079,8 @@
         modal.style.setProperty('z-index', '999999', 'important');
         modal.style.setProperty('pointer-events', 'auto', 'important');
       }
+      setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 50);
+      setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 250);
     };
 
     window.closeTransactionModal = function() {
@@ -3910,6 +5090,9 @@
       if (generic && !generic.classList.contains('hidden')) {
         window.closeModalById('generic-modal');
         generic.innerHTML = '';
+      }
+      if (typeof window.syncBudgetsRealtime === 'function') {
+        window.syncBudgetsRealtime();
       }
     };
 
@@ -4013,15 +5196,21 @@
     };
 
     window.openSubscriptionModal = function(tier = 'VIP') {
+      if (typeof window.syncUserVipInfo === 'function') {
+        window.syncUserVipInfo();
+      }
       try {
         if (typeof window.switchTab === 'function') {
           window.switchTab('subscription');
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 100);
           return;
         } else if (window.fintrackApp?.navigate) {
           window.fintrackApp.navigate('subscription');
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 100);
           return;
         } else if (window.fintrackApp?.subscription?.openUpgradeModal) {
           window.fintrackApp.subscription.openUpgradeModal(tier);
+          setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 100);
           return;
         }
       } catch (err) {
@@ -4035,6 +5224,7 @@
         modal.style.setProperty('z-index', '999999', 'important');
         modal.style.setProperty('pointer-events', 'auto', 'important');
       }
+      setTimeout(() => { if (typeof window.syncUserVipInfo === 'function') window.syncUserVipInfo(); }, 100);
     };
 
     window.closeSubscriptionModal = function() {
@@ -4358,149 +5548,84 @@
      * COMMAND CENTER VIEW MODE CONTROLLER DÀNH CHO NGƯỜI MỚI (GỌN GÀNG / ĐẦY ĐỦ)
      * ============================================================================
      * 1. Khi ở chế độ "Gọn Gàng":
-     *    - Ẩn biểu đồ xu hướng 6 tháng phức tạp (#cashflow-chart-card) và banner hướng dẫn cồng kềnh.
-     *    - Ẩn cụm 4 thẻ KPI chi tiết (#kpi-cards-container).
-     *    - Hiển thị khối tóm tắt trực quan chuyên biệt cho người mới (#beginner-compact-summary-container):
-     *      + Thẻ trạng thái sức khỏe tài chính tháng (An toàn / Cần lưu ý) kèm lời khuyên hành động.
-     *      + 3 khối trọng tâm lớn nhất:
-     *         1) Tổng Tài Sản Khả Dụng (tổng hợp tiền mặt, ngân hàng, ví ảo).
-     *         2) Dòng Tiền Thu & Chi tháng này (đối chiếu trực quan Thu vs Chi).
-     *         3) Số Tiền Còn Lại Có Thể Sử Dụng (Dư ròng khả dụng kèm tỷ lệ tiết kiệm).
-     *    - Thu gọn danh mục ngân sách: Chỉ hiển thị TOP 3 danh mục chi tiêu lớn nhất để không bị ngợp.
-     *    - Thu gọn bảng giao dịch gần đây: Chỉ hiển thị 4 giao dịch mới nhất, chống tràn trang.
-     *    - Biểu đồ Cơ cấu chi tiêu Donut hiển thị full chiều ngang tinh tế.
-     * 2. Khi ở chế độ "Đầy ĐỦ":
-     *    - Ẩn khối tóm tắt người mới, mở rộng lại biểu đồ xu hướng 6 tháng (#cashflow-chart-card),
-     *      hiển thị lại 4 thẻ KPI đầy đủ, mở rộng toàn bộ bảng giao dịch và danh mục ngân sách ban đầu.
-     * 3. An toàn 100% dữ liệu, tính toán, và logic xử lý hệ thống.
+     *    - Hiển thị nổi bật thanh "Trạng thái sức khỏe tài chính tháng" và nút hành động nhanh
+     *      "⚡ Ghi Chép Nhanh AI" + "Ghi Thu Chi" ngay trên đầu giao diện.
+     *    - Giữ 4 thẻ cốt lõi (Tổng tài sản, Thu, Chi, Tỷ lệ tiết kiệm) trong #kpi-cards-container,
+     *      co giãn 1 hàng ngang lấp đầy 100% không gian, sắc nét, không bị trống trải.
+     *    - Ẩn biểu đồ xu hướng 6 tháng phức tạp (#cashflow-chart-card).
+     *    - Khối Cơ cấu chi tiêu Donut (#category-donut-card) tự động co giãn full hàng ngang cân đối.
+     *    - Khối Ngân sách: Chỉ hiển thị đúng TOP 3 danh mục quan trọng nhất để người mới không bị rối mắt.
+     *    - Khối Giao dịch gần đây: Thu gọn hiển thị 4 giao dịch mới nhất, chống tràn trang.
+     * 2. Khi ở chế độ "Đầy Đủ":
+     *    - Mở rộng lại toàn bộ các biểu đồ xu hướng 6 tháng, toàn bộ danh mục ngân sách, bảng lịch sử
+     *      giao dịch chi tiết và khung hướng dẫn ban đầu.
+     * 3. Cam kết an toàn: Bảo toàn 100% dữ liệu, tính toán, và logic xử lý hệ thống.
      */
 
-    // Hàm tạo và đồng bộ hóa Thẻ Sức Khỏe Tài Chính & 3 Khối Trọng Tâm Cho Người Mới
-    function ensureBeginnerSummaryContainer() {
-      let container = document.getElementById('beginner-compact-summary-container');
-      if (!container) {
+    // Hàm tạo và quản lý thanh Sức Khỏe Tài Chính & Nút Hành Động Nhanh AI
+    function ensureBeginnerHealthActionBar() {
+      // Xóa container cũ nếu còn sót lại từ phiên bản trước
+      const oldSummary = document.getElementById('beginner-compact-summary-container');
+      if (oldSummary) oldSummary.remove();
+
+      let bar = document.getElementById('beginner-health-action-bar');
+      if (!bar) {
         const kpiContainer = document.getElementById('kpi-cards-container');
         if (!kpiContainer || !kpiContainer.parentNode) return null;
 
-        container = document.createElement('div');
-        container.id = 'beginner-compact-summary-container';
-        container.className = 'space-y-3 mb-3 animate-in fade-in duration-200';
-        container.innerHTML = `
-          <!-- 1. THẺ TRẠNG THÁI SỨC KHỎE TÀI CHÍNH THÁNG -->
-          <div id="beginner-health-card" class="glass-card p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(15, 23, 42, 0.75);">
-            <div class="flex items-center gap-3">
-              <div id="beginner-health-icon-wrapper" class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30">
-                <i id="beginner-health-icon" class="fa-solid fa-shield-heart text-emerald-400"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-black uppercase tracking-wider text-slate-300">Sức Khỏe Tài Chính:</span>
-                  <span id="beginner-health-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
-                    AN TOÀN (TỐT)
-                  </span>
-                </div>
-                <p id="beginner-health-message" class="text-xs text-slate-300 font-medium mt-0.5">
-                  Dòng tiền tháng rất tốt, thu nhập lớn hơn chi tiêu và đạt mục tiêu tích lũy an toàn.
-                </p>
-              </div>
+        bar = document.createElement('div');
+        bar.id = 'beginner-health-action-bar';
+        bar.className = 'p-3.5 sm:p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg mb-3 transition-all duration-300 w-full';
+        bar.style.cssText = 'border: 1px solid rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(11, 19, 41, 0.9) 100%); backdrop-filter: blur(12px);';
+        bar.innerHTML = `
+          <!-- Left: Trạng Thái Sức Khỏe Tài Chính Tháng -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="beginner-health-icon-wrapper" class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+              <i id="beginner-health-icon" class="fa-solid fa-shield-heart"></i>
             </div>
-            <div class="shrink-0 flex items-center gap-2 self-end sm:self-center">
-              <span class="text-[11px] text-slate-400 font-semibold hidden md:inline">Chế độ người mới</span>
-              <button type="button" onclick="window.applyDashboardViewMode('detailed')" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer active:scale-95" title="Mở rộng toàn bộ biểu đồ và lịch sử giao dịch">
-                <i class="fa-solid fa-expand text-[10px] text-cyan-400"></i>
-                <span>Xem Đầy Đủ</span>
-              </button>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-black uppercase tracking-wider text-slate-300">Sức Khỏe Tài Chính Tháng Này:</span>
+                <span id="beginner-health-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20">
+                  🟢 AN TOÀN (TỐT)
+                </span>
+              </div>
+              <p id="beginner-health-message" class="text-xs text-slate-300 font-medium mt-0.5 truncate sm:whitespace-normal">
+                Dòng tiền tháng dương, thu nhập lớn hơn chi tiêu và đạt tỷ lệ tích lũy an toàn.
+              </p>
             </div>
           </div>
 
-          <!-- 2. 3 KHỐI TRỌNG TÂM LỚN NHẤT: TỔNG TÀI SẢN, TỔNG THU/CHI, TIỀN CÒN LẠI -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <!-- Khối 1: Tổng Tài Sản -->
-            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-cyan-950/20" style="border: 1px solid rgba(6, 182, 212, 0.35); background: rgba(15, 23, 42, 0.65);">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Tổng Tài Sản Khả Dụng</span>
-                <div class="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-sm border border-cyan-500/20">
-                  <i class="fa-solid fa-wallet"></i>
-                </div>
-              </div>
-              <div class="mt-1">
-                <span id="beginner-val-networth" class="text-2xl font-black text-slate-100 font-mono tracking-tight group-hover:text-cyan-300 transition-colors">0 ₫</span>
-              </div>
-              <p class="text-[11px] text-slate-400 font-medium mt-1">Tổng tiền mặt, tài khoản ngân hàng & ví</p>
-            </div>
-
-            <!-- Khối 2: Tổng Thu & Chi Tháng Này -->
-            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-purple-950/20" style="border: 1px solid rgba(168, 85, 247, 0.35); background: rgba(15, 23, 42, 0.65);">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Dòng Tiền Thu & Chi</span>
-                <div class="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-sm border border-purple-500/20">
-                  <i class="fa-solid fa-arrow-right-arrow-left"></i>
-                </div>
-              </div>
-              <div class="flex items-center justify-between gap-3 mt-1">
-                <div class="min-w-0">
-                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Tổng Thu</span>
-                  <span id="beginner-val-income" class="text-base sm:text-lg font-black text-emerald-400 font-mono tracking-tight block truncate">+0 ₫</span>
-                </div>
-                <div class="w-px h-8 bg-slate-800 shrink-0"></div>
-                <div class="min-w-0 text-right">
-                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Tổng Chi</span>
-                  <span id="beginner-val-expense" class="text-base sm:text-lg font-black text-rose-400 font-mono tracking-tight block truncate">-0 ₫</span>
-                </div>
-              </div>
-              <p class="text-[11px] text-slate-400 font-medium mt-1">Đối chiếu thu nhập và chi phí sinh hoạt</p>
-            </div>
-
-            <!-- Khối 3: Số Tiền Còn Lại Có Thể Sử Dụng -->
-            <div class="glass-card p-4 rounded-2xl border relative overflow-hidden group shadow-md shadow-emerald-950/20" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(15, 23, 42, 0.65);">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">3. Tiền Còn Lại Khả Dụng</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20">
-                  <i class="fa-solid fa-piggy-bank"></i>
-                </div>
-              </div>
-              <div class="mt-1 flex items-baseline gap-2">
-                <span id="beginner-val-remaining" class="text-2xl font-black text-emerald-400 font-mono tracking-tight">+0 ₫</span>
-                <span id="beginner-val-savings-rate" class="text-xs text-emerald-300 font-mono font-bold">(0%)</span>
-              </div>
-              <p class="text-[11px] text-slate-400 font-medium mt-1">Tiền nhàn rỗi sau khi trừ các khoản chi</p>
-            </div>
+          <!-- Right: Nút Hành Động Nhanh AI & Ghi Thu Chi -->
+          <div class="flex items-center gap-2 shrink-0 self-end md:self-center">
+            <button type="button" onclick="window.openQuickAiModal()" class="px-3.5 py-2 rounded-xl text-xs font-black text-white shadow-lg shadow-indigo-500/25 flex items-center gap-2 hover:scale-[1.03] active:scale-95 transition cursor-pointer relative z-20 pointer-events-auto" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%); border: 1px solid rgba(168, 85, 247, 0.5);" title="Nhập giao dịch bằng ngôn ngữ tự nhiên AI">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300 animate-pulse text-xs"></i>
+              <span>Ghi Chép Nhanh AI</span>
+            </button>
+            <button type="button" onclick="window.openTransactionModal('EXPENSE')" class="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700/80 flex items-center gap-1.5 transition cursor-pointer active:scale-95 relative z-20 pointer-events-auto" title="Ghi chép giao dịch thủ công">
+              <i class="fa-solid fa-plus text-cyan-400 text-xs"></i>
+              <span class="hidden sm:inline">Ghi Thu Chi</span>
+            </button>
           </div>
         `;
-        kpiContainer.parentNode.insertBefore(container, kpiContainer);
+        kpiContainer.parentNode.insertBefore(bar, kpiContainer);
       }
-      return container;
+      return bar;
     }
 
-    // Cập nhật giá trị vào các khối tóm tắt dành cho người mới
-    function updateBeginnerSummaryCards() {
-      const summaryContainer = document.getElementById('beginner-compact-summary-container');
-      if (!summaryContainer) return;
+    // Cập nhật trạng thái sức khỏe tài chính tháng
+    function updateBeginnerHealthStatus() {
+      const bar = document.getElementById('beginner-health-action-bar');
+      if (!bar) return;
 
       const kpis = window.fintrackApp?.dashboard?.kpis;
-
-      const formatVND = (amount) => {
-        if (typeof window.fintrackApp?.dashboard?.formatVND === 'function') {
-          return window.fintrackApp.dashboard.formatVND(amount);
-        }
-        return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
-      };
-
-      let netWorthText = '0 ₫';
-      const netWorthEl = document.getElementById('dash-net-worth-val');
-      if (netWorthEl && netWorthEl.textContent.trim()) {
-        netWorthText = netWorthEl.textContent.trim();
-      }
-
       let totalIncome = 0;
       let totalExpense = 0;
-      let netSavings = 0;
       let savingsRate = 0;
 
       if (kpis) {
         totalIncome = Number(kpis.total_income_month) || 0;
         totalExpense = Number(kpis.total_expense_month) || 0;
-        netSavings = Number(kpis.net_savings_month !== undefined ? kpis.net_savings_month : (totalIncome - totalExpense));
         savingsRate = Number(kpis.savings_rate_month || 0);
       } else {
         const incEl = document.querySelector('#kpi-card-income .text-2xl');
@@ -4508,69 +5633,44 @@
         const savRateEl = document.querySelector('#kpi-card-savings .text-2xl');
         if (incEl) totalIncome = parseInt((incEl.textContent || '').replace(/[^\d]/g, '') || '0', 10);
         if (expEl) totalExpense = parseInt((expEl.textContent || '').replace(/[^\d]/g, '') || '0', 10);
-        netSavings = totalIncome - totalExpense;
         if (savRateEl) savingsRate = parseFloat((savRateEl.textContent || '').replace(/[^\d.]/g, '') || '0');
       }
 
-      const incomeText = totalIncome > 0 ? `+${formatVND(totalIncome)}` : (document.querySelector('#kpi-card-income .text-2xl')?.textContent?.trim() || '+0 ₫');
-      const expenseText = totalExpense > 0 ? `-${formatVND(totalExpense)}` : (document.querySelector('#kpi-card-expense .text-2xl')?.textContent?.trim() || '-0 ₫');
-      const remainingText = netSavings >= 0 ? `+${formatVND(netSavings)}` : `-${formatVND(Math.abs(netSavings))}`;
-      const rateText = savingsRate > 0 ? `(${savingsRate.toFixed(1)}%)` : (document.querySelector('#kpi-card-savings .text-2xl')?.textContent?.trim() || '(0%)');
-
-      // Điền giá trị
-      const elNetWorth = document.getElementById('beginner-val-networth');
-      if (elNetWorth) elNetWorth.textContent = netWorthText;
-
-      const elIncome = document.getElementById('beginner-val-income');
-      if (elIncome) elIncome.textContent = incomeText;
-
-      const elExpense = document.getElementById('beginner-val-expense');
-      if (elExpense) elExpense.textContent = expenseText;
-
-      const elRemaining = document.getElementById('beginner-val-remaining');
-      if (elRemaining) {
-        elRemaining.textContent = remainingText;
-        if (netSavings >= 0) {
-          elRemaining.className = 'text-2xl font-black text-emerald-400 font-mono tracking-tight';
-        } else {
-          elRemaining.className = 'text-2xl font-black text-rose-400 font-mono tracking-tight';
-        }
-      }
-
-      const elSavingsRate = document.getElementById('beginner-val-savings-rate');
-      if (elSavingsRate) elSavingsRate.textContent = rateText;
-
-      // Đánh giá sức khỏe tài chính tháng
       const isWarning = (totalExpense > totalIncome);
       const isSafe = (totalExpense <= totalIncome && savingsRate >= 20);
 
-      const healthCard = document.getElementById('beginner-health-card');
       const healthBadge = document.getElementById('beginner-health-badge');
       const healthIcon = document.getElementById('beginner-health-icon');
       const healthIconWrapper = document.getElementById('beginner-health-icon-wrapper');
       const healthMsg = document.getElementById('beginner-health-message');
 
-      if (healthBadge && healthMsg && healthCard) {
+      if (healthBadge && healthMsg) {
         if (isWarning) {
-          healthBadge.textContent = 'CẦN LƯU Ý (CHI VƯỢT THU)';
-          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20';
-          healthIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
-          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-rose-500/15 border border-rose-500/30';
-          healthCard.style.borderColor = 'rgba(244, 63, 94, 0.4)';
-          healthMsg.textContent = 'Tổng chi tiêu tháng này đang lớn hơn thu nhập. Bạn nên kiểm tra lại các khoản mua sắm chưa cần thiết!';
+          healthBadge.innerHTML = '🔴 CẦN LƯU Ý (CHI VƯỢT THU)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide border bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20';
+          if (healthIcon) healthIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+          if (healthIconWrapper) {
+            healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-rose-500/15 border border-rose-500/30 text-rose-400';
+          }
+          bar.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+          healthMsg.textContent = 'Tổng chi tiêu tháng này đang lớn hơn thu nhập. Bạn nên rà soát lại các khoản chi không cấp thiết!';
         } else if (isSafe) {
-          healthBadge.textContent = 'AN TOÀN (TỐT)';
-          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20';
-          healthIcon.className = 'fa-solid fa-shield-heart text-emerald-400';
-          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30';
-          healthCard.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          healthBadge.innerHTML = '🟢 AN TOÀN (TỐT)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20';
+          if (healthIcon) healthIcon.className = 'fa-solid fa-shield-heart text-emerald-400';
+          if (healthIconWrapper) {
+            healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400';
+          }
+          bar.style.borderColor = 'rgba(16, 185, 129, 0.4)';
           healthMsg.textContent = `Dòng tiền tháng rất tốt! Bạn đã tiết kiệm được ${savingsRate.toFixed(1)}% thu nhập (đạt chuẩn khuyến nghị tối thiểu 20%).`;
         } else {
-          healthBadge.textContent = 'CẦN LƯU Ý (TIẾT KIỆM THẤP)';
-          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide border bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/20';
-          healthIcon.className = 'fa-solid fa-circle-exclamation text-amber-400';
-          healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-amber-500/15 border border-amber-500/30';
-          healthCard.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+          healthBadge.innerHTML = '🟡 CẦN LƯU Ý (TIẾT KIỆM THẤP)';
+          healthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide border bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/20';
+          if (healthIcon) healthIcon.className = 'fa-solid fa-circle-exclamation text-amber-400';
+          if (healthIconWrapper) {
+            healthIconWrapper.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-md bg-amber-500/15 border border-amber-500/30 text-amber-400';
+          }
+          bar.style.borderColor = 'rgba(251, 191, 36, 0.4)';
           healthMsg.textContent = `Dòng tiền đang dương nhưng mức tích lũy (${savingsRate.toFixed(1)}%) thấp hơn chuẩn 20%. Hãy tối ưu thêm các khoản chi nhỏ.`;
         }
       }
@@ -4600,14 +5700,15 @@
           }
         });
 
-        // 2. Quản lý Thẻ Sức Khỏe & 3 Khối Trọng Tâm Dành Cho Người Mới
-        const beginnerContainer = ensureBeginnerSummaryContainer();
-        if (beginnerContainer) {
+        // 2. Quản lý thanh Trạng Thái Sức Khỏe & Nút Hành Động Nhanh AI
+        const healthBar = ensureBeginnerHealthActionBar();
+        if (healthBar) {
           if (isCompact) {
-            beginnerContainer.style.setProperty('display', 'block', 'important');
-            updateBeginnerSummaryCards();
+            healthBar.style.removeProperty('display');
+            healthBar.classList.remove('hidden');
+            updateBeginnerHealthStatus();
           } else {
-            beginnerContainer.style.setProperty('display', 'none', 'important');
+            healthBar.style.setProperty('display', 'none', 'important');
           }
         }
 
@@ -4623,7 +5724,7 @@
           }
         }
 
-        // 4. Quản lý biểu đồ xu hướng 6 tháng & 4 thẻ KPI cũ
+        // 4. Quản lý biểu đồ xu hướng 6 tháng & 4 thẻ KPI cốt lõi
         const cashflowCard = document.getElementById('cashflow-chart-card');
         const kpiCardsContainer = document.getElementById('kpi-cards-container');
 
@@ -4640,12 +5741,10 @@
           }
         }
 
+        // ĐẢM BẢO 4 THẺ CỐT LÕI (TÀI SẢN, THU, CHI, TIẾT KIỆM) LUÔN HIỂN THỊ
         if (kpiCardsContainer) {
-          if (isCompact) {
-            kpiCardsContainer.style.setProperty('display', 'none', 'important');
-          } else {
-            kpiCardsContainer.style.removeProperty('display');
-          }
+          kpiCardsContainer.style.removeProperty('display');
+          kpiCardsContainer.classList.remove('hidden');
         }
 
         // 5. Đảm bảo Card Cơ Cấu Chi Tiêu, Ngân Sách, và Giao Dịch luôn hiển thị
@@ -4656,17 +5755,33 @@
         const recentTxsCard = document.getElementById('recent-txs-card');
         const recentTxsBody = document.getElementById('recent-txs-card-body');
 
-        [catCard, catBody, budgetCard, budgetBody, recentTxsCard, recentTxsBody].forEach(el => {
+        [catCard, budgetCard, budgetBody, recentTxsCard, recentTxsBody].forEach(el => {
           if (el) {
             el.classList.remove('hidden');
             el.style.removeProperty('display');
           }
         });
 
-        // Đưa tất cả icon chevron của card về trạng thái mở rộng (fa-chevron-up)
-        document.querySelectorAll('.card-collapse-btn i').forEach(icon => {
-          icon.className = 'fa-solid fa-chevron-up text-xs transition-transform duration-200';
-        });
+        // Xử lý riêng biệt cho catBody: Tôn trọng trạng thái thu gọn của người dùng
+        if (catBody) {
+          const isCatCollapsed = catCard && (catCard.classList.contains('is-collapsed') || catCard.getAttribute('data-user-collapsed') === 'true');
+          const collapseBtn = catCard ? catCard.querySelector('.card-collapse-btn') : document.querySelector('.card-collapse-btn[data-target="category-card-body"]');
+          const collapseIcon = collapseBtn ? collapseBtn.querySelector('i') : null;
+
+          if (isCatCollapsed) {
+            catBody.classList.add('hidden');
+            catBody.style.setProperty('display', 'none', 'important');
+            if (collapseIcon) {
+              collapseIcon.className = 'fa-solid fa-chevron-down text-xs transition-transform duration-200 text-cyan-400';
+            }
+          } else {
+            catBody.classList.remove('hidden');
+            catBody.style.removeProperty('display');
+            if (collapseIcon) {
+              collapseIcon.className = 'fa-solid fa-chevron-up text-xs transition-transform duration-200';
+            }
+          }
+        }
 
         // 6. Đồng bộ màu sắc và hiệu ứng cho 2 nút bấm "Gọn Gàng" / "Đầy Đủ"
         const btnCompact = document.getElementById('btn-view-mode-compact');
@@ -4711,8 +5826,66 @@
       }
     };
 
+    // Hàm xử lý thu gọn / mở rộng card linh hoạt và bảo toàn trạng thái
+    window.toggleCardCollapse = function(btn) {
+      if (!btn) return;
+      const targetId = btn.getAttribute('data-target') || 'category-card-body';
+      const targetBody = document.getElementById(targetId);
+      if (!targetBody) return;
+      const card = btn.closest('.glass-card') || document.getElementById('category-donut-card') || targetBody.parentElement;
+      const icon = btn.querySelector('i');
+
+      const isCurrentlyHidden = targetBody.classList.contains('hidden') || 
+                                targetBody.style.display === 'none' ||
+                                (card && card.classList.contains('is-collapsed'));
+
+      if (isCurrentlyHidden) {
+        // Đang thu gọn -> Mở rộng
+        targetBody.classList.remove('hidden');
+        targetBody.style.removeProperty('display');
+        if (card) {
+          card.classList.remove('is-collapsed');
+          card.removeAttribute('data-user-collapsed');
+        }
+        if (icon) {
+          icon.className = 'fa-solid fa-chevron-up text-xs transition-transform duration-200';
+        }
+        setTimeout(() => {
+          try {
+            if (targetId === 'category-card-body' && window.fintrackApp?.dashboard?.categoryChart) {
+              window.fintrackApp.dashboard.categoryChart.resize();
+            } else if (targetId === 'cashflow-card-body' && window.fintrackApp?.dashboard?.cashflowChart) {
+              window.fintrackApp.dashboard.cashflowChart.resize();
+            }
+          } catch (_) {}
+        }, 60);
+      } else {
+        // Đang mở rộng -> Thu gọn
+        targetBody.classList.add('hidden');
+        targetBody.style.setProperty('display', 'none', 'important');
+        if (card) {
+          card.classList.add('is-collapsed');
+          card.setAttribute('data-user-collapsed', 'true');
+        }
+        if (icon) {
+          icon.className = 'fa-solid fa-chevron-down text-xs transition-transform duration-200 text-cyan-400';
+        }
+      }
+    };
+
     // Lắng nghe sự kiện click trên toàn document (Giai đoạn Capture) để can thiệp trực tiếp trước listener gốc
     document.addEventListener('click', function(e) {
+      // 1. Ưu tiên bắt nút mũi tên thu gọn / mở rộng card (nhất là card Cơ Cấu Chi Tiêu)
+      const collapseBtn = e.target.closest('.card-collapse-btn');
+      if (collapseBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.toggleCardCollapse(collapseBtn);
+        return;
+      }
+
+      // 2. Chuyển đổi chế độ Gọn Gàng / Đầy Đủ
       const btn = e.target.closest('button, a');
       if (!btn) return;
       const txt = (btn.textContent || '').trim();
@@ -4755,10 +5928,355 @@
       }
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupDashboardViewModeObserver);
-    } else {
-      setupDashboardViewModeObserver();
+    /**
+     * ============================================================================
+     * 1. CHUYỂN HƯỚNG NHANH ĐẾN "CÀI ĐẶT & BẢO MẬT" KHI CLICK AVATAR
+     * ============================================================================
+     */
+    window.navigateToSettings = function() {
+      try {
+        const settingsTabBtn = document.querySelector('#sidebar a[data-tab="settings"]');
+        if (settingsTabBtn) {
+          settingsTabBtn.click();
+          return;
+        }
+        if (window.fintrackApp?.router?.navigate) {
+          window.fintrackApp.router.navigate('settings');
+        } else if (window.fintrackApp?.switchTab) {
+          window.fintrackApp.switchTab('settings');
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi navigateToSettings:", err);
+      }
+    };
+
+    /**
+     * ============================================================================
+     * 2. TÍNH NĂNG ĐỔI AVATAR THỦ CÔNG TẠI TRANG THÔNG TIN CÁ NHÂN / CÀI ĐẶT
+     * ============================================================================
+     */
+    window.ensureCustomAvatarControls = function() {
+      try {
+        const mainView = document.getElementById('main-content-view');
+        if (!mainView) return;
+
+        // Chỉ hiển thị khi đang ở view Cài Đặt / Thông Tin Cá Nhân
+        const settingsLinkActive = document.querySelector('#sidebar a[data-tab="settings"].active');
+        const hasSettingsContent = mainView.querySelector('#settings-profile-card, #profile-form, [data-view="settings"], #settings-view') ||
+                                   mainView.textContent.includes('Thông Tin Cá Nhân') ||
+                                   mainView.textContent.includes('Cài Đặt & Bảo Mật');
+
+        if (!settingsLinkActive && !hasSettingsContent) return;
+        if (document.getElementById('manual-avatar-control-box')) return;
+
+        // Tìm vị trí để chèn hộp đổi avatar
+        const targetAnchor = mainView.querySelector('#profile-form, #settings-profile-card, .profile-card, form') || mainView.firstElementChild;
+        if (!targetAnchor) return;
+
+        const currentAvatarSrc = document.getElementById('user-display-avatar')?.src || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+
+        const avatarBox = document.createElement('div');
+        avatarBox.id = 'manual-avatar-control-box';
+        avatarBox.className = 'p-4 sm:p-5 rounded-2xl border border-cyan-500/40 bg-slate-900/90 backdrop-blur-xl shadow-xl mb-6 space-y-4 animate-in fade-in duration-200';
+        avatarBox.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-sm shadow-sm">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+              <div>
+                <h4 class="text-xs sm:text-sm font-black text-slate-100 uppercase tracking-wide">Thay Đổi Ảnh Đại Diện (Avatar)</h4>
+                <p class="text-[11px] text-slate-400">Tải ảnh trực tiếp từ máy tính hoặc dán đường dẫn (URL) ảnh avatar mới</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Avatar Thủ Công</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <!-- Cách 1: Tải ảnh từ thiết bị -->
+            <div class="flex items-center gap-3 bg-slate-950/70 p-3 rounded-xl border border-slate-800 hover:border-cyan-500/40 transition">
+              <img id="manual-avatar-preview" src="${currentAvatarSrc}" 
+                alt="Avatar Preview" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-cyan-400 shadow-md flex-shrink-0" />
+              <div class="space-y-1 flex-1 min-w-0">
+                <label class="block text-[11px] font-bold text-slate-200 uppercase tracking-wider">1. Tải ảnh từ thiết bị:</label>
+                <input type="file" id="manual-avatar-file" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-500 file:text-slate-950 hover:file:bg-cyan-400 cursor-pointer" />
+              </div>
+            </div>
+
+            <!-- Cách 2: Nhập đường dẫn ảnh trực tuyến -->
+            <div class="space-y-1.5 bg-slate-950/70 p-3 rounded-xl border border-slate-800 hover:border-cyan-500/40 transition">
+              <label class="block text-[11px] font-bold text-slate-200 uppercase tracking-wider">2. Hoặc dán đường dẫn ảnh (URL):</label>
+              <div class="flex items-center gap-2">
+                <input type="url" id="manual-avatar-url" placeholder="https://domain.com/avatar.jpg" 
+                  class="flex-1 px-3 py-1.5 text-xs rounded-lg bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-medium" />
+                <button type="button" id="btn-save-manual-avatar" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 text-xs font-black hover:opacity-90 active:scale-95 transition cursor-pointer shrink-0 shadow-md">
+                  <i class="fa-solid fa-check mr-1"></i> Lưu
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="manual-avatar-msg" class="hidden text-xs font-bold px-3 py-1.5 rounded-lg"></div>
+        `;
+
+        targetAnchor.parentNode.insertBefore(avatarBox, targetAnchor);
+
+        const fileInput = document.getElementById('manual-avatar-file');
+        const urlInput = document.getElementById('manual-avatar-url');
+        const previewImg = document.getElementById('manual-avatar-preview');
+        const saveBtn = document.getElementById('btn-save-manual-avatar');
+        const msgEl = document.getElementById('manual-avatar-msg');
+
+        const applyAvatarChange = function(newUrl) {
+          if (!newUrl) return;
+          if (previewImg) previewImg.src = newUrl;
+          const headerAvatar = document.getElementById('user-display-avatar');
+          if (headerAvatar) headerAvatar.src = newUrl;
+          document.querySelectorAll('.user-avatar-img, img[alt="Avatar"]').forEach(img => {
+            img.src = newUrl;
+          });
+
+          // Lưu vào LocalStorage
+          try {
+            const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
+            if (userStr) {
+              const userObj = JSON.parse(userStr);
+              userObj.avatar_url = newUrl;
+              localStorage.setItem('currentUser', JSON.stringify(userObj));
+              localStorage.setItem('user', JSON.stringify(userObj));
+            }
+          } catch (_) {}
+
+          // Gửi API backend nếu có token
+          const token = localStorage.getItem('fintrack_token') || localStorage.getItem('token');
+          if (token) {
+            fetch('/api/v1/users/profile', {
+              method: 'PUT',
+              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ avatar_url: newUrl })
+            }).catch(() => {});
+          }
+
+          if (msgEl) {
+            msgEl.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1.5';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Cập nhật ảnh đại diện thành công!';
+            msgEl.classList.remove('hidden');
+            setTimeout(() => msgEl.classList.add('hidden'), 4000);
+          }
+        };
+
+        if (fileInput) {
+          fileInput.addEventListener('change', function(e) {
+            const file = e.target.files ? e.target.files[0] : null;
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(evt) {
+                applyAvatarChange(evt.target.result);
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+
+        if (saveBtn && urlInput) {
+          saveBtn.addEventListener('click', function() {
+            const url = urlInput.value.trim();
+            if (url) {
+              applyAvatarChange(url);
+            } else {
+              alert('Vui lòng nhập đường dẫn URL ảnh hợp lệ!');
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi ensureCustomAvatarControls:", err);
+      }
+    };
+
+    /**
+     * ============================================================================
+     * 3. DỮ LIỆU MẪU PHÂN BỔ NGÂN SÁCH CHUẨN 50/30/20 CHO HẠN MỨC NGÂN SÁCH
+     * ============================================================================
+     */
+    window.ensureStandard50_30_20BudgetData = function() {
+      try {
+        const mainView = document.getElementById('main-content-view');
+        if (!mainView) return;
+
+        // Chỉ kích hoạt khi đang ở view Hạn Mức Ngân Sách (data-tab="budgets")
+        const budgetsTabActive = document.querySelector('#sidebar a[data-tab="budgets"].active');
+        const hasBudgetsContent = mainView.querySelector('#budget-summary-cards, #budget-card-body, [data-view="budgets"]') ||
+                                 mainView.textContent.includes('Hạn Mức Ngân Sách') ||
+                                 mainView.textContent.includes('Ngân Sách');
+
+        if (!budgetsTabActive && !hasBudgetsContent) return;
+        if (document.getElementById('standard-503020-budget-card')) return;
+
+        // Vị trí chèn: trên danh sách ngân sách hoặc đầu trang
+        const targetContainer = mainView.querySelector('.budget-list-container, #budget-alerts-list, #budget-summary-cards, .grid') || mainView.firstElementChild;
+        if (!targetContainer) return;
+
+        const card503020 = document.createElement('div');
+        card503020.id = 'standard-503020-budget-card';
+        card503020.className = 'p-4 sm:p-6 rounded-2xl border border-amber-500/40 bg-gradient-to-br from-slate-900/95 via-[#0b1329]/90 to-slate-900/95 backdrop-blur-xl shadow-2xl mb-6 space-y-5 animate-in fade-in duration-200';
+        card503020.innerHTML = `
+          <!-- Header Card 50/30/20 -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-lg shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wide">Phân Bổ Ngân Sách Chuẩn 50/30/20</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">KHOA HỌC</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Mô hình phân bổ tối ưu theo thu nhập thực tế: 50% Thiết Yếu • 30% Linh Hoạt • 20% Tích Lũy</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold text-slate-300 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span class="text-slate-400">Thu Nhập Chuẩn Đoán:</span>
+              <span class="text-emerald-400 font-mono font-black">25.000.000 ₫</span>
+            </div>
+          </div>
+
+          <!-- 3 Columns for 50/30/20 Allocation -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- 1. 50% Nhu Cầu Thiết Yếu (Needs) -->
+            <div class="p-4 rounded-xl bg-slate-950/70 border border-emerald-500/30 space-y-3 relative overflow-hidden group hover:border-emerald-500/60 transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                  <span class="text-xs font-black uppercase tracking-wider text-emerald-300">50% Thiết Yếu (Needs)</span>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">🟢 AN TOÀN (66%)</span>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-baseline justify-between text-xs">
+                  <span class="text-slate-400">Đã chi: <strong class="text-white font-mono">8.250.000 ₫</strong></span>
+                  <span class="text-slate-400">Hạn mức: <strong class="text-emerald-300 font-mono">12.500.000 ₫</strong></span>
+                </div>
+                <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden p-0.5">
+                  <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" style="width: 66%;"></div>
+                </div>
+                <div class="text-[11px] text-emerald-400/90 font-medium flex justify-between pt-0.5">
+                  <span>Còn lại: <strong class="font-mono">4.250.000 ₫</strong></span>
+                  <span>(34.0% khả dụng)</span>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-400 bg-slate-900/60 p-2 rounded-lg border border-slate-800 space-y-0.5">
+                <div class="flex justify-between"><span>• Tiền nhà & điện nước:</span> <strong class="text-slate-300 font-mono">5.500.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Ăn uống thiết yếu:</span> <strong class="text-slate-300 font-mono">2.000.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Xăng xe & đi lại:</span> <strong class="text-slate-300 font-mono">750.000 ₫</strong></div>
+              </div>
+            </div>
+
+            <!-- 2. 30% Mong Muốn Linh Hoạt (Wants) -->
+            <div class="p-4 rounded-xl bg-slate-950/70 border border-indigo-500/30 space-y-3 relative overflow-hidden group hover:border-indigo-500/60 transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span>
+                  <span class="text-xs font-black uppercase tracking-wider text-indigo-300">30% Linh Hoạt (Wants)</span>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">🟢 ỔN ĐỊNH (68%)</span>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-baseline justify-between text-xs">
+                  <span class="text-slate-400">Đã chi: <strong class="text-white font-mono">5.100.000 ₫</strong></span>
+                  <span class="text-slate-400">Hạn mức: <strong class="text-indigo-300 font-mono">7.500.000 ₫</strong></span>
+                </div>
+                <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden p-0.5">
+                  <div class="bg-gradient-to-r from-indigo-500 to-purple-400 h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(99,102,241,0.6)]" style="width: 68%;"></div>
+                </div>
+                <div class="text-[11px] text-indigo-400/90 font-medium flex justify-between pt-0.5">
+                  <span>Còn lại: <strong class="font-mono">2.400.000 ₫</strong></span>
+                  <span>(32.0% khả dụng)</span>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-400 bg-slate-900/60 p-2 rounded-lg border border-slate-800 space-y-0.5">
+                <div class="flex justify-between"><span>• Cà phê & giao lưu:</span> <strong class="text-slate-300 font-mono">1.800.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Mua sắm cá nhân:</span> <strong class="text-slate-300 font-mono">2.200.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Xem phim & giải trí:</span> <strong class="text-slate-300 font-mono">1.100.000 ₫</strong></div>
+              </div>
+            </div>
+
+            <!-- 3. 20% Tiết Kiệm & Tích Lũy (Savings) -->
+            <div class="p-4 rounded-xl bg-slate-950/70 border border-cyan-500/30 space-y-3 relative overflow-hidden group hover:border-cyan-500/60 transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                  <span class="text-xs font-black uppercase tracking-wider text-cyan-300">20% Tích Lũy (Savings)</span>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">🎯 ĐẠT CHUẨN (100%)</span>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-baseline justify-between text-xs">
+                  <span class="text-slate-400">Đã trích lập: <strong class="text-white font-mono">5.000.000 ₫</strong></span>
+                  <span class="text-slate-400">Mục tiêu: <strong class="text-cyan-300 font-mono">5.000.000 ₫</strong></span>
+                </div>
+                <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden p-0.5">
+                  <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(6,182,212,0.6)]" style="width: 100%;"></div>
+                </div>
+                <div class="text-[11px] text-cyan-400 font-medium flex justify-between pt-0.5">
+                  <span>Trạng thái: <strong>Hoàn thành 100%</strong></span>
+                  <span>(Chuẩn 20% thu nhập)</span>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-400 bg-slate-900/60 p-2 rounded-lg border border-slate-800 space-y-0.5">
+                <div class="flex justify-between"><span>• Quỹ dự phòng khẩn cấp:</span> <strong class="text-slate-300 font-mono">3.000.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Tích lũy mua nhà:</span> <strong class="text-slate-300 font-mono">2.000.000 ₫</strong></div>
+                <div class="flex justify-between"><span>• Đầu tư sinh lời:</span> <strong class="text-emerald-400 font-mono">+Tối ưu</strong></div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        targetContainer.parentNode.insertBefore(card503020, targetContainer);
+      } catch (err) {
+        console.warn("[FinTrack] Lỗi ensureStandard50_30_20BudgetData:", err);
+      }
+    };
+
+    // Tự động kiểm tra và áp dụng chế độ hiển thị & controls khi DOM thay đổi hoặc khi render
+    let _viewModeObserver = null;
+    let _applyViewModeTimer = null;
+    function setupDashboardViewModeObserver() {
+      const targetNode = document.getElementById('main-content-view') || document.body;
+      if (!targetNode) return;
+      if (_viewModeObserver) _viewModeObserver.disconnect();
+
+      _viewModeObserver = new MutationObserver(function() {
+        const compactBtn = document.getElementById('btn-view-mode-compact');
+        if (compactBtn) {
+          clearTimeout(_applyViewModeTimer);
+          _applyViewModeTimer = setTimeout(() => {
+            const savedMode = localStorage.getItem('fintrack_dash_view_mode') || 'compact';
+            window.applyDashboardViewMode(savedMode);
+          }, 35);
+        }
+        if (typeof window.ensureCustomAvatarControls === 'function') {
+          window.ensureCustomAvatarControls();
+        }
+        if (typeof window.ensureStandard50_30_20BudgetData === 'function') {
+          window.ensureStandard50_30_20BudgetData();
+        }
+        if (typeof window.syncUserVipInfo === 'function') {
+          window.syncUserVipInfo();
+        }
+      });
+      _viewModeObserver.observe(targetNode, { childList: true, subtree: true });
+
+      // Chạy khởi tạo ban đầu nếu dashboard đã có sẵn
+      const initialBtn = document.getElementById('btn-view-mode-compact');
+      if (initialBtn) {
+        const savedMode = localStorage.getItem('fintrack_dash_view_mode') || 'compact';
+        window.applyDashboardViewMode(savedMode);
+      }
+      if (typeof window.ensureCustomAvatarControls === 'function') {
+        window.ensureCustomAvatarControls();
+      }
+      if (typeof window.ensureStandard50_30_20BudgetData === 'function') {
+        window.ensureStandard50_30_20BudgetData();
+      }
     }
   </script>
 </body>
